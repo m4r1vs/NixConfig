@@ -1,6 +1,8 @@
 {
   pkgs,
   systemArgs,
+  lib,
+  config,
   ...
 }: {
   configured = {
@@ -12,6 +14,7 @@
   };
 
   virtualisation = {
+    oci-containers.backend = "podman";
     podman = {
       enable = true;
       dockerCompat = true;
@@ -67,12 +70,18 @@
   users = {
     users.${systemArgs.username} = {
       isNormalUser = true;
-      extraGroups = [
-        "audio"
-        "networkmanager"
-        "podman"
-        "wheel"
-      ];
+      extraGroups =
+        [
+          "audio"
+          "networkmanager"
+          "wheel"
+        ]
+        ++ lib.optionals config.virtualisation.podman.enable [
+          "podman"
+        ]
+        ++ lib.optionals config.virtualisation.docker.enable [
+          "docker"
+        ];
       openssh.authorizedKeys.keys = [
         # Allmighty SSH key
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIN6sMTjk1LAXVX9qRKsB3VgsfqCfcJSeosgoYWTgSHW"

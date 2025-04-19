@@ -2,7 +2,7 @@
   disko.devices = {
     disk = {
       main = {
-        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_60890743";
+        device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_61022660";
         type = "disk";
         content = {
           type = "gpt";

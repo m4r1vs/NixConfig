@@ -71,159 +71,141 @@
     };
     makeTheme = import ./makeTheme.nix;
   in {
-    nixosConfigurations = {
-      nixpad = inputs.nixpkgs.lib.nixosSystem (let
-        systemArgs =
-          globalArgs
-          // {
-            system = "x86_64-linux";
-            theme = makeTheme {
-              primary = "green";
-              secondary = "orange";
+    nixosConfigurations =
+      {
+        nixpad = inputs.nixpkgs.lib.nixosSystem (let
+          systemArgs =
+            globalArgs
+            // {
+              system = "x86_64-linux";
+              theme = makeTheme {
+                primary = "green";
+                secondary = "orange";
+              };
+              git = {
+                name = "Marius Niveri";
+                email = "mniveri@cc.systems";
+              };
+              hostname = "nixpad";
             };
-            git = {
-              name = "Marius Niveri";
-              email = "mniveri@cc.systems";
-            };
-            hostname = "nixpad";
-          };
-      in {
-        inherit (systemArgs) system;
-        modules = [
-          ./hosts/nixpad
+        in {
+          inherit (systemArgs) system;
+          modules = [
+            ./hosts/nixpad
 
+            ./hosts
+            ./nixpkgs.nix
+            ./modules
+
+            inputs.lanzaboote.nixosModules.lanzaboote
+            inputs.disko.nixosModules.disko
+            inputs.nixos-06cb-009a-fingerprint-sensor.nixosModules."06cb-009a-fingerprint-sensor"
+            inputs.nix-index-database.nixosModules.nix-index
+            inputs.home-manager.nixosModules.home-manager
+
+            {config._module.args = {inherit systemArgs self inputs;};}
+          ];
+        });
+        nixner = inputs.nixpkgs.lib.nixosSystem (let
+          systemArgs =
+            globalArgs
+            // {
+              system = "aarch64-linux";
+              theme = makeTheme {
+                primary = "orange";
+                secondary = "green";
+              };
+              ipv4 = "95.217.16.168";
+              ipv6 = "2a01:4f9:c013:785::1";
+              hostname = "nixner";
+              domain = "niveri.dev";
+            };
+        in {
+          inherit (systemArgs) system;
+          modules = [
+            ./hosts/nixner
+
+            ./hosts
+            ./nixpkgs.nix
+            ./modules
+
+            inputs.comin.nixosModules.comin
+            inputs.disko.nixosModules.disko
+            inputs.nix-index-database.nixosModules.nix-index
+            inputs.home-manager.nixosModules.home-manager
+            inputs.slidecontrol.nixosModules.slidecontrol-server
+
+            {config._module.args = {inherit systemArgs self inputs;};}
+          ];
+        });
+        desknix = inputs.nixpkgs.lib.nixosSystem (let
+          systemArgs =
+            globalArgs
+            // {
+              system = "x86_64-linux";
+              theme = makeTheme {
+                primary = "green";
+                secondary = "orange";
+              };
+              hostname = "desknix";
+            };
+        in {
+          inherit (systemArgs) system;
+          modules = [
+            ./hosts/desknix
+
+            ./hosts
+            ./nixpkgs.nix
+            ./modules
+
+            inputs.lanzaboote.nixosModules.lanzaboote
+            inputs.disko.nixosModules.disko
+            inputs.nix-index-database.nixosModules.nix-index
+            inputs.home-manager.nixosModules.home-manager
+
+            {config._module.args = {inherit systemArgs self inputs;};}
+          ];
+        });
+        winix = inputs.nixpkgs.lib.nixosSystem (let
+          systemArgs =
+            globalArgs
+            // {
+              system = "x86_64-linux";
+              theme = makeTheme {
+                primary = "green";
+                secondary = "orange";
+              };
+              hostname = "winix";
+            };
+        in {
+          inherit (systemArgs) system;
+          modules = [
+            ./hosts/winix
+
+            ./hosts
+            ./nixpkgs.nix
+            ./modules
+
+            inputs.nixos-wsl.nixosModules.default
+            inputs.nix-index-database.nixosModules.nix-index
+            inputs.home-manager.nixosModules.home-manager
+
+            {config._module.args = {inherit systemArgs self inputs;};}
+          ];
+        });
+      }
+      // (import ./hosts/kubenix) {
+        inherit inputs globalArgs self makeTheme;
+        modules = [
           ./hosts
           ./nixpkgs.nix
           ./modules
-
-          inputs.lanzaboote.nixosModules.lanzaboote
-          inputs.disko.nixosModules.disko
-          inputs.nixos-06cb-009a-fingerprint-sensor.nixosModules."06cb-009a-fingerprint-sensor"
-          inputs.nix-index-database.nixosModules.nix-index
-          inputs.home-manager.nixosModules.home-manager
-
-          {config._module.args = {inherit systemArgs self inputs;};}
-        ];
-      });
-      nixner = inputs.nixpkgs.lib.nixosSystem (let
-        systemArgs =
-          globalArgs
-          // {
-            system = "aarch64-linux";
-            theme = makeTheme {
-              primary = "orange";
-              secondary = "green";
-            };
-            ipv4 = "95.217.16.168";
-            ipv6 = "2a01:4f9:c013:785::1";
-            hostname = "nixner";
-            domain = "niveri.dev";
-          };
-      in {
-        inherit (systemArgs) system;
-        modules = [
-          ./hosts/nixner
-
-          ./hosts
-          ./nixpkgs.nix
-          ./modules
-
           inputs.comin.nixosModules.comin
           inputs.disko.nixosModules.disko
           inputs.nix-index-database.nixosModules.nix-index
           inputs.home-manager.nixosModules.home-manager
-          inputs.slidecontrol.nixosModules.slidecontrol-server
-
-          {config._module.args = {inherit systemArgs self inputs;};}
         ];
-      });
-      falkenberg = inputs.nixpkgs.lib.nixosSystem (let
-        systemArgs =
-          globalArgs
-          // {
-            system = "aarch64-linux";
-            theme = makeTheme {
-              primary = "orange";
-              secondary = "green";
-            };
-            ipv4 = "91.99.10.215";
-            ipv6 = "2a01:4f8:c013:e704::1";
-            hostname = "falkenberg";
-            domain = "kubenix.niveri.dev";
-          };
-      in {
-        inherit (systemArgs) system;
-        modules = [
-          ./hosts/kubenix/falkenberg
-
-          ./hosts
-          ./nixpkgs.nix
-          ./modules
-
-          inputs.comin.nixosModules.comin
-          inputs.disko.nixosModules.disko
-          inputs.nix-index-database.nixosModules.nix-index
-          inputs.home-manager.nixosModules.home-manager
-
-          {config._module.args = {inherit systemArgs self inputs;};}
-        ];
-      });
-      desknix = inputs.nixpkgs.lib.nixosSystem (let
-        systemArgs =
-          globalArgs
-          // {
-            system = "x86_64-linux";
-            theme = makeTheme {
-              primary = "green";
-              secondary = "orange";
-            };
-            hostname = "desknix";
-          };
-      in {
-        inherit (systemArgs) system;
-        modules = [
-          ./hosts/desknix
-
-          ./hosts
-          ./nixpkgs.nix
-          ./modules
-
-          inputs.lanzaboote.nixosModules.lanzaboote
-          inputs.disko.nixosModules.disko
-          inputs.nix-index-database.nixosModules.nix-index
-          inputs.home-manager.nixosModules.home-manager
-
-          {config._module.args = {inherit systemArgs self inputs;};}
-        ];
-      });
-      winix = inputs.nixpkgs.lib.nixosSystem (let
-        systemArgs =
-          globalArgs
-          // {
-            system = "x86_64-linux";
-            theme = makeTheme {
-              primary = "green";
-              secondary = "orange";
-            };
-            hostname = "winix";
-          };
-      in {
-        inherit (systemArgs) system;
-        modules = [
-          ./hosts/winix
-
-          ./hosts
-          ./nixpkgs.nix
-          ./modules
-
-          inputs.nixos-wsl.nixosModules.default
-          inputs.nix-index-database.nixosModules.nix-index
-          inputs.home-manager.nixosModules.home-manager
-
-          {config._module.args = {inherit systemArgs self inputs;};}
-        ];
-      });
-    };
+      };
     packages.x86_64-linux = {
       bootstrap_local_x86_64 = inputs.nixos-generators.nixosGenerate (let
         systemArgs =

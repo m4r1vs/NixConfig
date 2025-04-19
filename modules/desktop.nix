@@ -25,6 +25,10 @@ in {
       fonts.enable = true;
     };
 
+    # networking.extraHosts = ''
+    #   91.99.10.215 falkenberg.kubenix.local
+    # '';
+
     services = {
       configured.kmscon.enable = true;
 
