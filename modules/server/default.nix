@@ -32,7 +32,7 @@ in {
     };
     networking = {
       firewall = {
-        allowedTCPPorts = [22];
+        allowedTCPPorts = config.services.openssh.ports;
       };
     };
   };

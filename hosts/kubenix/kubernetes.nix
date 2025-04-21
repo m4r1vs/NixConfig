@@ -63,7 +63,7 @@ in {
   networking = {
     inherit domain;
     firewall = {
-      allowedTCPPorts = [53 80 443 6443];
+      allowedTCPPorts = [22 53 80 443 6443];
       allowedUDPPorts = [53];
       trustedInterfaces = [
         "enp7s0"
@@ -74,6 +74,10 @@ in {
       10.0.0.4 ronhof.${domain}
       10.0.0.3 stadeln.${domain}
     '';
+  };
+
+  services.openssh = {
+    ports = lib.mkForce [422];
   };
 
   services.comin = {
