@@ -32,6 +32,10 @@ in {
     };
   };
 
+  users.users.${systemArgs.username}.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFBNq0SWrIVxHKZazvSROg+sghfK4857bclimtjBQGP+ pipeline@gitlab.cluster.niveri.dev"
+  ];
+
   configured.server = {
     enable = true;
     networking = {
