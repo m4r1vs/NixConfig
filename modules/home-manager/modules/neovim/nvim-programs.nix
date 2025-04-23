@@ -33,8 +33,6 @@ with pkgs; [
   rustc
   rustfmt
   shfmt
-  sourcekit-lsp
-  swift
   terraform-ls
   tinymist
   tree-sitter

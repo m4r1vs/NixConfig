@@ -122,7 +122,6 @@ return {
     c.nixd.setup({})
     c.pyright.setup({})
     c.rust_analyzer.setup({})
-    c.sourcekit.setup({})
     c.taplo.setup({})
     c.terraformls.setup({})
     c.texlab.setup({})
