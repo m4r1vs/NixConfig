@@ -24,6 +24,9 @@ in {
         };
       })
       (final: prev: {
+        gimp-with-plugins = prev.gimp3-with-plugins;
+      })
+      (final: prev: {
         hyprlandPlugins =
           prev.hyprlandPlugins
           // {
