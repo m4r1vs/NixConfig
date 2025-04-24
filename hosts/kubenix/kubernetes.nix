@@ -63,7 +63,7 @@ in {
   networking = {
     inherit domain;
     firewall = {
-      allowedTCPPorts = [22 53 80 443 6443];
+      allowedTCPPorts = [22 53 80 443 k8sPort];
       allowedUDPPorts = [53];
       trustedInterfaces = [
         "enp7s0"
