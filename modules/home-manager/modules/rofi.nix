@@ -75,12 +75,12 @@ in {
         kb-move-end = "";
         kb-accept-entry = "Return,KP_Enter";
         kb-remove-char-back = "BackSpace,Shift+BackSpace";
-        kb-row-up = ["Control+k" "Alt+k"];
-        kb-row-down = ["Control+j" "Alt+j"];
-        kb-row-right = ["Control+l" "Alt+l"];
-        kb-row-left = ["Control+h" "Alt+h"];
-        kb-page-prev = ["Control+y" "Alt+y"];
-        kb-page-next = ["Control+e" "Alt+e"];
+        kb-row-up = ["Control+k" "Alt+Meta+k"];
+        kb-row-down = ["Control+j" "Alt+Meta+j"];
+        kb-row-right = ["Control+l" "Alt+Meta+l"];
+        kb-row-left = ["Control+h" "Alt+Meta+h"];
+        kb-page-prev = ["Control+y" "Alt+Meta+y"];
+        kb-page-next = ["Control+e" "Alt+Meta+e"];
       };
       theme = toString (pkgs.writeText "style.rasi"
         /*
