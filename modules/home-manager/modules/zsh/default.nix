@@ -37,7 +37,7 @@ in {
         rebuild = "sudo nixos-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}";
         upgrade = "nix flake update --flake ~/NixConfig && sudo nixos-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}";
       };
-      initExtra = import ./init.nix pkgs;
+      initContent = import ./init.nix pkgs;
       plugins = [
         {
           name = "fzf-tab";
