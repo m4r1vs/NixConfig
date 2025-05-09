@@ -9,11 +9,12 @@ in {
   home.packages = with pkgs;
     [
       fastfetch
-      yt-dlp
-      xdg-utils
-      w3m-full
       kubectl
       kubernetes-helm
+      matterhorn
+      w3m-full
+      xdg-utils
+      yt-dlp
     ]
     ++ lib.optionals isDesktop ([
         amberol
