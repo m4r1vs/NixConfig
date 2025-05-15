@@ -25,9 +25,18 @@ in {
       fonts.enable = true;
     };
 
-    # networking.extraHosts = ''
-    #   91.99.10.215 falkenberg.kubenix.local
-    # '';
+    networking.extraHosts = ''
+      127.0.0.1 artpc17
+    '';
+
+    # Fix libstrongswan not working due to missing config file
+    environment.etc."strongswan.conf" = {
+      enable = true;
+      user = "root";
+      group = "root";
+      mode = "0644";
+      text = "";
+    };
 
     services = {
       configured.kmscon.enable = true;
