@@ -11,7 +11,6 @@ in {
       fastfetch
       kubectl
       kubernetes-helm
-      matterhorn
       w3m-full
       xdg-utils
       yt-dlp
