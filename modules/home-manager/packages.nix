@@ -1,6 +1,7 @@
 {
   pkgs,
   osConfig,
+  scripts,
   ...
 }: let
   isDesktop = osConfig.configured.desktop.enable;
@@ -34,6 +35,7 @@ in {
         obsidian
         pavucontrol
         polkit_gnome
+        scripts.artkube
         slack
         stockfish
         wireplumber
