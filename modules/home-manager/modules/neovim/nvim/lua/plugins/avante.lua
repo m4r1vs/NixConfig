@@ -13,7 +13,7 @@ return {
     },
     gemini = {
       endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
-      model = "gemini-2.5-pro-exp-03-25",
+      model = "gemini-2.5-pro-preview-05-06",
       timeout = 30000,
       temperature = 0,
       api_key_name = "cmd:secret-tool lookup google_gemini password",
