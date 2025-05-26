@@ -34,8 +34,8 @@ in {
               src = pkgs.fetchFromGitHub {
                 owner = "daxisunder";
                 repo = "hyprfocus";
-                rev = "8061b05a04432da5331110e0ffaa8c81e1035725";
-                hash = "sha256-n8lCf4zQehWEK6UJWcLuGUausXuRgqggGuidc85g20I=";
+                rev = "516e36572f50cca631e7e572249b3716c3602176";
+                hash = "sha256-TnsdJxxBFbc54T43UP+7mmZkErc7NrZ31C0QNePdDrE=";
               };
               meta.broken = false;
             };

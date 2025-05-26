@@ -2,7 +2,7 @@
   description = "Marius' Nixos Configuration Flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.05";
     nixos-wsl = {
       # Run NixOS on Windows Subsystem for Linux
       url = "github:nix-community/NixOS-WSL/main";
@@ -20,7 +20,7 @@
     };
     home-manager = {
       # Configure programs using nix
-      url = "github:nix-community/home-manager?ref=master";
+      url = "github:nix-community/home-manager?ref=release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-06cb-009a-fingerprint-sensor = {
