@@ -10,10 +10,61 @@
       font-family: monospace;
       line-height: 1.6;
       padding: 2em;
+      background-color: #fff;
+      color: #222;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    h1 {
+    h1,
+    h2 {
       color: #333;
+    }
+
+    a {
+      color: #007bff;
+    }
+
+    a:hover {
+      color: #0056b3;
+    }
+
+    .album-card {
+      display: inline-block;
+      width: 192px;
+      margin: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      vertical-align: top;
+      background-color: #f9f9f9;
+      padding-bottom: 10px;
+      transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .album-card img {
+      width: 100%;
+      height: auto;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      margin-bottom: 2px;
+    }
+
+    .album-card span {
+      display: block;
+      padding: 0 10px;
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    .album-card h3 {
+      text-align: left;
+      font-size: 1em;
+      font-weight: bold;
+      color: #333;
+      margin: 0px 8px;
+      line-height: 1.2;
+      margin-bottom: 5px;
     }
 
     .cursor {
@@ -34,13 +85,96 @@
         opacity: 0;
       }
     }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+      }
+
+      h1,
+      h2 {
+        color: #f0f0f0;
+      }
+
+      a {
+        color: #6bb8ff;
+      }
+
+      a:hover {
+        color: #8bc7ff;
+      }
+
+      .album-card {
+        background-color: #2c2c2c;
+        border-color: #444;
+        box-shadow: 2px 2px 8px rgba(255, 255, 255, 0.05);
+      }
+
+      .album-card h3 {
+        color: #e8e8e8;
+      }
+
+      .album-card span {
+        color: #b0b0b0;
+      }
+
+      .album-card span a {
+        color: #6bb8ff;
+      }
+
+      .album-card span a:hover {
+        color: #8bc7ff;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <h1>Hello World from NixOS :)</h1>
+  <h1>Hello World :)</h1>
   <p>Current time: <span id="time"></span><span class="cursor">█</span></p>
-  <p>Go to <a href="https://nixner.niveri.dev">Configuration</a> of this machine.</p>
+  <p>
+    I am Marius, an aspiring computer programmer from northern Germany. Currently studying IT at <a
+      href="https://www.inf.uni-hamburg.de/">UHH</a> and employed at <a href="https://cc.systems">cc.systems</a>. Hit me
+    up by <a href="mailto:marius@niveri.de">sending me an E-Mail</a> or take a look at my portfolio:
+  </p>
+  <ul>
+    <li>Browse my open-source work on <a href="https://github.com/m4r1vs">GitHub</a> or visit me on <a
+        href="https://www.linkedin.com/in/marius-niveri/">LinkedIn</a>.</li>
+    <li>I like photography and experimenting with Kubernetes. Take a look at some pictures I took on my <a
+        href="https://photos.cluster.niveri.dev/share/Z2eR2MtYwwZSEpwlLguxwab4dWD8ZrqQONJS3kKMBVE8fRYovSzPFajoFgD2enuOh4o">self-hosted
+        Immich cluster</a>.</li>
+    <li>Go to the <a href="https://nixner.niveri.dev">NixOS configuration</a> of this server.</li>
+  </ul>
+  <h2>Music I enjoy</h2>
+  <div class="album-card">
+    <img src="./imaginal_disk_cover.jpg" alt="Imaginal Disk Album Cover">
+    <h3>Imaginal Disk - Magdalena Bay</h3>
+    <span>Hyperpop for cycling through your city. <a
+        href="https://magdalenabay.bandcamp.com/album/imaginal-disk">Bandcamp</a>.</span>
+  </div>
+  <div class="album-card">
+    <img src="./all_amerikkkan_badass_cover.jpg" alt="All Amerikkkan Bada$$ Album Cover">
+    <h3>All Amerikkkan Bada$$ - Joey Bada$$</h3>
+    <span>Jazzy Hip-Hop. <a href="https://open.spotify.com/album/2ZmDoyNYarmubD4vTfwh6g">Spotify</a></span>
+  </div>
+  <div class="album-card">
+    <img src="./ral6004_cover.jpg" alt="ral6004 Album Cover">
+    <h3>ral6004</h3>
+    <span>Regular Techno and Dance sessions. <a href="https://soundcloud.com/RAL6004">SoundCloud</a></span>
+  </div>
+  <div class="album-card">
+    <img src="./sunday_by_the_river_cover.jpg" alt="Sunday by the River Album Cover">
+    <h3>Sunday by the River - Orbit</h3>
+    <span>Synth and base for doing the chores or studying. <a
+        href="https://orbitnotthewchewinggum.bandcamp.com/album/sunday-by-the-river">Bandcamp</a></span>
+  </div>
+  <div class="album-card">
+    <img src="./the_new_abnormal_cover.jpg" alt="The New Abnormal Album Cover">
+    <h3>The New Abnormal - The Strokes</h3>
+    <span>Rock for the summer (year-round).<a
+        href="https://open.spotify.com/album/2xkZV2Hl1Omi8rk2D7t5lN">Spotify</a></span>
+  </div>
   <script>
     function updateTime() {
       document.getElementById('time').textContent = new Date().toLocaleTimeString();
