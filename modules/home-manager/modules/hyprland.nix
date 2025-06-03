@@ -87,6 +87,9 @@ in {
           allow_tearing = true;
           layout = "dwindle";
         };
+        ecosystem = {
+          no_update_news = true;
+        };
         plugin = {
           hyprfocus = {
             enabled = true;
