@@ -1,5 +1,6 @@
 {
   systemArgs,
+  lib,
   osConfig,
   ...
 }: let
@@ -35,6 +36,13 @@ in {
     network-manager-applet.enable = isDesktop;
     polkit-gnome.enable = isDesktop;
     swww.enable = isDesktop;
+  };
+
+  dconf.settings = lib.mkIf isDesktop {
+    "org/virt-manager/virt-manager/connections" = {
+      autoconnect = ["qemu:///system"];
+      uris = ["qemu:///system"];
+    };
   };
 
   programs = {

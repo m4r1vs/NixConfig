@@ -118,10 +118,10 @@ in {
       consoleLogLevel = 0;
       plymouth = {
         enable = true;
-        theme = "colorful_sliced"; # rings and abstract_ring also good
+        theme = "abstract_ring"; # rings and colorful_sliced also good
         themePackages = with pkgs; [
           (adi1090x-plymouth-themes.override {
-            selected_themes = ["colorful_sliced"];
+            selected_themes = ["abstract_ring"];
           })
         ];
       };
@@ -177,7 +177,13 @@ in {
       };
     };
 
+    virtualisation = {
+      spiceUSBRedirection.enable = true;
+      libvirtd.enable = true;
+    };
+
     programs = {
+      virt-manager.enable = true;
       dconf.enable = true;
       steam = {
         enable = true;

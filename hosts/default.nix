@@ -81,6 +81,9 @@
         ]
         ++ lib.optionals config.virtualisation.docker.enable [
           "docker"
+        ]
+        ++ lib.optionals config.virtualisation.libvirtd.enable [
+          "libvirtd"
         ];
       openssh.authorizedKeys.keys = [
         # Allmighty SSH key
