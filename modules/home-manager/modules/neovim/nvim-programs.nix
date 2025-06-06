@@ -6,8 +6,8 @@ with pkgs; [
   cargo
   clang-tools
   dart
-  dockerfile-language-server-nodejs
   docker-compose-language-service
+  dockerfile-language-server-nodejs
   fd
   fzf
   gcc
@@ -19,6 +19,7 @@ with pkgs; [
   gotools
   helm-ls
   hyprls
+  jdt-language-server
   kotlin-language-server
   lazygit
   libsecret
