@@ -108,11 +108,6 @@ in {
             always = true;
             notification = false;
           }
-          {
-            command = "${pkgs.slack}/bin/slack --silent";
-            always = true;
-            notification = false;
-          }
         ];
         terminal = terminal;
         defaultWorkspace = "workspace number 1";

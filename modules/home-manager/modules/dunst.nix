@@ -94,11 +94,6 @@ in {
           per_monitor_dpi = false;
         };
 
-        Slack = {
-          appname = "Slack";
-          default_icon = "${pkgs.papirus-icon-theme}/share/icons/Papirus/48x48/apps/slack.svg";
-        };
-
         nixpad = {
           appname = "nixpad";
           default_icon = "${pkgs.papirus-icon-theme}/share/icons/Papirus/48x48/apps/element4l.svg";

@@ -27,7 +27,6 @@ in {
         exec-once = [
           "${pkgs.waybar}/bin/waybar"
           "${pkgs._1password-gui}/bin/1password --silent --ozone-platform-hint=x11"
-          "${pkgs.slack}/bin/slack"
           "${scripts.volume-change-notify}"
           "${scripts.brightness-change-notify}"
         ];
@@ -180,8 +179,6 @@ in {
           "float,initialClass:^(obsidian)$"
           "size 1600 900, initialClass:^(obsidian)$"
           "workspace special:obsidian silent,initialClass:^(obsidian)$"
-
-          "workspace special:Slack silent,initialClass:^(Slack)$"
         ];
         monitor = [
           "eDP-1,1920x1080@60.01,0x0, 1" # Internal
@@ -234,9 +231,6 @@ in {
 
             ",F1, togglespecialworkspace, spotify_player"
             ",F1, exec, pgrep spotify_player || ${pkgs.ghostty}/bin/ghostty --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
-
-            ",F2, togglespecialworkspace, Slack"
-            ",F2, exec, pgrep Slack || ${pkgs.slack}/bin/slack"
 
             ",F7, exec, ${scripts.wireless-screen}"
 
