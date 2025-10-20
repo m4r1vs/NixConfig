@@ -161,7 +161,7 @@ in {
                 owner = "niksingh710";
                 repo = "minimal-tmux-status";
                 rev = "main";
-                sha256 = "sha256-JtbuSxWFR94HiUdQL9uIm2V/kwGz0gbVbqvYWmEncbc=";
+                sha256 = "sha256-k/rEvNWUTge1uYwwSMfgM7CDoKanIm8ED3vo5mqDe08=";
               };
               rtpFilePath = "minimal.tmux";
             };
