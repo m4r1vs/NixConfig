@@ -16,7 +16,7 @@ in {
       shellWrapperName = "y";
       enableZshIntegration = true;
       keymap = {
-        manager.prepend_keymap = [
+        mgr.prepend_keymap = [
           {
             run = ''shell 'printf "Mode Bits: "; read ans; chmod $ans "$@"' --block --confirm'';
             on = "=";
@@ -139,8 +139,8 @@ in {
           src = pkgs.fetchFromGitHub {
             owner = "yazi-rs";
             repo = "plugins";
-            sha256 = "sha256-LWN0riaUazQl3llTNNUMktG+7GLAHaG/IxNj1gFhDRE=";
-            rev = "b12a9ab085a8c2fe2b921e1547ee667b714185f9";
+            sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
+            rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
           };
           installPhase = ''
             runHook preInstall
@@ -154,8 +154,8 @@ in {
           src = pkgs.fetchFromGitHub {
             owner = "yazi-rs";
             repo = "plugins";
-            sha256 = "sha256-LWN0riaUazQl3llTNNUMktG+7GLAHaG/IxNj1gFhDRE=";
-            rev = "b12a9ab085a8c2fe2b921e1547ee667b714185f9";
+            sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
+            rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
           };
           installPhase = ''
             runHook preInstall
@@ -169,8 +169,8 @@ in {
           src = pkgs.fetchFromGitHub {
             owner = "yazi-rs";
             repo = "plugins";
-            sha256 = "sha256-LWN0riaUazQl3llTNNUMktG+7GLAHaG/IxNj1gFhDRE=";
-            rev = "b12a9ab085a8c2fe2b921e1547ee667b714185f9";
+            sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
+            rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
           };
           installPhase = ''
             runHook preInstall
@@ -184,8 +184,8 @@ in {
           src = pkgs.fetchFromGitHub {
             owner = "yazi-rs";
             repo = "plugins";
-            sha256 = "sha256-LWN0riaUazQl3llTNNUMktG+7GLAHaG/IxNj1gFhDRE=";
-            rev = "b12a9ab085a8c2fe2b921e1547ee667b714185f9";
+            sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
+            rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
           };
           installPhase = ''
             runHook preInstall
