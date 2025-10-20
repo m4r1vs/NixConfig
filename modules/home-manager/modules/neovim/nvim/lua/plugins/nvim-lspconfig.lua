@@ -40,10 +40,8 @@ return {
       end,
     })
 
-    local c = require("lspconfig")
-
     -- Hyprland Configs
-    c.hyprls.setup({})
+    vim.lsp.enable("hyprls")
     vim.filetype.add({
       pattern = { [".*/hypr/.*%.conf"] = "hyprlang" },
     })
@@ -65,8 +63,6 @@ return {
       },
     })
 
-    c.docker_compose_language_service.setup({})
-
     -- Helm
     vim.filetype.add({
       pattern = {
@@ -77,60 +73,43 @@ return {
       },
     })
 
-    c.helm_ls.setup({
-      settings = {
-        ["helm-ls"] = {
-          yamlls = {
-            path = "yaml-language-server"
-          }
-        }
-      }
-    })
-
     -- Bash
-    c.bashls.setup({
+    vim.lsp.enable("bashls")
+    vim.lsp.config("bashls", {
       filetypes = {
         "bash", "sh", "zsh"
       }
     })
 
-    -- Kotlin
-    c.kotlin_language_server.setup({
-      init_options = {
-        storagePath = vim.fn.stdpath("cache") .. "/kotlinlsp",
-      },
-      filetypes = {
-        "kotlin"
-      }
-    })
-
     -- Other ones without config
 
-    c.clangd.setup({})
-    c.cssls.setup({})
-    c.dockerls.setup({})
-    c.eslint.setup({})
-    c.gitlab_ci_ls.setup({})
-    c.golangci_lint_ls.setup({})
-    c.gopls.setup({})
-    c.html.setup({})
-    c.jdtls.setup({})
-    c.jsonls.setup({})
-    c.lua_ls.setup({})
-    c.marksman.setup({})
-    c.nil_ls.setup({})
-    c.nixd.setup({})
-    c.pyright.setup({})
-    c.rust_analyzer.setup({})
-    c.taplo.setup({})
-    c.terraformls.setup({})
-    c.texlab.setup({})
-    c.tinymist.setup({})
-    c.vtsls.setup({})
-    c.yamlls.setup({})
-    c.zls.setup({})
+    vim.lsp.enable("clangd")
+    vim.lsp.enable("cssls")
+    vim.lsp.enable("docker_compose_language_service")
+    vim.lsp.enable("dockerls")
+    vim.lsp.enable("eslint")
+    vim.lsp.enable("gitlab_ci_ls")
+    vim.lsp.enable("golangci_lint_ls")
+    vim.lsp.enable("gopls")
+    vim.lsp.enable("helm_ls")
+    vim.lsp.enable("html")
+    vim.lsp.enable("jdtls")
+    vim.lsp.enable("jsonls")
+    vim.lsp.enable("lua_ls")
+    vim.lsp.enable("marksman")
+    vim.lsp.enable("nil_ls")
+    vim.lsp.enable("nixd")
+    vim.lsp.enable("pyright")
+    vim.lsp.enable("rust_analyzer")
+    vim.lsp.enable("taplo")
+    vim.lsp.enable("terraformls")
+    vim.lsp.enable("texlab")
+    vim.lsp.enable("tinymist")
+    vim.lsp.enable("vtsls")
+    vim.lsp.enable("yamlls")
+    vim.lsp.enable("zls")
 
-    -- c.ccls.setup({})
+    -- Make sure each server knows what can and cannot be done using nvim-cmp
 
     local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
@@ -142,7 +121,7 @@ return {
     local configs = require("lspconfig.configs")
     for server, config in ipairs(configs) do
       if config.manager ~= nil then
-        c[server].setup({
+        vim.lsp.config(server, {
           capabilities = capabilities
         })
       end
