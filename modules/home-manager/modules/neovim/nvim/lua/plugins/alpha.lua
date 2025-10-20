@@ -27,7 +27,7 @@ return {
     dashboard.section.header.opts.hl = "AlphaHeader"
 
     dashboard.section.buttons.val = {
-      dashboard.button("s", "󰆋   Sessions", ":silent SessionSearch<CR>"),
+      dashboard.button("s", "󰆋   Sessions", ":silent AutoSession search<CR>"),
       dashboard.button("u", "󰮭   Update Lazy", ":silent Lazy update<CR>"),
       dashboard.button("n", "   New Empty File", ":silent ene <BAR> startinsert <CR>"),
       dashboard.button("d", "   Dotfiles", ":silent SessionRestore /home/mn/NixConfig<CR>"),
