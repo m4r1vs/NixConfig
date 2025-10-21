@@ -106,6 +106,33 @@
             {config._module.args = {inherit systemArgs self inputs;};}
           ];
         });
+        pavilionix = inputs.nixpkgs.lib.nixosSystem (let
+          systemArgs =
+            globalArgs
+            // {
+              system = "x86_64-linux";
+              theme = makeTheme {
+                primary = "green";
+                secondary = "orange";
+              };
+              hostname = "pavilionix";
+            };
+        in {
+          inherit (systemArgs) system;
+          modules = [
+            ./hosts/pavilionix
+
+            ./hosts
+            ./nixpkgs.nix
+            ./modules
+
+            inputs.disko.nixosModules.disko
+            inputs.nix-index-database.nixosModules.nix-index
+            inputs.home-manager.nixosModules.home-manager
+
+            {config._module.args = {inherit systemArgs self inputs;};}
+          ];
+        });
         nixner = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
             globalArgs
