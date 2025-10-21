@@ -28,7 +28,6 @@
     let
       ditDelay = config.services.thinkmorse.speed;
       thinkmorse = pkgs.writeShellScriptBin "thinkmorse" ''
-        # ${pkgs.spotify-player}
         while [[ 1 ]]; do
           led(){
             ${lib.concatStringsSep "\n" (builtins.map (device: ''echo $1 | ${pkgs.coreutils}/bin/tee /sys/class/leds/${device}/brightness > /dev/null'') config.services.thinkmorse.devices)}
