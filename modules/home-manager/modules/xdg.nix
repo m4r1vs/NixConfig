@@ -84,30 +84,6 @@ in {
           noDisplay = true;
         };
         brave-browser = {
-          name = "cc.systems Browser";
-          exec = ''${pkgs.brave}/bin/brave --profile-directory=cc-profile --ozone-platform-hint=auto --use-gl=desktop --enable-features=TouchpadOverscrollHistoryNavigation %U'';
-          icon = "brave-browser-dev";
-          terminal = false;
-          type = "Application";
-          categories = ["WebBrowser" "Network"];
-          mimeType = [
-            "application/pdf"
-            "application/rdf+xml"
-            "application/rss+xml"
-            "application/xhtml+xml"
-            "application/xhtml_xml"
-            "application/xml"
-            "image/gif"
-            "image/jpeg"
-            "image/png"
-            "image/webp"
-            "text/html"
-            "text/xml"
-            "x-scheme-handler/http"
-            "x-scheme-handler/https"
-          ];
-        };
-        brave-personal = {
           name = "Personal Browser";
           exec = ''${pkgs.brave}/bin/brave --profile-directory=Default --ozone-platform-hint=auto --use-gl=desktop --enable-features=TouchpadOverscrollHistoryNavigation %U'';
           icon = "brave-browser-nightly";
