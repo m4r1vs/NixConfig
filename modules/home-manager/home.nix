@@ -57,7 +57,7 @@ in {
       neovim.enable = true;
       newsboat.enable = true;
       rofi.enable = isDesktop;
-      spotify-player.enable = true;
+      spotify-player.enable = isDesktop || isWindows;
       ssh.enable = true;
       swappy.enable = isDesktop;
       tmux.enable = true;
