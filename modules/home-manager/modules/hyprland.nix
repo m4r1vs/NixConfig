@@ -3,6 +3,7 @@
   config,
   scripts,
   pkgs,
+  osConfig,
   ...
 }:
 with lib; let
@@ -34,8 +35,7 @@ in {
           inactive_timeout = 3;
           use_cpu_buffer = 1;
         };
-        # exec = "${pkgs.hyprland}/bin/hyprctl setcursor Bibata-Modern-Ice 20";
-        env = [
+        env = lib.mkIf osConfig.configured.nvidia.enable [
           "LIBVA_DRIVER_NAME,nvidia"
           "GBM_BACKEND,nvidia-drm"
           "__GLX_VENDOR_LIBRARY_NAME,nvidia"
