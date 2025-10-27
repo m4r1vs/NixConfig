@@ -212,27 +212,6 @@
         "type": "github"
       }
     },
-    "nixos-06cb-009a-fingerprint-sensor": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1743406058,
-        "narHash": "sha256-u3s8K88F8QaV3nF1H+KrSXwkPbx6+rAj2/out0eIZG4=",
-        "owner": "m4r1vs",
-        "repo": "nixos-06cb-009a-fingerprint-sensor",
-        "rev": "de60ed2ca79ce267a05f6b5628706396e5861ffb",
-        "type": "github"
-      },
-      "original": {
-        "owner": "m4r1vs",
-        "ref": "24.11",
-        "repo": "nixos-06cb-009a-fingerprint-sensor",
-        "type": "github"
-      }
-    },
     "nixos-generators": {
       "inputs": {
         "nixlib": "nixlib",
@@ -342,7 +321,6 @@
         "home-manager": "home-manager",
         "lanzaboote": "lanzaboote",
         "nix-index-database": "nix-index-database",
-        "nixos-06cb-009a-fingerprint-sensor": "nixos-06cb-009a-fingerprint-sensor",
         "nixos-generators": "nixos-generators",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs",

@@ -1,5 +1,4 @@
 {
-  config,
   systemArgs,
   lib,
   ...
@@ -10,7 +9,7 @@
   ];
 
   configured = {
-    nvidia.enable = true;
+    nvidia.enable = false;
     desktop = {
       enable = true;
       x11 = false;
@@ -28,18 +27,11 @@
     Blinking ThinkPad LED
     */
     thinkmorse = {
-      message = "Leck Eier";
+      message = "Hallo Welt";
       enable = true;
     };
 
-    /*
-    Fingerprint Scanner Driver
-    */
-    "06cb-009a-fingerprint-sensor" = {
-      enable = true;
-      backend = "libfprint-tod";
-      calib-data-file = ./calib-data.bin;
-    };
+    # TODO: Add fingerpint support either by installing a different sensor or packaging https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=libfprint-goodixtls-55x4
 
     /*
     Limit CPU when on battery
@@ -50,13 +42,16 @@
         CPU_SCALING_GOVERNOR_ON_AC = "performance";
         CPU_SCALING_GOVERNOR_ON_BAT = "powersave";
 
-        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
         CPU_ENERGY_PERF_POLICY_ON_AC = "performance";
+        CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+
+        CPU_BOOST_ON_AC = 1;
+        CPU_BOOST_ON_BAT = 0;
 
         CPU_MIN_PERF_ON_AC = 0;
         CPU_MAX_PERF_ON_AC = 100;
         CPU_MIN_PERF_ON_BAT = 0;
-        CPU_MAX_PERF_ON_BAT = 40;
+        CPU_MAX_PERF_ON_BAT = 60;
       };
     };
 
@@ -72,36 +67,7 @@
     };
   };
 
-  /*
-  Extra Nvidia Settings
-  */
-  hardware = {
-    nvidia = {
-      open = false;
-      package = config.boot.kernelPackages.nvidiaPackages.beta;
-      prime = {
-        sync.enable = true;
-        intelBusId = "PCI:0:2:0";
-        nvidiaBusId = "PCI:1:0:0";
-      };
-    };
-  };
-
-  /*
-  Enable Secure Boot
-  */
-  boot.configured.secureboot = {
-    enable = true;
-  };
-
-  security = {
-    pam.services = {
-      login.fprintAuth = true;
-      sudo.fprintAuth = true;
-    };
-  };
-
   system = {
-    nixos.label = systemArgs.hostname + ".cc.systems";
+    nixos.label = systemArgs.hostname + ".niveri.dev";
   };
 }

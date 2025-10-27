@@ -23,11 +23,6 @@
       url = "github:nix-community/home-manager?ref=release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixos-06cb-009a-fingerprint-sensor = {
-      # Drivers for the ThinkPad P52 fingerprint scanner
-      url = "github:m4r1vs/nixos-06cb-009a-fingerprint-sensor?ref=24.11";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     disko = {
       # Declare how disks are formatted and partitioned
       url = "github:nix-community/disko";
@@ -82,10 +77,6 @@
                 primary = "green";
                 secondary = "orange";
               };
-              git = {
-                name = "Marius Niveri";
-                email = "mniveri@cc.systems";
-              };
               hostname = "nixpad";
             };
         in {
@@ -97,9 +88,7 @@
             ./nixpkgs.nix
             ./modules
 
-            inputs.lanzaboote.nixosModules.lanzaboote
             inputs.disko.nixosModules.disko
-            inputs.nixos-06cb-009a-fingerprint-sensor.nixosModules."06cb-009a-fingerprint-sensor"
             inputs.nix-index-database.nixosModules.nix-index
             inputs.home-manager.nixosModules.home-manager
 
