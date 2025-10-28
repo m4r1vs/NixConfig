@@ -59,7 +59,7 @@ in {
             shadow_size = 4;
             shadow_passes = 4;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 0.7;
+            shadow_boost = 0.5;
           }
           {
             text = "cmd[update:2000] ${scripts.battery-status}";
@@ -73,10 +73,10 @@ in {
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 1;
+            shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:1000] ${scripts.mpris-hyprlock} --title";
+            text = "cmd[update:6000] ${scripts.mpris-hyprlock} --title";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             font_size = 12;
             font_family = "JetBrainsMono NF SemiBold";
@@ -87,10 +87,10 @@ in {
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 1;
+            shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:1000] ${scripts.mpris-hyprlock} --length";
+            text = "cmd[update:6000] ${scripts.mpris-hyprlock} --length";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
             font_size = 12;
             font_family = "JetBrainsMono NF SemiBold";
@@ -101,10 +101,10 @@ in {
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 1;
+            shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:1000] ${scripts.mpris-hyprlock} --source";
+            text = "cmd[update:6000] ${scripts.mpris-hyprlock} --source";
             color = "rgba(${theme.secondaryColor.rgb}, 0.32)";
             font_size = 64;
             font_family = "JetBrainsMono Nerd Font";
@@ -116,10 +116,10 @@ in {
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 1;
+            shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:1000] ${scripts.mpris-hyprlock} --artist";
+            text = "cmd[update:6000] ${scripts.mpris-hyprlock} --artist";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
             font_family = "JetBrainsMono Nerd Font";
             font_size = 12;
@@ -130,7 +130,7 @@ in {
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 1;
+            shadow_boost = 0.9;
           }
           {
             text = "cmd[update:60000] echo \"$(date +\"%a, %b %d\")  $(${pkgs.wttrbar}/bin/wttrbar --nerd --custom-indicator \"{ICON} {temp_C}°\" | ${pkgs.jq}/bin/jq .text -r)\"";
@@ -144,7 +144,7 @@ in {
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 1.2;
+            shadow_boost = 1;
           }
         ];
         input-field = [
@@ -174,7 +174,7 @@ in {
             rounding = 5;
             border_size = 0;
             rotate = 0;
-            reload_time = 2;
+            reload_time = 6;
             reload_cmd = "${scripts.mpris-hyprlock} --arturl";
             position = "24, -21";
             halign = "left";
@@ -183,7 +183,7 @@ in {
             shadow_size = 2;
             shadow_passes = 4;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 1;
+            shadow_boost = 0.3;
           }
         ];
       };
