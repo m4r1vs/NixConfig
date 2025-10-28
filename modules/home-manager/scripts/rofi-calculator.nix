@@ -5,6 +5,7 @@
 }: {
   rofi-calculator =
     pkgs.writeShellScript "rofi-calculator"
+    # bash
     ''
       if [ ! -z "$@" ]; then
         # input=$(echo "$@" | sed 's/[[:space:]]*//g')
@@ -46,18 +47,19 @@
 
         APPID="5H4A34-8PTG87GH54"
 
-        RESPONSE="Wolfram|Alpha did not understand your input"
+        RESPONSE='"Wolfram|Alpha did not understand your input"'
 
         if [ $SKIP_WOLFRAM -eq 0 ]; then
-          RESPONSE=$(curl -s "https://api.wolframalpha.com/v1/result?appid=$APPID&units=metric&" --data-urlencode "i=$*")
+          QUERY=$(${pkgs.jq}/bin/jq -sRr @uri <<< "$*")
+          RESPONSE=$(curl -s "https://api.wolframalpha.com/v1/result?appid=$APPID&units=metric&i=$QUERY")
         fi
 
-        if [ "$RESPONSE" == "No short answer available" ]; then
+        if [ "$RESPONSE" == '"No short answer available"' ]; then
           ${scripts.nixos-notify} -e -t 2000 "There is no short answer. I'm opening the website for you..."
           coproc (xdg-open "https://wolframalpha.com/input?i=$*" > /dev/null 2>&1)
           ${pkgs.psmisc}/bin/killall rofi
           exit 0
-        elif [ "$RESPONSE" == "Wolfram|Alpha did not understand your input" ]; then
+        elif [ "$RESPONSE" == '"Wolfram|Alpha did not understand your input"' ]; then
           ${scripts.nixos-notify} -e -t 2000 "Wait, let me query OpenAI..."
           ${pkgs.psmisc}/bin/killall rofi
           # GPT_RESPONSE=$(/home/mn/.local/share/mise/installs/bun/latest/bin/bun run /home/mn/code/personal-stuff/totoro/index.ts "$*")
