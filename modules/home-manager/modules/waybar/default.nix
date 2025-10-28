@@ -211,7 +211,7 @@ in {
             format = "{}°C";
             tooltip = true;
             interval = 1800;
-            exec = "${pkgs.wttrbar}/bin/wttrbar --custom-indicator \"{temp_C}\"";
+            exec = "${pkgs.wttrbar}/bin/wttrbar --location Hamburg --custom-indicator \"{temp_C}\"";
             return-type = "json";
           };
 
