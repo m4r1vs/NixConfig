@@ -2,6 +2,7 @@
   pkgs,
   osConfig,
   scripts,
+  pkgsUnstable,
   ...
 }: let
   isDesktop = osConfig.configured.desktop.enable;
@@ -35,6 +36,7 @@ in {
         networkmanagerapplet
         obsidian
         pavucontrol
+        pkgsUnstable.gemini-cli
         polkit_gnome
         scripts.artkube
         spotify
