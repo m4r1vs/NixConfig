@@ -37,6 +37,7 @@ in {
         pavucontrol
         polkit_gnome
         scripts.artkube
+        spotify
         stockfish
         wireplumber
         zathura
