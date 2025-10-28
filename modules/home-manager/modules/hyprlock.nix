@@ -25,7 +25,7 @@ in {
         };
         auth = {
           fingerprint = {
-            enabled = true;
+            enabled = false;
           };
           pam = {
             enabled = true;
