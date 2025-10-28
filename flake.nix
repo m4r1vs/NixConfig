@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.05";
+    nixpkgs_unstable.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixos-wsl = {
       # Run NixOS on Windows Subsystem for Linux
       url = "github:nix-community/NixOS-WSL/main";
