@@ -43,7 +43,7 @@ in {
         };
         background = [
           {
-            path = "${builtins.path {path = ../wallpaper/Sunset_Tree.jpg;}}";
+            path = "${builtins.path {path = ../wallpaper/Hamburg_TV_Tower.jpg;}}";
           }
         ];
         label = [
@@ -59,7 +59,7 @@ in {
             shadow_size = 4;
             shadow_passes = 4;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 2;
+            shadow_boost = 0.7;
           }
           {
             text = " Plugged In"; # Consider making this dynamic based on battery status
@@ -73,7 +73,7 @@ in {
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 3.2;
+            shadow_boost = 1;
           }
           {
             text = "cmd[update:1000] ${scripts.mpris-hyprlock} --title";
@@ -87,7 +87,7 @@ in {
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 2;
+            shadow_boost = 1;
           }
           {
             text = "cmd[update:1000] ${scripts.mpris-hyprlock} --length";
@@ -101,7 +101,7 @@ in {
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 2;
+            shadow_boost = 1;
           }
           {
             text = "cmd[update:1000] ${scripts.mpris-hyprlock} --source";
@@ -116,7 +116,7 @@ in {
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 2;
+            shadow_boost = 1;
           }
           {
             text = "cmd[update:1000] ${scripts.mpris-hyprlock} --artist";
@@ -130,7 +130,7 @@ in {
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 2;
+            shadow_boost = 1;
           }
           {
             text = "cmd[update:60000] echo \"$(date +\"%a, %b %d\")  $(${pkgs.wttrbar}/bin/wttrbar --nerd --custom-indicator \"{ICON} {temp_C}°\" | ${pkgs.jq}/bin/jq .text -r)\"";
@@ -144,7 +144,7 @@ in {
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 4;
+            shadow_boost = 1.2;
           }
         ];
         input-field = [
