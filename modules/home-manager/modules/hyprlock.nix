@@ -62,7 +62,7 @@ in {
             shadow_boost = 0.7;
           }
           {
-            text = " Plugged In"; # Consider making this dynamic based on battery status
+            text = "cmd[update:2000] ${scripts.battery-status}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             font_size = 12;
             font_family = "JetBrainsMono NF SemiBold";
