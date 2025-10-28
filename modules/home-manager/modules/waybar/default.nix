@@ -207,14 +207,6 @@ in {
             exec = "${scripts.webcam-privacy}";
           };
 
-          # "custom/fprint" = {
-          #   return-type = "text";
-          #   interval = 2;
-          #   escape = true;
-          #   tooltip = false;
-          #   exec = "${scripts.fprint-privacy}";
-          # };
-
           "custom/weather" = {
             format = "{}°C";
             tooltip = true;
