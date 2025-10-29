@@ -19,6 +19,7 @@ return {
         args = { "--experimental-acp" },
         env = {
           NODE_NO_WARNINGS = "1",
+          GEMINI_API_KEY = vim.fn.trim(vim.fn.system("secret-tool lookup google_gemini password")),
         },
       },
     },
