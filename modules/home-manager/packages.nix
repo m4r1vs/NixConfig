@@ -2,11 +2,11 @@
   pkgs,
   osConfig,
   scripts,
-  pkgsUnstable,
   ...
 }: let
   isDesktop = osConfig.configured.desktop.enable;
   isWayland = !osConfig.configured.desktop.x11;
+  isWindows = osConfig ? wsl && osConfig.wsl.enable;
 in {
   home.packages = with pkgs;
     [
@@ -16,6 +16,9 @@ in {
       w3m-full
       xdg-utils
       yt-dlp
+    ]
+    ++ lib.optionals (isDesktop || isWindows) [
+      pkgs.gemini-cli-bin
     ]
     ++ lib.optionals isDesktop ([
         amberol
@@ -36,7 +39,6 @@ in {
         networkmanagerapplet
         obsidian
         pavucontrol
-        pkgsUnstable.gemini-cli
         polkit_gnome
         scripts.artkube
         spotify
