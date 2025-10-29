@@ -25,6 +25,7 @@ in {
           "tmux"
         ];
         extraConfig = ''
+          export NIXPKGS_ALLOW_UNFREE=1
           ZSH_TMUX_AUTOSTART=true
         '';
       };
