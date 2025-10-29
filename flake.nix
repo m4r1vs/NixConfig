@@ -89,6 +89,7 @@
             ./nixpkgs.nix
             ./modules
 
+            inputs.lanzaboote.nixosModules.lanzaboote
             inputs.disko.nixosModules.disko
             inputs.nix-index-database.nixosModules.nix-index
             inputs.home-manager.nixosModules.home-manager

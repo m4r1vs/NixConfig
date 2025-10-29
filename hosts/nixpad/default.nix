@@ -67,6 +67,13 @@
     };
   };
 
+  /*
+  Enable Secure Boot
+  */
+  boot.configured.secureboot = {
+    enable = true;
+  };
+
   system = {
     nixos.label = systemArgs.hostname + ".niveri.dev";
   };
