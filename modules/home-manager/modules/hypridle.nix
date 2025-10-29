@@ -27,20 +27,20 @@ in {
 
         listener = [
           {
-            timeout = 360;
+            timeout = 500;
             on-timeout = "${pkgs.brightnessctl}/bin/brightnessctl -s set 10";
             on-resume = "${pkgs.brightnessctl}/bin/brightnessctl -r";
           }
           {
-            timeout = 500;
+            timeout = 510;
             on-timeout = "${scripts.nixos-notify} -e -t 50000 \"Locking the Screen in a Minute, Chief\"";
           }
           {
-            timeout = 550;
+            timeout = 560;
             on-timeout = "${scripts.nixos-notify} -e -t 10000 \"10 Seconds left.\"";
           }
           {
-            timeout = 560;
+            timeout = 570;
             on-timeout = "loginctl lock-session";
           }
         ];
