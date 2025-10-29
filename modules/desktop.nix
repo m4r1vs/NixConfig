@@ -207,6 +207,8 @@ in {
           ln -s ${bibata-cursors}/share/icons/Bibata-Modern-Ice $out/share/icons/default
         '')
         kdePackages.kwallet
+        qemu
+        quickemu
       ];
     };
   };
