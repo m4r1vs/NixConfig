@@ -1,5 +1,5 @@
 return {
-  "yetone/avante.nvim",
+  "m4r1vs/avante.nvim",
   version = false,
   event = "VeryLazy",
   keys = {
