@@ -8,52 +8,89 @@ return {
     { "<leader>ae", "<cmd>AvanteEdit<cr>",   mode = "v" },
   },
   opts = {
-    -- add any opts here
-    -- this file can contain specific instructions for your project
+    selection = {
+      enabled = true,
+      hint_display = "none",
+    },
     instructions_file = "avante.md",
-    -- for example
-    provider = "gemini-cli",
+    provider = "openai",
+    providers = {
+      openai = {
+        endpoint = "https://api.openai.com/v1",
+        model = "gpt-4.1",
+        timeout = 30000,
+        context_window = 128000,
+        support_previous_response_id = true,
+        extra_request_body = {
+          temperature = 0.75,
+          max_completion_tokens = 16384,
+          reasoning_effort = "medium",
+        },
+      },
+      gemini = { -- API key set in zsh config
+        endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
+        model = "gemini-2.5-pro",
+        timeout = 15000,
+        context_window = 1048576,
+        use_ReAct_prompt = true,
+        extra_request_body = {
+          generationConfig = {
+            temperature = 0.75,
+          },
+        },
+      },
+    },
     acp_providers = {
       ["gemini-cli"] = {
         command = "gemini",
-        args = { "--experimental-acp" },
+        args = { "--experimental-acp", "--approval-mode=yolo" },
         env = {
           NODE_NO_WARNINGS = "1",
-          GEMINI_API_KEY = vim.fn.trim(vim.fn.system("secret-tool lookup google_gemini password")),
         },
+        auth_method = "oauth-personal",
+      },
+    },
+    behaviour = {
+      auto_approve_tool_permissions = true,
+    },
+    windows = {
+      spinner = {
+        generating = { "·", "✢", "∗", "✻", "✽" },
+        thinking = { "🤯", "🤯", "🙄", "🙄" },
+      },
+    },
+    web_search_engine = {
+      provider = "tavily",
+      proxy = nil,
+      providers = {
       },
     },
   },
   dependencies = {
     "nvim-lua/plenary.nvim",
     "MunifTanjim/nui.nvim",
-    --- The below dependencies are optional,
-    "nvim-mini/mini.pick",           -- for file_selector provider mini.pick
-    "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
-    "hrsh7th/nvim-cmp",              -- autocompletion for avante commands and mentions
-    "ibhagwan/fzf-lua",              -- for file_selector provider fzf
-    "stevearc/dressing.nvim",        -- for input provider dressing
-    "folke/snacks.nvim",             -- for input provider snacks
-    "nvim-tree/nvim-web-devicons",   -- or echasnovski/mini.icons
+    "nvim-mini/mini.pick",
+    "nvim-telescope/telescope.nvim",
+    "hrsh7th/nvim-cmp",
+    "ibhagwan/fzf-lua",
+    "stevearc/dressing.nvim",
+    "folke/snacks.nvim",
+    "nvim-tree/nvim-web-devicons",
     {
-      -- support for image pasting
       "HakonHarnes/img-clip.nvim",
       event = "VeryLazy",
       opts = {
-        -- recommended settings
         default = {
           embed_image_as_base64 = false,
           prompt_for_file_name = false,
           drag_and_drop = {
             insert_mode = true,
           },
-          -- required for Windows users
           use_absolute_path = true,
         },
       },
     },
     {
-      -- Make sure to set this up properly if you have lazy=true
       'MeanderingProgrammer/render-markdown.nvim',
       opts = {
         file_types = { "markdown", "Avante" },
