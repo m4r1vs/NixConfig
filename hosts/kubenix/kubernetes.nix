@@ -107,7 +107,7 @@ in {
         (resourceFromYAML {
           path = builtins.fetchurl {
             url = "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml";
-            sha256 = "05n9rfa1wh6gmw9bxiv8w8jxr3kq6hq55vrr1vjl98pi7ypyk7al";
+            sha256 = "sha256:1z4fgq9w29xlr3h84a9cg0yy5i6njrvq2z7vsah5laqr7cdqbq9r";
           };
           ns = "argocd";
         })
