@@ -33,6 +33,7 @@ in {
         window-decoration = false;
         window-padding-balance = true;
         link-url = true;
+        custom-shader = builtins.toString ./ripple-shader.glsl;
         keybind = [
           "ctrl+i=csi:6~"
           "ctrl+minus=decrease_font_size:1"
