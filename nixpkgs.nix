@@ -2,14 +2,26 @@
   pkgs,
   config,
   lib,
+  systemArgs,
+  inputs,
   ...
 }: let
   isWayland = !config.configured.desktop.x11;
   isDesktop = config.configured.desktop.enable;
+  pkgsUnstable = import inputs.nixpkgs_unstable {
+    system = systemArgs.system;
+    config.allowUnfree = true;
+  };
 in {
   nixpkgs = {
     config.allowUnfree = true;
     overlays = [
+      /*
+      From unstable Nixpkgs
+      */
+      (final: prev: {
+        ghostty = pkgsUnstable.ghostty;
+      })
       /*
       Temporary Fixes / Updates
       */

@@ -45,7 +45,7 @@ in {
           icon = "duckstation";
           comment = "Blazing fast terminal file manager written in Rust, based on async I/O";
           terminal = false;
-          exec = "${pkgs.ghostty}/bin/ghostty --class=ghostty.yazi -e EDITOR=nvim ${pkgs.yazi}/bin/yazi %u";
+          exec = "${pkgs.ghostty}/bin/ghostty --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi %u";
           type = "Application";
           mimeType = ["inode/directory"];
           categories = ["Utility" "Core" "System" "FileTools" "FileManager"];
