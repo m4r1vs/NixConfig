@@ -47,7 +47,7 @@
   boot = {
     tmp.cleanOnBoot = true;
     loader = {
-      timeout = 1;
+      timeout = lib.mkForce 1;
       systemd-boot = {
         enable = true;
         configurationLimit = 20;
