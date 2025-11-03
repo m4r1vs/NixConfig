@@ -33,6 +33,10 @@
     };
     settings = {
       auto-optimise-store = true;
+      trusted-users = [
+        "@wheel"
+        "@admin"
+      ];
       trusted-substituters = [
         "https://nix-community.cachix.org"
         "https://nix-cache.niveri.dev"
