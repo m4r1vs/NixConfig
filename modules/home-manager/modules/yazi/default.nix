@@ -45,14 +45,6 @@ in {
       };
       settings = {
         opener = {
-          gimp = [
-            {
-              run = "${pkgs.gimp-with-plugins}/bin/gimp \"$@\"";
-              desc = "GIMP";
-              block = true;
-              for = "unix";
-            }
-          ];
           edit = [
             {
               run = "${config.programs.neovim.finalPackage}/bin/nvim \"$@\"";
