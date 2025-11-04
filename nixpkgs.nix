@@ -5,10 +5,11 @@
   systemArgs,
   inputs,
   ...
-}: let
-  isWayland = !config.configured.desktop.x11;
-  isDesktop = config.configured.desktop.enable;
-  isDarwin = config.configured.darwin.enable;
+}:
+with lib; let
+  isWayland = config.configured ? desktop && !config.configured.desktop.x11;
+  isDesktop = config.configured ? desktop && config.configured.desktop.enable;
+  isDarwin = systemArgs.system == "aarch64-darwin";
   pkgsUnstable = import inputs.nixpkgs_unstable {
     system = systemArgs.system;
     config.allowUnfree = true;

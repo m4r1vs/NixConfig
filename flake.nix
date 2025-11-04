@@ -68,6 +68,10 @@
       };
     };
     makeTheme = import ./makeTheme.nix;
+    commonModules = [
+      ./hosts
+      ./nixpkgs.nix
+    ];
   in {
     nixosConfigurations =
       {
@@ -84,20 +88,19 @@
             };
         in {
           inherit (systemArgs) system;
-          modules = [
-            ./hosts/nixpad
+          modules =
+            [
+              ./hosts/nixpad
+              ./hosts/nixos.nix
 
-            ./hosts
-            ./nixpkgs.nix
-            ./modules
+              inputs.lanzaboote.nixosModules.lanzaboote
+              inputs.disko.nixosModules.disko
+              inputs.nix-index-database.nixosModules.nix-index
+              inputs.home-manager.nixosModules.home-manager
 
-            inputs.lanzaboote.nixosModules.lanzaboote
-            inputs.disko.nixosModules.disko
-            inputs.nix-index-database.nixosModules.nix-index
-            inputs.home-manager.nixosModules.home-manager
-
-            {config._module.args = {inherit systemArgs self inputs;};}
-          ];
+              {config._module.args = {inherit systemArgs self inputs;};}
+            ]
+            ++ commonModules;
         });
         pavilionix = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
@@ -112,19 +115,18 @@
             };
         in {
           inherit (systemArgs) system;
-          modules = [
-            ./hosts/pavilionix
+          modules =
+            [
+              ./hosts/pavilionix
+              ./hosts/nixos.nix
 
-            ./hosts
-            ./nixpkgs.nix
-            ./modules
+              inputs.disko.nixosModules.disko
+              inputs.nix-index-database.nixosModules.nix-index
+              inputs.home-manager.nixosModules.home-manager
 
-            inputs.disko.nixosModules.disko
-            inputs.nix-index-database.nixosModules.nix-index
-            inputs.home-manager.nixosModules.home-manager
-
-            {config._module.args = {inherit systemArgs self inputs;};}
-          ];
+              {config._module.args = {inherit systemArgs self inputs;};}
+            ]
+            + commonModules;
         });
         nixner = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
@@ -142,21 +144,20 @@
             };
         in {
           inherit (systemArgs) system;
-          modules = [
-            ./hosts/nixner
+          modules =
+            [
+              ./hosts/nixner
+              ./hosts/nixos.nix
 
-            ./hosts
-            ./nixpkgs.nix
-            ./modules
+              inputs.comin.nixosModules.comin
+              inputs.disko.nixosModules.disko
+              inputs.nix-index-database.nixosModules.nix-index
+              inputs.home-manager.nixosModules.home-manager
+              inputs.slidecontrol.nixosModules.slidecontrol-server
 
-            inputs.comin.nixosModules.comin
-            inputs.disko.nixosModules.disko
-            inputs.nix-index-database.nixosModules.nix-index
-            inputs.home-manager.nixosModules.home-manager
-            inputs.slidecontrol.nixosModules.slidecontrol-server
-
-            {config._module.args = {inherit systemArgs self inputs;};}
-          ];
+              {config._module.args = {inherit systemArgs self inputs;};}
+            ]
+            ++ commonModules;
         });
         desknix = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
@@ -171,20 +172,19 @@
             };
         in {
           inherit (systemArgs) system;
-          modules = [
-            ./hosts/desknix
+          modules =
+            [
+              ./hosts/desknix
+              ./hosts/nixos.nix
 
-            ./hosts
-            ./nixpkgs.nix
-            ./modules
+              inputs.lanzaboote.nixosModules.lanzaboote
+              inputs.disko.nixosModules.disko
+              inputs.nix-index-database.nixosModules.nix-index
+              inputs.home-manager.nixosModules.home-manager
 
-            inputs.lanzaboote.nixosModules.lanzaboote
-            inputs.disko.nixosModules.disko
-            inputs.nix-index-database.nixosModules.nix-index
-            inputs.home-manager.nixosModules.home-manager
-
-            {config._module.args = {inherit systemArgs self inputs;};}
-          ];
+              {config._module.args = {inherit systemArgs self inputs;};}
+            ]
+            ++ commonModules;
         });
         winix = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
@@ -199,32 +199,32 @@
             };
         in {
           inherit (systemArgs) system;
-          modules = [
-            ./hosts/winix
+          modules =
+            [
+              ./hosts/winix
+              ./hosts/nixos.nix
 
-            ./hosts
-            ./nixpkgs.nix
-            ./modules
+              inputs.nixos-wsl.nixosModules.default
+              inputs.nix-index-database.nixosModules.nix-index
+              inputs.home-manager.nixosModules.home-manager
 
-            inputs.nixos-wsl.nixosModules.default
-            inputs.nix-index-database.nixosModules.nix-index
-            inputs.home-manager.nixosModules.home-manager
-
-            {config._module.args = {inherit systemArgs self inputs;};}
-          ];
+              {config._module.args = {inherit systemArgs self inputs;};}
+            ]
+            ++ commonModules;
         });
       }
       // (import ./hosts/kubenix) {
         inherit inputs globalArgs self makeTheme;
-        modules = [
-          ./hosts
-          ./nixpkgs.nix
-          ./modules
-          inputs.comin.nixosModules.comin
-          inputs.disko.nixosModules.disko
-          inputs.nix-index-database.nixosModules.nix-index
-          inputs.home-manager.nixosModules.home-manager
-        ];
+        modules =
+          [
+            ./hosts/nixos.nix
+
+            inputs.comin.nixosModules.comin
+            inputs.disko.nixosModules.disko
+            inputs.nix-index-database.nixosModules.nix-index
+            inputs.home-manager.nixosModules.home-manager
+          ]
+          ++ commonModules;
       };
     darwinConfigurations = {
       nixbook = inputs.nix-darwin.lib.darwinSystem (let
@@ -241,16 +241,15 @@
       in {
         inherit (systemArgs) system;
         specialArgs = {inherit systemArgs self inputs;};
-        modules = [
-          ./modules/darwin/nixbook
+        modules =
+          [
+            ./hosts/darwin
+            ./hosts/darwin/nixbook
 
-          ./hosts
-          ./nixpkgs.nix
-          ./modules
-
-          inputs.home-manager.darwinModules.home-manager
-          {config._module.args = {inherit systemArgs self inputs;};}
-        ];
+            inputs.home-manager.darwinModules.home-manager
+            {config._module.args = {inherit systemArgs self inputs;};}
+          ]
+          ++ commonModules;
       });
     };
     packages.x86_64-linux = {
@@ -269,18 +268,17 @@
           };
       in {
         inherit (systemArgs) format system;
-        modules = [
-          ./bootstrap/local.nix
+        modules =
+          [
+            ./bootstrap/local.nix
+            ./hosts/nixos.nix
 
-          ./hosts
-          ./nixpkgs.nix
-          ./modules
+            inputs.home-manager.nixosModules.home-manager
+            inputs.nix-index-database.nixosModules.nix-index
 
-          inputs.home-manager.nixosModules.home-manager
-          inputs.nix-index-database.nixosModules.nix-index
-
-          {config._module.args = {inherit systemArgs self inputs;};}
-        ];
+            {config._module.args = {inherit systemArgs self inputs;};}
+          ]
+          + commonModules;
       });
       bootstrap_remote_arm64 = inputs.nixos-generators.nixosGenerate (let
         systemArgs =
@@ -297,17 +295,16 @@
           };
       in {
         inherit (systemArgs) format system;
-        modules = [
-          ./bootstrap/remote.nix
+        modules =
+          [
+            ./bootstrap/remote.nix
+            ./hosts/nixos.nix
 
-          ./hosts
-          ./nixpkgs.nix
-          ./modules
-
-          inputs.home-manager.nixosModules.home-manager
-          inputs.nix-index-database.nixosModules.nix-index
-          {config._module.args = {inherit systemArgs self inputs;};}
-        ];
+            inputs.home-manager.nixosModules.home-manager
+            inputs.nix-index-database.nixosModules.nix-index
+            {config._module.args = {inherit systemArgs self inputs;};}
+          ]
+          ++ commonModules;
       });
     };
   };
