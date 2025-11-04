@@ -44,6 +44,15 @@ in {
         ];
       };
       settings = {
+        tasks = {
+          image_alloc = 0;
+          image_bound = [20000 20000]; # roughly 200 Megapixel
+        };
+        preview = {
+          max_width = 1200;
+          max_height = 1200;
+          image_quality = 60;
+        };
         opener = {
           edit = [
             {
