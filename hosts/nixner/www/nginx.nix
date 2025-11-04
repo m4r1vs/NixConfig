@@ -64,7 +64,7 @@ in {
       virtualHosts."dns-admin.${cfg.domain}" = {
         forceSSL = true;
         useACMEHost = cfg.domain;
-        globalRedirect = "marius.niveri.de";
+        globalRedirect = "marius.niveri.dev";
       };
 
       virtualHosts."*.${cfg.domain}" = {

@@ -84,6 +84,6 @@
   };
 
   system = {
-    nixos.label = systemArgs.hostname + ".niveri.de";
+    nixos.label = systemArgs.hostname + ".niveri.dev";
   };
 }
