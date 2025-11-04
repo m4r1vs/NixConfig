@@ -66,6 +66,7 @@ in {
       enable = true;
       package = pkgs.tmux;
       keyMode = "vi";
+      shell = "${pkgs.zsh}/bin/zsh";
       shortcut = "Space";
       escapeTime = 0;
       baseIndex = 1;
@@ -83,6 +84,9 @@ in {
           set -g allow-passthrough all
           set -ga update-environment TERM
           set -ga update-environment TERM_PROGRAM
+
+          set -gu default-command
+          set -g default-shell "$SHELL"
 
           set-option -g set-titles on
           set-option -g set-titles-string "${mkTmuxWindowStatusFormat {

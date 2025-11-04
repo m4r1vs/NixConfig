@@ -18,7 +18,7 @@ return {
     workspaces = {
       {
         name = "personal",
-        path = "/home/mn/Documents/Marius' Remote Vault",
+        path = "~/Documents/Marius' Remote Vault",
       },
     },
     disable_frontmatter = true,

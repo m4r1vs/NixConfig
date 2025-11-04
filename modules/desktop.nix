@@ -16,7 +16,7 @@ in {
       description = "Use x11 instead of Wayland";
     };
   };
-  config = mkIf cfg.enable {
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable {
     environment.pathsToLink = ["/share/xdg-desktop-portal" "/share/applications"];
 
     configured = {
@@ -211,5 +211,5 @@ in {
         quickemu
       ];
     };
-  };
+  });
 }

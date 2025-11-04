@@ -8,6 +8,7 @@
 }: let
   isWayland = !config.configured.desktop.x11;
   isDesktop = config.configured.desktop.enable;
+  isDarwin = config.configured.darwin.enable;
   pkgsUnstable = import inputs.nixpkgs_unstable {
     system = systemArgs.system;
     config.allowUnfree = true;
@@ -20,10 +21,43 @@ in {
       From unstable Nixpkgs
       */
       (final: prev: {
-        ghostty = pkgsUnstable.ghostty;
+        ghostty =
+          if isDarwin
+          then pkgsUnstable.ghostty-bin
+          else pkgsUnstable.ghostty;
+      })
+      (final: prev: {
+        aerospace = pkgsUnstable.aerospace;
       })
       (final: prev: {
         yazi = pkgsUnstable.yazi;
+      })
+      (final: prev: {
+        aerospace-swipe = with pkgsUnstable;
+          stdenvNoCC.mkDerivation {
+            pname = "aerospace-swipe";
+            version = "0.1.0";
+            buildInputs = [clang_19 darwin.sigtool];
+            src = fetchFromGitHub {
+              owner = "acsandmann";
+              repo = "aerospace-swipe";
+              rev = "fc1bdcbcd27c37b7765ba88161bb40bddd627b12";
+              hash = "sha256-Qfj6+qZ/SQND+LMOSdUiYGDXFxU6+xmXxkYerxsdkcE=";
+            };
+            patchPhase = ''
+              runHook prePatch
+              sed -i "s/kIOMainPortDefault/kIOMasterPortDefault/g" src/haptic.c
+              sed -i 's|--sign - $(APP_BUNDLE)|-f --sign - $(APP_MACOS)/$(BINARY_NAME)|' Makefile
+              runHook postPatch
+            '';
+            buildPhase = ''
+              make bundle
+            '';
+            installPhase = ''
+              mkdir -p $out/Applications
+              cp -r AerospaceSwipe.app $out/Applications/
+            '';
+          };
       })
       /*
       Temporary Fixes / Updates

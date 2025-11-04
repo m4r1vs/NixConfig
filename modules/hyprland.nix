@@ -11,7 +11,7 @@ in {
   options.configured.hyprland = {
     enable = mkEnableOption "Enable hyprland tiling window manager as desktop environment";
   };
-  config = mkIf cfg.enable {
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable {
     environment = {
       systemPackages = with pkgs; [
         wl-clipboard
@@ -48,5 +48,5 @@ in {
         };
       };
     };
-  };
+  });
 }

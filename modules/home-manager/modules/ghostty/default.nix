@@ -3,10 +3,12 @@
   config,
   systemArgs,
   pkgs,
+  osConfig,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.ghostty;
+  isDarwin = osConfig.configured.darwin.enable;
   theme = systemArgs.theme;
 in {
   options.programs.configured.ghostty = {
@@ -20,50 +22,44 @@ in {
       enableZshIntegration = true;
       settings = {
         theme = "dark:cyberdream-dark,light:cyberdream-light";
-        window-padding-x = 4;
-        window-padding-y = 4;
+        window-padding-x = 6;
+        window-padding-y = 6;
         gtk-titlebar = false;
-        font-size = 10;
-        font-family = [
+        font-size =
+          if isDarwin
+          then 13
+          else 10;
+        font-family = mkIf isDarwin [
           "JetBrainsMono Nerd Font Propo"
           "Apple Color Emoji"
         ];
         confirm-close-surface = false;
         resize-overlay = "never";
-        window-decoration = false;
+        window-decoration =
+          if isDarwin
+          then "auto"
+          else false;
+        macos-titlebar-style = mkIf isDarwin "hidden";
         window-padding-balance = true;
+        background-blur = isDarwin;
         link-url = true;
-        custom-shader = builtins.toString ./ripple-shader.glsl;
-        keybind = [
-          "ctrl+i=csi:6~"
-          "ctrl+minus=decrease_font_size:1"
-          "ctrl+equal=increase_font_size:1"
-          "ctrl+plus=increase_font_size:1"
-          "ctrl+shift+v=paste_from_clipboard"
-          "ctrl+shift+c=copy_to_clipboard"
-          "ctrl+shift+i=inspector:toggle"
-          "ctrl+zero=reset_font_size"
-          "shift+insert=paste_from_selection"
-          # "alt+v=new_split:right"
-          # "alt+s=new_split:down"
-          # "ctrl+h=goto_split:left"
-          # "ctrl+l=goto_split:right"
-          # "ctrl+k=goto_split:up"
-          # "ctrl+j=goto_split:down"
-          # "alt+f=toggle_split_zoom"
-          # "alt+n=new_tab"
-          # "alt+l=next_tab"
-          # "alt+h=previous_tab"
-          # "alt+z=toggle_tab_overview"
-          # "alt+shift+h=resize_split:left,5"
-          # "alt+shift+l=resize_split:right,5"
-          # "alt+shift+k=resize_split:up,5"
-          # "alt+shift+j=resize_split:down,5"
-          # "alt+x=close_surface"
-          # "alt+shift+y=write_scrollback_file:open"
-          # "alt+e=scroll_page_down"
-          # "alt+y=scroll_page_up"
-        ];
+        keybind =
+          [
+            "ctrl+i=csi:6~"
+            "ctrl+minus=decrease_font_size:1"
+            "ctrl+equal=increase_font_size:1"
+            "ctrl+plus=increase_font_size:1"
+            "ctrl+shift+v=paste_from_clipboard"
+            "ctrl+shift+c=copy_to_clipboard"
+            "ctrl+shift+i=inspector:toggle"
+            "ctrl+zero=reset_font_size"
+            "shift+insert=paste_from_selection"
+          ]
+          ++ optionals isDarwin [
+            "super+c=copy_to_clipboard"
+            "super+v=paste_from_clipboard"
+            "super+q=quit"
+          ];
       };
       themes = {
         cyberdream-dark = {
@@ -116,7 +112,7 @@ in {
           cursor-color = "#100f0f";
           selection-background = "#cecdc3";
           selection-foreground = "#100f0f";
-          background-opacity = 1;
+          background-opacity = 0.94;
         };
       };
     };

@@ -5,7 +5,8 @@
   ...
 }: let
   isDesktop = osConfig.configured.desktop.enable;
-  isWindows = osConfig ? wsl && osConfig.wsl.enable;
+  isWSL = osConfig ? wsl && osConfig.wsl.enable;
+  isDarwin = osConfig.configured.darwin.enable;
 in {
   imports = [
     ./modules
@@ -14,14 +15,10 @@ in {
 
   home = {
     username = systemArgs.username;
-    homeDirectory = "/home/${systemArgs.username}";
-    sessionVariables =
-      if isDesktop
-      then {
-        ELECTRON_OZONE_PLATFORM_HINT = "auto";
-        NIXOS_OZONE_WL = "1";
-      }
-      else {};
+    sessionVariables = lib.mkIf isDesktop {
+      ELECTRON_OZONE_PLATFORM_HINT = "auto";
+      NIXOS_OZONE_WL = "1";
+    };
     stateVersion = "24.05";
   };
 
@@ -50,14 +47,14 @@ in {
       brave.enable = isDesktop;
       direnv.enable = true;
       fzf.enable = true;
-      ghostty.enable = isDesktop || isWindows;
+      ghostty.enable = isDesktop || isWSL || isDarwin;
       git.enable = true;
       lazygit.enable = true;
       mpv.enable = true;
       neovim.enable = true;
       newsboat.enable = true;
       rofi.enable = isDesktop;
-      spotify-player.enable = isDesktop || isWindows;
+      spotify-player.enable = isDesktop || isWSL || isDarwin;
       ssh.enable = true;
       swappy.enable = isDesktop;
       tmux.enable = true;
@@ -76,6 +73,8 @@ in {
     gtk.enable = isDesktop;
     qt.enable = isDesktop;
     xdg.enable = isDesktop;
+    hushlogin.enable = isDarwin;
+    raycast-scripts.enable = isDarwin;
   };
 
   fonts.fontconfig.enable = isDesktop;

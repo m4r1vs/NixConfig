@@ -6,7 +6,8 @@
 }: let
   isDesktop = osConfig.configured.desktop.enable;
   isWayland = !osConfig.configured.desktop.x11;
-  isWindows = osConfig ? wsl && osConfig.wsl.enable;
+  isDarwin = osConfig.configured.darwin.enable;
+  isGraphical = isDarwin || isDesktop;
 in {
   home.packages = with pkgs;
     [
@@ -16,13 +17,18 @@ in {
       w3m-full
       xdg-utils
       yt-dlp
-    ]
-    ++ lib.optionals (isDesktop || isWindows) [
       pkgs.gemini-cli-bin
+    ]
+    ++ lib.optionals isDarwin [
+      podman
+    ]
+    ++ lib.optionals isGraphical [
+      obsidian
+      blender
+      zathura
     ]
     ++ lib.optionals isDesktop ([
         amberol
-        blender
         dbeaver-bin
         diebahn
         discord
@@ -37,14 +43,12 @@ in {
         libnotify
         nautilus
         networkmanagerapplet
-        obsidian
         pavucontrol
         polkit_gnome
         scripts.artkube
         spotify
         stockfish
         wireplumber
-        zathura
       ]
       ++ (
         if isWayland

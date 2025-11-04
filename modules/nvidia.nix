@@ -10,7 +10,7 @@ in {
   options.configured.nvidia = {
     enable = mkEnableOption "Enable NVidia Driver";
   };
-  config = mkIf cfg.enable {
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable {
     services = mkIf isDesktop {
       xserver.videoDrivers = ["nvidia"];
     };
@@ -26,5 +26,5 @@ in {
         nvidiaSettings = isDesktop;
       };
     };
-  };
+  });
 }

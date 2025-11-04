@@ -11,7 +11,7 @@ in {
   options.configured.razer = {
     enable = mkEnableOption "Enable OpenRazer Drivers";
   };
-  config = mkIf cfg.enable {
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable {
     users.users.${systemArgs.username}.extraGroups = [
       "openrazer"
     ];
@@ -19,5 +19,5 @@ in {
       openrazer-daemon
     ];
     hardware.openrazer.enable = true;
-  };
+  });
 }

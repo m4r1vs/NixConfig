@@ -15,7 +15,7 @@ in {
       description = "The domain to serve the cache on";
     };
   };
-  config = mkIf cfg.enable {
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable {
     assertions = [
       {
         assertion = config.services.nginx.enable;
@@ -67,5 +67,5 @@ in {
         locations."/".proxyPass = "http://${config.services.nix-serve.bindAddress}:${toString config.services.nix-serve.port}";
       };
     };
-  };
+  });
 }

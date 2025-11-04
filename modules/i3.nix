@@ -11,7 +11,7 @@ in {
   options.configured.i3 = {
     enable = mkEnableOption "Enable i3 tiling window manager as desktop environment";
   };
-  config = mkIf cfg.enable {
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable {
     environment = {
       pathsToLink = ["/libexec"];
       systemPackages = with pkgs; [
@@ -72,5 +72,5 @@ in {
         };
       };
     };
-  };
+  });
 }

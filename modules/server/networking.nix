@@ -31,7 +31,7 @@ in {
       description = "network interface to use";
     };
   };
-  config = mkIf cfg.enable {
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable {
     networking = {
       inherit domain;
       dhcpcd.enable = lib.mkForce false;
@@ -75,5 +75,5 @@ in {
         };
       };
     };
-  };
+  });
 }

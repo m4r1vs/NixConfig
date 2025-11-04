@@ -24,7 +24,7 @@
       };
     };
   };
-  config = lib.mkIf config.services.thinkmorse.enable (
+  config = lib.optionalAttrs (lib.options ? boot) (lib.mkIf config.services.thinkmorse.enable (
     let
       ditDelay = config.services.thinkmorse.speed;
       thinkmorse = pkgs.writeShellScriptBin "thinkmorse" ''
@@ -118,5 +118,5 @@
         };
       };
     }
-  );
+  ));
 }

@@ -28,7 +28,7 @@ in {
   options.configured.server.terminfo = {
     enable = mkEnableOption "Use all terminal capabilities on a remote machine.";
   };
-  config = mkIf cfg.enable {
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable {
     environment.variables.TERMINFO_DIRS = "${ghosttyTerminfo}/share/terminfo" + ":${pkgs.ncurses}/share/terminfo";
-  };
+  });
 }

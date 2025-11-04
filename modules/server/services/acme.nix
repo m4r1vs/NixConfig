@@ -30,7 +30,7 @@ in {
       description = "Get a wildcard certificate for the domain provided using BIND local DNS.";
     };
   };
-  config = mkIf cfg.enable (lib.mkMerge [
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable (lib.mkMerge [
     {
       assertions = [
         {
@@ -118,5 +118,5 @@ in {
         '';
       };
     })
-  ]);
+  ]));
 }

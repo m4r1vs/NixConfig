@@ -10,7 +10,7 @@ in {
   options.configured.fonts = {
     enable = mkEnableOption "Enable fonts.";
   };
-  config = mkIf cfg.enable {
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable {
     fonts = {
       enableDefaultPackages = true;
 
@@ -59,5 +59,5 @@ in {
       ];
       fontDir.enable = true;
     };
-  };
+  });
 }

@@ -1,12 +1,14 @@
 {
   lib,
   config,
+  osConfig,
   pkgs,
   systemArgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.zsh;
+  isDarwin = osConfig.configured.darwin.enable;
 in {
   options.programs.configured.zsh = {
     enable = mkEnableOption "Z-Shell";
@@ -34,8 +36,12 @@ in {
       };
       shellAliases = {
         lg = "${pkgs.lazygit}/bin/lazygit";
-        rebuild = "sudo nixos-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}";
-        upgrade = "nix flake update --flake ~/NixConfig && sudo nixos-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}";
+        rebuild =
+          if isDarwin
+          then "sudo darwin-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}"
+          else "sudo nixos-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}";
+        vi = "nvim";
+        vim = "nvim";
       };
       initContent = import ./init.nix pkgs;
       plugins = [

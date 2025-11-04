@@ -19,7 +19,7 @@ in {
       description = "BIND DNS Config";
     };
   };
-  config = mkIf cfg.enable {
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable {
     system.activationScripts.bind-zones.text = ''
       mkdir -p /etc/bind/zones
       chown named:named /etc/bind/zones
@@ -38,5 +38,5 @@ in {
         master = true;
       };
     };
-  };
+  });
 }

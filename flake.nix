@@ -9,6 +9,8 @@
       url = "github:nix-community/NixOS-WSL/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     comin = {
       # GitOps
       url = "github:m4r1vs/comin";
@@ -224,6 +226,33 @@
           inputs.home-manager.nixosModules.home-manager
         ];
       };
+    darwinConfigurations = {
+      nixbook = inputs.nix-darwin.lib.darwinSystem (let
+        systemArgs =
+          globalArgs
+          // {
+            system = "aarch64-darwin";
+            theme = makeTheme {
+              primary = "green";
+              secondary = "orange";
+            };
+            hostname = "nixbook";
+          };
+      in {
+        inherit (systemArgs) system;
+        specialArgs = {inherit systemArgs self inputs;};
+        modules = [
+          ./modules/darwin/nixbook
+
+          ./hosts
+          ./nixpkgs.nix
+          ./modules
+
+          inputs.home-manager.darwinModules.home-manager
+          {config._module.args = {inherit systemArgs self inputs;};}
+        ];
+      });
+    };
     packages.x86_64-linux = {
       bootstrap_local_x86_64 = inputs.nixos-generators.nixosGenerate (let
         systemArgs =
@@ -277,7 +306,6 @@
 
           inputs.home-manager.nixosModules.home-manager
           inputs.nix-index-database.nixosModules.nix-index
-
           {config._module.args = {inherit systemArgs self inputs;};}
         ];
       });

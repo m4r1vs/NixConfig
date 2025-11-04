@@ -15,7 +15,7 @@ in {
     enable = mkEnableOption "Enable SSH and other stuff that should be available on a remote Server.";
   };
 
-  config = mkIf cfg.enable {
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable {
     configured.server = {
       terminfo.enable = true;
     };
@@ -35,5 +35,5 @@ in {
         allowedTCPPorts = config.services.openssh.ports;
       };
     };
-  };
+  });
 }

@@ -16,7 +16,7 @@ in {
       description = "Automatically log in with the default user";
     };
   };
-  config = mkIf cfg.enable {
+  config = optionalAttrs (options ? boot) (mkIf cfg.enable {
     services.kmscon = {
       enable = true;
       fonts = [
@@ -28,5 +28,5 @@ in {
       autologinUser = mkIf cfg.autologin "${systemArgs.username}";
       extraOptions = "--term xterm-256color";
     };
-  };
+  });
 }

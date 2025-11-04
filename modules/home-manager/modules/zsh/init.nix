@@ -15,7 +15,4 @@ pkgs:
   bindkey -M 'viins' '^Z' zoxide_jump
 
   export NIXPKGS_ALLOW_UNFREE=1
-  export AVANTE_GEMINI_API_KEY=$(secret-tool lookup google_gemini password)
-  export AVANTE_OPENAI_API_KEY=$(secret-tool lookup openai password)
-  export TAVILY_API_KEY=$(secret-tool lookup tavily password)
 ''
