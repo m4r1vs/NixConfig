@@ -22,6 +22,9 @@ in {
       (final: prev: {
         ghostty = pkgsUnstable.ghostty;
       })
+      (final: prev: {
+        yazi = pkgsUnstable.yazi;
+      })
       /*
       Temporary Fixes / Updates
       */
