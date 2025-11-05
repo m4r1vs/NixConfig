@@ -24,13 +24,13 @@ in {
       podman
     ]
     ++ lib.optionals isGraphical [
-      obsidian
       blender
+      dbeaver-bin
+      obsidian
       zathura
     ]
     ++ lib.optionals isDesktop ([
         amberol
-        dbeaver-bin
         diebahn
         discord
         gimp-with-plugins
