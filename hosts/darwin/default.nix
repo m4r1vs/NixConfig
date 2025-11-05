@@ -76,10 +76,10 @@ in {
     services = {
       configured = {
         aerospace = {
-          enable = true;
-          enableAerospaceSwipe = true;
+          enable = false;
+          enableAerospaceSwipe = false;
         };
-        hammerspoon.enable = true;
+        hammerspoon.enable = false;
       };
     };
 
