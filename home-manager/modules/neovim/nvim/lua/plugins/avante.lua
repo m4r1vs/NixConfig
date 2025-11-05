@@ -1,11 +1,47 @@
+local function loadAPIKeysAndRunVimCMD(cmd)
+  local function set_env_from_op(env_var, op_path)
+    if vim.env[env_var] and vim.env[env_var] ~= "" then return end
+    local handle = io.popen(string.format('op read "%s"', op_path))
+    if handle then
+      local key = handle:read("*a")
+      handle:close()
+      if key then
+        vim.env[env_var] = key:gsub("%s+$", "")
+      end
+    end
+  end
+  set_env_from_op("AVANTE_OPENAI_API_KEY", "op://Private/OpenAI/credential")
+  set_env_from_op("AVANTE_GEMINI_API_KEY", "op://Private/Gemini/credential")
+  set_env_from_op("TAVILY_API_KEY", "op://Private/Tavily/credential")
+  vim.cmd(cmd)
+end
+
 return {
   "yetone/avante.nvim",
   version = false,
   event = "VeryLazy",
   keys = {
-    { "<leader>aa", "<cmd>AvanteToggle<cr>", mode = "n" },
-    { "<leader>aa", "<cmd>AvanteAsk<cr>",    mode = "v" },
-    { "<leader>ae", "<cmd>AvanteEdit<cr>",   mode = "v" },
+    {
+      "<leader>aa",
+      function()
+        loadAPIKeysAndRunVimCMD("AvanteToggle")
+      end,
+      mode = "n"
+    },
+    {
+      "<leader>aa",
+      function()
+        loadAPIKeysAndRunVimCMD("AvanteAsk")
+      end,
+      mode = "v"
+    },
+    {
+      "<leader>ae",
+      function()
+        loadAPIKeysAndRunVimCMD("AvanteEdit")
+      end,
+      mode = "v"
+    },
   },
   opts = {
     selection = {
