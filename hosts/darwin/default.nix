@@ -31,15 +31,15 @@ in {
       enable = true;
       caskArgs.no_quarantine = true;
       casks = [
-        "steam"
+        "blender"
+        "discord"
+        "gimp"
+        "hammerspoon"
         "mediamate"
         "raycast"
         "spotify"
+        "steam"
         "whatsapp"
-        "blender"
-        "gimp"
-        "discord"
-        "hammerspoon"
       ];
     };
 
