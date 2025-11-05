@@ -58,7 +58,7 @@ in {
         LaunchServices.LSQuarantine = false;
         dock = {
           autohide = true;
-          autohide-delay = 0.0;
+          autohide-delay = 2.0;
           static-only = false;
         };
         finder = {
