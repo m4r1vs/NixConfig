@@ -22,7 +22,6 @@ in {
     configured = {
       i3.enable = cfg.x11;
       hyprland.enable = !cfg.x11;
-      fonts.enable = true;
     };
 
     networking.extraHosts = ''

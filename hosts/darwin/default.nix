@@ -82,12 +82,6 @@ in {
       };
     };
 
-    fonts.packages = with pkgs; [
-      nerd-fonts.jetbrains-mono
-      ubuntu_font_family
-      eb-garamond
-    ];
-
     /*
     Enable auth for sudo using TouchID (also inside TMUX by reattaching)
     */
