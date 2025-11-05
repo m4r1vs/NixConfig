@@ -36,7 +36,9 @@ in {
         cleanup = "zap";
       };
       casks = [
+        "1password"
         "blender"
+        "brave-browser"
         "discord"
         "gimp"
         "mediamate"
