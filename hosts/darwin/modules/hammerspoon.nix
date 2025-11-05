@@ -28,7 +28,6 @@ in {
 
         hs.hotkey.bind(mash, triggerKey,
           function()
-            print("test2")
             if dragging then return end
             dragging = true
             local pos = hs.mouse.absolutePosition()
