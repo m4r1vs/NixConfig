@@ -107,5 +107,18 @@ in {
         };
       };
     };
+
+    home-manager.users.${systemArgs.username}.home.file.".hammerspoon/init.lua".text =
+      mkIf cfg.enableAerospaceSwipe
+      #json
+      ''
+        {
+          "haptic": true,
+          "natural_swipe": true,
+          "wrap_around": true,
+          "skip_empty": true,
+          "fingers": 4
+        }
+      '';
   };
 }
