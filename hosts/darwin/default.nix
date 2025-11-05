@@ -36,6 +36,7 @@ in {
         "gimp"
         "hammerspoon"
         "mediamate"
+        "minecraft"
         "raycast"
         "spotify"
         "steam"
