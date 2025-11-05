@@ -202,6 +202,35 @@ in {
             ];
           };
         })
+      (final: prev:
+        with prev; {
+          clippy-darwin = pkgsUnstable.buildGoModule {
+            pname = "clippy-darwin";
+            version = "1.6.1";
+
+            src = fetchFromGitHub {
+              owner = "neilberkman";
+              repo = "clippy";
+              rev = "dd94573da7ab30a7277834e53aeb04cb2b6f7f56";
+              hash = "sha256-81bV+C+3Z7S1ymudZ+4TH6D5IItfvxCo2Hh+dippbic=";
+            };
+
+            vendorHash = "sha256-9za2KDUB4txYhJo0ezbLk6h8g6EYnxJhWWjzes+5IIg=";
+
+            buildPhase = ''
+              runHook preBuild
+              go build -o clippy ./cmd/clippy
+              runHook postBuild
+            '';
+
+            installPhase = ''
+              runHook preInstall
+              mkdir -p $out/bin
+              mv ./clippy $out/bin/clippy
+              runHook postInstall
+            '';
+          };
+        })
       /*
       Mods to packages
       */

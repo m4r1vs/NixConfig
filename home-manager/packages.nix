@@ -22,6 +22,8 @@ in {
     ]
     ++ lib.optionals isDarwin [
       podman
+      comma
+      clippy-darwin
     ]
     ++ lib.optionals isGraphical [
       blender

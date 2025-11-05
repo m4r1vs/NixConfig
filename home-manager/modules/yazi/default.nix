@@ -2,10 +2,14 @@
   lib,
   config,
   pkgs,
+  osConfig,
+  systemArgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.yazi;
+  isDesktop = osConfig.configured ? desktop && osConfig.configured.desktop.enable;
+  isDarwin = systemArgs.system == "aarch64-darwin";
 in {
   options.programs.configured.yazi = {
     enable = mkEnableOption "Terminal File Manager";
@@ -16,32 +20,57 @@ in {
       shellWrapperName = "y";
       enableZshIntegration = true;
       keymap = {
-        mgr.prepend_keymap = [
-          {
-            run = ''shell 'printf "Mode Bits: "; read ans; chmod $ans "$@"' --block --confirm'';
-            on = "=";
-            desc = "chmod";
-          }
-          {
-            run = "escape";
-            on = ["<Esc>"];
-          }
-          {
-            on = "l";
-            run = "plugin smart-enter";
-            desc = "Enter the child directory, or open the file";
-          }
-          {
-            on = "T";
-            run = "plugin toggle-pane max-preview";
-            desc = "Maximize or restore the preview pane";
-          }
-          {
-            on = "f";
-            run = "plugin jump-to-char";
-            desc = "Jump to char";
-          }
-        ];
+        mgr.prepend_keymap =
+          [
+            {
+              run = ''shell 'printf "Mode Bits: "; read ans; chmod $ans "$@"' --block --confirm'';
+              on = "=";
+              desc = "chmod";
+            }
+            {
+              run = "escape";
+              on = ["<Esc>"];
+            }
+            {
+              on = "l";
+              run = "plugin smart-enter";
+              desc = "Enter the child directory, or open the file";
+            }
+            {
+              on = "T";
+              run = "plugin toggle-pane max-preview";
+              desc = "Maximize or restore the preview pane";
+            }
+            {
+              on = "f";
+              run = "plugin jump-to-char";
+              desc = "Jump to char";
+            }
+            {
+              on = "<C-z>";
+              run = "plugin zoxide";
+              desc = "Open Zoxide";
+            }
+          ]
+          ++ (optionals isDesktop [
+            {
+              on = "p";
+              run = "plugin ucp paste";
+              desc = "Paste";
+            }
+            {
+              on = "y";
+              run = "plugin ucp copy";
+              desc = "Copy";
+            }
+          ])
+          ++ (optionals isDarwin [
+            {
+              on = "Y";
+              run = ["plugin clippy"];
+              desc = "Copy";
+            }
+          ]);
       };
       settings = {
         tasks = {
@@ -134,68 +163,103 @@ in {
           separator_close = "";
         };
       };
-      plugins = {
-        git = pkgs.stdenv.mkDerivation {
-          name = "yazi-git-plugin";
-          src = pkgs.fetchFromGitHub {
-            owner = "yazi-rs";
-            repo = "plugins";
-            sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
-            rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
+      plugins =
+        {
+          git = pkgs.stdenv.mkDerivation {
+            name = "yazi-git-plugin";
+            src = pkgs.fetchFromGitHub {
+              owner = "yazi-rs";
+              repo = "plugins";
+              sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
+              rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
+            };
+            installPhase = ''
+              runHook preInstall
+              mkdir $out
+              mv git.yazi/*.lua $out/
+              runHook postInstall
+            '';
           };
-          installPhase = ''
-            runHook preInstall
-            mkdir $out
-            mv git.yazi/*.lua $out/
-            runHook postInstall
-          '';
-        };
-        jump-to-char = pkgs.stdenv.mkDerivation {
-          name = "yazi-jump-to-char-plugin";
-          src = pkgs.fetchFromGitHub {
-            owner = "yazi-rs";
-            repo = "plugins";
-            sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
-            rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
+          jump-to-char = pkgs.stdenv.mkDerivation {
+            name = "yazi-jump-to-char-plugin";
+            src = pkgs.fetchFromGitHub {
+              owner = "yazi-rs";
+              repo = "plugins";
+              sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
+              rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
+            };
+            installPhase = ''
+              runHook preInstall
+              mkdir $out
+              mv jump-to-char.yazi/*.lua $out/
+              runHook postInstall
+            '';
           };
-          installPhase = ''
-            runHook preInstall
-            mkdir $out
-            mv jump-to-char.yazi/*.lua $out/
-            runHook postInstall
-          '';
-        };
-        smart-enter = pkgs.stdenv.mkDerivation {
-          name = "yazi-smart-enter-plugin";
-          src = pkgs.fetchFromGitHub {
-            owner = "yazi-rs";
-            repo = "plugins";
-            sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
-            rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
+          smart-enter = pkgs.stdenv.mkDerivation {
+            name = "yazi-smart-enter-plugin";
+            src = pkgs.fetchFromGitHub {
+              owner = "yazi-rs";
+              repo = "plugins";
+              sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
+              rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
+            };
+            installPhase = ''
+              runHook preInstall
+              mkdir $out
+              mv smart-enter.yazi/*.lua $out/
+              runHook postInstall
+            '';
           };
-          installPhase = ''
-            runHook preInstall
-            mkdir $out
-            mv smart-enter.yazi/*.lua $out/
-            runHook postInstall
-          '';
-        };
-        toggle-pane = pkgs.stdenv.mkDerivation {
-          name = "yazi-toggle-pane-plugin";
-          src = pkgs.fetchFromGitHub {
-            owner = "yazi-rs";
-            repo = "plugins";
-            sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
-            rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
+          toggle-pane = pkgs.stdenv.mkDerivation {
+            name = "yazi-toggle-pane-plugin";
+            src = pkgs.fetchFromGitHub {
+              owner = "yazi-rs";
+              repo = "plugins";
+              sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
+              rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
+            };
+            installPhase = ''
+              runHook preInstall
+              mkdir $out
+              mv toggle-pane.yazi/*.lua $out/
+              runHook postInstall
+            '';
           };
-          installPhase = ''
-            runHook preInstall
-            mkdir $out
-            mv toggle-pane.yazi/*.lua $out/
-            runHook postInstall
-          '';
-        };
-      };
+        }
+        // (optionalAttrs isDesktop {
+          ucp = pkgs.stdenv.mkDerivation {
+            name = "yazi-ucp-plugin";
+            src = pkgs.fetchFromGitHub {
+              owner = "simla33";
+              repo = "ucp.yazi";
+              sha256 = "sha256-eSc3I2I4PZLVy7X/4SK5YjEOCx0/WoZAV/hzs0La0nU=";
+              rev = "58fbaa512f52b7e26e5a54dc68b435b11140ced9";
+            };
+            installPhase = ''
+              runHook preInstall
+              mkdir $out
+              mv main.lua $out/
+              runHook postInstall
+            '';
+          };
+        })
+        // (optionalAttrs isDarwin {
+          clippy = pkgs.stdenv.mkDerivation {
+            name = "yazi-clippy-plugin";
+            src = pkgs.fetchFromGitHub {
+              owner = "gallardo994";
+              repo = "clippy.yazi";
+              sha256 = "sha256-oB9DkNWvUDbSAPnxtv56frlWWYz5vtu2BJVvWH/Uags=";
+              rev = "8ce55413976ebd1922dbc4fc27ced9776823df54";
+            };
+            installPhase = ''
+              runHook preInstall
+              mkdir $out
+              mv main.lua $out/
+              runHook postInstall
+            '';
+          };
+        });
     };
   };
 }
