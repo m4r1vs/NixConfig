@@ -106,8 +106,8 @@ in {
       bootstrapAddons =
         (resourceFromYAML {
           path = builtins.fetchurl {
-            url = "https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml";
-            sha256 = "sha256:1z4fgq9w29xlr3h84a9cg0yy5i6njrvq2z7vsah5laqr7cdqbq9r";
+            url = "https://raw.githubusercontent.com/argoproj/argo-cd/v3.2.0/manifests/install.yaml";
+            sha256 = "sha256:191q5rxlamfm7hh7b9604l3pzhavhx200v5vj95rm130yw7rlaai";
           };
           ns = "argocd";
         })
