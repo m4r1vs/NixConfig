@@ -25,15 +25,16 @@ in {
           window_opacity = "on";
           active_window_opacity = 1.0;
           normal_window_opacity = 0.96;
-          # top_padding = 8;
-          bottom_padding = 8;
-          left_padding = 8;
-          right_padding = 8;
-          window_gap = 8;
+          top_padding = 6;
+          bottom_padding = 6;
+          left_padding = 6;
+          right_padding = 6;
+          window_gap = 6;
           window_animation_duration = 0.15;
         };
         extraConfig = ''
           yabai -m rule --add app="^Riot Client$" manage=off
+          yabai -m rule --add app="^System Settings$" manage=off
           yabai -m rule --add app="^League of Legends$" manage=off
           yabai -m rule --add app="^Raycast$" manage=off
 
@@ -46,6 +47,11 @@ in {
           yabai -m space 7 --label six
           yabai -m space 8 --label six
           yabai -m space 9 --label nine
+
+          while true; do
+            yabai -m config focus_follows_mouse autoraise
+            sleep 20
+          done
         '';
         enableScriptingAddition = true;
       };
