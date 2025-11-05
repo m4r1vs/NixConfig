@@ -42,7 +42,7 @@ in {
             src = fetchFromGitHub {
               owner = "acsandmann";
               repo = "aerospace-swipe";
-              rev = "fc1bdcbcd27c37b7765ba88161bb40bddd627b12";
+              rev = "fc1bdcbcd27c3x7b7765ba88161bb40bddd627b12";
               hash = "sha256-Qfj6+qZ/SQND+LMOSdUiYGDXFxU6+xmXxkYerxsdkcE=";
             };
             patchPhase = ''
