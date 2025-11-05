@@ -31,6 +31,12 @@ in {
         aerospace = pkgsUnstable.aerospace;
       })
       (final: prev: {
+        yabai = pkgsUnstable.yabai;
+      })
+      (final: prev: {
+        skhd = pkgsUnstable.skhd;
+      })
+      (final: prev: {
         yazi = pkgsUnstable.yazi;
       })
       (final: prev: {

@@ -34,7 +34,6 @@ in {
         "blender"
         "discord"
         "gimp"
-        "hammerspoon"
         "mediamate"
         "minecraft"
         "raycast"
@@ -80,6 +79,7 @@ in {
           enableAerospaceSwipe = false;
         };
         hammerspoon.enable = false;
+        yabai.enable = true;
       };
     };
 
