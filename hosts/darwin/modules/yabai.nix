@@ -30,11 +30,12 @@ in {
           left_padding = 8;
           right_padding = 8;
           window_gap = 8;
-          window_animation_duration = 0.2;
+          window_animation_duration = 0.15;
         };
         extraConfig = ''
           yabai -m rule --add app="^Riot Client$" manage=off
           yabai -m rule --add app="^League of Legends$" manage=off
+          yabai -m rule --add app="^Raycast$" manage=off
 
           yabai -m space 1 --label one
           yabai -m space 2 --label two
