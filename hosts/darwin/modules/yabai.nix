@@ -2,6 +2,7 @@
   lib,
   config,
   pkgs,
+  systemArgs,
   ...
 }:
 with lib; let
@@ -25,34 +26,45 @@ in {
           window_opacity = "on";
           active_window_opacity = 1.0;
           normal_window_opacity = 0.96;
-          top_padding = 6;
+          top_padding = 4;
           bottom_padding = 6;
           left_padding = 6;
           right_padding = 6;
           window_gap = 6;
           window_animation_duration = 0.15;
         };
-        extraConfig = ''
-          yabai -m rule --add app="^Riot Client$" manage=off
-          yabai -m rule --add app="^System Settings$" manage=off
-          yabai -m rule --add app="^League of Legends$" manage=off
-          yabai -m rule --add app="^Raycast$" manage=off
+        extraConfig =
+          # bash
+          ''
+            yabai -m rule --add app="^Riot Client$" manage=off
+            yabai -m rule --add app="^System Settings$" manage=off
+            yabai -m rule --add app="^League of Legends$" manage=off
+            yabai -m rule --add app="^Raycast$" manage=off
 
-          yabai -m space 1 --label one
-          yabai -m space 2 --label two
-          yabai -m space 3 --label three
-          yabai -m space 4 --label four
-          yabai -m space 5 --label five
-          yabai -m space 6 --label six
-          yabai -m space 7 --label six
-          yabai -m space 8 --label six
-          yabai -m space 9 --label nine
+            yabai -m space 1 --label one
+            yabai -m space 2 --label two
+            yabai -m space 3 --label three
+            yabai -m space 4 --label four
+            yabai -m space 5 --label five
+            yabai -m space 6 --label six
+            yabai -m space 7 --label six
+            yabai -m space 8 --label six
+            yabai -m space 9 --label nine
 
-          while true; do
-            yabai -m config focus_follows_mouse autoraise
-            sleep 20
-          done
-        '';
+            TARGET_SPACES=9
+            CURRENT_SPACES=$(yabai -m query --spaces | jq 'length')
+            if [ "$CURRENT_SPACES" -lt "$TARGET_SPACES" ]; then
+              SPACES_TO_CREATE=$((TARGET_SPACES - CURRENT_SPACES))
+              for ((i=0; i<SPACES_TO_CREATE; i++)); do
+                yabai -m space --create
+              done
+            fi
+
+            while true; do
+              yabai -m config focus_follows_mouse autoraise
+              sleep 20
+            done
+          '';
         enableScriptingAddition = true;
       };
       skhd = {
@@ -84,6 +96,9 @@ in {
 
           cmd + lshift - n: yabai -m space --move next
 
+          f8: ${pkgs.scratchpad-rs}/bin/scratchpad --toggle spotify
+          cmd - e: ${pkgs.scratchpad-rs}/bin/scratchpad --toggle yazi
+
           cmd - 1 : yabai -m space --focus 1
           cmd - 2 : yabai -m space --focus 2
           cmd - 3 : yabai -m space --focus 3
@@ -106,5 +121,30 @@ in {
         '';
       };
     };
+
+    home-manager.users.${systemArgs.username}.home.file.".config/scratchpad/config.toml".text =
+      # toml
+      ''
+        scratchpad_space = 9
+        launch_timeout = 5
+
+        [[scratchpad]]
+        name = "spotify"
+        target_type = "title"
+        target = "spotify_scratchpad"
+        position = [288, 128]
+        size = [1240, 754]
+        launch_type = "app_with_arg"
+        launch_command = ["/Users/${systemArgs.username}/Applications/Home Manager Apps/Ghostty.app", "--title=spotify_scratchpad", "-e", "zsh", "-c", "${pkgs.spotify-player}/bin/spotify_player"]
+
+        [[scratchpad]]
+        name = "yazi"
+        target_type = "title"
+        target = "yazi_scratchpad"
+        position = [288, 128]
+        size = [1240, 754]
+        launch_type = "app_with_arg"
+        launch_command = ["/Users/${systemArgs.username}/Applications/Home Manager Apps/Ghostty.app", "--title=yazi_scratchpad", "-e", "zsh", "-c", "${pkgs.yazi}/bin/yazi"]
+      '';
   };
 }

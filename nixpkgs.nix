@@ -180,6 +180,28 @@ in {
               ];
           };
         })
+      (final: prev:
+        with prev; {
+          scratchpad-rs = rustPlatform.buildRustPackage {
+            pname = "scratchpad-rs";
+            version = "0.1.0";
+
+            src = fetchFromGitHub {
+              owner = "m4r1vs";
+              repo = "scratchpad-rs";
+              rev = "4422543baaa68ac76456b28252e4bd477a3c42c4";
+              hash = "sha256-IaEk5pXHxQKQRTB5m7Y8sEjd/ubvV2IoDLdC9VDzOZw=";
+            };
+
+            cargoHash = "sha256-nEDsB0nE0cNdC9uCLUHckk2A8kyzyaZw8Hd1xQcki+g=";
+
+            nativeBuildInputs = [
+              pkg-config
+              cmake
+              rustPlatform.bindgenHook
+            ];
+          };
+        })
       /*
       Mods to packages
       */
