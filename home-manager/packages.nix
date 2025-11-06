@@ -21,15 +21,16 @@ in {
       pkgs.gemini-cli-bin
     ]
     ++ lib.optionals isDarwin [
-      podman
-      comma
       clippy-darwin
+      comma
+      podman
       vscode
     ]
     ++ lib.optionals isGraphical [
       blender
       dbeaver-bin
       obsidian
+      prismlauncher
       zathura
     ]
     ++ lib.optionals isDesktop ([
