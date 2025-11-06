@@ -70,10 +70,10 @@ in {
         LaunchServices.LSQuarantine = false;
         dock = {
           autohide = true;
-          autohide-delay = 1.0;
+          autohide-delay = 0.0;
           static-only = false;
           expose-group-apps = false;
-          largesize = 56;
+          largesize = 46;
           launchanim = true;
           magnification = true;
           mineffect = "genie";
@@ -81,7 +81,7 @@ in {
           orientation = "bottom";
           minimize-to-application = true;
           show-recents = false;
-          tilesize = 42;
+          tilesize = 32;
         };
         trackpad = {
           Clicking = true;
