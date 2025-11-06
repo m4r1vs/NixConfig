@@ -71,6 +71,8 @@ in {
         package = pkgs.skhd;
         enable = true;
         skhdConfig = ''
+          cmd - return : ${pkgs.ghostty}/bin/ghostty
+
           cmd - q : yabai -m window --close
           cmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')
 
