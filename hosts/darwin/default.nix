@@ -42,6 +42,7 @@ in {
         "claude"
         "discord"
         "gimp"
+        "linearmouse"
         "mediamate"
         "minecraft"
         "raycast"
