@@ -121,6 +121,26 @@ in {
           cmd + shift - 7 : yabai -m window --space 7 && yabai -m space --focus 7
           cmd + shift - 8 : yabai -m window --space 8 && yabai -m space --focus 8
           cmd + shift - 9 : yabai -m window --space 9 && yabai -m space --focus 9
+
+          cmd + ctrl - 1 : yabai -m space --focus 10
+          cmd + ctrl - 2 : yabai -m space --focus 11
+          cmd + ctrl - 3 : yabai -m space --focus 12
+          cmd + ctrl - 4 : yabai -m space --focus 13
+          cmd + ctrl - 5 : yabai -m space --focus 14
+          cmd + ctrl - 6 : yabai -m space --focus 15
+          cmd + ctrl - 7 : yabai -m space --focus 16
+          cmd + ctrl - 8 : yabai -m space --focus 17
+          cmd + ctrl - 9 : yabai -m space --focus 18
+
+          cmd + ctrl + shift - 1 : yabai -m window --space 10 && yabai -m space --focus 10
+          cmd + ctrl + shift - 2 : yabai -m window --space 12 && yabai -m space --focus 11
+          cmd + ctrl + shift - 3 : yabai -m window --space 13 && yabai -m space --focus 12
+          cmd + ctrl + shift - 4 : yabai -m window --space 14 && yabai -m space --focus 13
+          cmd + ctrl + shift - 5 : yabai -m window --space 15 && yabai -m space --focus 14
+          cmd + ctrl + shift - 6 : yabai -m window --space 16 && yabai -m space --focus 15
+          cmd + ctrl + shift - 7 : yabai -m window --space 17 && yabai -m space --focus 16
+          cmd + ctrl + shift - 8 : yabai -m window --space 18 && yabai -m space --focus 17
+          cmd + ctrl + shift - 9 : yabai -m window --space 19 && yabai -m space --focus 18
         '';
       };
     };
