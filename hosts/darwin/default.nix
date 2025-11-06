@@ -39,6 +39,7 @@ in {
         "1password"
         "blender"
         "brave-browser"
+        "claude"
         "discord"
         "gimp"
         "mediamate"
@@ -48,6 +49,16 @@ in {
         "steam"
         "whatsapp"
       ];
+      masApps = {
+        PowerPoint = 462062816;
+        Word = 462054704;
+        Excel = 462058435;
+        Flighty = 1358823008;
+        DavinciResolve = 571213070;
+        Xcode = 497799835;
+        GarageBand = 682658836;
+        Radio = 6478023685;
+      };
     };
 
     system = {
@@ -58,15 +69,40 @@ in {
         LaunchServices.LSQuarantine = false;
         dock = {
           autohide = true;
-          autohide-delay = 2.0;
+          autohide-delay = 1.0;
           static-only = false;
+          expose-group-apps = false;
+          largesize = 56;
+          launchanim = true;
+          magnification = true;
+          mineffect = "genie";
+          mru-spaces = false;
+          orientation = "bottom";
+          minimize-to-application = true;
+          show-recents = false;
+          tilesize = 42;
+        };
+        trackpad = {
+          Clicking = true;
+          TrackpadRightClick = true;
+          FirstClickThreshold = 1;
+          SecondClickThreshold = 2;
         };
         finder = {
           CreateDesktop = false;
           AppleShowAllFiles = true;
         };
         SoftwareUpdate.AutomaticallyInstallMacOSUpdates = false;
+        controlcenter = {
+          AirDrop = false;
+          Bluetooth = true;
+          Display = false;
+          FocusModes = false;
+          NowPlaying = false;
+          Sound = true;
+        };
       };
+      startup.chime = false;
       keyboard = {
         enableKeyMapping = true;
         remapCapsLockToEscape = true;

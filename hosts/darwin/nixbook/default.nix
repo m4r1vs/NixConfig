@@ -10,12 +10,7 @@
     ];
   };
 
-  system = {
-    defaults = {
-      trackpad = {
-        Clicking = true;
-        TrackpadRightClick = true;
-      };
-    };
+  networking = {
+    computerName = "Marius' NixBook";
   };
 }
