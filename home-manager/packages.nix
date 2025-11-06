@@ -24,6 +24,7 @@ in {
       podman
       comma
       clippy-darwin
+      vscode
     ]
     ++ lib.optionals isGraphical [
       blender
