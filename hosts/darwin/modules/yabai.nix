@@ -76,6 +76,18 @@ in {
           cmd - q : yabai -m window --close
           cmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')
 
+          cmd - 0x2C : osascript -e 'set volume output volume ((output volume of (get volume settings)) - 5)'
+          cmd - 0x1E : osascript -e 'set volume output volume ((output volume of (get volume settings)) + 5)'
+
+          cmd + shift - 0x2C : skhd -k "f14" # brightness down
+          cmd + shift - 0x1E : skhd -k "f15" # brightness up
+
+          f1 : skhd -k "f14" # brightness down
+          f2 : skhd -k "f15" # brightness up
+
+          ctrl + cmd - h : skhd -k "ctrl + cmd - left"
+          ctrl + cmd - l : skhd -k "ctrl + cmd - right"
+
           cmd - h: yabai -m window --focus west || yabai -m display --focus west
           cmd - j: yabai -m window --focus south || yabai -m display --focus south
           cmd - k: yabai -m window --focus north || yabai -m display --focus north

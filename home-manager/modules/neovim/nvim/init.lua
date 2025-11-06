@@ -167,6 +167,9 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 vim.keymap.set("n", "<F2>", vim.cmd.cprevious)
 vim.keymap.set("n", "<F3>", vim.cmd.cnext)
 
+vim.keymap.set("n", "<F7>", vim.cmd.cprevious)
+vim.keymap.set("n", "<F9>", vim.cmd.cnext)
+
 -- Resize splits with Ctrl+Alt+h/j/k/l
 vim.keymap.set("n", "<C-M-h>", ":vertical resize -2<CR>", { noremap = true, silent = true })
 vim.keymap.set("n", "<C-M-l>", ":vertical resize +2<CR>", { noremap = true, silent = true })
