@@ -72,6 +72,7 @@ in {
         enable = true;
         skhdConfig = ''
           cmd - q : yabai -m window --close
+          cmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')
 
           cmd - h: yabai -m window --focus west || yabai -m display --focus west
           cmd - j: yabai -m window --focus south || yabai -m display --focus south
