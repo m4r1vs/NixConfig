@@ -102,6 +102,11 @@ in {
           NowPlaying = false;
           Sound = true;
         };
+        CustomUserPreferences = {
+          "com.apple.dock" = {
+            "workspaces-auto-swoosh" = true;
+          };
+        };
       };
       startup.chime = false;
       keyboard = {
