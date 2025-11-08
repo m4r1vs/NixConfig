@@ -82,8 +82,24 @@ in {
           cmd + shift - 0x2C : skhd -k "f14" # brightness down
           cmd + shift - 0x1E : skhd -k "f15" # brightness up
 
+          rcmd - a : skhd -k "left"
+          rcmd - w : skhd -k "up"
+          rcmd - s : skhd -k "down"
+          rcmd - d : skhd -k "right"
+
+          rcmd - h : skhd -k "left"
+          rcmd - k : skhd -k "up"
+          rcmd - j : skhd -k "down"
+          rcmd - l : skhd -k "right"
+
           f1 : skhd -k "f14" # brightness down
           f2 : skhd -k "f15" # brightness up
+
+          f10 : osascript -e 'set volume output muted not (output muted of (get volume settings))'
+          f11 : osascript -e 'set volume output volume ((output volume of (get volume settings)) - 5)'
+          f12 : osascript -e 'set volume output volume ((output volume of (get volume settings)) + 5)'
+
+          cmd - f1 : ${pkgs.ghostty}/bin/ghostty -e zsh -c "export TERM=xterm-256color; ssh -J 2niveri@rzssh1.informatik.uni-hamburg.de 2niveri@sppc13.informatik.uni-hamburg.de"
 
           ctrl + cmd - h : skhd -k "ctrl + cmd - left"
           ctrl + cmd - l : skhd -k "ctrl + cmd - right"
@@ -108,6 +124,7 @@ in {
           cmd + lshift - space: yabai -m window --toggle float
 
           cmd + lshift - f: yabai -m window --toggle zoom-fullscreen
+          cmd + ctrl - f: yabai -m window --toggle native-fullscreen
 
           cmd + lshift - n: yabai -m space --move next
 
