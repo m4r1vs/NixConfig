@@ -114,6 +114,8 @@ in {
           f8: ${pkgs.scratchpad-rs}/bin/scratchpad --toggle spotify
           cmd - e: ${pkgs.scratchpad-rs}/bin/scratchpad --toggle yazi
 
+          cmd - f8 : random-album-of-the-day
+
           cmd - 1 : yabai -m space --focus 1
           cmd - 2 : yabai -m space --focus 2
           cmd - 3 : yabai -m space --focus 3

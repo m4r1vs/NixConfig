@@ -24,6 +24,7 @@ in {
       clippy-darwin
       comma
       podman
+      (pkgs.writeShellScriptBin "random-album-of-the-day" scripts.random-album-of-the-day)
       vscode
     ]
     ++ lib.optionals isGraphical [

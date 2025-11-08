@@ -82,6 +82,7 @@ in {
 
   environment = {
     systemPackages = with pkgs; [
+      coreutils-full
       curl
       exiftool
       ffmpeg

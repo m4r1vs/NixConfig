@@ -1,27 +1,32 @@
 {
   pkgs,
   scripts,
+  systemArgs,
   ...
-}: {
+}: let
+  isDarwin = systemArgs.system == "aarch64-darwin";
+in {
   random-album-of-the-day =
     pkgs.writeShellScript "random-album-of-the-day"
     ''
       set -o pipefail
 
-      HTTP=$(${pkgs.curl}/bin/curl -s "https://daily.bandcamp.com/album-of-the-day")
-      random_album=$(echo "$HTTP" | grep '<a class="title" href="/album-of-the-day/' | shuf -n 1 | awk -F '">|</' '{print $3}' | sed -e 's/“//g ; s/”//g')
+      HTML=$(${pkgs.curl}/bin/curl -s "https://daily.bandcamp.com/album-of-the-day")
+      RANDOM_ALBUM_LINE=$(echo "$HTML" | grep '<a class="title" href="/album-of-the-day/' | shuf -n 1)
+      RANDOM_ALBUM=$(echo "$RANDOM_ALBUM_LINE" | awk -F '">|</' '{print $3}' | sed -e 's/“//g ; s/”//g')
+      ALBUM_PATH=$(echo "$RANDOM_ALBUM_LINE" | sed -n 's/.*href="\([^"]*\)".*/\1/p')
       exit_code="$?"
 
-      if [ -z "$random_album" ] || [ "$exit_code" -ne 0 ]; then
-        ${scripts.nixos-notify} -e "Failed to query Bandcamp's" "Album of the Day (got \"$random_album\")"
+      if [ -z "$RANDOM_ALBUM" ] || [ "$exit_code" -ne 0 ]; then
+        ${scripts.nixos-notify} -e "Failed to query Bandcamp's" "Album of the Day (got \"$RANDOM_ALBUM\")"
         exit 0
       fi
 
-      id=$(${pkgs.spotify-player}/bin/spotify_player search "$random_album" | ${pkgs.jq}/bin/jq -r '.albums.[0].id')
+      id=$(${pkgs.spotify-player}/bin/spotify_player search "$RANDOM_ALBUM" | ${pkgs.jq}/bin/jq -r '.albums.[0].id')
       exit_code="$?"
 
       if [ -z "$id" ] || [ "$exit_code" -ne 0 ]; then
-        ${scripts.nixos-notify} -e "Failed to search Spotify for" "\"$random_album\""
+        ${scripts.nixos-notify} -e "Failed to search Spotify for" "\"$RANDOM_ALBUM\""
         exit 0
       fi
 
@@ -29,17 +34,31 @@
       exit_code="$?"
 
       if [[ "$exit_code" -ne 0 ]]; then
-        ${scripts.nixos-notify} -e "Failed to start Playback of" "\"$random_album\""
+        ${scripts.nixos-notify} -e "Failed to start Playback of" "\"$RANDOM_ALBUM\""
         exit 0
       fi
 
-      RESPONSE=$(${scripts.nixos-notify} --action="open=Open on Bandcamp" "Playing a random Album of the Day:" "\"$random_album\"")
+      ${
+        if (!isDarwin)
+        then
+          /*
+          bash
+          */
+          ''
+            RESPONSE=$(${scripts.nixos-notify} --action="open=Open on Bandcamp" -e "Playing a random Album of the Day: \"$RANDOM_ALBUM\"")
 
-      if [[ "$RESPONSE" == *"open"* ]]; then
-        ALBUM_PATH=$(echo "$HTTP" | grep '<a class="title" href="/album-of-the-day/' | shuf -n 1 | awk -F 'href="|">' '{print $3}')
-        ${scripts.nixos-notify} -e -t 1000 "$(${pkgs.xdg-utils}/bin/xdg-open "https://daily.bandcamp.com$ALBUM_PATH")"
-      fi
+            if [[ "$RESPONSE" == *"open"* ]]; then
+              ${scripts.nixos-notify} -e -t 1000 "$(${pkgs.xdg-utils}/bin/xdg-open "https://daily.bandcamp.com$ALBUM_PATH")"
+            fi
 
-      exit 0
+            exit 0''
+        else
+          /*
+          bash
+          */
+          ''
+            xdg-open "https://daily.bandcamp.com$ALBUM_PATH"
+          ''
+      }
     '';
 }
