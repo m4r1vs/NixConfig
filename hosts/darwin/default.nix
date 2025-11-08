@@ -84,9 +84,9 @@ in {
           tilesize = 32;
         };
         trackpad = {
-          Clicking = true;
+          Clicking = false;
           TrackpadRightClick = true;
-          FirstClickThreshold = 1;
+          FirstClickThreshold = 0;
           SecondClickThreshold = 2;
         };
         finder = {
