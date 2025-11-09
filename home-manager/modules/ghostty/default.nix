@@ -26,7 +26,7 @@ in {
         gtk-titlebar = false;
         font-size =
           if isDarwin
-          then 13
+          then 12
           else 10;
         font-family = mkIf isDarwin [
           "JetBrainsMono Nerd Font Propo"

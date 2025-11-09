@@ -101,6 +101,8 @@ in {
 
           cmd - f1 : ${pkgs.ghostty}/bin/ghostty -e zsh -c "export TERM=xterm-256color; ssh -J 2niveri@rzssh1.informatik.uni-hamburg.de 2niveri@sppc13.informatik.uni-hamburg.de"
 
+          cmd - f6 : open -a ScreenSaverEngine
+
           ctrl + cmd - h : skhd -k "ctrl + cmd - left"
           ctrl + cmd - l : skhd -k "ctrl + cmd - right"
 
