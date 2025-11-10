@@ -39,7 +39,6 @@ in {
         "1password"
         "blender"
         "brave-browser"
-        "claude"
         "discord"
         "gimp"
         "linearmouse"
