@@ -28,7 +28,7 @@ in {
           if isDarwin
           then 12
           else 10;
-        font-family = mkIf isDarwin [
+        font-family = [
           "JetBrainsMono Nerd Font Propo"
           "Apple Color Emoji"
         ];
