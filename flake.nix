@@ -102,22 +102,22 @@
             ]
             ++ commonModules;
         });
-        pavilionix = inputs.nixpkgs.lib.nixosSystem (let
+        virtnix = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
             globalArgs
             // {
-              system = "x86_64-linux";
+              system = "aarch64-linux";
               theme = makeTheme {
                 primary = "green";
                 secondary = "orange";
               };
-              hostname = "pavilionix";
+              hostname = "virtnix";
             };
         in {
           inherit (systemArgs) system;
           modules =
             [
-              ./hosts/pavilionix
+              ./hosts/virtnix
               ./hosts/nixos.nix
 
               inputs.disko.nixosModules.disko
@@ -126,7 +126,7 @@
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]
-            + commonModules;
+            ++ commonModules;
         });
         nixner = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
@@ -278,7 +278,7 @@
 
             {config._module.args = {inherit systemArgs self inputs;};}
           ]
-          + commonModules;
+          ++ commonModules;
       });
       bootstrap_remote_arm64 = inputs.nixos-generators.nixosGenerate (let
         systemArgs =
