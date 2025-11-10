@@ -40,7 +40,7 @@ in {
           else false;
         macos-titlebar-style = mkIf isDarwin "hidden";
         window-padding-balance = true;
-        background-blur = isDarwin;
+        background-blur = mkIf isDarwin 50;
         link-url = true;
         keybind =
           [
