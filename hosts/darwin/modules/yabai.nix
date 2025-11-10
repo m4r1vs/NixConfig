@@ -31,7 +31,6 @@ in {
           left_padding = 6;
           right_padding = 6;
           window_gap = 6;
-          window_animation_duration = 0.15;
         };
         extraConfig =
           # bash
