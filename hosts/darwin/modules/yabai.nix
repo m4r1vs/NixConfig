@@ -59,7 +59,7 @@ in {
 
             while true; do
               yabai -m config focus_follows_mouse autoraise
-              sleep 20
+              sleep 60
             done
           '';
         enableScriptingAddition = true;
