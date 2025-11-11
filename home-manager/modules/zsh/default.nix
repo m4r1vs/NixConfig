@@ -35,6 +35,9 @@ in {
       };
       shellAliases = {
         lg = "${pkgs.lazygit}/bin/lazygit";
+        ls = "${pkgs.lsd}/bin/lsd";
+        la = "${pkgs.lsd}/bin/lsd -la";
+        tree = "${pkgs.lsd}/bin/lsd --tree";
         rebuild =
           if isDarwin
           then "sudo darwin-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}"
