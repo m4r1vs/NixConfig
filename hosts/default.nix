@@ -99,10 +99,11 @@ in {
   fonts =
     {
       packages = with pkgs; [
-        nerd-fonts.jetbrains-mono
-        ubuntu_font_family
         eb-garamond
+        nerd-fonts.jetbrains-mono
         open-sans
+        public-sans
+        ubuntu_font_family
       ];
     }
     // optionalAttrs (!isDarwin) {
