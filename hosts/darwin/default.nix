@@ -89,8 +89,25 @@ in {
           SecondClickThreshold = 2;
         };
         finder = {
-          CreateDesktop = false;
-          AppleShowAllFiles = true;
+          _FXShowPosixPathInTitle = true; # Show full POSIX path
+          _FXSortFoldersFirst = true; # Show folders first when sorting
+          AppleShowAllExtensions = true; # Show file extensions
+          AppleShowAllFiles = true; # Show hidden files by default
+          CreateDesktop = false; # Show files in Desktop folder on Desktop
+          FXDefaultSearchScope = "SCcf"; # Search current folder
+          FXEnableExtensionChangeWarning = false; # Do not warn when changing file extension
+          FXPreferredViewStyle = "Nlsv"; # Default to list view
+          FXRemoveOldTrashItems = true; # Auto remove trash after 30 days
+        };
+        NSGlobalDomain = {
+          "com.apple.mouse.tapBehavior" = null;
+        };
+        universalaccess.closeViewScrollWheelToggle = true; # Scroll while holding ctrl to zoom
+        screencapture = {
+          location = "/Users/${systemArgs.username}/Screencaptures";
+          show-thumbnail = false;
+          target = "file";
+          type = "jpg";
         };
         SoftwareUpdate.AutomaticallyInstallMacOSUpdates = false;
         controlcenter = {
