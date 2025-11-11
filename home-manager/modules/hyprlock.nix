@@ -43,7 +43,7 @@ in {
         };
         background = [
           {
-            path = "${builtins.path {path = ../wallpaper/Hamburg_TV_Tower.jpg;}}";
+            path = "${builtins.path {path = ../wallpaper/Hamburger_Fernsehturm.jpg;}}";
           }
         ];
         label = [
