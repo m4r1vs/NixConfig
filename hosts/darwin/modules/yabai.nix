@@ -24,8 +24,6 @@ in {
           mouse_follows_focus = "on";
           window_placement = "second_child";
           window_opacity = "on";
-          active_window_opacity = 1.0;
-          normal_window_opacity = 0.96;
           top_padding = 4;
           bottom_padding = 6;
           left_padding = 6;
@@ -102,13 +100,15 @@ in {
 
           cmd - f6 : open -a ScreenSaverEngine
 
-          ctrl + cmd - h : skhd -k "ctrl + cmd - left"
-          ctrl + cmd - l : skhd -k "ctrl + cmd - right"
-
           cmd - h: yabai -m window --focus west || yabai -m display --focus west
           cmd - j: yabai -m window --focus south || yabai -m display --focus south
           cmd - k: yabai -m window --focus north || yabai -m display --focus north
           cmd - l: yabai -m window --focus east || yabai -m display --focus east
+
+          cmd + ctrl - h : yabai -m window --resize left:-20:0 || yabai -m window --resize right:-20:0
+          cmd + ctrl - j : yabai -m window --resize bottom:0:20 || yabai -m window --resize top:0:20
+          cmd + ctrl - k : yabai -m window --resize top:0:-20 || yabai -m window --resize bottom:0:-20
+          cmd + ctrl - l : yabai -m window --resize right:20:0 || yabai -m window --resize left:20:0
 
           cmd + shift - h : yabai -m window --warp west \
             || yabai -m window --display west && yabai -m display --focus west
