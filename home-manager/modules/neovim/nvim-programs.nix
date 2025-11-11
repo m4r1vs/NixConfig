@@ -11,6 +11,7 @@ with pkgs; [
   fd
   fzf
   gcc
+  gitlab-ci-ls
   gnumake
   goimports-reviser
   golangci-lint
@@ -29,12 +30,15 @@ with pkgs; [
   nixd
   nodejs_22
   prettierd
+  pyright
   ripgrep
   rust-analyzer
   rustc
   rustfmt
   shfmt
+  taplo
   terraform-ls
+  texlab
   tinymist
   tree-sitter
   typstyle
