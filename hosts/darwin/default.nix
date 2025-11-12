@@ -36,6 +36,7 @@ in {
       };
       casks = [
         "1password"
+        "affinity"
         "blender"
         "brave-browser"
         "discord"
