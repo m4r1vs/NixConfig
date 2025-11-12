@@ -1,7 +1,6 @@
 {
   lib,
   config,
-  pkgs,
   systemArgs,
   self,
   ...
@@ -41,6 +40,7 @@ in {
         "brave-browser"
         "discord"
         "gimp"
+        "inkscape"
         "linearmouse"
         "mediamate"
         "minecraft"
