@@ -25,13 +25,14 @@ in {
       comma
       podman
       (pkgs.writeShellScriptBin "random-album-of-the-day" scripts.random-album-of-the-day)
-      vscode
     ]
     ++ lib.optionals isGraphical [
       blender
+      code-cursor
       dbeaver-bin
       obsidian
       prismlauncher
+      vscode
       zathura
     ]
     ++ lib.optionals isDesktop ([
