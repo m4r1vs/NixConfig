@@ -34,7 +34,24 @@ in {
         yabai = pkgsUnstable.yabai;
       })
       (final: prev: {
-        skhd = pkgsUnstable.skhd;
+        skhd-zig = with pkgs;
+          stdenv.mkDerivation {
+            pname = "skhd-zig";
+            version = "0.0.15";
+            buildInputs = [
+              lsd
+            ];
+            src = fetchTarball {
+              url = "https://github.com/jackielii/skhd.zig/releases/download/v0.0.15/skhd-arm64-macos.tar.gz";
+              sha256 = "sha256:1184g39dfhidzkjqhvn8lcjjhw5l65bg4nzccjkx91j4cx8x5xz9";
+            };
+            installPhase = ''
+              runHook preInstall
+              mkdir -p $out/bin
+              cp ./skhd-arm64-macos $out/bin/skhd
+              runHook postInstall
+            '';
+          };
       })
       (final: prev: {
         yazi = pkgsUnstable.yazi;
