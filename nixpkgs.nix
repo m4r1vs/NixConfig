@@ -28,6 +28,9 @@ in {
           else pkgsUnstable.ghostty;
       })
       (final: prev: {
+        code-cursor = pkgsUnstable.code-cursor;
+      })
+      (final: prev: {
         aerospace = pkgsUnstable.aerospace;
       })
       (final: prev: {
