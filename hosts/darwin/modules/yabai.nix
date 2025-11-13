@@ -37,6 +37,8 @@ in {
             yabai -m rule --add app="^System Settings$" manage=off
             yabai -m rule --add app="^League of Legends$" manage=off
             yabai -m rule --add app="^Raycast$" manage=off
+            yabai -m rule --add title="^scratchpad_yazi$" scratchpad=yazi grid=11:11:1:1:9:9
+            yabai -m rule --add title="^scratchpad_spotify$" scratchpad=spotify grid=11:11:1:1:9:9
 
             yabai -m space 1 --label one
             yabai -m space 2 --label two
@@ -72,6 +74,11 @@ in {
         .blacklist [
           "vmware fusion"
         ]
+
+        .define toggle_scratchpad : yabai -m window --toggle {{1}} || {{2}}
+
+        lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --title=scratchpad_yazi -e yazi")
+        f8 : @toggle_scratchpad("spotify", "${pkgs.ghostty}/bin/ghostty --title=scratchpad_spotify -e spotify_player")
 
         lcmd - q : yabai -m window --close
         lcmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')
@@ -130,9 +137,6 @@ in {
         lcmd + ctrl - f: yabai -m window --toggle native-fullscreen
 
         lcmd + lshift - n: yabai -m space --move next
-
-        f8: ${pkgs.scratchpad-rs}/bin/scratchpad --toggle spotify
-        lcmd - e: ${pkgs.scratchpad-rs}/bin/scratchpad --toggle yazi
 
         lcmd - f8 : random-album-of-the-day
 
