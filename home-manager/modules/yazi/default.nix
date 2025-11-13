@@ -67,8 +67,8 @@ in {
           ++ (optionals isDarwin [
             {
               on = "Y";
-              run = ["plugin clippy"];
-              desc = "Copy";
+              run = ["yank" "plugin clippy"];
+              desc = "Yank to System Clipboard";
             }
           ]);
       };
