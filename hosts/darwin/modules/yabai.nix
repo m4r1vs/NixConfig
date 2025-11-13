@@ -73,8 +73,6 @@ in {
           "vmware fusion"
         ]
 
-        lcmd - return : ${pkgs.ghostty}/bin/ghostty
-
         lcmd - q : yabai -m window --close
         lcmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')
 
