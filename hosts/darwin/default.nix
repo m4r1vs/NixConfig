@@ -41,6 +41,7 @@ in {
         "brave-browser"
         "discord"
         "gimp"
+        "google-drive"
         "inkscape"
         "linearmouse"
         "mediamate"
