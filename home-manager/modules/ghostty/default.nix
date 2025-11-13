@@ -40,7 +40,7 @@ in {
           else false;
         macos-titlebar-style = mkIf isDarwin "hidden";
         window-padding-balance = true;
-        background-blur = mkIf isDarwin 50;
+        background-blur = mkIf isDarwin 40;
         link-url = true;
         keybind =
           [
@@ -112,7 +112,7 @@ in {
           cursor-color = "#100f0f";
           selection-background = "#cecdc3";
           selection-foreground = "#100f0f";
-          background-opacity = 0.94;
+          background-opacity = 0.92;
         };
       };
     };
