@@ -124,6 +124,9 @@ in {
           "com.apple.dock" = {
             "workspaces-auto-swoosh" = true;
           };
+          "md.obsidian" = {
+            "ApplePressAndHoldEnabled" = false;
+          };
         };
       };
       startup.chime = false;
