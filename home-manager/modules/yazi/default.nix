@@ -144,13 +144,13 @@ in {
           owner = "m4r1vs";
           repo = "dark.yazi";
           rev = "main";
-          sha256 = "sha256-4yRYPoQ4PsnNRo+VzworhWrwNFrBYPHD1bu8agjsc/I=";
+          sha256 = "sha256-82yH6PGOHEmtRSAb/xIsb904jrLuUTlMTMSJe5O0vEI=";
         };
         light = pkgs.fetchFromGitHub {
           owner = "m4r1vs";
           repo = "light.yazi";
           rev = "main";
-          sha256 = "sha256-V6N1/RHcPus3ec2Hxit09/wwK0j69jIpE8jyg8qJ2ZE=";
+          sha256 = "sha256-p+aymwObO2Q6q4uOvz1H3HUyogkksh+3xJpz3fX23hI=";
         };
       };
       theme = {
@@ -165,66 +165,11 @@ in {
       };
       plugins =
         {
-          git = pkgs.stdenv.mkDerivation {
-            name = "yazi-git-plugin";
-            src = pkgs.fetchFromGitHub {
-              owner = "yazi-rs";
-              repo = "plugins";
-              sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
-              rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
-            };
-            installPhase = ''
-              runHook preInstall
-              mkdir $out
-              mv git.yazi/*.lua $out/
-              runHook postInstall
-            '';
-          };
-          jump-to-char = pkgs.stdenv.mkDerivation {
-            name = "yazi-jump-to-char-plugin";
-            src = pkgs.fetchFromGitHub {
-              owner = "yazi-rs";
-              repo = "plugins";
-              sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
-              rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
-            };
-            installPhase = ''
-              runHook preInstall
-              mkdir $out
-              mv jump-to-char.yazi/*.lua $out/
-              runHook postInstall
-            '';
-          };
-          smart-enter = pkgs.stdenv.mkDerivation {
-            name = "yazi-smart-enter-plugin";
-            src = pkgs.fetchFromGitHub {
-              owner = "yazi-rs";
-              repo = "plugins";
-              sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
-              rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
-            };
-            installPhase = ''
-              runHook preInstall
-              mkdir $out
-              mv smart-enter.yazi/*.lua $out/
-              runHook postInstall
-            '';
-          };
-          toggle-pane = pkgs.stdenv.mkDerivation {
-            name = "yazi-toggle-pane-plugin";
-            src = pkgs.fetchFromGitHub {
-              owner = "yazi-rs";
-              repo = "plugins";
-              sha256 = "sha256-WF2b9t0VPGNP3QXgr/GMDFcSh5bsXC7KKd2ICL4WDHo=";
-              rev = "d642bfb0822eb0c3c5c891ab0f4b6f897a2083cb";
-            };
-            installPhase = ''
-              runHook preInstall
-              mkdir $out
-              mv toggle-pane.yazi/*.lua $out/
-              runHook postInstall
-            '';
-          };
+          full-border = pkgs.yaziPlugins.full-border;
+          git = pkgs.yaziPlugins.git;
+          jump-to-char = pkgs.yaziPlugins.jump-to-char;
+          smart-enter = pkgs.yaziPlugins.smart-enter;
+          toggle-pane = pkgs.yaziPlugins.toggle-pane;
         }
         // (optionalAttrs isDesktop {
           ucp = pkgs.stdenv.mkDerivation {

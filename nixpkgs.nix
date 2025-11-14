@@ -58,6 +58,7 @@ in {
       })
       (final: prev: {
         yazi = pkgsUnstable.yazi;
+        yaziPlugins = pkgsUnstable.yaziPlugins;
       })
       (final: prev: {
         aerospace-swipe = with pkgsUnstable;
