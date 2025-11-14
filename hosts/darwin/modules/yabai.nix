@@ -7,6 +7,12 @@
 }:
 with lib; let
   cfg = config.services.configured.yabai;
+  focusUnderCursor = pkgs.writeShellScript "focus_under_cursor" ''
+    if yabai -m query --windows --space |
+        jq -er 'map(select(.focused == 1)) | length == 0' >/dev/null; then
+      yabai -m window --focus mouse 2>/dev/null || true
+    fi
+  '';
 in {
   options.services.configured.yabai = {
     enable = mkEnableOption "Enable the Yabai tiling WM for MacOS";
@@ -37,6 +43,10 @@ in {
             yabai -m rule --add app="^System Settings$" manage=off
             yabai -m rule --add app="^League of Legends$" manage=off
             yabai -m rule --add app="^Raycast$" manage=off
+
+            yabai -m rule --add app="^TV$" title="^.{3,}$" manage=off # match any Apple TV Window with more than 2 letters
+            yabai -m rule --add title="^General$" manage=off # most of apple settings windows are named "General"
+
             yabai -m rule --add title="^scratchpad_yazi$" scratchpad=yazi grid=11:11:1:1:9:9
             yabai -m rule --add title="^scratchpad_spotify$" scratchpad=spotify grid=11:11:1:1:9:9
 
@@ -49,6 +59,11 @@ in {
             yabai -m space 7 --label six
             yabai -m space 8 --label six
             yabai -m space 9 --label nine
+
+            # Try to focus the windows instead of finder ghost window:
+            yabai -m signal --add event=window_destroyed action="${focusUnderCursor}"
+            yabai -m signal --add event=window_minimized action="${focusUnderCursor}"
+            yabai -m signal --add event=application_hidden action="${focusUnderCursor}"
 
             TARGET_SPACES=9
             CURRENT_SPACES=$(yabai -m query --spaces | jq 'length')
@@ -136,8 +151,6 @@ in {
         lcmd + lshift - f: yabai -m window --toggle zoom-fullscreen
         lcmd + ctrl - f: yabai -m window --toggle native-fullscreen
 
-        lcmd + lshift - n: yabai -m space --move next
-
         lcmd - f8 : random-album-of-the-day
 
         lcmd - 1 : yabai -m space --focus 1
@@ -150,15 +163,15 @@ in {
         lcmd - 8 : yabai -m space --focus 8
         lcmd - 9 : yabai -m space --focus 9
 
-        lcmd + shift - 1 : yabai -m window --space 1 && yabai -m space --focus 1
-        lcmd + shift - 2 : yabai -m window --space 2 && yabai -m space --focus 2
-        lcmd + shift - 3 : yabai -m window --space 3 && yabai -m space --focus 3
-        lcmd + shift - 4 : yabai -m window --space 4 && yabai -m space --focus 4
-        lcmd + shift - 5 : yabai -m window --space 5 && yabai -m space --focus 5
-        lcmd + shift - 6 : yabai -m window --space 6 && yabai -m space --focus 6
-        lcmd + shift - 7 : yabai -m window --space 7 && yabai -m space --focus 7
-        lcmd + shift - 8 : yabai -m window --space 8 && yabai -m space --focus 8
-        lcmd + shift - 9 : yabai -m window --space 9 && yabai -m space --focus 9
+        lcmd + shift - 1 : yabai -m window --space 1 && yabai -m space --focus 1 && ${focusUnderCursor}
+        lcmd + shift - 2 : yabai -m window --space 2 && yabai -m space --focus 2 && ${focusUnderCursor}
+        lcmd + shift - 3 : yabai -m window --space 3 && yabai -m space --focus 3 && ${focusUnderCursor}
+        lcmd + shift - 4 : yabai -m window --space 4 && yabai -m space --focus 4 && ${focusUnderCursor}
+        lcmd + shift - 5 : yabai -m window --space 5 && yabai -m space --focus 5 && ${focusUnderCursor}
+        lcmd + shift - 6 : yabai -m window --space 6 && yabai -m space --focus 6 && ${focusUnderCursor}
+        lcmd + shift - 7 : yabai -m window --space 7 && yabai -m space --focus 7 && ${focusUnderCursor}
+        lcmd + shift - 8 : yabai -m window --space 8 && yabai -m space --focus 8 && ${focusUnderCursor}
+        lcmd + shift - 9 : yabai -m window --space 9 && yabai -m space --focus 9 && ${focusUnderCursor}
 
         lcmd + ctrl - 1 : yabai -m space --focus 10
         lcmd + ctrl - 2 : yabai -m space --focus 11
@@ -170,15 +183,15 @@ in {
         lcmd + ctrl - 8 : yabai -m space --focus 17
         lcmd + ctrl - 9 : yabai -m space --focus 18
 
-        lcmd + ctrl + shift - 1 : yabai -m window --space 10 && yabai -m space --focus 10
-        lcmd + ctrl + shift - 2 : yabai -m window --space 12 && yabai -m space --focus 11
-        lcmd + ctrl + shift - 3 : yabai -m window --space 13 && yabai -m space --focus 12
-        lcmd + ctrl + shift - 4 : yabai -m window --space 14 && yabai -m space --focus 13
-        lcmd + ctrl + shift - 5 : yabai -m window --space 15 && yabai -m space --focus 14
-        lcmd + ctrl + shift - 6 : yabai -m window --space 16 && yabai -m space --focus 15
-        lcmd + ctrl + shift - 7 : yabai -m window --space 17 && yabai -m space --focus 16
-        lcmd + ctrl + shift - 8 : yabai -m window --space 18 && yabai -m space --focus 17
-        lcmd + ctrl + shift - 9 : yabai -m window --space 19 && yabai -m space --focus 18
+        lcmd + ctrl + shift - 1 : yabai -m window --space 10 && yabai -m space --focus 10 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 2 : yabai -m window --space 12 && yabai -m space --focus 11 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 3 : yabai -m window --space 13 && yabai -m space --focus 12 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 4 : yabai -m window --space 14 && yabai -m space --focus 13 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 5 : yabai -m window --space 15 && yabai -m space --focus 14 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 6 : yabai -m window --space 16 && yabai -m space --focus 15 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 7 : yabai -m window --space 17 && yabai -m space --focus 16 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 8 : yabai -m window --space 18 && yabai -m space --focus 17 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 9 : yabai -m window --space 19 && yabai -m space --focus 18 && ${focusUnderCursor}
       '';
 
       ".config/scratchpad/config.toml".text =
