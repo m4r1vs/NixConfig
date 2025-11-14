@@ -26,6 +26,13 @@ return {
       folder = "Journal",
       date_format = "%Y-%m-%d",
     },
+    ui = {
+      enable = false,
+      checkboxes = {
+        [" "] = { char = "󰄱", hl_group = "ObsidianTodo" },
+        ["x"] = { char = "", hl_group = "ObsidianDone" },
+      },
+    },
     note_id_func = function(title)
       return title
     end,
