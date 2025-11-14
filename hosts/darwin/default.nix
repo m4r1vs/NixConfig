@@ -37,7 +37,6 @@ in {
       casks = [
         "1password"
         "affinity"
-        "blender"
         "brave-browser"
         "discord"
         "gimp"
@@ -59,7 +58,6 @@ in {
         DavinciResolve = 571213070;
         Xcode = 497799835;
         GarageBand = 682658836;
-        Radio = 6478023685;
       };
     };
 
@@ -95,7 +93,7 @@ in {
           _FXSortFoldersFirst = true; # Show folders first when sorting
           AppleShowAllExtensions = true; # Show file extensions
           AppleShowAllFiles = true; # Show hidden files by default
-          CreateDesktop = false; # Show files in Desktop folder on Desktop
+          CreateDesktop = true; # When no window is focus, focus Finder (if false, yabai breaks a bit)
           FXDefaultSearchScope = "SCcf"; # Search current folder
           FXEnableExtensionChangeWarning = false; # Do not warn when changing file extension
           FXPreferredViewStyle = "Nlsv"; # Default to list view
