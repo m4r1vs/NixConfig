@@ -43,12 +43,14 @@ in {
             yabai -m rule --add app="^System Settings$" manage=off
             yabai -m rule --add app="^League of Legends$" manage=off
             yabai -m rule --add app="^Raycast$" manage=off
+            yabai -m rule --add app="^mpv$" manage=off
 
             yabai -m rule --add app="^TV$" title="^.{3,}$" manage=off # match any Apple TV Window with more than 2 letters
             yabai -m rule --add title="^General$" manage=off # most of apple settings windows are named "General"
 
             yabai -m rule --add title="^scratchpad_yazi$" scratchpad=yazi grid=11:11:1:1:9:9
             yabai -m rule --add title="^scratchpad_spotify$" scratchpad=spotify grid=11:11:1:1:9:9
+            yabai -m rule --add title="^scratchpad_tmux$" scratchpad=tmux grid=11:11:1:1:9:9
 
             yabai -m space 1 --label one
             yabai -m space 2 --label two
@@ -92,8 +94,9 @@ in {
 
         .define toggle_scratchpad : yabai -m window --toggle {{1}} || {{2}}
 
-        lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --title=scratchpad_yazi -e yazi")
-        f8 : @toggle_scratchpad("spotify", "${pkgs.ghostty}/bin/ghostty --title=scratchpad_spotify -e spotify_player")
+        lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --macos-icon=paper --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_yazi -e yazi")
+        f8 : @toggle_scratchpad("spotify", "${pkgs.ghostty}/bin/ghostty --macos-icon=retro --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=16 --background-opacity=0.85 --title=scratchpad_spotify -e spotify_player")
+        lcmd + ctrl - t : @toggle_scratchpad("tmux", "${pkgs.ghostty}/bin/ghostty --macos-icon=microchip --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_tmux -e tmux")
 
         lcmd - q : yabai -m window --close
         lcmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')
@@ -193,31 +196,6 @@ in {
         lcmd + ctrl + shift - 8 : yabai -m window --space 18 && yabai -m space --focus 17 && ${focusUnderCursor}
         lcmd + ctrl + shift - 9 : yabai -m window --space 19 && yabai -m space --focus 18 && ${focusUnderCursor}
       '';
-
-      ".config/scratchpad/config.toml".text =
-        # toml
-        ''
-          scratchpad_space = 9
-          launch_timeout = 5
-
-          [[scratchpad]]
-          name = "spotify"
-          target_type = "title"
-          target = "spotify_scratchpad"
-          position = [288, 128]
-          size = [1240, 754]
-          launch_type = "app_with_arg"
-          launch_command = ["/Users/${systemArgs.username}/Applications/Home Manager Apps/Ghostty.app", "--title=spotify_scratchpad", "-e", "zsh", "-c", "${pkgs.spotify-player}/bin/spotify_player"]
-
-          [[scratchpad]]
-          name = "yazi"
-          target_type = "title"
-          target = "yazi_scratchpad"
-          position = [288, 128]
-          size = [1240, 754]
-          launch_type = "app_with_arg"
-          launch_command = ["/Users/${systemArgs.username}/Applications/Home Manager Apps/Ghostty.app", "--title=yazi_scratchpad", "-e", "zsh", "-c", "${pkgs.yazi}/bin/yazi"]
-        '';
     };
   };
 }
