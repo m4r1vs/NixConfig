@@ -94,7 +94,7 @@ in {
 
         .define toggle_scratchpad : yabai -m window --toggle {{1}} || {{2}}
 
-        lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --macos-icon=paper --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_yazi -e yazi")
+        lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --macos-icon=xray --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_yazi -e yazi")
         f8 : @toggle_scratchpad("spotify", "${pkgs.ghostty}/bin/ghostty --macos-icon=retro --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=16 --background-opacity=0.85 --title=scratchpad_spotify -e spotify_player")
         lcmd + ctrl - t : @toggle_scratchpad("tmux", "${pkgs.ghostty}/bin/ghostty --macos-icon=microchip --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_tmux -e tmux")
 
@@ -119,11 +119,11 @@ in {
         f11 : osascript -e 'set volume output volume ((output volume of (get volume settings)) - 5)'
         f12 : osascript -e 'set volume output volume ((output volume of (get volume settings)) + 5)'
 
-        lcmd - f1 : ${pkgs.ghostty}/bin/ghostty -e zsh -c "export TERM=xterm-256color; ssh -J 2niveri@rzssh1.informatik.uni-hamburg.de 2niveri@sppc13.informatik.uni-hamburg.de"
-        lcmd - f2 : ${pkgs.ghostty}/bin/ghostty -e ssh mn@nixner.niveri.dev
-        lcmd - f3 : ${pkgs.ghostty}/bin/ghostty -e ssh -p 422 mn@falkenberg.kubenix.niveri.dev
-        lcmd - f4 : ${pkgs.ghostty}/bin/ghostty -e ssh -p 422 mn@stadeln.kubenix.niveri.dev
-        lcmd - f5 : ${pkgs.ghostty}/bin/ghostty -e ssh -p 422 mn@ronhof.kubenix.niveri.dev
+        lcmd - f1 : ${pkgs.ghostty}/bin/ghostty --macos-icon=holographic -e zsh -c "export TERM=xterm-256color; ssh -J 2niveri@rzssh1.informatik.uni-hamburg.de 2niveri@sppc13.informatik.uni-hamburg.de"
+        lcmd - f2 : ${pkgs.ghostty}/bin/ghostty --macos-icon=holographic -e ssh mn@nixner.niveri.dev
+        lcmd - f3 : ${pkgs.ghostty}/bin/ghostty --macos-icon=holographic -e ssh -p 422 mn@falkenberg.kubenix.niveri.dev
+        lcmd - f4 : ${pkgs.ghostty}/bin/ghostty --macos-icon=holographic -e ssh -p 422 mn@stadeln.kubenix.niveri.dev
+        lcmd - f5 : ${pkgs.ghostty}/bin/ghostty --macos-icon=holographic -e ssh -p 422 mn@ronhof.kubenix.niveri.dev
 
         lcmd - f6 : open -a ScreenSaverEngine
 
