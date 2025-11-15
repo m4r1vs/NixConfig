@@ -107,7 +107,7 @@ in {
             "14=#3aa99f"
             "15=#fffcf0"
           ];
-          background = "#fffcf0";
+          background = "#fffdf3";
           foreground = "#100f0f";
           cursor-color = "#100f0f";
           selection-background = "#cecdc3";
