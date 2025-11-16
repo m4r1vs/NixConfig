@@ -17,6 +17,10 @@ in {
         enable = true;
         domain = "niveri.dev";
       };
+      stummumschalterung = {
+        enable = true;
+        domain = "niveri.dev";
+      };
     };
     comin = {
       enable = true;

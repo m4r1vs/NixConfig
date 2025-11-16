@@ -205,11 +205,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1762660502,
-        "narHash": "sha256-C9F1C31ys0V7mnp4EcDy7L1cLZw/sCTEXqqTtGnvu08=",
+        "lastModified": 1763265660,
+        "narHash": "sha256-Ad9Rd3ZAidrH01xP73S3CjPiyXo7ywZs3uCESjPwUdc=",
         "owner": "nix-community",
         "repo": "nix-index-database",
-        "rev": "15c5451c63f4c612874a43846bfe3fa828b03eee",
+        "rev": "469ef53571ea80890c9497952787920c79c1ee6e",
         "type": "github"
       },
       "original": {
@@ -363,7 +363,8 @@
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs",
         "nixpkgs_unstable": "nixpkgs_unstable",
-        "slidecontrol": "slidecontrol"
+        "slidecontrol": "slidecontrol",
+        "stummumschalterung": "stummumschalterung"
       }
     },
     "rust-overlay": {
@@ -406,6 +407,27 @@
         "ref": "master",
         "repo": "slidecontrol",
         "type": "github"
+      }
+    },
+    "stummumschalterung": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1763333245,
+        "narHash": "sha256-uA/v3OrZ3BbN3tgsriwb190yP5JbjbkvJNFCwmyh86U=",
+        "owner": "m4r1vs",
+        "repo": "stummumschalterung",
+        "rev": "0572e94a0eb2d110c5ed30f9d9241e774cc6543e",
+        "type": "gitlab"
+      },
+      "original": {
+        "owner": "m4r1vs",
+        "ref": "trunk",
+        "repo": "stummumschalterung",
+        "type": "gitlab"
       }
     }
   },
