@@ -48,6 +48,7 @@ in {
         "raycast"
         "spotify"
         "steam"
+        "utm"
         "whatsapp"
       ];
       masApps = {
