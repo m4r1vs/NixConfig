@@ -121,10 +121,10 @@ in {
       (final: prev: {
         containerd = prev.containerd.overrideAttrs {
           src = pkgs.fetchFromGitHub {
-            owner = "m4r1vs";
+            owner = "containerd";
             repo = "containerd";
-            rev = "4c61e0f45c81a137fede02daf25fd70e193410bf";
-            hash = "sha256-of/6mGBs/Dt4z7mEPyZGcwP80GMezxJ3Zzzxc1l3krk=";
+            rev = "release/2.2";
+            hash = "sha256-nMT4iTfVEiGvrobhq0wue/xI1kACX6eB0UteHnZAQbk=";
           };
         };
       })
