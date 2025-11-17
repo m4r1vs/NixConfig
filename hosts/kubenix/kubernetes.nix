@@ -93,6 +93,33 @@ in {
     ];
   };
 
+  virtualisation.containerd = {
+    settings = lib.mkForce {
+      version = 2;
+      root = "/var/lib/containerd";
+      state = "/run/containerd";
+      oom_score = 0;
+
+      grpc = {
+        address = "/run/containerd/containerd.sock";
+      };
+
+      plugins."io.containerd.grpc.v1.cri" = {
+        sandbox_image = "registry.k8s.io/pause:3.10.1";
+
+        cni = {
+          bin_dir = "/opt/cni/bin";
+          max_conf_num = 0;
+        };
+
+        containerd.runtimes.runc = {
+          runtime_type = "io.containerd.runc.v2";
+          options.SystemdCgroup = true;
+        };
+      };
+    };
+  };
+
   services.kubernetes = let
     masterAddr = "https://${masterFqdn}:${toString k8sPort}";
     isMaster = builtins.elem "master" clusterRoles;
@@ -170,14 +197,25 @@ in {
     };
     proxy.enable = true;
     kubelet =
-      if isMaster
-      then {
-        enable = true;
-        hostname = masterFqdn;
-      }
-      else {
-        enable = true;
-        kubeconfig.server = masterAddr;
+      (
+        if isMaster
+        then {
+          enable = true;
+          hostname = masterFqdn;
+        }
+        else {
+          enable = true;
+          kubeconfig.server = masterAddr;
+        }
+      )
+      // {
+        extraConfig = {
+          evictionHard = {
+            "imagefs.available" = "10%";
+            "nodefs.available" = "5%";
+            "memory.available" = "100Mi";
+          };
+        };
       };
     apiserver = lib.mkIf isMaster {
       enable = true;
