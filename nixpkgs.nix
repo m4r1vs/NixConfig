@@ -119,6 +119,9 @@ in {
           };
       })
       (final: prev: {
+        kubernetes = pkgsUnstable.kubernetes;
+      })
+      (final: prev: {
         containerd = prev.containerd.overrideAttrs {
           src = pkgs.fetchFromGitHub {
             owner = "containerd";
