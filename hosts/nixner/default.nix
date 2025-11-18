@@ -37,7 +37,7 @@ in {
   };
 
   users.users.${systemArgs.username}.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFBNq0SWrIVxHKZazvSROg+sghfK4857bclimtjBQGP+ pipeline@gitlab.cluster.niveri.dev"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDB9dPD91UOXdhmhfx9tZa/duzFyPgUj0uX8Q5scmCwF gitlab_ci"
   ];
 
   configured.server = {
