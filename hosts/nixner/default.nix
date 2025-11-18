@@ -100,6 +100,10 @@ in {
         domain = "niveri.dev";
         enable = true;
       };
+      gitlab-runner = {
+        enable = true;
+        authSecretPath = "/var/lib/secrets/nix-gitlab-runner-token";
+      };
     };
   };
 
