@@ -37,6 +37,7 @@ with pkgs; [
   rustfmt
   shfmt
   stylua
+  svelte-language-server
   taplo
   terraform-ls
   texlab
