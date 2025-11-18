@@ -36,6 +36,7 @@ with pkgs; [
   rustc
   rustfmt
   shfmt
+  stylua
   taplo
   terraform-ls
   texlab
