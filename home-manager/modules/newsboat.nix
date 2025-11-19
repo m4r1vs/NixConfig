@@ -16,7 +16,7 @@ in {
       autoReload = true;
       browser = "${
         scripts.xdg-open-yt {
-          player = "${config.programs.mpv.finalPackage}/bin/mpv";
+          player = "mpv";
         }
       }";
       extraConfig = ''

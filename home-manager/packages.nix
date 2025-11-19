@@ -14,17 +14,13 @@ in {
     [
       fastfetch
       kubectl
-      kubernetes-helm
-      w3m-full
       xdg-utils
-      yt-dlp
-      pkgs.gemini-cli-bin
     ]
     ++ lib.optionals isDarwin [
       clippy-darwin
       comma
       podman
-      (pkgs.writeShellScriptBin "random-album-of-the-day" scripts.random-album-of-the-day)
+      (writeShellScriptBin "random-album-of-the-day" scripts.random-album-of-the-day)
     ]
     ++ lib.optionals isGraphical [
       blender
@@ -33,6 +29,8 @@ in {
       prismlauncher
       vscode
       zathura
+      gemini-cli-bin
+      yt-dlp
     ]
     ++ lib.optionals isDesktop ([
         amberol

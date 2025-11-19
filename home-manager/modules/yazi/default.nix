@@ -101,7 +101,7 @@ in {
           ];
           play = [
             {
-              run = "${config.programs.mpv.finalPackage}/bin/mpv \"$@\"";
+              run = "mpv \"$@\"";
               block = true;
               for = "unix";
             }

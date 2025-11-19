@@ -50,9 +50,9 @@ in {
       ghostty.enable = isDesktop || isWSL || isDarwin;
       git.enable = true;
       lazygit.enable = true;
-      mpv.enable = true;
+      mpv.enable = isDesktop || isDarwin;
       neovim.enable = true;
-      newsboat.enable = true;
+      newsboat.enable = isDesktop || isDarwin;
       rofi.enable = isDesktop;
       spotify-player.enable = isDesktop || isWSL || isDarwin;
       ssh.enable = true;
