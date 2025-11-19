@@ -28,7 +28,6 @@ in {
     ]
     ++ lib.optionals isGraphical [
       blender
-      code-cursor
       dbeaver-bin
       obsidian
       prismlauncher
