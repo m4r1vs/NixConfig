@@ -42,6 +42,7 @@ in {
     shellIconMap = mkOption {
       type = types.attrsOf types.str;
       default = {
+        tmux = ""; # on macos zsh is not always immediately loaded
         htop = "";
         lazygit = "";
         mpv = "";
@@ -49,6 +50,10 @@ in {
         nvim = "";
         nix = "󱄅";
         sudo = "";
+        node = "";
+        journalctl = "";
+        spotify_player = "";
+        k9s = "󰠳";
         yazi = "󰇥";
         bash = "";
         terraform = "";
