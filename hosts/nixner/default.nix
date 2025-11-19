@@ -94,6 +94,11 @@ in {
 
           *                     IN      A       ${ipv4}
                                 IN      AAAA    ${ipv6}
+
+          mc                    IN      A       ${ipv4}
+                                IN      AAAA    ${ipv6}
+
+          _minecraft._tcp.mc    IN      SRV     0   5   25565   mc.niveri.dev.
         '';
       };
       cache = {
@@ -103,6 +108,10 @@ in {
       gitlab-runner = {
         enable = true;
         authSecretPath = "/var/lib/secrets/nix-gitlab-runner-token";
+      };
+      minecraft = {
+        enable = true;
+        port = 25565;
       };
     };
   };

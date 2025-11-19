@@ -61,6 +61,9 @@ in {
         yaziPlugins = pkgsUnstable.yaziPlugins;
       })
       (final: prev: {
+        minecraftServers = pkgsUnstable.minecraftServers;
+      })
+      (final: prev: {
         aerospace-swipe = with pkgsUnstable;
           stdenvNoCC.mkDerivation {
             pname = "aerospace-swipe";
