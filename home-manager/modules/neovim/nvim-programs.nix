@@ -38,6 +38,7 @@ with pkgs; [
   shfmt
   stylua
   svelte-language-server
+  tailwindcss-language-server
   taplo
   terraform-ls
   texlab

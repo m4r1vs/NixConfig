@@ -103,6 +103,7 @@ return {
     vim.lsp.enable("rust_analyzer")
     vim.lsp.enable("sourcekit")
     vim.lsp.enable("svelte")
+    vim.lsp.enable("tailwindcss")
     vim.lsp.enable("taplo")
     vim.lsp.enable("terraformls")
     vim.lsp.enable("texlab")
