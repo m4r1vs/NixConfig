@@ -107,7 +107,12 @@ in {
       };
       gitlab-runner = {
         enable = true;
-        authSecretPath = "/var/lib/secrets/nix-gitlab-runner-token";
+        authSecretPaths = [
+          "/var/lib/secrets/nix-gitlab-runner-0-token"
+          "/var/lib/secrets/nix-gitlab-runner-1-token"
+          "/var/lib/secrets/nix-gitlab-runner-2-token"
+          "/var/lib/secrets/nix-gitlab-runner-3-token"
+        ];
       };
       minecraft = {
         enable = true;
