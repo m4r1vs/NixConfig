@@ -27,7 +27,7 @@ in {
         difficulty = 2;
         gamemode = 0;
         max-players = 12;
-        motd = "NixOS Minecraft server!";
+        motd = "Schlackis gemütliche Fussball Ecke";
         white-list = false;
         allow-cheats = false;
       };
