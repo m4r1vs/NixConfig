@@ -20,6 +20,7 @@ return {
     notify_no_formatters = false,
     formatters_by_ft = {
       css = { "prettierd", "prettier", stop_after_first = true },
+      scss = { "prettierd", "prettier", stop_after_first = true },
       go = { "goimports", "gofmt" },
       javascript = { "prettierd", "prettier", stop_after_first = true },
       javascriptreact = { "prettierd", "prettier", stop_after_first = true },
