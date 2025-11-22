@@ -22,13 +22,16 @@ in {
       eula = true;
       openFirewall = true;
       declarative = true;
+      whitelist = {
+        username1 = "dfa12c34-c848-4f8a-b29a-e31aaafaa679";
+      };
       serverProperties = {
         server-port = cfg.port;
         difficulty = 2;
         gamemode = 0;
         max-players = 12;
         motd = "Schlackis gemütliche Fussball Ecke";
-        white-list = false;
+        white-list = true;
         allow-cheats = false;
       };
       jvmOpts = "-Xms2048M -Xmx4096M";
