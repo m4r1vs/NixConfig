@@ -24,6 +24,7 @@ in {
       declarative = true;
       whitelist = {
         username1 = "dfa12c34-c848-4f8a-b29a-e31aaafaa679";
+        nille453 = "c837e949-c226-48cc-a5f6-9f4d0e71b8d7";
       };
       serverProperties = {
         server-port = cfg.port;
