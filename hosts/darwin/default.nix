@@ -42,6 +42,7 @@ in {
         "gimp"
         "google-drive"
         "inkscape"
+        "krita"
         "linearmouse"
         "mediamate"
         "minecraft"
