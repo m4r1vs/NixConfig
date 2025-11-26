@@ -119,9 +119,11 @@ vim.keymap.set("n", "k", "gk", { noremap = true, silent = true })
 -- Add border to diagnostics (borders for other stuff in lspconfig.lua)
 vim.diagnostic.config {
   virtual_text = true,
+  source = true,
   float = {
     border = "rounded",
     focusable = true,
+    source = true,
   },
 }
 

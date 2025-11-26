@@ -108,7 +108,6 @@ return {
     vim.lsp.enable("terraformls")
     vim.lsp.enable("texlab")
     vim.lsp.enable("tinymist")
-    vim.lsp.enable("vtsls")
     vim.lsp.enable("yamlls")
     vim.lsp.enable("zls")
 

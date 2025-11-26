@@ -46,7 +46,6 @@ with pkgs; [
   tree-sitter
   typstyle
   vscode-langservers-extracted
-  vtsls
   websocat
   yaml-language-server
   yazi
