@@ -29,7 +29,7 @@ in {
       prismlauncher
       vscode
       zathura
-      gemini-cli-bin
+      gemini-cli
       yt-dlp
     ]
     ++ lib.optionals isDesktop ([

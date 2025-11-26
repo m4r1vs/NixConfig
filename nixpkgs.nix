@@ -14,6 +14,10 @@ with lib; let
     system = systemArgs.system;
     config.allowUnfree = true;
   };
+  pkgsMaster = import inputs.nixpkgs_master {
+    system = systemArgs.system;
+    config.allowUnfree = true;
+  };
 in {
   nixpkgs = {
     config.allowUnfree = true;
@@ -135,7 +139,7 @@ in {
         };
       })
       (final: prev: {
-        gemini-cli-bin = pkgsUnstable.gemini-cli-bin;
+        gemini-cli = pkgsMaster.gemini-cli;
       })
       /*
       Own Forks
