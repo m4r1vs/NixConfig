@@ -212,7 +212,7 @@ in {
       // {
         extraConfig = {
           evictionHard = {
-            "imagefs.available" = "10%";
+            "imagefs.available" = "5%";
             "nodefs.available" = "5%";
             "memory.available" = "100Mi";
           };
