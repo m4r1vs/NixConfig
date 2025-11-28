@@ -2,7 +2,7 @@
   description = "Marius' Nixos Configuration Flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     nixpkgs_unstable.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixpkgs_master.url = "github:nixos/nixpkgs?ref=master";
     nixos-wsl = {
@@ -10,7 +10,7 @@
       url = "github:nix-community/NixOS-WSL/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
+    nix-darwin.url = "github:nix-darwin/nix-darwin?ref=master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
     comin = {
       # GitOps
@@ -34,7 +34,7 @@
     };
     home-manager = {
       # Configure programs using nix
-      url = "github:nix-community/home-manager?ref=release-25.05";
+      url = "github:nix-community/home-manager?ref=release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     disko = {

@@ -23,7 +23,6 @@ in {
     ]
     ++ lib.optionals isGraphical [
       atai
-      blender
       dbeaver-bin
       gemini-cli
       obsidian

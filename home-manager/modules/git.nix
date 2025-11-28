@@ -14,9 +14,11 @@ in {
   config = mkIf cfg.enable {
     programs.git = {
       enable = true;
-      userName = git.name;
-      userEmail = git.email;
-      extraConfig = {
+      settings = {
+        user = {
+          name = git.name;
+          email = git.email;
+        };
         pull.rebase = true;
       };
     };

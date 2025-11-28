@@ -38,7 +38,7 @@ in {
         name = "Bibata-Modern-Ice";
       };
       font = {
-        package = pkgs.ubuntu_font_family;
+        package = pkgs.ubuntu-classic;
         name = "Ubuntu";
         size = 10;
       };

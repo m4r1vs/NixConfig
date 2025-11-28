@@ -40,7 +40,7 @@ in {
         tree = "${pkgs.lsd}/bin/lsd --tree";
         rebuild =
           if isDarwin
-          then "sudo darwin-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}"
+          then "sudo darwin-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname} && sudo yabai --load-sa"
           else "sudo nixos-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}";
         vi = "nvim";
         vim = "nvim";

@@ -103,7 +103,7 @@ in {
         nerd-fonts.jetbrains-mono
         open-sans
         public-sans
-        ubuntu_font_family
+        ubuntu-classic
       ];
     }
     // optionalAttrs (!isDarwin) {

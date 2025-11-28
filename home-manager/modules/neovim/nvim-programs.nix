@@ -7,7 +7,7 @@ with pkgs; [
   clang-tools
   dart
   docker-compose-language-service
-  dockerfile-language-server-nodejs
+  dockerfile-language-server
   fd
   fzf
   gcc

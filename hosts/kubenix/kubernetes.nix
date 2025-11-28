@@ -184,6 +184,7 @@ in {
     addons.dns = {
       enable = true;
       clusterDomain = domain;
+      # TODO: test if this has been fixed, if not, open PR
       coredns = {
         imageName = "mariusniveri/my-coredns";
         imageDigest = "sha256:dd3d70eaa614e7228af8124ef37c7d8ccd92e9dd0cbdd823f727428d7b8191f3";
