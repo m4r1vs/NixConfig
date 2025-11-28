@@ -14,10 +14,6 @@ with lib; let
     system = systemArgs.system;
     config.allowUnfree = true;
   };
-  pkgsMaster = import inputs.nixpkgs_master {
-    system = systemArgs.system;
-    config.allowUnfree = true;
-  };
 in {
   nixpkgs = {
     config.allowUnfree = true;
@@ -82,12 +78,10 @@ in {
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
-          aerospace = pkgsUnstable.aerospace;
-          minecraftServers = pkgsUnstable.minecraftServers;
           yabai = pkgsUnstable.yabai;
           yazi = pkgsUnstable.yazi;
           yaziPlugins = pkgsUnstable.yaziPlugins;
-          gemini-cli = pkgsMaster.gemini-cli;
+          gemini-cli = pkgsUnstable.gemini-cli;
 
           /*
           Temporary Fixes / Updates
