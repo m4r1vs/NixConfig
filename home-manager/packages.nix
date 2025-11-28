@@ -23,6 +23,7 @@ in {
       (writeShellScriptBin "random-album-of-the-day" scripts.random-album-of-the-day)
     ]
     ++ lib.optionals isGraphical [
+      atai
       blender
       dbeaver-bin
       obsidian

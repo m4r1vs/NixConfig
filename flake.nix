@@ -22,6 +22,11 @@
       url = "github:m4r1vs/slidecontrol?ref=master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    atai = {
+      # Google Slides remote
+      url = "gitlab:m4r1vs/atai?ref=master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     stummumschalterung = {
       # Cycle mute state of chrome tabs remotely
       url = "gitlab:m4r1vs/stummumschalterung?ref=trunk";

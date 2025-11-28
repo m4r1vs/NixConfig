@@ -1,5 +1,26 @@
 {
   "nodes": {
+    "atai": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1764250188,
+        "narHash": "sha256-TSKfC6s8hmhP2pTVOMA8LqNwIQ1x+ekpdfneuHerKmM=",
+        "owner": "m4r1vs",
+        "repo": "atai",
+        "rev": "afec53ebca623f4f56fc1fd474e6ffdc62b1a302",
+        "type": "gitlab"
+      },
+      "original": {
+        "owner": "m4r1vs",
+        "ref": "master",
+        "repo": "atai",
+        "type": "gitlab"
+      }
+    },
     "comin": {
       "inputs": {
         "nixpkgs": [
@@ -241,11 +262,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1751903740,
-        "narHash": "sha256-PeSkNMvkpEvts+9DjFiop1iT2JuBpyknmBUs0Un0a4I=",
+        "lastModified": 1764234087,
+        "narHash": "sha256-NHF7QWa0ZPT8hsJrvijREW3+nifmF2rTXgS2v0tpcEA=",
         "owner": "nix-community",
         "repo": "nixos-generators",
-        "rev": "032decf9db65efed428afd2fa39d80f7089085eb",
+        "rev": "032a1878682fafe829edfcf5fdfad635a2efe748",
         "type": "github"
       },
       "original": {
@@ -310,11 +331,11 @@
     },
     "nixpkgs_master": {
       "locked": {
-        "lastModified": 1764114617,
-        "narHash": "sha256-+mHySaCZPKWyq/EJIhozu0L+t3whwOVA5pEEIqOk0U8=",
+        "lastModified": 1764248989,
+        "narHash": "sha256-3aLoCMHQQHzhraz9Do91zpMABnIE3v6S+HR3PxI+d9E=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "d9b802c780dc6c8fc22783055681130ff98798a9",
+        "rev": "15fec50a73e9de27d2be4bcbcb09d546a53ee06e",
         "type": "github"
       },
       "original": {
@@ -369,6 +390,7 @@
     },
     "root": {
       "inputs": {
+        "atai": "atai",
         "comin": "comin",
         "disko": "disko",
         "home-manager": "home-manager",

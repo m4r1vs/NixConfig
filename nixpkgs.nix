@@ -23,6 +23,12 @@ in {
     config.allowUnfree = true;
     overlays = [
       /*
+      Own packages
+      */
+      (final: prev: {
+        atai = inputs.atai.packages.${prev.system}.atai;
+      })
+      /*
       From unstable Nixpkgs
       */
       (final: prev: {
