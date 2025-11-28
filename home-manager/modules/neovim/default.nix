@@ -1,5 +1,6 @@
 {
   lib,
+  osConfig,
   config,
   systemArgs,
   pkgs,
@@ -24,7 +25,7 @@ in {
       defaultEditor = true;
       viAlias = true;
       coc.enable = false;
-      extraPackages = import ./nvim-programs.nix pkgs;
+      extraPackages = import ./nvim-programs.nix {inherit pkgs osConfig systemArgs lib;};
       withNodeJs = true;
       extraWrapperArgs = [
         "--suffix"
