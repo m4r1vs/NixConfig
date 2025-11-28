@@ -114,16 +114,6 @@ in {
                 meta.broken = false;
               };
             };
-          # Removes a line that quits containerd when sandbox is missing
-          # TODO: test if it has been fixed by the sandbox overwrite
-          containerd = containerd.overrideAttrs {
-            src = pkgs.fetchFromGitHub {
-              owner = "containerd";
-              repo = "containerd";
-              rev = "release/2.2";
-              hash = "sha256-XLg4oh4AZDboHm9YkSDwlNuYxvvS0yFIXaorgfNGFWU=";
-            };
-          };
 
           /*
           Own Forks
