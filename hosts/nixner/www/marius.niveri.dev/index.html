@@ -74,6 +74,20 @@
       vertical-align: bottom;
     }
 
+    .terminal {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85em;
+      white-space: pre;
+      overflow-x: auto;
+      margin-top: 20px;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #ddd;
+    }
+
     @keyframes blink {
 
       0%,
@@ -126,6 +140,11 @@
       .album-card span a:hover {
         color: #8bc7ff;
       }
+
+      .terminal {
+        border-color: #444;
+        box-shadow: 2px 2px 8px rgba(255, 255, 255, 0.05);
+      }
     }
   </style>
 </head>
@@ -139,11 +158,11 @@
     up by <a href="mailto:marius.niveri@gmail.com">sending me an E-Mail</a> or take a look at my portfolio:
   </p>
   <ul>
-    <li>Browse my open-source work on <a href="https://github.com/m4r1vs">GitHub</a> or visit me on <a
+      <li>Browse my open-source work on <a href="https://github.com/m4r1vs">GitHub</a>, <a href="https://gitlab.com/m4r1vs">GitLab</a> or visit me on <a
         href="https://www.linkedin.com/in/marius-niveri/">LinkedIn</a>.</li>
     <li>I like photography and experimenting with Kubernetes. Take a look at some pictures I took on my <a
         href="https://photos.cluster.niveri.dev/s/gallery">self-hosted
-        Immich cluster</a>.</li>
+        Immich</a> running on my <a href="https://hello-kube.cluster.niveri.dev/">k8s Cluster</a>.</li>
     <li>Go to the <a href="https://nixner.niveri.dev">NixOS configuration</a> of this server.</li>
   </ul>
   <h2>Music I enjoy</h2>
@@ -181,12 +200,32 @@
     <span>Rock for the summer (year-round).<a
         href="https://open.spotify.com/album/2xkZV2Hl1Omi8rk2D7t5lN">Spotify</a></span>
   </div>
+
+  <h2>Server Status</h2>
+  <div id="fastfetch" class="terminal">Loading system info...</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ansi_up@5.0.1/ansi_up.min.js"></script>
   <script>
     function updateTime() {
       document.getElementById('time').textContent = new Date().toLocaleTimeString();
     }
     updateTime();
     setInterval(updateTime, 1000);
+
+    async function fetchSystemInfo() {
+      try {
+        const response = await fetch('https://fastfetch.niveri.dev');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const text = await response.text();
+        const ansi_up = new AnsiUp();
+        const html = ansi_up.ansi_to_html(text);
+        document.getElementById('fastfetch').innerHTML = html;
+      } catch (error) {
+        document.getElementById('fastfetch').innerText = 'Failed to load system info. (Is the server running?)';
+        console.error('Fastfetch error:', error);
+      }
+    }
+    fetchSystemInfo();
   </script>
 </body>
 
