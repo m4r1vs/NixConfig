@@ -19,7 +19,6 @@ in {
     ++ lib.optionals isDarwin [
       clippy-darwin
       comma
-      podman
       (writeShellScriptBin "random-album-of-the-day" scripts.random-album-of-the-day)
     ]
     ++ lib.optionals isGraphical [

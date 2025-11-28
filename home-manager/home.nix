@@ -46,6 +46,7 @@ in {
     configured = {
       brave.enable = isDesktop;
       direnv.enable = true;
+      docker-darwin.enable = isDarwin;
       fzf.enable = true;
       ghostty.enable = isDesktop || isWSL || isDarwin;
       git.enable = true;

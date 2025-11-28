@@ -38,6 +38,9 @@ in {
         mise = pkgsUnstable.mise;
       })
       (final: prev: {
+        colima = pkgsUnstable.colima;
+      })
+      (final: prev: {
         ghostty =
           if isDarwin
           then pkgsUnstable.ghostty-bin
