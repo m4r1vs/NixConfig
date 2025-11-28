@@ -25,12 +25,12 @@ in {
       atai
       blender
       dbeaver-bin
+      gemini-cli
       obsidian
       prismlauncher
       vscode
-      zathura
-      gemini-cli
       yt-dlp
+      zathura
     ]
     ++ lib.optionals isDesktop ([
         amberol
