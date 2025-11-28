@@ -26,6 +26,12 @@ in {
       From unstable Nixpkgs
       */
       (final: prev: {
+        direnv = pkgsUnstable.direnv;
+      })
+      (final: prev: {
+        mise = pkgsUnstable.mise;
+      })
+      (final: prev: {
         ghostty =
           if isDarwin
           then pkgsUnstable.ghostty-bin

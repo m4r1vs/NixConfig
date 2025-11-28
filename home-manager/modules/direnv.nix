@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  pkgs,
   ...
 }:
 with lib; let
@@ -14,8 +15,11 @@ in {
       enable = true;
       enableZshIntegration = true;
       nix-direnv.enable = true;
-      mise.enable = false;
+      mise.enable = true;
       silent = true;
     };
+    home.packages = [
+      pkgs.mise
+    ];
   };
 }
