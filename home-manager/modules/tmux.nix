@@ -51,6 +51,7 @@ in {
         nix = "󱄅";
         sudo = "";
         node = "";
+        bun = "";
         journalctl = "";
         spotify_player = "";
         k9s = "󰠳";
