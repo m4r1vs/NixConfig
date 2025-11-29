@@ -31,6 +31,11 @@
       url = "gitlab:m4r1vs/stummumschalterung?ref=trunk";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    homepage = {
+      # My Homepage
+      url = "gitlab:m4r1vs/homepage?ref=master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     home-manager = {
       # Configure programs using nix
       url = "github:nix-community/home-manager?ref=release-25.11";
@@ -164,6 +169,7 @@
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
               inputs.slidecontrol.nixosModules.slidecontrol-server
+              inputs.homepage.nixosModules.homepage-server
               inputs.stummumschalterung.nixosModules.stummumschalterung-server
 
               {config._module.args = {inherit systemArgs self inputs;};}

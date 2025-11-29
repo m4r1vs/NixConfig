@@ -22,6 +22,12 @@ in {
         domain = "niveri.dev";
       };
     };
+    homepage-server = {
+      enable = true;
+      domain = "homepage.niveri.dev";
+      acmeHost = "niveri.dev";
+      port = 4325;
+    };
     comin = {
       enable = true;
       debug = true;
