@@ -88,6 +88,12 @@ if vim.g.started_by_firenvim == true then
   }
 end
 
+-- Treat .svx files as markdown
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = "*.svx",
+  command = "set filetype=markdown",
+})
+
 -- Configure Markdown text wrapping
 vim.api.nvim_create_augroup('markdown_settings', { clear = true })
 vim.api.nvim_create_autocmd('FileType', {
