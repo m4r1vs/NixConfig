@@ -46,11 +46,11 @@ in {
         globalRedirect = "github.com/m4r1vs/NixConfig/tree/main/hosts/nixner";
       };
 
-      virtualHosts."marius.${cfg.domain}" = {
+      virtualHosts."old.${cfg.domain}" = {
         forceSSL = true;
         useACMEHost = cfg.domain;
         locations."/" = {
-          root = ./marius.niveri.dev;
+          root = ./old.niveri.dev;
           index = "index.html";
           extraConfig = ''
             default_type text/html;

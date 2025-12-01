@@ -24,7 +24,7 @@ in {
     };
     homepage-server = {
       enable = true;
-      domain = "homepage.niveri.dev";
+      domain = "marius.niveri.dev";
       acmeHost = "niveri.dev";
       port = 4325;
     };
