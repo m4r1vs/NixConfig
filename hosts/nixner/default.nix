@@ -26,7 +26,7 @@ in {
       enable = true;
       domain = "marius.niveri.dev";
       acmeHost = "niveri.dev";
-      port = 4325;
+      socket = true;
     };
     comin = {
       enable = true;
