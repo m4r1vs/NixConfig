@@ -101,6 +101,10 @@ in {
           *.envoy               IN      A       91.107.238.152
                                 IN      AAAA    2a01:4f8:1c1c:373e::1
 
+          *                     IN      TXT     google-site-verification=D-lnbFdtT250DqBO99hnS1fN3vDOXKvtTB42F9iGOE4
+
+          @                     IN      TXT     google-site-verification=D-lnbFdtT250DqBO99hnS1fN3vDOXKvtTB42F9iGOE4
+
           @                     IN      A       ${ipv4}
                                 IN      AAAA    ${ipv6}
 
