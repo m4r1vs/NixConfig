@@ -56,7 +56,6 @@ in {
         PowerPoint = 462062816;
         Word = 462054704;
         Excel = 462058435;
-        Flighty = 1358823008;
         DavinciResolve = 571213070;
         Xcode = 497799835;
         GarageBand = 682658836;
