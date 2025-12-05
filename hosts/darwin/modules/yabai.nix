@@ -49,7 +49,7 @@ in {
             yabai -m rule --add title="^General$" manage=off # most of apple settings windows are named "General"
 
             yabai -m rule --add title="^scratchpad_yazi$" scratchpad=yazi grid=11:11:1:1:9:9
-            yabai -m rule --add title="^scratchpad_spotify$" scratchpad=spotify grid=11:11:1:1:9:9
+            yabai -m rule --add title="^scratchpad_spotify$" scratchpad=spotify grid=11:11:2:1:7:9
             yabai -m rule --add title="^scratchpad_tmux$" scratchpad=tmux grid=11:11:1:1:9:9
             yabai -m rule --add title="^scratchpad_k9s$" scratchpad=k9s grid=11:11:1:1:9:9
 
@@ -91,20 +91,23 @@ in {
       ".config/skhd/skhdrc".text = ''
         .blacklist [
           "vmware fusion"
+          "digital color meter"
         ]
 
         .define toggle_scratchpad : yabai -m window --toggle {{1}} || {{2}}
 
-        lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --macos-icon=xray --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_yazi -e yazi")
-        f8 : @toggle_scratchpad("spotify", "${pkgs.ghostty}/bin/ghostty --macos-icon=retro --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=16 --background-opacity=0.85 --title=scratchpad_spotify -e spotify_player")
-        lcmd + ctrl - t : @toggle_scratchpad("tmux", "${pkgs.ghostty}/bin/ghostty --macos-icon=microchip --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_tmux -e tmux")
-        lcmd + shift - f3 : @toggle_scratchpad("k9s", "${pkgs.ghostty}/bin/ghostty --macos-icon=microchip --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_k9s -e k9s")
+        lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --macos-icon=xray --keybind='global:super+enter=unbind' --font-size=14 --title=scratchpad_yazi -e yazi")
+        f8 : @toggle_scratchpad("spotify", "${pkgs.ghostty}/bin/ghostty --macos-icon=retro --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_spotify -e spotify_player")
+        lcmd + ctrl - t : @toggle_scratchpad("tmux", "${pkgs.ghostty}/bin/ghostty --macos-icon=microchip --keybind='global:super+enter=unbind' --title=scratchpad_tmux -e tmux")
+        lcmd + ctrl - m : @toggle_scratchpad("k9s", "${pkgs.ghostty}/bin/ghostty --macos-icon=microchip --keybind='global:super+enter=unbind' --font-size=14 --title=scratchpad_k9s -e k9s")
 
         lcmd - q : yabai -m window --close
         lcmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')
 
         lcmd - 0x2C : osascript -e 'set volume output volume ((output volume of (get volume settings)) - 5)'
         lcmd - 0x1E : osascript -e 'set volume output volume ((output volume of (get volume settings)) + 5)'
+
+        lcmd + shift - c : open -a "Digital Color Meter"
 
         lcmd + shift - 0x2C : skhd -k "f14" # brightness down
         lcmd + shift - 0x1E : skhd -k "f15" # brightness up

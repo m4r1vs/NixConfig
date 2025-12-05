@@ -62,12 +62,12 @@ in {
           else "Never";
         notify_streaming_only = true;
         default_device = systemArgs.hostname;
-        cover_img_width = 9;
-        cover_img_length = 21;
+        cover_img_width = 14;
+        cover_img_length = 34;
         seek_duration_secs = 5;
         layout = {
           playback_window_position = "Bottom";
-          playback_window_height = 10;
+          playback_window_height = 16;
           library = {
             playlist_percent = 40;
             album_percent = 40;
