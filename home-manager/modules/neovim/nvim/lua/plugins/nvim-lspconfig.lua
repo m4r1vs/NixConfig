@@ -105,6 +105,7 @@ return {
     vim.lsp.enable("svelte")
     vim.lsp.enable("tailwindcss")
     vim.lsp.enable("taplo")
+    vim.lsp.enable("templ")
     vim.lsp.enable("terraformls")
     vim.lsp.enable("texlab")
     vim.lsp.enable("tinymist")
