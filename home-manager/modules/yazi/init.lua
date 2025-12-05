@@ -1,7 +1,5 @@
 ---@diagnostic disable: undefined-global
 
-require("full-border"):setup()
-
 -- Sync yank clipboard across instances
 require("session"):setup {
   sync_yanked = true,

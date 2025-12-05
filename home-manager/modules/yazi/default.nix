@@ -165,7 +165,6 @@ in {
       };
       plugins =
         {
-          full-border = pkgs.yaziPlugins.full-border;
           git = pkgs.yaziPlugins.git;
           jump-to-char = pkgs.yaziPlugins.jump-to-char;
           smart-enter = pkgs.yaziPlugins.smart-enter;
