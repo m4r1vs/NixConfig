@@ -101,6 +101,8 @@ in {
       packages = with pkgs; [
         eb-garamond
         nerd-fonts.jetbrains-mono
+        nerd-fonts.departure-mono
+        nerd-fonts.go-mono
         open-sans
         public-sans
         ubuntu-classic

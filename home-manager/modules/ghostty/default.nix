@@ -29,7 +29,7 @@ in {
           then 12
           else 10;
         font-family = [
-          "JetBrainsMono Nerd Font Propo"
+          "GoMono Nerd Font Propo"
           "Apple Color Emoji"
         ];
         confirm-close-surface = false;

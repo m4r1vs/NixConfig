@@ -120,7 +120,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     color.b = safeTexture(iChannel0, warped_uv - rgbShiftVec).b;
 
     // Set opacity
-    color.a = 0.80;
+    color.a = 0.92;
 
     // Extract bright areas
     vec4 bright = brightPass(color, 0.6);
