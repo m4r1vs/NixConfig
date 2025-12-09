@@ -192,14 +192,14 @@ in {
         lcmd + ctrl - 9 : yabai -m space --focus 18
 
         lcmd + ctrl + shift - 1 : yabai -m window --space 10 && yabai -m space --focus 10 && ${focusUnderCursor}
-        lcmd + ctrl + shift - 2 : yabai -m window --space 12 && yabai -m space --focus 11 && ${focusUnderCursor}
-        lcmd + ctrl + shift - 3 : yabai -m window --space 13 && yabai -m space --focus 12 && ${focusUnderCursor}
-        lcmd + ctrl + shift - 4 : yabai -m window --space 14 && yabai -m space --focus 13 && ${focusUnderCursor}
-        lcmd + ctrl + shift - 5 : yabai -m window --space 15 && yabai -m space --focus 14 && ${focusUnderCursor}
-        lcmd + ctrl + shift - 6 : yabai -m window --space 16 && yabai -m space --focus 15 && ${focusUnderCursor}
-        lcmd + ctrl + shift - 7 : yabai -m window --space 17 && yabai -m space --focus 16 && ${focusUnderCursor}
-        lcmd + ctrl + shift - 8 : yabai -m window --space 18 && yabai -m space --focus 17 && ${focusUnderCursor}
-        lcmd + ctrl + shift - 9 : yabai -m window --space 19 && yabai -m space --focus 18 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 2 : yabai -m window --space 11 && yabai -m space --focus 11 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 3 : yabai -m window --space 12 && yabai -m space --focus 12 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 4 : yabai -m window --space 13 && yabai -m space --focus 13 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 5 : yabai -m window --space 14 && yabai -m space --focus 14 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 6 : yabai -m window --space 15 && yabai -m space --focus 15 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 7 : yabai -m window --space 16 && yabai -m space --focus 16 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 8 : yabai -m window --space 17 && yabai -m space --focus 17 && ${focusUnderCursor}
+        lcmd + ctrl + shift - 9 : yabai -m window --space 18 && yabai -m space --focus 18 && ${focusUnderCursor}
       '';
     };
   };
