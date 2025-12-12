@@ -38,6 +38,7 @@ in {
         ls = "${pkgs.lsd}/bin/lsd";
         la = "${pkgs.lsd}/bin/lsd -la";
         tree = "${pkgs.lsd}/bin/lsd --tree";
+        present = "${pkgs.zathura}/bin/zathura --mode=presentation";
         rebuild =
           if isDarwin
           then "sudo darwin-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname} && sudo yabai --load-sa"
