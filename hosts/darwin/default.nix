@@ -40,6 +40,7 @@ in {
         "brave-browser"
         "discord"
         "google-drive"
+        "krishkrosh/apps/trackweight"
         "linearmouse"
         "mediamate"
         "raycast"
