@@ -263,6 +263,7 @@
             ./hosts/darwin
             ./hosts/darwin/nixbook
 
+            inputs.nix-index-database.darwinModules.nix-index
             inputs.home-manager.darwinModules.home-manager
             {config._module.args = {inherit systemArgs self inputs;};}
           ]
