@@ -70,12 +70,9 @@ in {
           "dimaround,swaync-control-center"
           "noanim,hyprpicker"
         ];
-        gestures = {
-          workspace_swipe = true;
-          workspace_swipe_fingers = 3;
-          workspace_swipe_forever = true;
-          workspace_swipe_direction_lock = false;
-        };
+        gesture = [
+          "3, horizontal, workspace"
+        ];
         opengl = {
           nvidia_anti_flicker = false;
         };
@@ -147,7 +144,6 @@ in {
         };
         animations = {
           enabled = true;
-          first_launch_animation = false;
           bezier = [
             "smooth, 0.05, 0.9, 0.1, 1"
           ];

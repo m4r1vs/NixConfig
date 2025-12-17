@@ -94,20 +94,6 @@ in {
               ttfautohint-nox
             ];
           };
-          # TODO: test if this has been fixed
-          hyprlandPlugins =
-            hyprlandPlugins
-            // {
-              hyprfocus = hyprlandPlugins.hyprfocus.overrideAttrs {
-                src = pkgs.fetchFromGitHub {
-                  owner = "daxisunder";
-                  repo = "hyprfocus";
-                  rev = "516e36572f50cca631e7e572249b3716c3602176";
-                  hash = "sha256-TnsdJxxBFbc54T43UP+7mmZkErc7NrZ31C0QNePdDrE=";
-                };
-                meta.broken = false;
-              };
-            };
 
           /*
           Own Forks
@@ -127,11 +113,11 @@ in {
             src = fetchFromGitHub {
               owner = "m4r1vs";
               repo = "spotify-player";
-              rev = "8ee2ce3228a7d69940ee290915269a42735228f1";
-              hash = "sha256-9+vpxcDHwCd4JdcjKeuUshs2PmHzPlUFj4+l2d7fhQs=";
+              rev = "e1f2b8b92363a233832db1bbbd8858f27d41709d";
+              hash = "sha256-wh8GoIUcPhzYmc4egXMHEMPnr4b5oNWs36qpVaYolEc=";
             };
 
-            cargoHash = "sha256-rqDLkzCl7gn3s/37MPytYaGb0tdtemYi8bgEkrkllDU=";
+            cargoHash = "sha256-JgPf68KpRE8z+2webU99cR0+6xmaplcVwgFcgvHiwrs=";
 
             nativeBuildInputs = [
               pkg-config
@@ -163,7 +149,6 @@ in {
           /*
           Mods to packages
           */
-          gimp-with-plugins = gimp3-with-plugins;
           rofi-unwrapped = rofi-unwrapped.overrideAttrs (oldAttrs: {
             patchPhase = ''
               echo "NoDisplay=true" >> ./data/rofi-theme-selector.desktop
@@ -178,11 +163,6 @@ in {
             alsaSupport = true;
             githubSupport = true;
           };
-
-          /*
-          Specialisations
-          */
-          rofi = lib.mkIf isWayland rofi-wayland;
         })
     ];
   };
