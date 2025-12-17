@@ -225,8 +225,11 @@ in {
 
             "SUPER, backslash, exec, ${pkgs.pamixer}/bin/pamixer -t"
 
-            ",F1, togglespecialworkspace, spotify_player"
-            ",F1, exec, pgrep spotify_player || ${pkgs.ghostty}/bin/ghostty --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
+            ",F8, togglespecialworkspace, spotify_player"
+            ",F8, exec, pgrep spotify_player || ${pkgs.ghostty}/bin/ghostty --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
+
+            "SUPER, F8, exec, ${pkgs.spotify-player}/bin/spotify_player like && ${scripts.nixos-notify} -e -t 1800 \"Liked currentry playing Track on Spotify\""
+            "Shift, F8, exec, ${scripts.random-album-of-the-day}"
 
             ",F7, exec, ${scripts.wireless-screen}"
 
@@ -247,9 +250,6 @@ in {
               useHypr = true;
             }}"
             "Shift, F11, togglespecialworkspace, obsidian"
-
-            ",F12, exec, ${pkgs.spotify-player}/bin/spotify_player like && ${scripts.nixos-notify} -e -t 1800 \"Liked currentry playing Track on Spotify\""
-            "Shift, F12, exec, ${scripts.random-album-of-the-day}"
 
             "SUPER+Shift, s, exec, ${scripts.screenshot} edit"
             "SUPER+Shift, c, exec, ${pkgs.swaynotificationcenter}/bin/swaync-client -t"
