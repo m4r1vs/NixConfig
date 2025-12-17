@@ -21,8 +21,14 @@ in {
       enableZshIntegration = true;
       settings = {
         theme = "dark:cyberdream-dark,light:cyberdream-light";
-        window-padding-x = 6;
-        window-padding-y = 6;
+        window-padding-x =
+          if isDarwin
+          then 6
+          else 3;
+        window-padding-y =
+          if isDarwin
+          then 6
+          else 3;
         gtk-titlebar = false;
         font-size =
           if isDarwin
