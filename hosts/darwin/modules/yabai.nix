@@ -77,6 +77,8 @@ in {
               done
             fi
 
+            yabai -m space 4 --layout float
+
             while true; do
               yabai -m config focus_follows_mouse autoraise
               sleep 60
@@ -97,32 +99,34 @@ in {
         .define toggle_scratchpad : yabai -m window --toggle {{1}} || {{2}}
 
         lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --macos-icon=xray --keybind='global:super+enter=unbind' --font-size=14 --title=scratchpad_yazi -e yazi")
-        f8 : @toggle_scratchpad("spotify", "${pkgs.ghostty}/bin/ghostty --macos-icon=retro --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_spotify -e spotify_player")
         lcmd + ctrl - t : @toggle_scratchpad("tmux", "${pkgs.ghostty}/bin/ghostty --macos-icon=microchip --keybind='global:super+enter=unbind' --title=scratchpad_tmux -e tmux")
         lcmd + ctrl - m : @toggle_scratchpad("k9s", "${pkgs.ghostty}/bin/ghostty --macos-icon=microchip --keybind='global:super+enter=unbind' --font-size=14 --title=scratchpad_k9s -e k9s")
 
         lcmd - q : yabai -m window --close
         lcmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')
 
-        lcmd - 0x2C : osascript -e 'set volume output volume ((output volume of (get volume settings)) - 5)'
-        lcmd - 0x1E : osascript -e 'set volume output volume ((output volume of (get volume settings)) + 5)'
-
         lcmd + shift - c : open -a "Digital Color Meter"
 
-        lcmd + shift - 0x2C : skhd -k "f14" # brightness down
-        lcmd + shift - 0x1E : skhd -k "f15" # brightness up
+        lcmd - 0x2C | sound_down
+        lcmd - 0x1E | sound_up
+
+        lcmd + shift - 0x2C | brightness_down
+        lcmd + shift - 0x1E | brightness_up
 
         fn - h : skhd -k "left"
         fn - k : skhd -k "up"
         fn - j : skhd -k "down"
         fn - l : skhd -k "right"
 
-        f1 : skhd -k "f14" # brightness down
-        f2 : skhd -k "f15" # brightness up
+        f1 | brightness_down
+        f2 | brightness_up
 
-        f10 : osascript -e 'set volume output muted not (output muted of (get volume settings))'
-        f11 : osascript -e 'set volume output volume ((output volume of (get volume settings)) - 5)'
-        f12 : osascript -e 'set volume output volume ((output volume of (get volume settings)) + 5)'
+        f8 : @toggle_scratchpad("spotify", "${pkgs.ghostty}/bin/ghostty --macos-icon=retro --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_spotify -e spotify_player")
+        lcmd - f8 : random-album-of-the-day
+
+        f10 | mute
+        f11 | sound_down
+        f12 | sound_up
 
         lcmd - f1 : ${pkgs.ghostty}/bin/ghostty --macos-icon=holographic -e zsh -c "export TERM=xterm-256color; ssh -J 2niveri@rzssh1.informatik.uni-hamburg.de 2niveri@sppc13.informatik.uni-hamburg.de"
         lcmd - f2 : ${pkgs.ghostty}/bin/ghostty --macos-icon=holographic -e ssh mn@nixner.niveri.dev
@@ -159,8 +163,6 @@ in {
         lcmd + lshift - f: yabai -m window --toggle zoom-fullscreen
         lcmd + ctrl - f: yabai -m window --toggle native-fullscreen
 
-        lcmd - f8 : random-album-of-the-day
-
         lcmd - 1 : yabai -m space --focus 1
         lcmd - 2 : yabai -m space --focus 2
         lcmd - 3 : yabai -m space --focus 3
@@ -170,6 +172,7 @@ in {
         lcmd - 7 : yabai -m space --focus 7
         lcmd - 8 : yabai -m space --focus 8
         lcmd - 9 : yabai -m space --focus 9
+        lcmd - 0 : yabai -m space --focus recent
 
         lcmd + shift - 1 : yabai -m window --space 1 && yabai -m space --focus 1 && ${focusUnderCursor}
         lcmd + shift - 2 : yabai -m window --space 2 && yabai -m space --focus 2 && ${focusUnderCursor}
