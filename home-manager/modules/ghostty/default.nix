@@ -64,7 +64,7 @@ in {
             "super+c=copy_to_clipboard"
             "super+v=paste_from_clipboard"
             "super+q=quit"
-            "global:super+enter=new_window"
+            # "global:super+enter=new_window"
           ];
       };
       themes = {
