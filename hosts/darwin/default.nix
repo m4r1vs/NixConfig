@@ -70,7 +70,7 @@ in {
           autohide-delay = 0.0;
           static-only = false;
           expose-group-apps = false;
-          largesize = 46;
+          largesize = 36;
           launchanim = true;
           magnification = true;
           mineffect = "genie";
@@ -78,7 +78,7 @@ in {
           orientation = "bottom";
           minimize-to-application = true;
           show-recents = false;
-          tilesize = 32;
+          tilesize = 28;
         };
         trackpad = {
           Clicking = false;
