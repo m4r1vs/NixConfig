@@ -22,7 +22,6 @@ in {
       enable = true;
       plugins = with pkgs; [
         hyprlandPlugins.hypr-dynamic-cursors
-        hyprlandPlugins.hyprfocus
       ];
       settings = {
         exec-once = [
@@ -87,20 +86,6 @@ in {
           no_update_news = true;
         };
         plugin = {
-          hyprfocus = {
-            enabled = true;
-            animate_floating = true;
-            animate_workspacechange = true;
-            focus_animation = "flash";
-            bezier = "realsmooth, 0.28,0.29,0.69,1.08";
-            flash = {
-              flash_opacity = 0.96;
-              in_bezier = "realsmooth";
-              in_speed = 0.3;
-              out_bezier = "realsmooth";
-              out_speed = 0.6;
-            };
-          };
           dynamic-cursors = {
             enabled = true;
             threshold = 1;
