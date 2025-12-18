@@ -53,15 +53,15 @@ in {
             yabai -m rule --add title="^scratchpad_tmux$" scratchpad=tmux grid=11:11:1:1:9:9
             yabai -m rule --add title="^scratchpad_k9s$" scratchpad=k9s grid=11:11:1:1:9:9
 
-            yabai -m space 1 --label one
-            yabai -m space 2 --label two
-            yabai -m space 3 --label three
-            yabai -m space 4 --label four
-            yabai -m space 5 --label five
-            yabai -m space 6 --label six
-            yabai -m space 7 --label six
-            yabai -m space 8 --label six
-            yabai -m space 9 --label nine
+            yabai -m space 1 --label browser
+            yabai -m space 2 --label terminal
+            yabai -m space 3 --label obsidian
+            yabai -m space 4 --label scratchpad_one
+            yabai -m space 5 --label scratchpad_two
+            yabai -m space 6 --label scratchpad_three
+            yabai -m space 7 --label calender
+            yabai -m space 8 --label mail
+            yabai -m space 9 --label whatsapp
 
             # Try to focus the windows instead of finder ghost window:
             yabai -m signal --add event=window_destroyed action="${focusUnderCursor}"
@@ -78,6 +78,11 @@ in {
             fi
 
             yabai -m space 4 --layout float
+            yabai -m space 5 --layout float
+            yabai -m space 6 --layout float
+            yabai -m space 7 --layout float
+            yabai -m space 8 --layout float
+            yabai -m space 9 --layout float
 
             while true; do
               yabai -m config focus_follows_mouse autoraise
