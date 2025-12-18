@@ -78,6 +78,7 @@ in {
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
+          mesa = pkgsUnstable.mesa;
           yabai = pkgsUnstable.yabai;
           yazi = pkgsUnstable.yazi;
           yaziPlugins = pkgsUnstable.yaziPlugins;

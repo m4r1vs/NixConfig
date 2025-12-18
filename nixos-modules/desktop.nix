@@ -7,6 +7,7 @@
 }:
 with lib; let
   cfg = config.configured.desktop;
+  isX86 = systemArgs.system == "x86_64-linux";
 in {
   options.configured.desktop = {
     enable = mkEnableOption "Enable a Desktop Environment";
@@ -109,7 +110,10 @@ in {
     };
 
     boot = {
-      binfmt.emulatedSystems = ["aarch64-linux"];
+      binfmt.emulatedSystems =
+        if isX86
+        then ["aarch64-linux"]
+        else ["x86_64-linux"];
       initrd = {
         verbose = false;
         systemd.enable = true;
@@ -159,7 +163,7 @@ in {
       };
     };
 
-    hardware = {
+    hardware = lib.mkIf isX86 {
       bluetooth = {
         enable = true;
         powerOnBoot = true;
@@ -176,15 +180,15 @@ in {
       };
     };
 
-    virtualisation = {
+    virtualisation = lib.mkIf isX86 {
       spiceUSBRedirection.enable = true;
       libvirtd.enable = true;
     };
 
     programs = {
-      virt-manager.enable = true;
+      virt-manager.enable = isX86;
       dconf.enable = true;
-      steam = {
+      steam = lib.mkIf isX86 {
         enable = true;
         remotePlay.openFirewall = true;
         dedicatedServer.openFirewall = true;

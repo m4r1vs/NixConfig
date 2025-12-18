@@ -8,6 +8,7 @@
   isDesktop = osConfig.configured ? desktop && osConfig.configured.desktop.enable;
   isWayland = osConfig.configured ? desktop && !osConfig.configured.desktop.x11;
   isDarwin = systemArgs.system == "aarch64-darwin";
+  isX86 = systemArgs.system == "x86_64-linux";
   isGraphical = isDarwin || isDesktop;
 in {
   home.packages = with pkgs;
@@ -34,7 +35,6 @@ in {
     ++ lib.optionals isDesktop ([
         amberol
         diebahn
-        discord
         gimp-with-plugins
         gnome-chess
         gnome-clocks
@@ -49,7 +49,6 @@ in {
         pavucontrol
         polkit_gnome
         scripts.artkube
-        spotify
         stockfish
         wireplumber
       ]
@@ -65,6 +64,16 @@ in {
         else [
           arandr
           feh
+        ]
+      )
+      ++ (
+        if isX86
+        then [
+          discord
+          spotify
+        ]
+        else [
+          legcord
         ]
       ));
 }
