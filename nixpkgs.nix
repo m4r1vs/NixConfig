@@ -79,7 +79,18 @@ in {
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
           mesa = pkgsUnstable.mesa;
-          yabai = pkgsUnstable.yabai;
+          yabai = pkgsUnstable.yabai.overrideAttrs {
+            src = pkgs.fetchzip {
+              url = "https://github.com/m4r1vs/yabai/raw/refs/heads/master/bin.tar.gz";
+              hash = "sha256-+vy3Wyq2bTlEDVXIOXqe40BBUz5CWLHQzgBhv1EfFB8=";
+            };
+            installPhase = ''
+              runHook preInstall
+              mkdir -p $out/bin
+              cp ./yabai $out/bin/yabai
+              runHook postInstall
+            '';
+          };
           yazi = pkgsUnstable.yazi;
           yaziPlugins = pkgsUnstable.yaziPlugins;
           gemini-cli = pkgsUnstable.gemini-cli;
