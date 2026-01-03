@@ -41,7 +41,7 @@ in {
         gnome-decoder
         gnome-network-displays
         inkscape-with-extensions
-        jetbrains.idea-ultimate
+        jetbrains.idea
         kdePackages.kwalletmanager
         libnotify
         nautilus
