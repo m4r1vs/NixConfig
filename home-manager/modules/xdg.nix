@@ -85,7 +85,7 @@ in {
         };
         brave-browser = {
           name = "Personal Browser";
-          exec = ''${pkgs.brave}/bin/brave --profile-directory=Default --ozone-platform-hint=auto --use-gl=desktop --enable-features=TouchpadOverscrollHistoryNavigation %U'';
+          exec = ''${pkgs.brave}/bin/brave --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation %U'';
           icon = "brave-browser-nightly";
           terminal = false;
           type = "Application";

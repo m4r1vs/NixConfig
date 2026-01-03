@@ -17,7 +17,6 @@ in {
       commandLineArgs = [
         "--ozone-platform-hint=auto"
         "--enable-features=TouchpadOverscrollHistoryNavigation"
-        "--use-gl=desktop"
       ];
     };
   };
