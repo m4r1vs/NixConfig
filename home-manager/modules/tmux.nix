@@ -170,8 +170,8 @@ in {
               src = pkgs.fetchFromGitHub {
                 owner = "niksingh710";
                 repo = "minimal-tmux-status";
-                rev = "main";
-                sha256 = "sha256-k/rEvNWUTge1uYwwSMfgM7CDoKanIm8ED3vo5mqDe08=";
+                rev = "67e2f5205de1b46f99af1d92013fb38fec5b05d9";
+                sha256 = "sha256-T5eoG861JJdGj6swp4+icjzwtSB5TY4efy5FeYbgHeg=";
               };
               rtpFilePath = "minimal.tmux";
             };
