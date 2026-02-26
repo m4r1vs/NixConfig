@@ -23,7 +23,9 @@ in {
           /*
           Own packages / not in nixpkgs
           */
+
           atai = inputs.atai.packages.${stdenv.hostPlatform.system}.atai;
+
           # TODO: add PR to add to nixpkgs
           clippy-darwin = pkgsUnstable.buildGoModule {
             pname = "clippy-darwin";
@@ -51,6 +53,7 @@ in {
               runHook postInstall
             '';
           };
+
           # TODO: add PR to add to nixpkgs
           skhd-zig = with pkgs;
             stdenv.mkDerivation {
@@ -74,23 +77,12 @@ in {
           /*
           From unstable/master Nixpkgs
           */
+
           ghostty =
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
           mesa = pkgsUnstable.mesa;
-          yabai = pkgsUnstable.yabai.overrideAttrs {
-            src = pkgs.fetchzip {
-              url = "https://github.com/m4r1vs/yabai/raw/refs/heads/master/bin.tar.gz";
-              hash = "sha256-LyV7fcf4Av5gab4TPDXUs52iu4WFgx7Q4W1lWHjL+7k=";
-            };
-            installPhase = ''
-              runHook preInstall
-              mkdir -p $out/bin
-              cp ./yabai $out/bin/yabai
-              runHook postInstall
-            '';
-          };
           yazi = pkgsUnstable.yazi;
           yaziPlugins = pkgsUnstable.yaziPlugins;
           gemini-cli = pkgsUnstable.gemini-cli;
@@ -98,7 +90,8 @@ in {
           /*
           Temporary Fixes / Updates
           */
-          #  https://github.com/NixOS/nixpkgs/pull/463023
+
+          # https://github.com/NixOS/nixpkgs/pull/463023
           eb-garamond = eb-garamond.overrideAttrs {
             nativeBuildInputs = [
               fontforge
@@ -110,6 +103,8 @@ in {
           /*
           Own Forks
           */
+
+          # Make border between panes invisible
           tmux = tmux.overrideAttrs {
             src = pkgs.fetchFromGitHub {
               owner = "m4r1vs";
@@ -118,6 +113,8 @@ in {
               hash = "sha256-TP0jL+oA/qHHlOYG2zyDZmSxa39+UgLWM2NvPEoVXyE=";
             };
           };
+
+          # Add title, add playing animation and fix podcasts not loading
           spotify-player = rustPlatform.buildRustPackage {
             pname = "spotify-player";
             version = "0.22.1";
@@ -158,15 +155,31 @@ in {
               ];
           };
 
+          # Add fn-X and fn-Y shortcuts to resize/move windows
+          yabai = pkgsUnstable.yabai.overrideAttrs {
+            src = pkgs.fetchzip {
+              url = "https://github.com/m4r1vs/yabai/raw/refs/heads/master/bin.tar.gz";
+              hash = "sha256-LyV7fcf4Av5gab4TPDXUs52iu4WFgx7Q4W1lWHjL+7k=";
+            };
+            installPhase = ''
+              runHook preInstall
+              mkdir -p $out/bin
+              cp ./yabai $out/bin/yabai
+              runHook postInstall
+            '';
+          };
+
           /*
           Mods to packages
           */
+
           rofi-unwrapped = rofi-unwrapped.overrideAttrs (oldAttrs: {
             patchPhase = ''
               echo "NoDisplay=true" >> ./data/rofi-theme-selector.desktop
               echo "NoDisplay=true" >> ./data/rofi.desktop
             '';
           });
+
           polybar = polybar.override {
             nlSupport = true; # networking
             iwSupport = true; # WiFi
