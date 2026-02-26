@@ -121,10 +121,10 @@ in {
       consoleLogLevel = 0;
       plymouth = {
         enable = true;
-        theme = "abstract_ring"; # rings and colorful_sliced also good
+        theme = "owl"; # rings, abstract_ring and colorful_sliced also good
         themePackages = with pkgs; [
           (adi1090x-plymouth-themes.override {
-            selected_themes = ["abstract_ring"];
+            selected_themes = ["owl"];
           })
         ];
       };
