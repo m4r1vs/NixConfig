@@ -120,16 +120,16 @@ in {
           };
           spotify-player = rustPlatform.buildRustPackage {
             pname = "spotify-player";
-            version = "0.20.4";
+            version = "0.22.1";
 
             src = fetchFromGitHub {
               owner = "m4r1vs";
               repo = "spotify-player";
-              rev = "e1f2b8b92363a233832db1bbbd8858f27d41709d";
-              hash = "sha256-wh8GoIUcPhzYmc4egXMHEMPnr4b5oNWs36qpVaYolEc=";
+              rev = "2bc970368f2b16842b6c28aeeb193bac012c1f33";
+              hash = "sha256-mCBvYLOPLkODz5suL61ILOQhLGOr57xrdSS8deRhXkE=";
             };
 
-            cargoHash = "sha256-JgPf68KpRE8z+2webU99cR0+6xmaplcVwgFcgvHiwrs=";
+            cargoHash = "sha256-12ccf5LT2XAq1SmcG6RnpECDS89ZJ/21MYp8dtBUnL8=";
 
             nativeBuildInputs = [
               pkg-config
