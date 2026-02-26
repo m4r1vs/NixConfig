@@ -82,7 +82,7 @@ in {
           yabai = pkgsUnstable.yabai.overrideAttrs {
             src = pkgs.fetchzip {
               url = "https://github.com/m4r1vs/yabai/raw/refs/heads/master/bin.tar.gz";
-              hash = "sha256-+vy3Wyq2bTlEDVXIOXqe40BBUz5CWLHQzgBhv1EfFB8=";
+              hash = "sha256-LyV7fcf4Av5gab4TPDXUs52iu4WFgx7Q4W1lWHjL+7k=";
             };
             installPhase = ''
               runHook preInstall
