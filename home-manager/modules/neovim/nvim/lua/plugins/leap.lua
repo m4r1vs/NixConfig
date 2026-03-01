@@ -1,6 +1,6 @@
 -- Quickly leap from point-to-point
 return {
-  "ggandor/leap.nvim",
+  "https://codeberg.org/andyg/leap.nvim.git",
   name = "leap",
   event = "VeryLazy",
   init = function()
