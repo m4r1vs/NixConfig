@@ -45,7 +45,7 @@ in {
             yabai -m rule --add app="^Raycast$" manage=off
             yabai -m rule --add app="^mpv$" manage=off
 
-            yabai -m rule --add app="^TV$" title="^.{3,}$" manage=off # match any Apple TV Window with more than 2 letters
+            yabai -m rule --add app="^TV$" title="^.{3,}$" manage=off # match any Apple TV Window with more than 2 letters (should apply to the popout player)
             yabai -m rule --add title="^General$" manage=off # most of apple settings windows are named "General"
 
             yabai -m rule --add title="^scratchpad_yazi$" scratchpad=yazi grid=11:11:1:1:9:9
@@ -150,6 +150,8 @@ in {
         lcmd + ctrl - j : yabai -m window --resize bottom:0:20 || yabai -m window --resize top:0:20
         lcmd + ctrl - k : yabai -m window --resize top:0:-20 || yabai -m window --resize bottom:0:-20
         lcmd + ctrl - l : yabai -m window --resize right:20:0 || yabai -m window --resize left:20:0
+
+        lcmd + ctrl - w : yabai -m window --move abs:70:90 && yabai -m window --resize abs:1200:1020
 
         lcmd + shift - h : yabai -m window --warp west \
           || yabai -m window --display west && yabai -m display --focus west
