@@ -5,7 +5,6 @@ return {
     "hrsh7th/cmp-nvim-lsp",
     "hrsh7th/cmp-buffer",
     "hrsh7th/cmp-path",
-    "onsails/lspkind.nvim",
     "hrsh7th/cmp-cmdline",
     "hrsh7th/cmp-calc",
     "L3MON4D3/LuaSnip",
@@ -14,7 +13,6 @@ return {
   event = "InsertEnter",
   init = function()
     local cmp = require("cmp")
-    local lspkind = require("lspkind")
     local cmp_autopairs = require("nvim-autopairs.completion.cmp")
     cmp.event:on(
       "confirm_done",
@@ -49,25 +47,56 @@ return {
       end,
 
       window = {
-        completion = cmp.config.window.bordered(),
-        documentation = cmp.config.window.bordered(),
+        completion = {
+          border = "rounded",
+          col_offset = -1,
+          side_padding = 1,
+        },
+        documentation = {
+          border = "rounded",
+          side_padding = 1,
+        },
       },
 
       formatting = {
-        format = lspkind.cmp_format({
-          mode = "symbol",
-          maxwidth = {
-            menu = 50,
-            abbr = 50,
-          },
-          ellipsis_char = "...",
-          show_labelDetails = true,
-          before = function(_, vim_item)
-            return vim_item
-          end
-        }),
-        fields = { "kind", "abbr", "menu" },
-        expandable_indicator = true,
+        fields = { "abbr", "kind", "menu" },
+        format = function(entry, vim_item)
+          vim_item.kind = (({
+            Text = "  ",
+            Method = "  󰆧",
+            Function = "  󰊕",
+            Constructor = "  ",
+            Field = "  󰇽",
+            Variable = "  󰂡",
+            Class = "  󰠱",
+            Interface = "  ",
+            Module = "  ",
+            Property = "  󰜢",
+            Unit = "  ",
+            Value = "  󰎠",
+            Enum = "  ",
+            Keyword = "  󰌋",
+            Snippet = "  ",
+            Color = "  󰏘",
+            File = "  󰈙",
+            Reference = "  ",
+            Folder = "  󰉋",
+            EnumMember = "  ",
+            Constant = "  󰏿",
+            Struct = "  ",
+            Event = "  ",
+            Operator = "  󰆕",
+            TypeParameter = "  󰅲",
+          })[vim_item.kind] or " ") .. string.format(" (%s)", vim_item.kind)
+          vim_item.menu = ({
+            buffer = "",
+            nvim_lsp = "󱠂",
+            luasnip = "",
+            nvim_lua = "",
+            latex_symbols = "",
+          })[entry.source.name]
+          return vim_item
+        end
       },
 
       mapping = cmp.mapping.preset.insert({
@@ -75,6 +104,8 @@ return {
         ["<C-k>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Insert }),
         ["<C-e>"] = cmp.mapping.scroll_docs(-4),
         ["<C-y>"] = cmp.mapping.scroll_docs(4),
+        ["<C-d>"] = cmp.mapping.open_docs(),
+        ["<C-u>"] = cmp.mapping.close_docs(),
         ["<C-l>"] = cmp.mapping(
           cmp.mapping.confirm({
             behavior = cmp.ConfirmBehavior.Insert,

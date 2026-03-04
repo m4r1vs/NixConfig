@@ -26,6 +26,7 @@ return {
       trouble = true,
       treesitter = true,
       base = true,
+      cmp = true,
     }
   }
 }
