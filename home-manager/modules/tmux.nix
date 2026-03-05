@@ -58,6 +58,7 @@ in {
         yazi = "󰇥";
         bash = "";
         terraform = "";
+        ".opencode-wrapp" = "󱚣"; # Name so long, it gets truncated
       };
       description = "Map program-names to their icons";
     };
