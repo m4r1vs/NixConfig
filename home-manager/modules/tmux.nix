@@ -47,7 +47,7 @@ in {
         lazygit = "";
         mpv = "";
         newsboat = "󰎕";
-        nvim = "";
+        nvim = "";
         nix = "󱄅";
         sudo = "";
         node = "";
