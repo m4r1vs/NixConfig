@@ -1,8 +1,19 @@
 -- Collection of small useful enhancements
 return {
-  { "echasnovski/mini.ai",         version = false, opts = {} },
-  { "echasnovski/mini.cursorword", version = false, opts = {} },
   {
+    -- Enable aliases for common surrounding chars (for example c-i-q to change inside any quotes)
+    "echasnovski/mini.ai",
+    version = false,
+    opts = {}
+  },
+  {
+    -- Highlight the word under the cursor in the entire buffer
+    "echasnovski/mini.cursorword",
+    version = false,
+    opts = {}
+  },
+  {
+    -- Better diff view
     "echasnovski/mini.diff",
     version = false,
     opts = {
