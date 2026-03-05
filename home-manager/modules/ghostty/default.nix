@@ -92,7 +92,7 @@ in {
           cursor-color = "#ffffff";
           selection-background = "#3c4048";
           selection-foreground = "#ffffff";
-          background-opacity = 0.92;
+          background-opacity = 0.96;
         };
         cyberdream-light = {
           palette = [
