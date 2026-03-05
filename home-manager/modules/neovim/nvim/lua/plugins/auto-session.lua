@@ -23,7 +23,7 @@ return {
     bypass_save_filetypes = { "alpha", "dashboard" },
     session_lens = {
       load_on_setup = true,
-      previewer = false,
+      previewer = "summary",
       mappings = {
         delete_session = { "i", "<C-D>" },
         alternate_session = { "i", "<C-S>" },
