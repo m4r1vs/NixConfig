@@ -54,6 +54,7 @@ in {
       mpv.enable = isDesktop || isDarwin;
       neovim.enable = true;
       newsboat.enable = isDesktop || isDarwin;
+      opencode.enable = true;
       rofi.enable = isDesktop;
       spotify-player.enable = isDesktop || isWSL || isDarwin;
       ssh.enable = true;

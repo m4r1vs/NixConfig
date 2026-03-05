@@ -78,14 +78,15 @@ in {
           From unstable/master Nixpkgs
           */
 
+          gemini-cli = pkgsUnstable.gemini-cli;
           ghostty =
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
           mesa = pkgsUnstable.mesa;
+          opencode = pkgsUnstable.opencode;
           yazi = pkgsUnstable.yazi;
           yaziPlugins = pkgsUnstable.yaziPlugins;
-          gemini-cli = pkgsUnstable.gemini-cli;
 
           /*
           Temporary Fixes / Updates
