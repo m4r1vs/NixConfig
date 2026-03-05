@@ -5,7 +5,6 @@ return {
   cmd = { "ConformInfo" },
   keys = {
     {
-      -- Customize or remove this keymap to your liking
       "<leader>ff",
       function()
         require("conform").format({ async = true })
