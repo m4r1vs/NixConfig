@@ -14,6 +14,15 @@ return {
     vim.keymap.set("n", "<leader>sd", telescope.buffers, { desc = "Telescope diagnostics" })
   end,
   opts = {
+    defaults = {
+      mappings = {
+        i = {
+          ["<C-j>"] = require('telescope.actions').move_selection_next,
+          ["<C-k>"] = require('telescope.actions').move_selection_previous,
+          ["<C-l>"] = require('telescope.actions').select_default,
+        },
+      },
+    },
     extensions = {
       fzf = {
         fuzzy = true,                   -- false will only do exact matching
