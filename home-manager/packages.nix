@@ -31,6 +31,7 @@ in {
       vscode
       yt-dlp
       zathura
+      zed-editor
     ]
     ++ lib.optionals isDesktop ([
         amberol
