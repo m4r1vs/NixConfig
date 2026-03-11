@@ -91,6 +91,7 @@ in {
           opencode = pkgsUnstable.opencode;
           yazi = pkgsUnstable.yazi;
           yaziPlugins = pkgsUnstable.yaziPlugins;
+          colima = pkgsUnstable.colima;
 
           /*
           Temporary Fixes / Updates
