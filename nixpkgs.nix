@@ -14,6 +14,10 @@ with lib; let
     system = systemArgs.system;
     config.allowUnfree = true;
   };
+  pkgsMaster = import inputs.nixpkgs_master {
+    system = systemArgs.system;
+    config.allowUnfree = true;
+  };
 in {
   nixpkgs = {
     config.allowUnfree = true;
@@ -81,8 +85,8 @@ in {
           gemini-cli = pkgsUnstable.gemini-cli;
           ghostty =
             if isDarwin
-            then pkgsUnstable.ghostty-bin
-            else pkgsUnstable.ghostty;
+            then pkgsMaster.ghostty-bin
+            else pkgsMaster.ghostty;
           mesa = pkgsUnstable.mesa;
           opencode = pkgsUnstable.opencode;
           yazi = pkgsUnstable.yazi;

@@ -385,6 +385,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_master": {
+      "locked": {
+        "lastModified": 1773106454,
+        "narHash": "sha256-NHshg8dYtUIcmTlRNb0DQq+pPFlEuOPDokf9K++LqFE=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "4f3ce683b7534e3ea3216be6e2767a2a7825a068",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "master",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_unstable": {
       "locked": {
         "lastModified": 1772624091,
@@ -437,6 +453,7 @@
         "nixos-generators": "nixos-generators",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs",
+        "nixpkgs_master": "nixpkgs_master",
         "nixpkgs_unstable": "nixpkgs_unstable",
         "slidecontrol": "slidecontrol",
         "stummumschalterung": "stummumschalterung"
