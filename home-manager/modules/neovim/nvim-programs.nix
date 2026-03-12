@@ -37,6 +37,7 @@ in
       prettierd
       pyright
       ripgrep
+      rumdl
       shfmt
       stylua
       svelte-language-server

@@ -24,7 +24,7 @@ return {
       javascriptreact = { "prettierd", "prettier", stop_after_first = true },
       json = { "lsp_format" },
       lua = { "lsp_format" },
-      markdown = { "lsp_format" },
+      markdown = { "rumdl" },
       nix = { "alejandra" },
       python = { "isort", "black" },
       rust = { "rustfmt", lsp_format = "fallback" },
