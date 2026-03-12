@@ -6,6 +6,7 @@ return {
   "nvim-treesitter/nvim-treesitter",
   build = ":TSUpdate",
   event = "VeryLazy",
+  branch = "master", -- TODO: update to treesitter on main branch
   init = function()
     local configs = require("nvim-treesitter.configs")
 
