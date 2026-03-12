@@ -98,15 +98,52 @@ in {
 
   fonts =
     {
-      packages = with pkgs; [
-        eb-garamond
-        nerd-fonts.jetbrains-mono
-        nerd-fonts.departure-mono
-        nerd-fonts.go-mono
-        open-sans
-        public-sans
-        ubuntu-classic
-      ];
+      packages =
+        with pkgs;
+          [
+            eb-garamond
+            nerd-fonts.jetbrains-mono
+            nerd-fonts.departure-mono
+            nerd-fonts.go-mono
+            open-sans
+            public-sans
+            ubuntu-classic
+          ]
+          ++ (
+            if (!isDarwin)
+            then [
+              (stdenv.mkDerivation {
+                name = "Apple Color Emoji Font";
+                src = fetchurl {
+                  url = "https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf";
+                  hash = "sha256-pP0He9EUN7SUDYzwj0CE4e39SuNZ+SVz7FdmUviF6r0=";
+                };
+                dontUnpack = true;
+                installPhase = ''
+                  runHook preInstall
+
+                  mkdir -p $out/share/fonts/truetype
+                  cp $src $out/share/fonts/truetype/AppleColorEmoji.ttf
+
+                  runHook postInstall
+                '';
+              })
+              (stdenv.mkDerivation {
+                name = "Samsung Classic Clock Font";
+                src = ../assets/fonts/samsung/samsung-clock-classic.ttf;
+                dontUnpack = true;
+                installPhase = ''
+                  runHook preInstall
+
+                  mkdir -p $out/share/fonts/truetype
+                  cp $src $out/share/fonts/truetype/SamsungClockClassic.ttf
+
+                  runHook postInstall
+                '';
+              })
+            ]
+            else []
+          );
     }
     // optionalAttrs (!isDarwin) {
       enableDefaultPackages = true;
@@ -118,37 +155,6 @@ in {
           emoji = ["Apple Color Emoji"];
         };
       };
-      packages = with pkgs; [
-        (stdenv.mkDerivation {
-          name = "Apple Color Emoji Font";
-          src = fetchurl {
-            url = "https://github.com/samuelngs/apple-emoji-linux/releases/download/v18.4/AppleColorEmoji.ttf";
-            hash = "sha256-pP0He9EUN7SUDYzwj0CE4e39SuNZ+SVz7FdmUviF6r0=";
-          };
-          dontUnpack = true;
-          installPhase = ''
-            runHook preInstall
-
-            mkdir -p $out/share/fonts/truetype
-            cp $src $out/share/fonts/truetype/AppleColorEmoji.ttf
-
-            runHook postInstall
-          '';
-        })
-        (stdenv.mkDerivation {
-          name = "Samsung Classic Clock Font";
-          src = ../assets/fonts/samsung/samsung-clock-classic.ttf;
-          dontUnpack = true;
-          installPhase = ''
-            runHook preInstall
-
-            mkdir -p $out/share/fonts/truetype
-            cp $src $out/share/fonts/truetype/SamsungClockClassic.ttf
-
-            runHook postInstall
-          '';
-        })
-      ];
       fontDir.enable = true;
     };
 }
