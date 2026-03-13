@@ -4,8 +4,8 @@
 }: let
   colors = {
     orange = {
-      hex = "#fa8621";
-      rgb = "250,134,33";
+      hex = "#f7821B";
+      rgb = "247,130,27";
     };
     green = {
       hex = "#658257";
