@@ -7,14 +7,9 @@
   ...
 }:
 with lib; let
-  isWayland = config.configured ? desktop && !config.configured.desktop.x11;
   isDesktop = config.configured ? desktop && config.configured.desktop.enable;
   isDarwin = systemArgs.system == "aarch64-darwin";
   pkgsUnstable = import inputs.nixpkgs_unstable {
-    system = systemArgs.system;
-    config.allowUnfree = true;
-  };
-  pkgsMaster = import inputs.nixpkgs_master {
     system = systemArgs.system;
     config.allowUnfree = true;
   };
@@ -85,8 +80,8 @@ in {
           gemini-cli = pkgsUnstable.gemini-cli;
           ghostty =
             if isDarwin
-            then pkgsMaster.ghostty-bin
-            else pkgsMaster.ghostty;
+            then pkgsUnstable.ghostty-bin
+            else pkgsUnstable.ghostty;
           mesa = pkgsUnstable.mesa;
           opencode = pkgsUnstable.opencode;
           yazi = pkgsUnstable.yazi;
