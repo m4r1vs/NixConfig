@@ -145,8 +145,8 @@ in {
           NSNavPanelExpandedStateForSaveMode = true;
           NSNavPanelExpandedStateForSaveMode2 = true;
           NSScrollAnimationEnabled = true;
-          NSStatusItemSelectionPadding = 2;
-          NSStatusItemSpacing = 6;
+          NSStatusItemSelectionPadding = 4;
+          NSStatusItemSpacing = 10;
           NSTableViewDefaultSizeMode = 1;
           NSUseAnimatedFocusRing = true;
           NSWindowResizeTime = 0.1;
