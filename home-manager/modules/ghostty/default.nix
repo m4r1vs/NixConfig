@@ -45,6 +45,8 @@ in {
           then "auto"
           else false;
         macos-titlebar-style = mkIf isDarwin "hidden";
+        macos-icon = "official";
+        mouse-hide-while-typing = true;
         window-padding-balance = true;
         background-blur = mkIf isDarwin 30;
         window-colorspace = mkIf isDarwin "display-p3";
