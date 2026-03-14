@@ -170,6 +170,9 @@ in {
         lcmd + lshift - f: yabai -m window --toggle zoom-fullscreen
         lcmd + ctrl - f: yabai -m window --toggle native-fullscreen
 
+        shift + fn - right | lcmd - right
+        shift + fn - left | lcmd - left
+
         lcmd - 1 : yabai -m space --focus 1
         lcmd - 2 : yabai -m space --focus 2
         lcmd - 3 : yabai -m space --focus 3
