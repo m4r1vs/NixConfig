@@ -99,7 +99,7 @@ return {
     vim.lsp.enable("marksman")
     vim.lsp.enable("nil_ls")
     vim.lsp.enable("nixd")
-    vim.lsp.enable("pyright")
+    vim.lsp.enable("ty")
     vim.lsp.enable("rust_analyzer")
     vim.lsp.enable("sourcekit")
     vim.lsp.enable("svelte")

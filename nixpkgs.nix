@@ -82,11 +82,12 @@ in {
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
+          colima = pkgsUnstable.colima;
           mesa = pkgsUnstable.mesa;
           opencode = pkgsUnstable.opencode;
+          ty = pkgsUnstable.ty;
           yazi = pkgsUnstable.yazi;
           yaziPlugins = pkgsUnstable.yaziPlugins;
-          colima = pkgsUnstable.colima;
 
           /*
           Temporary Fixes / Updates

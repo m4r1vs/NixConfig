@@ -35,7 +35,6 @@ in
       nixd
       nodejs_22
       prettierd
-      pyright
       ripgrep
       rumdl
       shfmt
@@ -47,6 +46,7 @@ in
       texlab
       tinymist
       tree-sitter
+      ty
       vscode-langservers-extracted
       websocat
       yaml-language-server
