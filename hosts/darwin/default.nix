@@ -46,7 +46,6 @@ in {
         "spotify"
         "steam"
         "utm"
-        "whatsapp"
       ];
       masApps = {
         DavinciResolve = 571213070;
@@ -54,6 +53,7 @@ in {
         GarageBand = 682658836;
         PowerPoint = 462062816;
         Remarkable = 1276493162;
+        WhatsApp = 310633997;
         Word = 462054704;
         Xcode = 497799835;
       };
