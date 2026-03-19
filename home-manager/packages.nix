@@ -13,8 +13,10 @@
 in {
   home.packages = with pkgs;
     [
+      astroterm
       fastfetch
       kubectl
+      pastel
       xdg-utils
     ]
     ++ lib.optionals isDarwin [
