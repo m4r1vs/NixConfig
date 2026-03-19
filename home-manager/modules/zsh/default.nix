@@ -46,7 +46,9 @@ in {
         vi = "nvim";
         vim = "nvim";
       };
-      initContent = import ./init.nix pkgs;
+      initContent = import ./init.nix {
+        inherit pkgs isDarwin;
+      };
       plugins = [
         {
           name = "fzf-tab";

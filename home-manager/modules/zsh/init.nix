@@ -1,4 +1,7 @@
-pkgs:
+{
+  pkgs,
+  isDarwin,
+}:
 # bash
 ''
   export LANG=en_US.UTF-8
@@ -17,4 +20,12 @@ pkgs:
   }
   zle -N zoxide_jump
   bindkey -M 'viins' '^Z' zoxide_jump
+
+  ${
+    if isDarwin
+    then ''
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    ''
+    else ""
+  }
 ''
