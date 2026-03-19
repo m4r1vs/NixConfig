@@ -36,6 +36,7 @@ in {
       casks = [
         "1password"
         "affinity"
+        "android-studio"
         "brave-browser"
         "discord"
         "google-drive"
