@@ -25,7 +25,7 @@ in {
         enable = true;
         package = pkgs.yabai;
         config = {
-          focus_follows_mouse = "autoraise";
+          focus_follows_mouse = "autofocus";
           layout = "bsp";
           mouse_follows_focus = "on";
           window_placement = "second_child";
@@ -85,7 +85,7 @@ in {
             yabai -m space 9 --layout float
 
             while true; do
-              yabai -m config focus_follows_mouse autoraise
+              yabai -m config focus_follows_mouse autofocus
               sleep 60
             done
           '';
