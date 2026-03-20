@@ -103,9 +103,9 @@ in {
 
         .define toggle_scratchpad : yabai -m window --toggle {{1}} || {{2}}
 
-        lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --macos-icon=xray --keybind='global:super+enter=unbind' --font-size=14 --title=scratchpad_yazi -e yazi")
-        lcmd + ctrl - t : @toggle_scratchpad("tmux", "${pkgs.ghostty}/bin/ghostty --macos-icon=microchip --keybind='global:super+enter=unbind' --title=scratchpad_tmux -e tmux")
-        lcmd + ctrl - m : @toggle_scratchpad("k9s", "${pkgs.ghostty}/bin/ghostty --macos-icon=microchip --keybind='global:super+enter=unbind' --font-size=14 --title=scratchpad_k9s -e k9s")
+        lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --keybind='global:super+enter=unbind' --font-size=14 --title=scratchpad_yazi -e yazi")
+        lcmd + ctrl - t : @toggle_scratchpad("tmux", "${pkgs.ghostty}/bin/ghostty --keybind='global:super+enter=unbind' --title=scratchpad_tmux -e tmux")
+        lcmd + ctrl - m : @toggle_scratchpad("k9s", "${pkgs.ghostty}/bin/ghostty --keybind='global:super+enter=unbind' --font-size=14 --title=scratchpad_k9s -e k9s")
 
         lcmd - q : yabai -m window --close
         lcmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')
@@ -126,18 +126,18 @@ in {
         f1 | brightness_down
         f2 | brightness_up
 
-        f8 : @toggle_scratchpad("spotify", "${pkgs.ghostty}/bin/ghostty --macos-icon=retro --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_spotify -e spotify_player")
+        f8 : @toggle_scratchpad("spotify", "${pkgs.ghostty}/bin/ghostty --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_spotify -e spotify_player")
         lcmd - f8 : random-album-of-the-day
 
         f10 | mute
         f11 | sound_down
         f12 | sound_up
 
-        lcmd - f1 : ${pkgs.ghostty}/bin/ghostty --macos-icon=holographic -e zsh -c "export TERM=xterm-256color; ssh -J 2niveri@rzssh1.informatik.uni-hamburg.de 2niveri@sppc13.informatik.uni-hamburg.de"
-        lcmd - f2 : ${pkgs.ghostty}/bin/ghostty --macos-icon=holographic -e ssh mn@nixner.niveri.dev
-        lcmd - f3 : ${pkgs.ghostty}/bin/ghostty --macos-icon=holographic -e ssh -p 422 mn@falkenberg.kubenix.niveri.dev
-        lcmd - f4 : ${pkgs.ghostty}/bin/ghostty --macos-icon=holographic -e ssh -p 422 mn@stadeln.kubenix.niveri.dev
-        lcmd - f5 : ${pkgs.ghostty}/bin/ghostty --macos-icon=holographic -e ssh -p 422 mn@ronhof.kubenix.niveri.dev
+        lcmd - f1 : ${pkgs.ghostty}/bin/ghostty -e zsh -c "export TERM=xterm-256color; ssh -J 2niveri@rzssh1.informatik.uni-hamburg.de 2niveri@sppc13.informatik.uni-hamburg.de"
+        lcmd - f2 : ${pkgs.ghostty}/bin/ghostty -e ssh mn@nixner.niveri.dev
+        lcmd - f3 : ${pkgs.ghostty}/bin/ghostty -e ssh -p 422 mn@falkenberg.kubenix.niveri.dev
+        lcmd - f4 : ${pkgs.ghostty}/bin/ghostty -e ssh -p 422 mn@stadeln.kubenix.niveri.dev
+        lcmd - f5 : ${pkgs.ghostty}/bin/ghostty -e ssh -p 422 mn@ronhof.kubenix.niveri.dev
 
         lcmd - f6 : open -a ScreenSaverEngine
 
