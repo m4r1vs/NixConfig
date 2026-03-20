@@ -23,6 +23,7 @@ require("lazy").setup("plugins", {
   rocks = { enabled = false },
 })
 
+-- Set default colorscheme
 vim.cmd("colorscheme cyberdream")
 
 -- Set common options
@@ -32,16 +33,17 @@ vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 2
-vim.opt.clipboard = "unnamedplus"
+vim.opt.clipboard = "unnamedplus" -- use system clipboard
 vim.opt.showtabline = 2
 vim.opt.cursorline = true
-vim.opt.swapfile = false
+vim.opt.swapfile = false -- do not create swapfile for unsaved files
 vim.opt.smarttab = true
 vim.opt.wrap = false
-vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
+vim.opt.undodir = os.getenv("HOME") .. "/.vim/undodir" -- persistent undo history
 vim.opt.undofile = true
 vim.opt.showmode = false
 vim.opt.scrolloff = 12
+vim.opt.sidescrolloff = 8
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 vim.opt.incsearch = true
@@ -50,8 +52,9 @@ vim.opt.splitbelow = true
 vim.opt.conceallevel = 1
 vim.opt.pumheight = 12
 vim.opt.hidden = true
+vim.opt.hlsearch = true
+vim.opt.inccommand = "split" -- live preview of substitutions
 vim.wo.signcolumn = "yes:1"
-vim.o.termguicolors = true
 vim.opt.linebreak = true
 
 -- Change settings if we're in the Browser
@@ -88,6 +91,21 @@ if vim.g.started_by_firenvim == true then
   }
 end
 
+-- use <leader>x to toggle the quickfix window
+vim.keymap.set("n", "<leader>x", function()
+  local qf_exists = false
+  for _, win in pairs(vim.fn.getwininfo()) do
+    if win.quickfix == 1 then
+      qf_exists = true
+    end
+  end
+  if qf_exists then
+    vim.cmd("cclose")
+  else
+    vim.cmd("copen")
+  end
+end)
+
 -- Treat .svx files as markdown
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = "*.svx",
@@ -113,6 +131,10 @@ vim.api.nvim_create_autocmd('BufWinEnter', {
     end
   end
 })
+
+-- Move selected lines up and down in visual mode
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { noremap = true, silent = true })
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { noremap = true, silent = true })
 
 -- Remap > and < in visual mode to keep the selection
 vim.api.nvim_set_keymap("v", ">", ">gv", { noremap = true, silent = true })
@@ -142,10 +164,25 @@ vim.keymap.set("v", "<leader>\"", ":s/'/\"/g<CR>")
 -- Use <leader>rs to sort the current selection
 vim.keymap.set("v", "<leader>rs", ":!sort<CR>")
 
+-- Use <leader>ro to convert the current selection to an ordered list
+vim.keymap.set("v", "<leader>ro", ":!nl -w 1 -s '. '<CR>")
+
+-- Use <leader>rq to surround the current selection with triple backticks
+vim.keymap.set("v", "<leader>rq", function()
+  local old_reg = vim.fn.getreg('"')
+  local old_regtype = vim.fn.getregtype('"')
+  vim.cmd('normal! y')
+  local text = vim.fn.getreg('"')
+  local wrapped = "```\n" .. text .. "```"
+  vim.fn.setreg('"', wrapped)
+  vim.cmd('normal! gv""p')
+  vim.fn.setreg('"', old_reg, old_regtype)
+end)
+
 -- Change cursor depending on mode
 vim.opt.guicursor = "n-v-c-sm:block,i-ci-ve:ver25,r-cr-o:hor20"
 
--- save cursor position
+-- save cursor position across sessions
 vim.api.nvim_create_autocmd("BufReadPost", {
   callback = function()
     local row, col = unpack(vim.api.nvim_buf_get_mark(0, "\""))

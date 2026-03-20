@@ -29,6 +29,7 @@ in
       hyprls
       lazygit
       libsecret
+      lsd
       lua-language-server
       marksman
       nil
