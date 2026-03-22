@@ -2,51 +2,51 @@
   term-file-chooser =
     pkgs.writeShellScript "term-file-chooser"
     ''
+      set -e
+
+      if [ "$6" -ge 4 ]; then
+        set -x
+      fi
+
       multiple="$1"
       directory="$2"
       save="$3"
       path="$4"
       out="$5"
-      cmd="yazi"
 
-      escape_args() {
-        printf '%s' "$1" | sed -e "s/[()&|;]/\\\\&/g" -e 's/ /\\ /g'
-      }
+      cmd="${pkgs.yazi}/bin/yazi"
+      termcmd="${pkgs.ghostty}/bin/ghostty --class=ghostty.yazi -e"
 
       if [ "$save" = "1" ]; then
-        # /usr/bin/touch $path
-        set -- --chooser-file="$(escape_args "$out")" --cwd-file="$(escape_args "$path")"
-        printf '%s' '
-      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      !!!                 === WARNING! ===                 !!!
-      !!! The contents of *whatever* file you open last in !!!
-      !!! yazi will be *overwritten*!                      !!!
-      !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-      Instructions:
-      1) Move this file wherever you want.
-      2) Rename the file if needed.
-      3) Confirm your selection by opening the file, for
-         example by pressing <Enter>.
-
-      Notes:
-      1) This file is provided for your convenience. You
-         could delete it and choose another file to overwrite
-         that, for example.
-      2) If you quit yazi without opening a file, this file
-         will be removed and the save operation aborted.
-      ' > "$path"
+        # save a file
+        set -- --chooser-file="$out" "\"$path\""
       elif [ "$directory" = "1" ]; then
-        set -- --cwd-file="$(escape_args "$out")"
+        # upload files from a directory
+        set -- --chooser-file="$out" --cwd-file="$out"".1" "\"$path\""
       elif [ "$multiple" = "1" ]; then
-        set -- --chooser-file="$(escape_args "$out")"
+        # upload multiple files
+        set -- --chooser-file="$out" "\"$path\""
       else
-        set -- --chooser-file="$(escape_args "$out")"
+        # upload only 1 file
+        set -- --chooser-file="$out" "\"$path\""
       fi
 
-      ${pkgs.ghostty}/bin/ghostty --class=ghostty.yazi -e $cmd "$(escape_args "$@") $(escape_args "$path")"
-      if [ "$save" = "1" ] && [ ! -s "$out" ]; then
-        rm "$path"
+      command="$termcmd $cmd"
+      for arg in "$@"; do
+        command="$command $arg"
+      done
+
+      echo "$command" > /tmp/termfilechooser_command.txt
+
+      sh -c "$command"
+
+      if [ "$directory" = "1" ]; then
+        if [ ! -s "$out" ] && [ -s "$out"".1" ]; then
+          cat "$out"".1" > "$out"
+          rm "$out"".1"
+        else
+          rm "$out"".1"
+        fi
       fi
     '';
 }
