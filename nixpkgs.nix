@@ -84,6 +84,7 @@ in {
             else pkgsUnstable.ghostty;
           colima = pkgsUnstable.colima;
           mesa = pkgsUnstable.mesa;
+          oh-my-posh = pkgsUnstable.oh-my-posh;
           opencode = pkgsUnstable.opencode;
           ty = pkgsUnstable.ty;
           yazi = pkgsUnstable.yazi;
