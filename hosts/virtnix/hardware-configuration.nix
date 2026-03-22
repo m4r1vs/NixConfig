@@ -10,8 +10,8 @@
 }: {
   imports = [];
 
-  boot.initrd.availableKernelModules = ["ehci_pci" "ahci" "xhci_pci" "nvme" "usbhid" "sr_mod" "vmwgfx"];
-  boot.initrd.kernelModules = ["vmwgfx"];
+  boot.initrd.availableKernelModules = ["virtio_pci" "xhci_pci" "usbhid" "usb_storage"];
+  boot.initrd.kernelModules = [];
   boot.kernelModules = [];
   boot.extraModulePackages = [];
 
@@ -20,7 +20,7 @@
   # still possible to use this option, but it's recommended to use it in conjunction
   # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
   networking.useDHCP = lib.mkDefault true;
-  # networking.interfaces.enp2s0.useDHCP = lib.mkDefault true;
+  networking.interfaces.enp0s1.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
 }
