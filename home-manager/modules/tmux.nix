@@ -123,6 +123,7 @@ in {
           bind-key -n M-g new-window -c "#{pane_current_path}" ${lib.getExe pkgs.lazygit}
           bind-key -n M-e new-window -c "#{pane_current_path}" ${lib.getExe config.programs.neovim.finalPackage}
           bind-key -n M-a new-window -c "#{pane_current_path}" ${lib.getExe pkgs.gemini-cli}
+          bind-key -n M-i new-window -c "#{pane_current_path}" ${lib.getExe pkgs.gemini-cli} \; split-window -h -p 65 -c "#{pane_current_path}" ${lib.getExe config.programs.neovim.finalPackage} \; split-window -v -p 12 -c "#{pane_current_path}"
           bind-key -n M-y new-window -c "#{pane_current_path}" ${lib.getExe pkgs.yazi}
           bind-key -n M-x kill-window
           bind-key -n M-1 select-window -t 1
