@@ -1,12 +1,10 @@
 {
   lib,
   config,
-  systemArgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.oh-my-posh;
-  isDarwin = systemArgs.system == "aarch64-darwin";
 in {
   options.programs.configured.oh-my-posh = {
     enable = mkEnableOption "Nice shell prompt";
@@ -222,7 +220,7 @@ in {
         ];
 
         shell_integration = true;
-        enable_cursor_positioning = !isDarwin;
+        enable_cursor_positioning = true;
         async = true;
         streaming = 60;
         version = 4;

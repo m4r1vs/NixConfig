@@ -74,6 +74,7 @@ with lib; {
 
   environment = {
     systemPackages = with pkgs; [
+      coreutils-full
       libsecret
       podman-tui
       psmisc

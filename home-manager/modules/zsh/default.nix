@@ -45,6 +45,7 @@ in {
           else "sudo nixos-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}";
         vi = "nvim";
         vim = "nvim";
+        stty = mkIf isDarwin "/bin/stty";
       };
       initContent = import ./init.nix {
         inherit pkgs isDarwin;
