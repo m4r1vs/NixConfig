@@ -10,10 +10,6 @@
 with lib; let
   cfg = config.programs.configured.hyprland;
   isX86 = systemArgs.system == "x86_64-linux";
-  gui_env_vars =
-    if isX86
-    then ""
-    else "MESA_LOADER_DRIVER_OVERRIDE=llvmpipe";
 in {
   options.programs.configured.hyprland = {
     enable = mkEnableOption "Tiling Wayland Window Manager";
@@ -32,7 +28,7 @@ in {
       settings = {
         exec-once = [
           "${pkgs.waybar}/bin/waybar"
-          "${gui_env_vars} ${pkgs._1password-gui}/bin/1password --silent --ozone-platform-hint=x11"
+          "${pkgs._1password-gui}/bin/1password --silent --ozone-platform-hint=x11"
           "${scripts.volume-change-notify}"
           "${scripts.brightness-change-notify}"
         ];
@@ -203,13 +199,13 @@ in {
             "SUPER+Shift, F, fullscreenstate, 2,"
             "SUPER+Shift, Space, togglefloating"
 
-            "SUPER, Return, exec, ${gui_env_vars} ${lib.getExe pkgs.ghostty}"
+            "SUPER, Return, exec, ${lib.getExe pkgs.ghostty}"
             "SUPER+Shift, Return, exec, ${pkgs.writeShellScript "rofi-ssh" ''
               ${pkgs.rofi}/bin/rofi -show ssh -theme-str "entry{placeholder:\"SSH into a Remote...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}window{padding: 38% 42%;}"
             ''}"
             "SUPER, d, exec, ${pkgs.rofi}/bin/rofi -theme-str \"entry {placeholder: \\\"Launch a Program...\\\";}entry{padding: 10 10 0 12;}\" -combi-modi search:${scripts.rofi-search},drun -show combi"
             "SUPER, s, exec, ${scripts.screenshot}"
-            "SUPER, E, exec, ${gui_env_vars} ${lib.getExe pkgs.ghostty} --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi ~/Downloads/"
+            "SUPER, E, exec, ${lib.getExe pkgs.ghostty} --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi ~/Downloads/"
             "SUPER, m, exec, ${pkgs.rofimoji}/bin/rofimoji --selector-args=\"-theme-str \\\"listview{dynamic:true;columns:12;layout:vertical;flow:horizontal;reverse:false;lines:10;}element-text{enabled:false;}element-icon{size:32px;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 24;}\\\"\" --use-icons --typer wtype --clipboarder wl-copy --skin-tone neutral --selector rofi --max-recent 0 --action clipboard"
             "SUPER, SPACE, exec, ${scripts.switch-kb-layout}"
             "SUPER, c, exec, ${pkgs.rofi}/bin/rofi -modi calculator:${scripts.rofi-calculator} -show calculator -theme-str \"entry {placeholder:\\\"Ask a Question...\\\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}\""
@@ -218,7 +214,7 @@ in {
             "SUPER, backslash, exec, ${pkgs.pamixer}/bin/pamixer -t"
 
             ",F8, togglespecialworkspace, spotify_player"
-            ",F8, exec, pgrep spotify_player || ${gui_env_vars} ${lib.getExe pkgs.ghostty} --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
+            ",F8, exec, pgrep spotify_player || ${lib.getExe pkgs.ghostty} --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
 
             "SUPER, F8, exec, ${pkgs.spotify-player}/bin/spotify_player like && ${scripts.nixos-notify} -e -t 1800 \"Liked currentry playing Track on Spotify\""
             "Shift, F8, exec, ${scripts.random-album-of-the-day}"
@@ -232,7 +228,7 @@ in {
               useHypr = true;
             }}"
             ",F11, exec, ${scripts.launch-once {
-              command = "${gui_env_vars} ${lib.getExe pkgs.ghostty} --class=ghostty.obsidian -e ${config.programs.neovim.finalPackage}/bin/nvim \"~/Documents/Marius\\\'\\\ Remote\\\ Vault\"";
+              command = "${lib.getExe pkgs.ghostty} --class=ghostty.obsidian -e ${config.programs.neovim.finalPackage}/bin/nvim \"~/Documents/Marius\\\'\\\ Remote\\\ Vault\"";
               grep = "ghostty\\\.obsidian";
               useHypr = true;
             }}"
@@ -251,7 +247,7 @@ in {
             "SUPER+Shift, P, exec, ${pkgs.hyprpicker}/bin/hyprpicker -a"
             "SUPER+Shift, q, exec,  ${pkgs.rofi}/bin/rofi -show power-menu -modi power-menu:${scripts.rofi-power-menu} -theme-str \"entry {placeholder:\\\"Power Menu...\\\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}window{padding: 38% 44%;}\""
             "SUPER+Shift, b, exec,  ${scripts.rofi-bluetooth}"
-            "SUPER+Shift, i, exec, ${gui_env_vars} ${pkgs._1password-gui}/bin/1password --quick-access --ozone-platform-hint=x11"
+            "SUPER+Shift, i, exec, ${pkgs._1password-gui}/bin/1password --quick-access --ozone-platform-hint=x11"
             "SUPER+Shift, v, exec, ${scripts.rofi-cliphist}"
 
             # bound to mousewheel left/right

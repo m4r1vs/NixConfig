@@ -1,7 +1,6 @@
 {
   systemArgs,
   lib,
-  pkgs,
   ...
 }: {
   imports = [
@@ -19,19 +18,6 @@
   specialisation = {
     x11.configuration = {
       configured.desktop.x11 = lib.mkForce true;
-    };
-  };
-
-  virtualisation.vmware.guest = {
-    enable = true;
-    headless = lib.mkForce false;
-  };
-
-  hardware = {
-    graphics = {
-      enable = true;
-      enable32Bit = false;
-      package = pkgs.mesa;
     };
   };
 
