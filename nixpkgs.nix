@@ -83,7 +83,7 @@ in {
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
           colima = pkgsUnstable.colima;
-          mesa = pkgsUnstable.mesa;
+          golazo = pkgsUnstable.golazo;
           oh-my-posh = pkgsUnstable.buildGo126Module (finalAttrs: {
             pname = "oh-my-posh";
             version = "29.9.1";

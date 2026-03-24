@@ -16,6 +16,7 @@ in {
       astroterm
       fastfetch
       kubectl
+      golazo
       pastel
       xdg-utils
     ]
