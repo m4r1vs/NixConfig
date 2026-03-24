@@ -84,7 +84,51 @@ in {
             else pkgsUnstable.ghostty;
           colima = pkgsUnstable.colima;
           mesa = pkgsUnstable.mesa;
-          oh-my-posh = pkgsUnstable.oh-my-posh;
+          oh-my-posh = pkgsUnstable.buildGo126Module (finalAttrs: {
+            pname = "oh-my-posh";
+            version = "29.9.1";
+
+            src = pkgsUnstable.fetchFromGitHub {
+              owner = "m4r1vs";
+              repo = "oh-my-posh";
+              rev = "a483019234881c039e5b51ac0d61094bbd3d6857";
+              hash = "sha256-1axqKMFHUGApH+kRKHaxo4csnJmopEWb1BDp+NeZElc=";
+            };
+
+            vendorHash = "sha256-0pxVRDXdvImA2B3yonnl01Y1UuEKNb6UCVH4enohu2I=";
+
+            sourceRoot = "${finalAttrs.src.name}/src";
+
+            ldflags = [
+              "-s"
+              "-w"
+              "-X github.com/m4r1vs/oh-my-posh/src/build.Version=${finalAttrs.version}"
+              "-X github.com/m4r1vs/oh-my-posh/src/build.Date=1970-01-01T00:00:00Z"
+            ];
+
+            tags = [
+              "netgo"
+              "osusergo"
+              "static_build"
+            ];
+
+            postPatch = ''
+              # these tests requires internet access
+              rm cli/image/image_test.go config/migrate_glyphs_test.go cli/upgrade/notice_test.go segments/upgrade_test.go
+            '';
+
+            postInstall = ''
+              mv $out/bin/{src,oh-my-posh}
+              mkdir -p $out/share/oh-my-posh
+              cp -r $src/themes $out/share/oh-my-posh/
+            '';
+
+            meta = {
+              description = "Prompt theme engine for any shell";
+              mainProgram = "oh-my-posh";
+              license = lib.licenses.mit;
+            };
+          });
           opencode = pkgsUnstable.opencode;
           ty = pkgsUnstable.ty;
           yazi = pkgsUnstable.yazi;

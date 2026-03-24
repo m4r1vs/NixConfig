@@ -213,7 +213,7 @@ in {
                 type = "text";
                 style = "plain";
                 foreground = "green";
-                template = "❯ ";
+                template = "{{ if eq .Keymap \"vicmd\" }}❮ {{ else }}❯ {{ end }}";
               }
             ];
           }
