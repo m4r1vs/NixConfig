@@ -26,6 +26,7 @@ in {
         package = pkgs.yabai;
         config = {
           focus_follows_mouse = "autofocus";
+          mouse_modifier = "alt";
           layout = "bsp";
           mouse_follows_focus = "on";
           window_placement = "second_child";
