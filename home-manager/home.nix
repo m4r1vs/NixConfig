@@ -44,17 +44,18 @@ in {
 
   programs = {
     configured = {
+      bat.enable = true;
       brave.enable = isDesktop;
       direnv.enable = true;
       docker-darwin.enable = isDarwin;
       fzf.enable = true;
-      oh-my-posh.enable = true;
       ghostty.enable = isDesktop || isWSL || isDarwin;
       git.enable = true;
       lazygit.enable = true;
       mpv.enable = isDesktop || isDarwin;
       neovim.enable = true;
       newsboat.enable = isDesktop || isDarwin;
+      oh-my-posh.enable = true;
       opencode.enable = true;
       rofi.enable = isDesktop;
       spotify-player.enable = isDesktop || isWSL || isDarwin;
@@ -65,7 +66,6 @@ in {
       yazi.enable = true;
       zsh.enable = true;
     };
-    bat.enable = true;
     home-manager.enable = true;
     k9s.enable = true;
     obs-studio.enable = isDesktop;

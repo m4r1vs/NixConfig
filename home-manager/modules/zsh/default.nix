@@ -46,9 +46,10 @@ in {
         vi = "nvim";
         vim = "nvim";
         stty = mkIf isDarwin "/bin/stty";
+        bat = "bat --theme auto:system --theme-dark default --theme-light GitHub";
       };
       initContent = import ./init.nix {
-        inherit pkgs isDarwin;
+        inherit isDarwin lib pkgs;
       };
       plugins = [
         {
