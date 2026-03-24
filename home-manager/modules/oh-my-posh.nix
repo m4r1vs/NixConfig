@@ -1,12 +1,10 @@
 {
   lib,
-  systemArgs,
   config,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.oh-my-posh;
-  isDarwin = systemArgs.system == "aarch64-darwin";
 in {
   options.programs.configured.oh-my-posh = {
     enable = mkEnableOption "Nice shell prompt";
@@ -28,6 +26,12 @@ in {
             newline = true;
             segments = [
               {
+                type = "session";
+                style = "plain";
+                foreground = "yellow";
+                template = "{{ if .SSHSession }}󰒍 <b><i>{{ .UserName }}@{{ .HostName }}</i></b> {{ end }}";
+              }
+              {
                 type = "path";
                 style = "plain";
                 foreground = "blue";
@@ -48,6 +52,10 @@ in {
                   source = "cli";
                   branch_icon = "";
                   branch_identical_icon = "";
+                  git_icon = "";
+                  upstream_icons = {
+                    "git.informatik.uni-hamburg.de" = "";
+                  };
                 };
               }
               {
@@ -60,13 +68,7 @@ in {
                 type = "nix-shell";
                 style = "plain";
                 foreground = "cyan";
-                template = "{{ if contains .Type \"impure\" }} 󱄅 direnv {{ else if contains .Type \"pure\" }} 󱄅 pure {{ end }}";
-              }
-              {
-                type = "session";
-                style = "plain";
-                foreground = "yellow";
-                template = "{{ if .SSHSession }} SSH as {{ .UserName }} {{ end }}";
+                template = "{{ if contains .Type \"impure\" }} 󱄅 <i>devshell</i> {{ else if contains .Type \"pure\" }} 󱄅 <i>pure nix shell</i> {{ end }}";
               }
               {
                 type = "status";
@@ -76,19 +78,6 @@ in {
                 leading_diamond = "  ";
                 trailing_diamond = "";
                 template = "{{ if ne .Code 0 }} exited <b>{{ .Code }}</b> - <b>{{ reason .Code }}</b> {{ end }}";
-              }
-              {
-                type = "executiontime";
-                style = "diamond";
-                foreground = "white";
-                background = "#B58100";
-                leading_diamond = "  ";
-                trailing_diamond = "";
-                template = " ran for <b>{{ .FormattedMs }}</b> ";
-                options = {
-                  threshold = 5000;
-                  style = "round";
-                };
               }
             ];
           }
@@ -225,6 +214,27 @@ in {
                 template = "{{ if eq .Keymap \"vicmd\" }}❮ {{ else }}❯ {{ end }}";
               }
             ];
+          }
+        ];
+
+        tooltips_action = "extend";
+        tooltips = [
+          {
+            type = "executiontime";
+            tips = [
+              "t"
+              "time"
+            ];
+            style = "diamond";
+            foreground = "white";
+            background = "#C15B00";
+            leading_diamond = "  ";
+            trailing_diamond = "";
+            template = " ran for <b>{{ .FormattedMs }}</b> ";
+            options = {
+              threshold = 0;
+              style = "round";
+            };
           }
         ];
 
