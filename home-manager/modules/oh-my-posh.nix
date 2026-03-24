@@ -1,10 +1,12 @@
 {
   lib,
+  systemArgs,
   config,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.oh-my-posh;
+  isDarwin = systemArgs.system == "aarch64-darwin";
 in {
   options.programs.configured.oh-my-posh = {
     enable = mkEnableOption "Nice shell prompt";
@@ -60,46 +62,34 @@ in {
                 foreground = "cyan";
                 template = "{{ if contains .Type \"impure\" }} 󱄅 direnv {{ else if contains .Type \"pure\" }} 󱄅 pure {{ end }}";
               }
-              # {
-              #   type = "firebase";
-              #   style = "powerline";
-              #   powerline_symbol = "";
-              #   foreground = "#ffffff";
-              #   background = "#FFA000";
-              #   template = " 󰥧 {{ .Project }}";
-              # }
-              # {
-              #   type = "kubectl";
-              #   style = "powerline";
-              #   powerline_symbol = "";
-              #   foreground = "#000000";
-              #   background = "#ebcc34";
-              #   template = " 󱃾 {{.Context}}{{if .Namespace}} :: {{.Namespace}}{{end}} ";
-              #   options = {
-              #     context_aliases = {
-              #       "arn:aws:eks:eu-west-1:1234567890:cluster/posh" = "posh";
-              #     };
-              #     cluster_aliases = {
-              #       "arn:aws:eks:eu-west-1:1234567890:cluster/posh" = "posh-cluster";
-              #     };
-              #   };
-              # }
-              # {
-              #   type = "aws";
-              #   style = "powerline";
-              #   powerline_symbol = "";
-              #   foreground = "#ffffff";
-              #   background = "#FFA400";
-              #   template = "  {{.Profile}}{{if .Region}}@{{.Region}}{{end}}";
-              # }
-              # {
-              #   type = "gcp";
-              #   style = "powerline";
-              #   powerline_symbol = "";
-              #   foreground = "#ffffff";
-              #   background = "#47888d";
-              #   template = " 󱇶 {{.Project}} :: {{.Account}} ";
-              # }
+              {
+                type = "session";
+                style = "plain";
+                foreground = "yellow";
+                template = "{{ if .SSHSession }} SSH as {{ .UserName }} {{ end }}";
+              }
+              {
+                type = "status";
+                style = "diamond";
+                foreground = "white";
+                background = "red";
+                leading_diamond = "  ";
+                trailing_diamond = "";
+                template = "{{ if ne .Code 0 }} exited <b>{{ .Code }}</b> - <b>{{ reason .Code }}</b> {{ end }}";
+              }
+              {
+                type = "executiontime";
+                style = "diamond";
+                foreground = "white";
+                background = "#B58100";
+                leading_diamond = "  ";
+                trailing_diamond = "";
+                template = " ran for <b>{{ .FormattedMs }}</b> ";
+                options = {
+                  threshold = 5000;
+                  style = "round";
+                };
+              }
             ];
           }
           {
@@ -196,6 +186,25 @@ in {
                 foreground = "yellow";
                 template = "  {{ .Full }} ";
               }
+              {
+                type = "zig";
+                style = "plain";
+                foreground = "yellow";
+                template = "  {{ if .Error }}{{ .Error }}{{ else }}{{ .Full }}{{ end }} ";
+              }
+              # {
+              #   type = "spotify";
+              #   style = "plain";
+              #   foreground = "green";
+              #   include_folders = [
+              #     (
+              #       if isDarwin
+              #       then "/Users/${systemArgs.username}"
+              #       else "/home/${systemArgs.username}"
+              #     )
+              #   ];
+              #   template = "{{ if eq .Status \"playing\" }} 󰓇 {{ .Artist }} - {{ .Track }}{{ end }}";
+              # }
               {
                 type = "os";
                 style = "plain";
