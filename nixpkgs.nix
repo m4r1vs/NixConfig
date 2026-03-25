@@ -77,13 +77,38 @@ in {
           From unstable/master Nixpkgs
           */
 
+          colima = pkgsUnstable.colima;
+          direnv = pkgsUnstable.direnv;
+          mise = pkgsUnstable.mise;
           gemini-cli = pkgsUnstable.gemini-cli;
           ghostty =
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
-          colima = pkgsUnstable.colima;
           golazo = pkgsUnstable.golazo;
+          opencode = pkgsUnstable.opencode;
+          ty = pkgsUnstable.ty;
+          yazi = pkgsUnstable.yazi;
+          yaziPlugins = pkgsUnstable.yaziPlugins;
+
+          /*
+          Temporary Fixes / Updates
+          */
+
+          # https://github.com/NixOS/nixpkgs/pull/463023
+          eb-garamond = eb-garamond.overrideAttrs {
+            nativeBuildInputs = [
+              fontforge
+              python3
+              ttfautohint-nox
+            ];
+          };
+
+          /*
+          Own Forks
+          */
+
+          # Add support for zsh-vi-mode
           oh-my-posh = pkgsUnstable.buildGo126Module (finalAttrs: {
             pname = "oh-my-posh";
             version = "29.9.1";
@@ -129,27 +154,6 @@ in {
               license = lib.licenses.mit;
             };
           });
-          opencode = pkgsUnstable.opencode;
-          ty = pkgsUnstable.ty;
-          yazi = pkgsUnstable.yazi;
-          yaziPlugins = pkgsUnstable.yaziPlugins;
-
-          /*
-          Temporary Fixes / Updates
-          */
-
-          # https://github.com/NixOS/nixpkgs/pull/463023
-          eb-garamond = eb-garamond.overrideAttrs {
-            nativeBuildInputs = [
-              fontforge
-              python3
-              ttfautohint-nox
-            ];
-          };
-
-          /*
-          Own Forks
-          */
 
           # Make border between panes invisible
           tmux = tmux.overrideAttrs {
