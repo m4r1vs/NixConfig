@@ -25,9 +25,8 @@ return {
       load_on_setup = true,
       previewer = "summary",
       mappings = {
-        delete_session = { "i", "<C-D>" },
-        alternate_session = { "i", "<C-S>" },
-        copy_session = { "i", "<C-Y>" },
+        delete_session = { "n", "<C-d>" },
+        alternate_session = { "n", "<C-s>" },
       },
       theme_conf = {
         border = true,
