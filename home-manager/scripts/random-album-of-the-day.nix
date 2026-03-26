@@ -12,7 +12,7 @@ in {
       set -o pipefail
 
       HTML=$(${pkgs.curl}/bin/curl -s "https://daily.bandcamp.com/album-of-the-day")
-      RANDOM_ALBUM_LINE=$(echo "$HTML" | grep '<a class="title" href="/album-of-the-day/' | shuf -n 1)
+      RANDOM_ALBUM_LINE=$(echo "$HTML" | grep '<a class="title" href="/album-of-the-day/' | ${pkgs.coreutils}/bin/shuf -n 1)
       RANDOM_ALBUM=$(echo "$RANDOM_ALBUM_LINE" | awk -F '">|</' '{print $3}' | sed -e 's/“//g ; s/”//g')
       ALBUM_PATH=$(echo "$RANDOM_ALBUM_LINE" | sed -n 's/.*href="\([^"]*\)".*/\1/p')
       exit_code="$?"
