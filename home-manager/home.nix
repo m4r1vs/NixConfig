@@ -77,7 +77,6 @@ in {
     qt.enable = isDesktop;
     xdg.enable = isDesktop;
     hushlogin.enable = isDarwin;
-    raycast-scripts.enable = false;
   };
 
   fonts.fontconfig.enable = isDesktop;

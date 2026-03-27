@@ -196,11 +196,6 @@ in {
 
     services = {
       configured = {
-        aerospace = {
-          enable = false;
-          enableAerospaceSwipe = false;
-        };
-        hammerspoon.enable = false;
         yabai.enable = true;
       };
     };
