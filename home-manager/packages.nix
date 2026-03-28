@@ -32,7 +32,6 @@ in {
       gemini-cli
       obsidian
       prismlauncher
-      vscode
       yt-dlp
       zathura
     ]
