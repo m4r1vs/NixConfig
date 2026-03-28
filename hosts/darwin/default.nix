@@ -33,6 +33,9 @@ in {
         upgrade = true;
         cleanup = "zap";
       };
+      brews = [
+        "ghidra"
+      ];
       casks = [
         "1password"
         "affinity"
