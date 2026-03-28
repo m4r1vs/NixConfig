@@ -134,6 +134,19 @@ in {
         f11 | sound_down
         f12 | sound_up
 
+        ctrl - f1 | f1
+        ctrl - f2 | f2
+        ctrl - f3 | f3
+        ctrl - f4 | f4
+        ctrl - f5 | f5
+        ctrl - f6 | f6
+        ctrl - f7 | f7
+        ctrl - f8 | f8
+        ctrl - f9 | f9
+        ctrl - f10 | f10
+        ctrl - f11 | f11
+        ctrl - f12 | f12
+
         lcmd - f1 : ${pkgs.ghostty}/bin/ghostty -e zsh -c "export TERM=xterm-256color; ssh -J 2niveri@rzssh1.informatik.uni-hamburg.de 2niveri@sppc13.informatik.uni-hamburg.de"
         lcmd - f2 : ${pkgs.ghostty}/bin/ghostty -e ssh mn@nixner.niveri.dev
         lcmd - f3 : ${pkgs.ghostty}/bin/ghostty -e ssh -p 422 mn@falkenberg.kubenix.niveri.dev
