@@ -44,6 +44,7 @@ in {
       default = {
         bash = "";
         bun = "";
+        caffeinate = "";
         ghostty = "󰊠";
         golazo = "󰒸";
         htop = "";
