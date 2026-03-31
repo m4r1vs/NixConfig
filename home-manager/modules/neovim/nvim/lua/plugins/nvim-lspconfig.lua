@@ -35,8 +35,8 @@ return {
         vim.keymap.set("i", "<C-s>", "<cmd>lua vim.lsp.buf.signature_help()<cr>", opts)
         vim.keymap.set("n", "<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
         vim.keymap.set("n", "<leader>la", "<cmd>lua vim.lsp.buf.code_action()<cr>", opts)
-        vim.keymap.set("n", "<leader>lk", "<cmd>lua vim.diagnostic.goto_prev()<cr>", opts)
-        vim.keymap.set("n", "<leader>lj", "<cmd>lua vim.diagnostic.goto_next()<cr>", opts)
+        vim.keymap.set("n", "<leader>lk", "<cmd>lua vim.diagnostic.jump({count=-1})<cr>", opts)
+        vim.keymap.set("n", "<leader>lj", "<cmd>lua vim.diagnostic.jump({count=1})<cr>", opts)
       end,
     })
 
