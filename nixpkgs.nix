@@ -13,6 +13,10 @@ with lib; let
     system = systemArgs.system;
     config.allowUnfree = true;
   };
+  pkgsMaster = import inputs.nixpkgs_master {
+    system = systemArgs.system;
+    config.allowUnfree = true;
+  };
 in {
   nixpkgs = {
     config.allowUnfree = true;
@@ -79,13 +83,15 @@ in {
 
           colima = pkgsUnstable.colima;
           direnv = pkgsUnstable.direnv;
-          mise = pkgsUnstable.mise;
           gemini-cli = pkgsUnstable.gemini-cli;
           ghostty =
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
           golazo = pkgsUnstable.golazo;
+          mise = pkgsUnstable.mise;
+          neovim = pkgsMaster.neovim;
+          neovim-unwrapped = pkgsMaster.neovim-unwrapped;
           opencode = pkgsUnstable.opencode;
           ty = pkgsUnstable.ty;
           yazi = pkgsUnstable.yazi;
