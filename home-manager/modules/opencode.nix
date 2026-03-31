@@ -10,11 +10,14 @@ in {
     enable = mkEnableOption "Multi-provider AI coding CLI";
   };
   config = mkIf cfg.enable {
+    home.file."./.config/opencode/tui.json".text = builtins.toJSON {
+      theme = "system";
+      background = "none";
+    };
     programs.opencode = {
       enable = true;
       settings = {
-        theme = "system";
-        autoupdate = true;
+        autoupdate = false;
       };
     };
   };
