@@ -10,16 +10,22 @@ local function loadAPIKeysAndRunVimCMD(cmd)
       end
     end
   end
+
   set_env_from_op("AVANTE_OPENAI_API_KEY", "op://Private/OpenAI/credential")
   set_env_from_op("AVANTE_GEMINI_API_KEY", "op://Private/Gemini/credential")
   set_env_from_op("TAVILY_API_KEY", "op://Private/Tavily/credential")
   vim.cmd(cmd)
 end
 
+local function switchToOpencodeAndRunCMD(cmd)
+  require("avante.api").switch_provider("opencode")
+  vim.cmd(cmd)
+end
+
 return {
   "yetone/avante.nvim",
   version = false,
-  event = "VeryLazy",
+  lazy = true,
   keys = {
     {
       "<leader>aa",
@@ -42,26 +48,47 @@ return {
       end,
       mode = "v"
     },
+    {
+      "<leader>AA",
+      function()
+        switchToOpencodeAndRunCMD("AvanteToggle")
+      end,
+      mode = "n"
+    },
+    {
+      "<leader>aM",
+      function()
+        switchToOpencodeAndRunCMD("AvanteACPModes")
+      end,
+      mode = "n"
+    },
+    {
+      "<leader>am",
+      ":<cr>",
+      function()
+        switchToOpencodeAndRunCMD("AvanteACPModels")
+      end,
+      mode = "n"
+    },
   },
   opts = {
     selection = {
-      enabled = true,
+      enabled = false,
       hint_display = "none",
     },
-    instructions_file = "avante.md",
     provider = "openai",
+    auto_suggestions_provider = "openai_nano",
     providers = {
       openai = {
         endpoint = "https://api.openai.com/v1",
-        model = "gpt-4.1",
-        timeout = 30000,
-        context_window = 128000,
-        support_previous_response_id = true,
-        extra_request_body = {
-          temperature = 0.75,
-          max_completion_tokens = 16384,
-          reasoning_effort = "medium",
-        },
+        model = "gpt-5.3-codex",
+        api_key_name = "AVANTE_OPENAI_API_KEY",
+      },
+      openai_nano = {
+        __inherited_from = "openai",
+        endpoint = "https://api.openai.com/v1",
+        model = "gpt-5.4-nano",
+        api_key_name = "AVANTE_OPENAI_API_KEY",
       },
       gemini = { -- API key set in zsh config
         endpoint = "https://generativelanguage.googleapis.com/v1beta/models",
@@ -76,18 +103,36 @@ return {
         },
       },
     },
+    mode = "agentic",
+    input = {
+      provider = "native",
+    },
+    behaviour = {
+      auto_suggestions = false,
+      auto_set_highlight_group = true,
+      auto_set_keymaps = true,
+      auto_apply_diff_after_generation = true,
+      support_paste_from_clipboard = true,
+      minimize_diff = true,
+      enable_token_counting = true,
+      auto_add_current_file = true,
+      auto_approve_tool_permissions = true,
+      confirmation_ui_style = "inline_buttons",
+      acp_follow_agent_locations = true,
+    },
     acp_providers = {
+      ["opencode"] = {
+        command = "opencode",
+        args = { "acp" }
+      },
       ["gemini-cli"] = {
         command = "gemini",
-        args = { "--experimental-acp", "--approval-mode=yolo" },
+        args = { "--acp", "--approval-mode=yolo" },
         env = {
           NODE_NO_WARNINGS = "1",
         },
         auth_method = "oauth-personal",
       },
-    },
-    behaviour = {
-      auto_approve_tool_permissions = true,
     },
     windows = {
       spinner = {
