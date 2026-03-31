@@ -48,6 +48,8 @@ in
       tinymist
       tree-sitter
       ty
+      typescript
+      typescript-language-server
       vscode-langservers-extracted
       websocat
       yaml-language-server
