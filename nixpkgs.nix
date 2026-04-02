@@ -13,10 +13,6 @@ with lib; let
     system = systemArgs.system;
     config.allowUnfree = true;
   };
-  pkgsMaster = import inputs.nixpkgs_master {
-    system = systemArgs.system;
-    config.allowUnfree = true;
-  };
 in {
   nixpkgs = {
     config.allowUnfree = true;
@@ -90,8 +86,8 @@ in {
             else pkgsUnstable.ghostty;
           golazo = pkgsUnstable.golazo;
           mise = pkgsUnstable.mise;
-          neovim = pkgsMaster.neovim;
-          neovim-unwrapped = pkgsMaster.neovim-unwrapped;
+          neovim = pkgsUnstable.neovim;
+          neovim-unwrapped = pkgsUnstable.neovim-unwrapped;
           opencode = pkgsUnstable.opencode;
           ty = pkgsUnstable.ty;
           yazi = pkgsUnstable.yazi;
@@ -214,9 +210,10 @@ in {
 
           # Add fn-X and fn-Y shortcuts to resize/move windows
           yabai = pkgsUnstable.yabai.overrideAttrs {
+            version = "7.1.18";
             src = pkgs.fetchzip {
-              url = "https://github.com/m4r1vs/yabai/raw/refs/heads/master/bin.tar.gz";
-              hash = "sha256-YHNiag1SD1pmOFI1k89UH9Hjz2P2ls7KAwpVtrPZhFQ=";
+              url = "https://github.com/m4r1vs/yabai/raw/48c4fac997579ee007e5486f846f50f199263c3b/bin.tar.gz";
+              hash = "sha256-zyWS5St2xIl40LB5yxYhoy8oI+jK+Wnvlj5UoezrSmw=";
             };
             installPhase = ''
               runHook preInstall
