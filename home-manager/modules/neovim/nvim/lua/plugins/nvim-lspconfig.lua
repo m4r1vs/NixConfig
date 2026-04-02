@@ -96,7 +96,6 @@ return {
     vim.lsp.enable("jdtls")
     vim.lsp.enable("jsonls")
     vim.lsp.enable("lua_ls")
-    vim.lsp.enable("marksman")
     vim.lsp.enable("nil_ls")
     vim.lsp.enable("nixd")
     vim.lsp.enable("ty")
