@@ -38,6 +38,7 @@ in {
         ls = "${pkgs.lsd}/bin/lsd";
         la = "${pkgs.lsd}/bin/lsd -la";
         tree = "${pkgs.lsd}/bin/lsd --tree";
+        g3 = "${pkgs.gemini-cli}/bin/gemini -m gemini-3.1-pro-preview";
         present = "${pkgs.zathura}/bin/zathura --mode=presentation";
         rebuild =
           if isDarwin
