@@ -193,8 +193,34 @@ vim.keymap.set("n", "<C-T>", ":tabnew<CR>:Telescope find_files<CR>")
 -- Use <leader>" to change current selection ' to "
 vim.keymap.set("v", "<leader>\"", ":s/'/\"/g<CR>")
 
--- Use <leader>rs to sort the current selection
-vim.keymap.set("v", "<leader>rs", ":!sort<CR>")
+-- Use <leader>rs to sort the current selection (visual) or inside brackets (normal)
+vim.keymap.set("v", "<leader>rs", ":sort<CR>")
+vim.keymap.set("n", "<leader>rs", function()
+  local function sort_in_pair(open, close)
+    local start_pos = vim.fn.searchpairpos(open, "", close, "bnW")
+    local end_pos = vim.fn.searchpairpos(open, "", close, "nW")
+    if start_pos[1] > 0 and end_pos[1] > 0 and start_pos[1] < end_pos[1] then
+      vim.cmd(string.format("%d,%dsort", start_pos[1] + 1, end_pos[1] - 1))
+      return true
+    end
+    return false
+  end
+
+  if not sort_in_pair("\\[", "\\]") then
+    if not sort_in_pair("{", "}") then
+      -- Fallback: Sort block between empty lines (or start/end of file)
+      local start_line = vim.fn.search("^\\s*$", "bnW")
+      start_line = start_line == 0 and 1 or start_line + 1
+
+      local end_line = vim.fn.search("^\\s*$", "nW")
+      end_line = end_line == 0 and vim.fn.line("$") or end_line - 1
+
+      if start_line <= end_line then
+        vim.cmd(string.format("%d,%dsort", start_line, end_line))
+      end
+    end
+  end
+end, { noremap = true, silent = true })
 
 -- Use <leader>ro to convert the current selection to an ordered list
 vim.keymap.set("v", "<leader>ro", ":!nl -w 1 -s '. '<CR>")
