@@ -3,55 +3,50 @@ vim.fn.mkdir(parser_install_dir, "p")
 vim.opt.runtimepath:append(parser_install_dir)
 
 return {
-  "nvim-treesitter/nvim-treesitter",
-  build = ":TSUpdate",
-  event = "VeryLazy",
-  branch = "master", -- TODO: update to treesitter on main branch
-  init = function()
-    local configs = require("nvim-treesitter.configs")
-
-    configs.setup({
+  {
+    "nvim-treesitter/nvim-treesitter",
+    version = false,
+    build = ":TSUpdate",
+    event = "VeryLazy",
+    branch = "master",
+    opts = {
       parser_install_dir = parser_install_dir,
-      auto_install = true,
+      highlight = {
+        enable = true,
+      },
+      indent = { enable = true },
       ensure_installed = {
-        "javascript",
-        "typescript",
-        "rust",
-        "python",
-        "go",
-        "c",
-        "lua",
-        "vim",
-        "query",
-        "html",
-        "css",
         "arduino",
+        "c",
         "cpp",
+        "css",
         "dart",
+        "dot",
+        "go",
+        "html",
+        "javascript",
         "json",
         "julia",
         "lua",
-        "markdown_inline",
-        "markdown",
         "make",
+        "markdown",
+        "markdown_inline",
+        "nix",
+        "python",
+        "query",
         "regex",
         "ruby",
+        "rust",
         "scss",
         "sql",
         "svelte",
+        "typescript",
+        "vim",
         "vimdoc",
-        "yaml",
         "xml",
-        "dot",
+        "yaml",
         "zig",
       },
-      sync_install = false,
-      highlight = {
-        enable = true,
-        disable = { "latex" },
-        additional_vim_regex_highlighting = { "latex", "markdown" },
-      },
-      indent = { enable = true },
-    })
-  end
+    },
+  },
 }
