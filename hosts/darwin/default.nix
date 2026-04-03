@@ -46,6 +46,7 @@ in {
         "iriunwebcam"
         "keycastr"
         "linearmouse"
+        "macs-fan-control"
         "mediamate"
         "obs"
         "raycast"
