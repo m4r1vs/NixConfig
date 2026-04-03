@@ -3,55 +3,55 @@ vim.fn.mkdir(parser_install_dir, "p")
 vim.opt.runtimepath:append(parser_install_dir)
 
 return {
-  "nvim-treesitter/nvim-treesitter",
-  build = ":TSUpdate",
-  event = "VeryLazy",
-  branch = "master", -- TODO: update to treesitter on main branch
-  init = function()
-    local configs = require("nvim-treesitter.configs")
-
-    configs.setup({
+  {
+    "nvim-treesitter/nvim-treesitter",
+    version = false,
+    build = ":TSUpdate",
+    event = "VeryLazy",
+    branch = "main",
+    opts = {
       parser_install_dir = parser_install_dir,
-      auto_install = true,
-      ensure_installed = {
-        "javascript",
-        "typescript",
-        "rust",
-        "python",
-        "go",
-        "c",
-        "lua",
-        "vim",
-        "query",
-        "html",
-        "css",
-        "arduino",
-        "cpp",
-        "dart",
-        "json",
-        "julia",
-        "lua",
-        "markdown_inline",
-        "markdown",
-        "make",
-        "regex",
-        "ruby",
-        "scss",
-        "sql",
-        "svelte",
-        "vimdoc",
-        "yaml",
-        "xml",
-        "dot",
-        "zig",
-      },
-      sync_install = false,
       highlight = {
         enable = true,
         disable = { "latex" },
-        additional_vim_regex_highlighting = { "latex", "markdown" },
       },
       indent = { enable = true },
-    })
-  end
+      ensure_installed = {
+        "arduino",
+        "c",
+        "cpp",
+        "css",
+        "dart",
+        "dot",
+        "go",
+        "html",
+        "javascript",
+        "json",
+        "julia",
+        "lua",
+        "make",
+        "markdown",
+        "markdown_inline",
+        "nix",
+        "python",
+        "query",
+        "regex",
+        "ruby",
+        "rust",
+        "scss",
+        "sql",
+        "svelte",
+        "typescript",
+        "vim",
+        "vimdoc",
+        "xml",
+        "yaml",
+        "zig",
+      },
+    },
+    ---@param opts TSConfig
+    config = function(_, opts)
+      require("nvim-treesitter").setup(opts)
+    end,
+  },
 }
