@@ -136,6 +136,38 @@ vim.api.nvim_create_autocmd('BufWinEnter', {
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { noremap = true, silent = true })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { noremap = true, silent = true })
 
+-- Toggle booleans under cursor
+vim.keymap.set("n", "<leader>rb", function()
+  local word = vim.fn.expand("<cword>")
+  local toggles = {
+    ["true"] = "false",
+    ["false"] = "true",
+    ["True"] = "False",
+    ["False"] = "True",
+    ["TRUE"] = "FALSE",
+    ["FALSE"] = "TRUE",
+    ["on"] = "off",
+    ["off"] = "on",
+    ["On"] = "Off",
+    ["Off"] = "On",
+    ["ON"] = "OFF",
+    ["OFF"] = "ON",
+    ["yes"] = "no",
+    ["no"] = "yes",
+    ["Yes"] = "No",
+    ["No"] = "Yes",
+    ["YES"] = "NO",
+    ["NO"] = "YES",
+    ["0"] = "1",
+    ["1"] = "0",
+  }
+
+  local new_word = toggles[word]
+  if new_word then
+    vim.cmd("normal! \"_ciw" .. new_word)
+  end
+end, { noremap = true, silent = true })
+
 -- Remap > and < in visual mode to keep the selection
 vim.api.nvim_set_keymap("v", ">", ">gv", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("v", "<", "<gv", { noremap = true, silent = true })
