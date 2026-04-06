@@ -57,6 +57,19 @@ vim.opt.inccommand = "split" -- live preview of substitutions
 vim.wo.signcolumn = "yes:1"
 vim.opt.linebreak = true
 
+-- Folds (use za to toggle the fold, zR to unfold all and zM to fold all)
+vim.opt.foldlevel = 99
+vim.opt.foldlevelstart = 99
+vim.opt.foldenable = true
+vim.opt.fillchars:append({ fold = " " })
+_G.custom_fold_text = function()
+  local start_line = vim.fn.getline(vim.v.foldstart)
+  local end_line = vim.fn.trim(vim.fn.getline(vim.v.foldend))
+  local line_count = vim.v.foldend - vim.v.foldstart + 1
+  return start_line .. "      [" .. line_count .. " lines]      " .. end_line
+end
+vim.opt.foldtext = "v:lua.custom_fold_text()"
+
 -- Change settings if we're in the Browser
 if vim.g.started_by_firenvim == true then
   vim.opt.showtabline = 0
