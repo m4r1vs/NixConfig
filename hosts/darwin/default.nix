@@ -48,6 +48,7 @@ in {
         "iriunwebcam"
         "keycastr"
         "linearmouse"
+        "lm-studio"
         "macs-fan-control"
         "mediamate"
         "obs"
