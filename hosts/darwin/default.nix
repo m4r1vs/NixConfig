@@ -43,6 +43,7 @@ in {
         "android-studio"
         "brave-browser"
         "discord"
+        "finetune"
         "google-drive"
         "iriunwebcam"
         "keycastr"
