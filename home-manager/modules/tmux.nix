@@ -42,9 +42,11 @@ in {
     shellIconMap = mkOption {
       type = types.attrsOf types.str;
       default = {
+        ".opencode-wrapp" = "󱚣"; # Name so long, it gets truncated
         bash = "";
         bun = "";
         caffeinate = "";
+        cargo = "";
         ghostty = "󰊠";
         golazo = "󰒸";
         htop = "";
@@ -56,13 +58,14 @@ in {
         nix = "󱄅";
         node = "";
         nvim = "";
+        rustc = "";
+        rustup = "";
         spotify_player = "";
         ssh = "󰒍";
         sudo = "  root";
         terraform = "";
         tmux = ""; # on macos zsh is not always immediately loaded
         yazi = "󰇥";
-        ".opencode-wrapp" = "󱚣"; # Name so long, it gets truncated
       };
       description = "Map program-names to their icons";
     };
