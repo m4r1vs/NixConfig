@@ -39,6 +39,7 @@ in {
       ];
       settings = {
         client_id = "228dbbe5c96a418586e5847a6d2e1a73";
+        enable_audio_visualization = true;
         theme = "dracula";
         client_port = 8080;
         login_redirect_uri = "http://127.0.0.1:8888/login";
