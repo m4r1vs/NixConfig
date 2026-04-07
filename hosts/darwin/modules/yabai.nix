@@ -48,6 +48,8 @@ in {
 
             yabai -m rule --add app="^TV$" title="^.{3,}$" manage=off # match any Apple TV Window with more than 2 letters (should apply to the popout player)
             yabai -m rule --add title="^General$" manage=off # most of apple settings windows are named "General"
+            yabai -m rule --add app="^Arc$" title="^Advanced$" manage=off # match arc settings
+            yabai -m rule --add app="^Arc$" title="^$" manage=off # match arc settings
 
             yabai -m rule --add title="^scratchpad_yazi$" scratchpad=yazi grid=11:11:1:1:9:9
             yabai -m rule --add title="^scratchpad_spotify$" scratchpad=spotify grid=11:11:2:1:7:9
