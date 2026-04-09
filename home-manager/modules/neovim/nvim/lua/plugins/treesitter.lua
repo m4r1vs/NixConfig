@@ -3,6 +3,7 @@ return {
   lazy = false,
   build = ":TSUpdate",
   opts = {},
+  branch = "main",
   config = function()
     local parsers = {
       "ada",
