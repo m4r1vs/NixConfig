@@ -251,8 +251,8 @@ in {
             "SUPER+Shift, v, exec, ${scripts.rofi-cliphist}"
 
             # bound to mousewheel left/right
-            "SUPER+Ctrl, Left, workspace, m-1"
-            "SUPER+Ctrl, Right, workspace, m+1"
+            "Ctrl+Shift, Left, workspace, m-1"
+            "Ctrl+Shift, Right, workspace, m+1"
           ]
           ++ (
             builtins.concatLists (builtins.genList (
