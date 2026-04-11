@@ -43,6 +43,7 @@ in {
         "android-studio"
         "brave-browser"
         "discord"
+        "dockdoor"
         "finetune"
         "google-drive"
         "iriunwebcam"
