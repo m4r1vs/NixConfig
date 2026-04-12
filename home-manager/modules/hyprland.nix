@@ -176,11 +176,8 @@ in {
           [
             "SUPER, q, killactive"
 
-            "SUPER, Tab, cyclenext"
-            "SUPER, Tab, bringactivetotop"
-
-            "SUPER+Shift, Tab, cyclenext, prev"
-            "SUPER+Shift, Tab, bringactivetotop"
+            "SUPER, Tab, exec, ${scripts.cycle-windows "next"}"
+            "SUPER+Shift, Tab, exec, ${scripts.cycle-windows "prev"}"
 
             "SUPER, h, movefocus, l"
             "SUPER, l, movefocus, r"
