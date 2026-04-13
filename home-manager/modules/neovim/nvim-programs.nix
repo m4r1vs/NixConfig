@@ -14,6 +14,7 @@ in
       alejandra
       bash-language-server
       black
+      copilot-language-server
       docker-compose-language-service
       dockerfile-language-server
       fd
