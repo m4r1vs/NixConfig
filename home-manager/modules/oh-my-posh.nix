@@ -73,7 +73,7 @@ in {
               {
                 type = "status";
                 style = "diamond";
-                foreground = "white";
+                foreground = "#ffffff";
                 background = "red";
                 leading_diamond = "  ";
                 trailing_diamond = "";
@@ -226,7 +226,7 @@ in {
               "time"
             ];
             style = "diamond";
-            foreground = "white";
+            foreground = "#ffffff";
             background = "#C15B00";
             leading_diamond = "  ";
             trailing_diamond = "";

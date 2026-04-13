@@ -4,12 +4,12 @@
 }: let
   colors = {
     orange = {
-      hex = "#f7821B";
-      rgb = "247,130,27";
+      hex = "#db8c4b";
+      rgb = "219, 140, 75";
     };
     green = {
-      hex = "#658257";
-      rgb = "101,130,87";
+      hex = "#6c7b2e";
+      rgb = "108, 123, 46";
     };
     red = {
       hex = "#FE3700";
