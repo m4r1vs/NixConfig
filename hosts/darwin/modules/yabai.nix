@@ -107,8 +107,6 @@ in {
         .define toggle_scratchpad : yabai -m window --toggle {{1}} || {{2}}
 
         lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --keybind='global:super+enter=unbind' --font-size=14 --title=scratchpad_yazi -e yazi")
-        lcmd + ctrl - t : @toggle_scratchpad("tmux", "${pkgs.ghostty}/bin/ghostty --keybind='global:super+enter=unbind' --title=scratchpad_tmux -e tmux")
-        lcmd + ctrl - m : @toggle_scratchpad("k9s", "${pkgs.ghostty}/bin/ghostty --keybind='global:super+enter=unbind' --font-size=14 --title=scratchpad_k9s -e k9s")
 
         lcmd - q : yabai -m window --close
         lcmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')
