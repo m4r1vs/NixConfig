@@ -239,7 +239,7 @@ in {
         ];
 
         shell_integration = true;
-        enable_cursor_positioning = true;
+        enable_cursor_positioning = false; # Disable to allow immediate input after spawning terminal
         async = true;
         streaming = 60;
         version = 4;
