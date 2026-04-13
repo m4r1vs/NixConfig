@@ -27,6 +27,9 @@
   zle -N zoxide_jump
   bindkey -M 'viins' '^Z' zoxide_jump
 
+  bindkey -M 'viins' '^[m' up-line-or-beginning-search
+  bindkey -M 'vicmd' '^[m' up-line-or-beginning-search
+
   ${
     if isDarwin
     then ''
