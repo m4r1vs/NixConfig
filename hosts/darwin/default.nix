@@ -35,6 +35,7 @@ in {
       };
       brews = [
         "ghidra"
+        "mole"
         "zig"
       ];
       casks = [
