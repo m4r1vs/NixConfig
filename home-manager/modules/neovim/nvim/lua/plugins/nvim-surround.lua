@@ -2,10 +2,8 @@
 return {
   "kylechui/nvim-surround",
   event = "VeryLazy",
-  opts = {
-    nvim_surround_no_mappings = true,
-  },
   init = function()
+    vim.g.nvim_surround_no_mappings = true
     vim.keymap.set("i", "<C-g>e", "<Plug>(nvim-surround-insert)", {
       desc = "Add a surrounding pair around the cursor (insert mode)",
     })
