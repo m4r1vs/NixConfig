@@ -1,24 +1,24 @@
 return {
   "zbirenbaum/copilot.lua",
-  dependencies = { {
-    "copilotlsp-nvim/copilot-lsp",
-    version = false,
-    event = "InsertEnter",
-    init = function()
-      vim.g.copilot_nes_debounce = 500
-    end,
-  } },
   version = false,
   event = "InsertEnter",
+  keys = {
+    { "<M-j>",      mode = "i", desc = "Next Copilot suggestion" },
+    { "<M-k>",      mode = "i", desc = "Previous Copilot suggestion" },
+    { "<M-m>",      mode = "i", desc = "Accept Copilot suggestion" },
+    { "<M-w>",      mode = "i", desc = "Accept Copilot suggestion word" },
+    { "<leader>mm", mode = "n", desc = "Toggle Copilot autotrigger" },
+  },
   config = function()
     require("copilot").setup({
       suggestion = {
         enabled = true,
-        auto_trigger = true,
+        auto_trigger = false,
         keymap = {
           next = "<M-j>",
           prev = "<M-k>",
           accept = "<M-m>",
+          accept_word = "<M-w>",
         },
       },
       panel = {
@@ -29,13 +29,9 @@ return {
       },
     })
 
-    vim.g.copilot_autotrigger = false
-
-    -- <leader>cc toggles copilot autotrigger
-    vim.keymap.set("n", "<leader>cc", function()
+    -- toggle copilot autotrigger
+    vim.keymap.set("n", "<leader>mm", function()
       require("copilot.suggestion").toggle_auto_trigger()
-      vim.g.copilot_autotrigger = not vim.g.copilot_autotrigger
-      print("Copilot autotrigger " .. (vim.g.copilot_autotrigger and "enabled" or "disabled"))
     end, { desc = "Toggle Copilot autotrigger" })
   end,
 }

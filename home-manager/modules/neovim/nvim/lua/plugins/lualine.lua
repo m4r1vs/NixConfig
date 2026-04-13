@@ -5,7 +5,10 @@ else
   return {
     {
       "nvim-lualine/lualine.nvim",
-      dependencies = { "nvim-tree/nvim-web-devicons" },
+      dependencies = {
+        { "nvim-tree/nvim-web-devicons" },
+        { "AndreM222/copilot-lualine" },
+      },
       event = "VeryLazy",
       init = function()
         local lualine = require("lualine")
@@ -137,6 +140,41 @@ else
             color_warn = { fg = colors.yellow },
             color_info = { fg = colors.cyan },
           },
+        })
+
+        ins_right({
+          "copilot",
+          -- icons_enabled = true,
+          -- color = { fg = colors.green, gui = "bold" },
+          symbols = {
+            status = {
+              icons = {
+                enabled = " ",
+                sleep = " ", -- auto-trigger disabled
+                disabled = " ",
+                warning = " ",
+                unknown = " "
+              },
+              hl = {
+                enabled = "#66800b",
+                sleep = "#ABAAA6",
+                disabled = "#7BAAD2",
+                warning = "#da702c",
+                unknown = "#ABAAA6"
+              }
+            },
+            spinners = {
+              "✶",
+              "✸",
+              "✹",
+              "✺",
+              "✹",
+              "✷",
+            },
+            spinner_color = "#d0a215"
+          },
+          show_colors = true,
+          show_loading = true
         })
 
         ins_right({
