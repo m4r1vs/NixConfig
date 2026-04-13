@@ -13,6 +13,9 @@
 in {
   home.packages = with pkgs;
     [
+      /*
+      Install on every system:
+      */
       astroterm # show stars in terminal
       fastfetch # new neofetch
       kubectl # kubernetes CLI
@@ -21,11 +24,17 @@ in {
       xdg-utils # xdg-open, etc.
     ]
     ++ lib.optionals isDarwin [
+      /*
+      Install on MacOS only
+      */
       clippy-darwin # cli to copy/paste files (used by yazi plugin)
       comma # run programs not installed but in nixpkgs
       (writeShellScriptBin "random-album-of-the-day" scripts.random-album-of-the-day)
     ]
     ++ lib.optionals isGraphical [
+      /*
+      Install on MacOS and NixOS Desktop
+      */
       android-tools # android studio and emulator
       atai # openai wrapper to write in the terminal for me
       dbeaver-bin # database explorer (postgres, mysql, etc.)
@@ -36,6 +45,9 @@ in {
       zathura # pdf viewer
     ]
     ++ lib.optionals isDesktop ([
+        /*
+        Install on NixOS Desktop only
+        */
         amberol # fancy mp3 player
         diebahn # deutsche bahn arrivals/departures/delays
         gimp-with-plugins # maxxed out gimp
@@ -57,6 +69,9 @@ in {
       ++ (
         if isWayland
         then [
+          /*
+          Install on Wayland only
+          */
           hyprcursor # fancy cursor
           hyprpicker # color picker
           hyprshot # screenshot tool
@@ -64,6 +79,9 @@ in {
           swayimg # image viewer
         ]
         else [
+          /*
+          Install on X11 only
+          */
           arandr # x11 monitor manager (resolution, position, etc.)
           feh # set wallpaper on x11
         ]
@@ -71,10 +89,16 @@ in {
       ++ (
         if isX86
         then [
+          /*
+          Install on x86 only
+          */
           discord # discord
           spotify # spotify
         ]
         else [
+          /*
+          Install on arm64 only
+          */
           legcord # discord alternative
         ]
       ));

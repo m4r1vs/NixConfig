@@ -34,40 +34,50 @@ in {
         cleanup = "zap";
       };
       brews = [
-        "ghidra"
-        "mole"
-        "zig"
+        /*
+        CLI apps to install using brew
+        */
+        "ghidra" # Disassembler and reverse engineering tool
+        "mole" # CLI to free up disk space
+        "zig" # zig programming language
       ];
       casks = [
-        "1password"
-        "affinity"
-        "android-studio"
-        "brave-browser"
-        "discord"
-        "finetune"
-        "google-drive"
-        "iriunwebcam"
-        "keycastr"
-        "linearmouse"
-        "lm-studio"
-        "macs-fan-control"
-        "mediamate"
-        "obs"
-        "raycast"
-        "signal"
-        "spotify"
-        "steam"
-        "utm"
+        /*
+        GUI apps to install using brew
+        */
+        "1password" # Password manager
+        "affinity" # Photoshot alternative
+        "android-studio" # Android IDE
+        "brave-browser" # Web browser
+        "discord" # Team chat
+        "finetune" # Music Mixer
+        "google-drive" # Cloud storage
+        "iriunwebcam" # Use phone as webcam
+        "keycastr" # Show keystrokes on screen
+        "linearmouse" # Smooth mouse acceleration
+        "lm-studio" # Run LLMs locally
+        "macs-fan-control" # View and control fan speeds
+        "mediamate" # Better volume UI
+        "obs" # Screen recording and streaming
+        "raycast" # Spotlight replacement
+        "signal" # Encrypted messaging
+        "spotify" # Music streaming
+        "steam" # Game Library
+        "utm" # VMs
       ];
       masApps = {
-        DavinciResolve = 571213070;
-        Excel = 462058435;
-        GarageBand = 682658836;
-        PowerPoint = 462062816;
-        Remarkable = 1276493162;
-        WhatsApp = 310633997;
-        Word = 462054704;
-        Xcode = 497799835;
+        /*
+        App Store apps to install by their numeric ID.
+        Find apps by sharing them from the App Store and looking at the URL.
+        */
+        DavinciResolve = 571213070; # Video editing software
+        Excel = 462058435; # Spreadsheet software
+        GarageBand = 682658836; # Music creation software
+        PowerPoint = 462062816; # Presentation software
+        Remarkable = 1276493162; # reMarkable tablet companion app
+        WhatsApp = 310633997; # WhatsApp
+        Word = 462054704; # Word processor
+        Xcode = 497799835; # Apple IDE
       };
     };
 
@@ -85,14 +95,14 @@ in {
       stateVersion = 6;
       primaryUser = systemArgs.username;
       defaults = {
-        LaunchServices.LSQuarantine = false;
+        LaunchServices.LSQuarantine = false; # Disable "This file was downloaded from the internet" warning
         WindowManager = {
           AppWindowGroupingBehavior = true;
           EnableStandardClickToShowDesktop = false;
           EnableTilingByEdgeDrag = false;
           EnableTilingOptionAccelerator = false;
           EnableTopTilingByEdgeDrag = false;
-          GloballyEnabled = false;
+          GloballyEnabled = false; # Disable macOS's built in tiling, since it conflicts with yabai
           StandardHideDesktopIcons = true;
           StandardHideWidgets = false;
         };
