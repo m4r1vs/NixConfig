@@ -66,6 +66,10 @@
           SOURCE_ICON="  "
       elif [[ "$PLAYER" == *"mpv"* ]]; then
           SOURCE_ICON="  "
+      elif [[ "$PLAYER" == *"de"* ]]; then
+          SOURCE_ICON="  "
+      else
+          SOURCE_ICON="  "
       fi
 
       # Parse the argument
