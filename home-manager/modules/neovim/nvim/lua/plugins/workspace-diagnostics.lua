@@ -1,4 +1,5 @@
 -- Load LSP diagnostics for the entire workspace
 return {
-  "artemave/workspace-diagnostics.nvim"
+  "artemave/workspace-diagnostics.nvim",
+  version = false
 }
