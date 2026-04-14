@@ -16,17 +16,18 @@ in {
       enable = true;
       settings = {
         general = {
-          lock_cmd = "pidof hyprlock || hyprlock";
-          before_sleep_cmd = "pidof hyprlock || hyprlock";
-          on_lock_cmd = "pidof hyprlock || hyprlock";
+          lock_cmd = "pidof hyprlock || hyprlock"; # Do not lock if already locked
+          before_sleep_cmd = "pidof hyprlock || hyprlock"; # Do not lock if already locked
+          on_lock_cmd = "pidof hyprlock || hyprlock"; # Do not lock if already locked
           after_sleep_cmd = "${pkgs.hyprland}/bin/hyprctl dispatch dpms on";
           ignore_dbus_inhibit = false;
           ignore_systemd_inhibit = false;
-          inhibit_sleep = 1;
+          inhibit_sleep = 2;
         };
 
         listener = [
           {
+            # Dim screen after 8.3 minutes
             timeout = 500;
             on-timeout = "${pkgs.brightnessctl}/bin/brightnessctl -s set 10";
             on-resume = "${pkgs.brightnessctl}/bin/brightnessctl -r";
@@ -40,6 +41,7 @@ in {
             on-timeout = "${scripts.nixos-notify} -e -t 10000 \"10 Seconds left.\"";
           }
           {
+            # Lock Screen after 9.5 minutes
             timeout = 570;
             on-timeout = "loginctl lock-session";
           }
