@@ -156,6 +156,24 @@ in {
           "float,initialClass:^(ghostty.yazi)$"
           "size 1400 700, initialClass:^(ghostty.yazi)$"
 
+          "float,initialClass:^(ghostty.fastfetch)$"
+          "size 1000 600, initialClass:^(ghostty.fastfetch)$"
+
+          "float,initialClass:^(ghostty.lazygit)$"
+          "size 1400 900, initialClass:^(ghostty.lazygit)$"
+
+          "float,initialClass:^(ghostty.golazo)$"
+          "size 1200 800, initialClass:^(ghostty.golazo)$"
+
+          "float,initialClass:^(ghostty.weather)$"
+          "size 1200 800, initialClass:^(ghostty.weather)$"
+
+          "float,initialClass:^(ghostty.asciiquarium)$"
+          "size 1200 800, initialClass:^(ghostty.asciiquarium)$"
+
+          "float,initialClass:^(ghostty.astroterm)$"
+          "size 1200 800, initialClass:^(ghostty.astroterm)$"
+
           "float,initialClass:^(ghostty.spotify_player)$"
           "size 1600 900, initialClass:^(ghostty.spotify_player)$"
           "workspace special:spotify_player silent,initialClass:^(ghostty.spotify_player)$"
@@ -177,121 +195,119 @@ in {
           "HDMI-A-1, 2560x1440@99.95,-320x-1440, 1" # 16:9 WQHD
         ];
         binds.movefocus_cycles_fullscreen = false;
-        bind =
+        bindd =
           [
-            "SUPER, q, killactive"
+            "SUPER, q, Kill active window, killactive"
 
-            "SUPER, Tab, exec, ${scripts.cycle-windows "next"}"
-            "SUPER+Shift, Tab, exec, ${scripts.cycle-windows "prev"}"
+            "SUPER, Tab, Cycle next window, exec, ${scripts.cycle-windows "next"}"
+            "SUPER+Shift, Tab, Cycle previous window, exec, ${scripts.cycle-windows "prev"}"
 
-            "SUPER, h, movefocus, l"
-            "SUPER, l, movefocus, r"
-            "SUPER, k, movefocus, u"
-            "SUPER, j, movefocus, d"
+            "SUPER, h, Move focus left, movefocus, l"
+            "SUPER, l, Move focus right, movefocus, r"
+            "SUPER, k, Move focus up, movefocus, u"
+            "SUPER, j, Move focus down, movefocus, d"
 
-            "SUPER, h, bringactivetotop, l"
-            "SUPER, l, bringactivetotop, r"
-            "SUPER, k, bringactivetotop, u"
-            "SUPER, j, bringactivetotop, d"
+            "SUPER, h, Bring active to top left, bringactivetotop, l"
+            "SUPER, l, Bring active to top right, bringactivetotop, r"
+            "SUPER, k, Bring active to top up, bringactivetotop, u"
+            "SUPER, j, Bring active to top down, bringactivetotop, d"
 
-            "SUPER, t, togglesplit"
-            "SUPER+Shift, N, movecurrentworkspacetomonitor, +1"
+            "SUPER, t, Toggle split, togglesplit"
+            "SUPER+Shift, N, Move current workspace to next monitor, movecurrentworkspacetomonitor, +1"
 
-            "SUPER, F, fullscreen,"
-            "SUPER+Shift, F, fullscreenstate, 2,"
-            "SUPER+Shift, Space, togglefloating"
+            "SUPER, F, Toggle fullscreen, fullscreen,"
+            "SUPER+Shift, F, Toggle fake fullscreen, fullscreenstate, 2,"
+            "SUPER+Shift, Space, Toggle floating, togglefloating"
 
-            "SUPER, Return, exec, ${lib.getExe pkgs.ghostty}"
-            "SUPER+Shift, Return, exec, ${pkgs.writeShellScript "rofi-ssh" ''
-              ${pkgs.rofi}/bin/rofi -show ssh -theme-str "entry{placeholder:\"SSH into a Remote...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}window{padding: 38% 42%;}"
-            ''}"
-            "SUPER, d, exec, ${pkgs.rofi}/bin/rofi -theme-str \"entry {placeholder: \\\"Launch a Program...\\\";}entry{padding: 10 10 0 12;}\" -combi-modi search:${scripts.rofi-search},drun -show combi"
-            "SUPER, s, exec, ${scripts.screenshot}"
-            "SUPER, E, exec, ${lib.getExe pkgs.ghostty} --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi ~/Downloads/"
-            "SUPER, m, exec, ${pkgs.rofimoji}/bin/rofimoji --selector-args=\"-theme-str \\\"listview{dynamic:true;columns:12;layout:vertical;flow:horizontal;reverse:false;lines:8;}element-text{enabled:false;}element-icon{size:50px;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 24;}\\\"\" --use-icons --typer wtype --clipboarder wl-copy --skin-tone neutral --selector rofi --max-recent 0 --action clipboard"
-            "SUPER, SPACE, exec, ${scripts.switch-kb-layout}"
-            "SUPER, c, exec, ${pkgs.rofi}/bin/rofi -modi calculator:${scripts.rofi-calculator} -show calculator -theme-str \"entry {placeholder:\\\"Ask a Question...\\\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}\""
-            "SUPER, p, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"
+            "SUPER, Return, Open terminal, exec, ${lib.getExe pkgs.ghostty}"
+            "SUPER+Shift, Return, Rofi SSH, exec, ${scripts.rofi-launch} ssh"
+            "SUPER, d, Rofi search, exec, ${scripts.rofi-launch} search"
+            "SUPER, s, Screenshot, exec, ${scripts.screenshot}"
+            "SUPER, E, Open file manager, exec, ${lib.getExe pkgs.ghostty} --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi ~/Downloads/"
+            "SUPER, m, Rofi emoji, exec, ${scripts.rofi-launch} emoji"
+            "SUPER, SPACE, Switch keyboard layout, exec, ${scripts.switch-kb-layout}"
+            "SUPER, c, Rofi calculator, exec, ${scripts.rofi-launch} calc"
+            "SUPER, p, Toggle media playback, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"
 
-            "SUPER, backslash, exec, ${pkgs.pamixer}/bin/pamixer -t"
+            "SUPER, backslash, Mute audio, exec, ${pkgs.pamixer}/bin/pamixer -t"
 
-            ",F8, togglespecialworkspace, spotify_player"
-            ",F8, exec, pgrep spotify_player || ${lib.getExe pkgs.ghostty} --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
+            ",F8, Toggle Spotify, togglespecialworkspace, spotify_player"
+            ",F8, Launch Spotify if not running, exec, pgrep spotify_player || ${lib.getExe pkgs.ghostty} --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
 
-            "SUPER, F8, exec, ${pkgs.spotify-player}/bin/spotify_player like && ${scripts.nixos-notify} -e -t 1800 \"Liked currentry playing Track on Spotify\""
-            "Shift, F8, exec, ${scripts.random-album-of-the-day}"
+            "SUPER, F8, Like current track on Spotify, exec, ${pkgs.spotify-player}/bin/spotify_player like && ${scripts.nixos-notify} -e -t 1800 \"Liked currentry playing Track on Spotify\""
+            "Shift, F8, Random album of the day, exec, ${scripts.random-album-of-the-day}"
 
-            ",F7, exec, ${scripts.wireless-screen}"
+            ",F7, Wireless screen, exec, ${scripts.wireless-screen}"
 
-            ",F11, togglespecialworkspace, obsidian_nvim"
-            ",F11, exec, ${scripts.launch-once {
+            ",F11, Toggle Obsidian Neovim, togglespecialworkspace, obsidian_nvim"
+            ",F11, Launch Obsidian, exec, ${scripts.launch-once {
               command = "${pkgs.obsidian}/bin/obsidian";
               grep = "initialClass: obsidian";
               useHypr = true;
             }}"
-            ",F11, exec, ${scripts.launch-once {
+            ",F11, Launch Obsidian Neovim, exec, ${scripts.launch-once {
               command = "${lib.getExe pkgs.ghostty} --class=ghostty.obsidian -e ${config.programs.neovim.finalPackage}/bin/nvim \"~/Documents/Marius\\\'\\\ Remote\\\ Vault\"";
               grep = "ghostty\\\.obsidian";
               useHypr = true;
             }}"
-            "Shift, F11, exec, ${scripts.launch-once {
+            "Shift, F11, Launch Obsidian, exec, ${scripts.launch-once {
               command = "${pkgs.obsidian}/bin/obsidian";
               grep = "initialClass: obsidian";
               useHypr = true;
             }}"
-            "Shift, F11, togglespecialworkspace, obsidian"
+            "Shift, F11, Toggle Obsidian, togglespecialworkspace, obsidian"
 
-            "SUPER+Shift, s, exec, ${scripts.screenshot} edit"
-            "SUPER+Shift, c, exec, ${pkgs.swaynotificationcenter}/bin/swaync-client -t"
-            "SUPER+Shift, d, exec, ${pkgs.darkman}/bin/darkman toggle"
-            "SUPER+Shift, w, exec, ${scripts.rofi-wallpaper}"
-            "SUPER+Shift, z, exec, ${scripts.toggle-zen}"
-            "SUPER+Shift, P, exec, ${pkgs.hyprpicker}/bin/hyprpicker -a"
-            "SUPER+Shift, q, exec,  ${pkgs.rofi}/bin/rofi -show power-menu -modi power-menu:${scripts.rofi-power-menu} -theme-str \"entry {placeholder:\\\"Power Menu...\\\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}window{padding: 38% 44%;}\""
-            "SUPER+Shift, b, exec,  ${scripts.rofi-bluetooth}"
-            "SUPER+Shift, i, exec, ${pkgs._1password-gui}/bin/1password --quick-access --ozone-platform-hint=x11"
-            "SUPER+Shift, v, exec, ${scripts.rofi-cliphist}"
+            "SUPER+Shift, s, Screenshot with edit, exec, ${scripts.screenshot} edit"
+            "SUPER+Shift, c, Toggle notification center, exec, ${pkgs.swaynotificationcenter}/bin/swaync-client -t"
+            "SUPER+Shift, d, Toggle dark mode, exec, ${pkgs.darkman}/bin/darkman toggle"
+            "SUPER+Shift, w, Rofi wallpaper, exec, ${scripts.rofi-launch} wallpaper"
+            "SUPER+Shift, z, Toggle zen mode, exec, ${scripts.toggle-zen}"
+            "SUPER+Shift, P, Color picker, exec, ${pkgs.hyprpicker}/bin/hyprpicker -a"
+            "SUPER+Shift, q, Rofi power menu, exec, ${scripts.rofi-launch} power"
+            "SUPER+Shift, b, Rofi bluetooth, exec, ${scripts.rofi-launch} bluetooth"
+            "SUPER+Shift, i, 1Password quick access, exec, ${pkgs._1password-gui}/bin/1password --quick-access --ozone-platform-hint=x11"
+            "SUPER+Shift, v, Rofi clipboard history, exec, ${scripts.rofi-launch} cliphist"
 
             # bound to mousewheel left/right
-            "Ctrl+Shift, Left, workspace, m-1"
-            "Ctrl+Shift, Right, workspace, m+1"
+            "Ctrl+Shift, Left, Previous workspace, workspace, m-1"
+            "Ctrl+Shift, Right, Next workspace, workspace, m+1"
           ]
           ++ (
             builtins.concatLists (builtins.genList (
                 i: let
                   ws = i + 1;
                 in [
-                  "SUPER, code:1${toString i}, workspace, ${toString ws}"
-                  "SUPER+Shift, code:1${toString i}, movetoworkspace, ${toString ws}"
+                  "SUPER, code:1${toString i}, Switch to workspace ${toString ws}, workspace, ${toString ws}"
+                  "SUPER+Shift, code:1${toString i}, Move to workspace ${toString ws}, movetoworkspace, ${toString ws}"
                 ]
               )
               9)
           );
-        bindle = [
-          "SUPER, bracketright, exec, ${pkgs.pamixer}/bin/pamixer -i 5"
-          "SUPER, slash, exec, ${pkgs.pamixer}/bin/pamixer -d 5"
+        binddle = [
+          "SUPER, bracketright, Increase volume, exec, ${pkgs.pamixer}/bin/pamixer -i 5"
+          "SUPER, slash, Decrease volume, exec, ${pkgs.pamixer}/bin/pamixer -d 5"
         ];
-        bindm = [
-          "SUPER, mouse:272, movewindow"
-          "SUPER, mouse:273, resizewindow"
-          "SUPER, X, resizewindow"
-          "SUPER, Y, movewindow"
-          "SUPER, Z, movewindow"
+        binddm = [
+          "SUPER, mouse:272, Move window, movewindow"
+          "SUPER, mouse:273, Resize window, resizewindow"
+          "SUPER, X, Resize window, resizewindow"
+          "SUPER, Y, Move window, movewindow"
+          "SUPER, Z, Move window, movewindow"
         ];
         "$moveactivewindow" = "grep -q \"true\" <<< $(${pkgs.hyprland}/bin/hyprctl activewindow -j | jq -r .floating) && ${pkgs.hyprland}/bin/hyprctl dispatch moveactive";
-        binde = [
-          "SUPER+Shift, bracketright, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%+"
-          "SUPER+Shift, slash, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%-"
+        bindde = [
+          "SUPER+Shift, bracketright, Increase brightness, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%+"
+          "SUPER+Shift, slash, Decrease brightness, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%-"
 
-          "SUPER+Shift, h,exec, $moveactivewindow -30 0 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow l"
-          "SUPER+Shift, l,exec, $moveactivewindow 30 0 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow r"
-          "SUPER+Shift, k,exec, $moveactivewindow  0 -30 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow u"
-          "SUPER+Shift, j,exec, $moveactivewindow 0 30 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow d"
+          "SUPER+Shift, h, Move window left, exec, $moveactivewindow -30 0 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow l"
+          "SUPER+Shift, l, Move window right, exec, $moveactivewindow 30 0 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow r"
+          "SUPER+Shift, k, Move window up, exec, $moveactivewindow  0 -30 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow u"
+          "SUPER+Shift, j, Move window down, exec, $moveactivewindow 0 30 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow d"
 
-          "SUPER+alt, l, resizeactive, 30 0"
-          "SUPER+alt, h, resizeactive, -30 0"
-          "SUPER+alt, k, resizeactive, 0 -30"
-          "SUPER+alt, j, resizeactive, 0 30"
+          "SUPER+alt, l, Resize window right, resizeactive, 30 0"
+          "SUPER+alt, h, Resize window left, resizeactive, -30 0"
+          "SUPER+alt, k, Resize window up, resizeactive, 0 -30"
+          "SUPER+alt, j, Resize window down, resizeactive, 0 30"
         ];
       };
     };

@@ -43,25 +43,71 @@ in {
         yazi = {
           name = "Yazi";
           icon = "duckstation";
+          genericName = "Terminal File Manager";
           comment = "Blazing fast terminal file manager written in Rust, based on async I/O";
           terminal = false;
-          exec = "${pkgs.ghostty}/bin/ghostty --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi %u";
+          exec = "${lib.getExe pkgs.ghostty} --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi %u";
           type = "Application";
           mimeType = ["inode/directory"];
           categories = ["Utility" "Core" "System" "FileTools" "FileManager"];
         };
+        fastfetch = {
+          name = "About this Computer";
+          genericName = "Systeminfo";
+          comment = "Fastfetch Information about this Computer";
+          icon = "glxinfo";
+          exec = "${lib.getExe pkgs.ghostty} --class=ghostty.fastfetch --wait-after-command=true -e ${pkgs.fastfetch}/bin/fastfetch";
+          type = "Application";
+          categories = ["Utility" "System" "Settings"];
+        };
+        weather = {
+          name = "Weather";
+          genericName = "from wttr.in";
+          comment = "Weather forecast from wttr.in";
+          icon = "sunflower";
+          exec = "${lib.getExe pkgs.ghostty} --class=ghostty.weather --wait-after-command=true -e ${pkgs.curl}/bin/curl https://wttr.in";
+          type = "Application";
+          categories = ["Utility"];
+        };
+        golazo = {
+          name = "Golazo";
+          genericName = "Soccer Scores";
+          comment = "Keep track of soccer matches";
+          icon = "football";
+          exec = "${lib.getExe pkgs.ghostty} --class=ghostty.golazo -e ${pkgs.golazo}/bin/golazo";
+          type = "Application";
+          categories = ["Utility"];
+        };
+        asciiquarium = {
+          name = "Asciiquarium";
+          genericName = "Fish.. and more!";
+          comment = "Show and Aquarium -- but ASCII";
+          icon = "cuttlefish";
+          exec = "${lib.getExe pkgs.ghostty} --class=ghostty.asciiquarium -e ${pkgs.asciiquarium-transparent}/bin/asciiquarium -t";
+          type = "Application";
+          categories = ["Utility"];
+        };
+        astroterm = {
+          name = "Astroterm";
+          genericName = "Star Map";
+          icon = "kstars";
+          exec = "${lib.getExe pkgs.ghostty} --class=ghostty.astroterm -e ${pkgs.astroterm}/bin/astroterm";
+          type = "Application";
+          categories = ["Utility"];
+        };
         darkman = {
           name = "Toggle Darkmode";
-          genericName = "Darkman";
+          genericName = "Shortcut: Super+Shift+D";
           exec = "${pkgs.darkman}/bin/darkman toggle";
           icon = "com.github.coslyk.MoonPlayer";
           type = "Application";
-          noDisplay = true;
+          noDisplay = false;
           categories = ["Settings"];
         };
         spotify_player = {
           name = "Spotify TUI";
-          genericName = "Spotify";
+          genericName = "Play Music in the Terminal!";
+          exec = "${lib.getExe pkgs.ghostty} --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player";
           icon = "spotify-client";
           type = "Application";
           categories = ["Music"];
@@ -72,7 +118,7 @@ in {
           genericName = "New Improved Vim - Text Editor";
           icon = "vim";
           type = "Application";
-          exec = "${pkgs.ghostty}/bin/ghostty -e nvim %u";
+          exec = "${lib.getExe pkgs.ghostty} -e nvim %u";
           settings = {
             Keywords = "Text;editor";
           };
@@ -154,6 +200,69 @@ in {
             "x-scheme-handler/http"
             "x-scheme-handler/https"
           ];
+        };
+        rofi-ssh = {
+          name = "SSH Launcher";
+          genericName = "Rofi SSH";
+          comment = "Launch SSH session via Rofi";
+          icon = "network-server";
+          exec = "${scripts.rofi-launch} ssh";
+          type = "Application";
+          categories = ["Network" "Utility"];
+        };
+        rofi-emoji = {
+          name = "Emoji Picker";
+          genericName = "Rofi Emoji";
+          comment = "Pick and copy emojis";
+          icon = "it.mijorus.smile";
+          exec = "${scripts.rofi-launch} emoji";
+          type = "Application";
+          categories = ["Utility"];
+        };
+        rofi-calc = {
+          name = "Calculator";
+          genericName = "Rofi Calc";
+          comment = "Rofi based calculator";
+          icon = "accessories-calculator";
+          exec = "${scripts.rofi-launch} calc";
+          type = "Application";
+          categories = ["Utility"];
+        };
+        rofi-wallpaper = {
+          name = "Wallpaper Selector";
+          genericName = "Rofi Wallpaper";
+          comment = "Change desktop wallpaper";
+          icon = "background";
+          exec = "${scripts.rofi-launch} wallpaper";
+          type = "Application";
+          categories = ["Settings"];
+        };
+        rofi-power = {
+          name = "Power Menu";
+          genericName = "Rofi Power";
+          comment = "System power options";
+          icon = "mate-power-manager";
+          exec = "${scripts.rofi-launch} power";
+          type = "Application";
+          categories = ["System"];
+        };
+        rofi-bluetooth = {
+          name = "Bluetooth Manager";
+          genericName = "Rofi Bluetooth";
+          comment = "Manage bluetooth connections";
+          icon = "bluetooth";
+          exec = "${scripts.rofi-launch} bluetooth";
+          type = "Application";
+          categories = ["Settings" "Network"];
+        };
+        rofi-cliphist = {
+          name = "Clipboard History";
+          genericName = "Rofi Clipboard";
+          comment = "Browse clipboard history";
+          icon = "xclipboard";
+          exec = "${scripts.rofi-launch} cliphist";
+          type = "Application";
+          categories = ["Utility"];
         };
       };
       portal = {
