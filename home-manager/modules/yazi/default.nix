@@ -52,18 +52,6 @@ in {
               desc = "Open Zoxide";
             }
           ]
-          ++ (optionals isDesktop [
-            {
-              on = "p";
-              run = "plugin ucp paste";
-              desc = "Paste";
-            }
-            {
-              on = "y";
-              run = "plugin ucp copy";
-              desc = "Copy";
-            }
-          ])
           ++ (optionals isDarwin [
             {
               on = "Y";
@@ -170,23 +158,6 @@ in {
           smart-enter = pkgs.yaziPlugins.smart-enter;
           toggle-pane = pkgs.yaziPlugins.toggle-pane;
         }
-        // (optionalAttrs isDesktop {
-          ucp = pkgs.stdenv.mkDerivation {
-            name = "yazi-ucp-plugin";
-            src = pkgs.fetchFromGitHub {
-              owner = "simla33";
-              repo = "ucp.yazi";
-              sha256 = "sha256-eSc3I2I4PZLVy7X/4SK5YjEOCx0/WoZAV/hzs0La0nU=";
-              rev = "58fbaa512f52b7e26e5a54dc68b435b11140ced9";
-            };
-            installPhase = ''
-              runHook preInstall
-              mkdir $out
-              mv main.lua $out/
-              runHook postInstall
-            '';
-          };
-        })
         // (optionalAttrs isDarwin {
           clippy = pkgs.stdenv.mkDerivation {
             name = "yazi-clippy-plugin";
