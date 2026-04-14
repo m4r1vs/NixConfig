@@ -224,7 +224,7 @@ in {
         };
         rofi-ssh = {
           name = "SSH Launcher";
-          genericName = "Rofi SSH";
+          genericName = "SUPER+Shift+Enter";
           comment = "Launch SSH session via Rofi";
           icon = "network-server";
           exec = "${scripts.rofi-launch} ssh";
@@ -233,7 +233,7 @@ in {
         };
         rofi-emoji = {
           name = "Emoji Picker";
-          genericName = "Rofi Emoji";
+          genericName = "SUPER+M";
           comment = "Pick and copy emojis";
           icon = "it.mijorus.smile";
           exec = "${scripts.rofi-launch} emoji";
@@ -241,8 +241,8 @@ in {
           categories = ["Utility"];
         };
         rofi-calc = {
-          name = "Calculator";
-          genericName = "Rofi Calc";
+          name = "Wolfram|Alpha Query with ChatGPT Fallback";
+          genericName = "SUPER+C";
           comment = "Rofi based calculator";
           icon = "accessories-calculator";
           exec = "${scripts.rofi-launch} calc";
@@ -251,7 +251,7 @@ in {
         };
         rofi-wallpaper = {
           name = "Wallpaper Selector";
-          genericName = "Rofi Wallpaper";
+          genericName = "SUPER+Shift+W";
           comment = "Change desktop wallpaper";
           icon = "background";
           exec = "${scripts.rofi-launch} wallpaper";
@@ -260,7 +260,7 @@ in {
         };
         rofi-power = {
           name = "Power Menu";
-          genericName = "Rofi Power";
+          genericName = "SUPER+Shift+Q";
           comment = "System power options";
           icon = "system-shutdown";
           exec = "${scripts.rofi-launch} power";
@@ -269,7 +269,7 @@ in {
         };
         rofi-bluetooth = {
           name = "Bluetooth Manager";
-          genericName = "Rofi Bluetooth";
+          genericName = "SUPER+Shift+B";
           comment = "Manage bluetooth connections";
           icon = "bluetooth";
           exec = "${scripts.rofi-launch} bluetooth";
@@ -278,7 +278,7 @@ in {
         };
         rofi-cliphist = {
           name = "Clipboard History";
-          genericName = "Rofi Clipboard";
+          genericName = "SUPER+Shift+V";
           comment = "Browse clipboard history";
           icon = "xclipboard";
           exec = "${scripts.rofi-launch} cliphist";
