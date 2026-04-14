@@ -96,7 +96,10 @@ in {
           cursor-text = "#100f0f";
           selection-background = "#403e3c";
           selection-foreground = "#cecdc3";
-          background-opacity = 0.96;
+          background-opacity =
+            if isDarwin
+            then 0.92
+            else 0.84;
         };
         flexoki-light = {
           palette = [
@@ -123,7 +126,10 @@ in {
           cursor-text = "#fffcf0";
           selection-background = "#cecdc3";
           selection-foreground = "#100f0f";
-          background-opacity = 0.92;
+          background-opacity =
+            if isDarwin
+            then 0.92
+            else 0.82;
         };
       };
     };
