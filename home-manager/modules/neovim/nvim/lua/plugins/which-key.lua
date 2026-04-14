@@ -3,8 +3,8 @@ return {
   "folke/which-key.nvim",
   event = "VeryLazy",
   opts = {
-    preset = "modern", -- modern, helix, classic
-    dealy = 400,
+    preset = "helix", -- modern, helix, classic
+    delay = 800,
     icons = {
       enabled = false,
       mappings = true,
@@ -15,10 +15,10 @@ return {
       { "<leader>g", group = "Git" },
       { "<leader>l", group = "LSP" },
       { "<leader>e", group = "Yazi File Manager" },
+      { "<leader>w", group = "File Operations" },
       { "<leader>r", group = "Replace/Refactor" },
       { "<leader>n", group = "Snippets" },
       { "<leader>h", group = "Harpoon" },
-      { "<leader>z", group = "Zen Mode" },
       { "<leader>u", group = "UI/UX" },
       { "<leader>m", group = "Copilot" },
     },
@@ -33,3 +33,4 @@ return {
     },
   },
 }
+

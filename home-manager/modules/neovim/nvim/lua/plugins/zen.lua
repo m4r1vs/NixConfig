@@ -2,7 +2,7 @@
 return {
   "m4r1vs/zen-mode.nvim",
   keys = {
-    { "<leader>zm", "<cmd>ZenMode<cr>" },
+    { "<leader>uz", "<cmd>ZenMode<cr>", { desc = "Toggle Zen Mode" } },
   },
   opts = {
     window = {
