@@ -7,10 +7,11 @@ return {
     local dashboard = require("alpha.themes.dashboard")
 
     local function home_dir()
+      local username = os.getenv("USER") or os.getenv("USERNAME") or "user"
       if vim.loop.os_uname().sysname == "Darwin" then
-        return "/Users/mn"
+        return "/Users/" .. username
       else
-        return "/home/mn"
+        return "/home/" .. username
       end
     end
 
@@ -36,7 +37,7 @@ return {
 
     dashboard.section.buttons.val = {
       dashboard.button("s", "󰆋   Sessions", ":silent AutoSession search<CR>"),
-      dashboard.button("u", "󰮭   Update Lazy", ":silent Lazy update<CR>"),
+      dashboard.button("u", "󰮭   Update Plugins", ":silent Lazy update<CR>"),
       dashboard.button("n", "   New Empty File", ":silent ene <BAR> startinsert <CR>"),
       dashboard.button("d", "   Dotfiles", ":silent SessionRestore " .. home_dir() .. "/NixConfig<CR>"),
       dashboard.button("o", "󰠮   Obsidian",
