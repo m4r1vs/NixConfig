@@ -159,12 +159,6 @@ in {
           "float,initialClass:^(ghostty.fastfetch)$"
           "size 1000 600, initialClass:^(ghostty.fastfetch)$"
 
-          "float,initialClass:^(ghostty.lazygit)$"
-          "size 1400 900, initialClass:^(ghostty.lazygit)$"
-
-          "float,initialClass:^(ghostty.golazo)$"
-          "size 1200 800, initialClass:^(ghostty.golazo)$"
-
           "float,initialClass:^(ghostty.weather)$"
           "size 1200 800, initialClass:^(ghostty.weather)$"
 

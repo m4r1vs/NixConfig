@@ -24,6 +24,7 @@ in {
           */
 
           atai = inputs.atai.packages.${stdenv.hostPlatform.system}.atai;
+          golazo = inputs.golazo.packages.${stdenv.hostPlatform.system}.default;
           hyprland-which-key = inputs.hyprland-which-key.packages.${stdenv.hostPlatform.system}.default;
 
           # TODO: add PR to add to nixpkgs
@@ -85,7 +86,6 @@ in {
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
-          golazo = pkgsUnstable.golazo;
           mise = pkgsUnstable.mise;
           neovim = pkgsUnstable.neovim;
           neovim-unwrapped = pkgsUnstable.neovim-unwrapped;

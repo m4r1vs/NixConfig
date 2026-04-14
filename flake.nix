@@ -32,6 +32,11 @@
       url = "gitlab:m4r1vs/hyprland-which-key?ref=master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    golazo = {
+      # Cycle mute state of chrome tabs remotely
+      url = "github:m4r1vs/golazo?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     stummumschalterung = {
       # Cycle mute state of chrome tabs remotely
       url = "gitlab:m4r1vs/stummumschalterung?ref=trunk";
