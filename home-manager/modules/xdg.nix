@@ -4,11 +4,13 @@
   pkgs,
   scripts,
   systemArgs,
+  osConfig,
   ...
 }:
 with lib; let
   cfg = config.configured.xdg;
   theme = systemArgs.theme;
+  hasPowerProfiles = osConfig.services.power-profiles-daemon.enable or false;
 in {
   options.configured.xdg = {
     enable = mkEnableOption "Cross-Desktop-Group";
@@ -260,7 +262,7 @@ in {
           name = "Power Menu";
           genericName = "Rofi Power";
           comment = "System power options";
-          icon = "mate-power-manager";
+          icon = "system-shutdown";
           exec = "${scripts.rofi-launch} power";
           type = "Application";
           categories = ["System"];
@@ -282,6 +284,15 @@ in {
           exec = "${scripts.rofi-launch} cliphist";
           type = "Application";
           categories = ["Utility"];
+        };
+        rofi-powermode = mkIf hasPowerProfiles {
+          name = "Select Performance Mode";
+          genericName = "Performance/Auto/Light";
+          comment = "Change system power profile";
+          icon = "mate-power-manager";
+          exec = "${scripts.rofi-launch} powermode";
+          type = "Application";
+          categories = ["Settings" "System"];
         };
       };
       portal = {
