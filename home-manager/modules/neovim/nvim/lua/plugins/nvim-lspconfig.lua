@@ -25,18 +25,27 @@ return {
           require("workspace-diagnostics").populate_workspace_diagnostics(client, args.buf)
         end
 
-        vim.keymap.set("n", "K", "<cmd>lua vim.lsp.buf.hover({border = 'rounded'})<cr>", opts)
-        vim.keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<cr>", opts)
-        vim.keymap.set("n", "gD", "<C-w>v<cmd>Telescope lsp_definitions<cr>", opts)
-        vim.keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<cr>", opts)
-        vim.keymap.set("n", "go", "<cmd>Telescope lsp_type_definitions<cr>", opts)
-        vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<cr>", opts)
-        vim.keymap.set("n", "<C-s>", "<cmd>lua vim.lsp.buf.signature_help()<cr>", opts)
-        vim.keymap.set("i", "<C-s>", "<cmd>lua vim.lsp.buf.signature_help()<cr>", opts)
-        vim.keymap.set("n", "<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", opts)
-        vim.keymap.set("n", "<leader>la", "<cmd>lua vim.lsp.buf.code_action()<cr>", opts)
-        vim.keymap.set("n", "<leader>lk", "<cmd>lua vim.diagnostic.jump({count=-1})<cr>", opts)
-        vim.keymap.set("n", "<leader>lj", "<cmd>lua vim.diagnostic.jump({count=1})<cr>", opts)
+        vim.keymap.set("n", "K", "<cmd>lua vim.lsp.buf.hover({border = 'rounded'})<cr>",
+          { buffer = args.buf, desc = "Hover" })
+        vim.keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<cr>", { buffer = args.buf, desc = "Go to Definition" })
+        vim.keymap.set("n", "gD", "<C-w>v<cmd>Telescope lsp_definitions<cr>",
+          { buffer = args.buf, desc = "Definition in Split" })
+        vim.keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<cr>",
+          { buffer = args.buf, desc = "Go to Implementation" })
+        vim.keymap.set("n", "go", "<cmd>Telescope lsp_type_definitions<cr>",
+          { buffer = args.buf, desc = "Go to Type Definition" })
+        vim.keymap.set("n", "gr", "<cmd>Telescope lsp_references<cr>", { buffer = args.buf, desc = "Go to References" })
+        vim.keymap.set("n", "<C-s>", "<cmd>lua vim.lsp.buf.signature_help()<cr>",
+          { buffer = args.buf, desc = "Signature Help" })
+        vim.keymap.set("i", "<C-s>", "<cmd>lua vim.lsp.buf.signature_help()<cr>",
+          { buffer = args.buf, desc = "Signature Help" })
+        vim.keymap.set("n", "<leader>lr", "<cmd>lua vim.lsp.buf.rename()<cr>", { buffer = args.buf, desc = "Rename" })
+        vim.keymap.set("n", "<leader>la", "<cmd>lua vim.lsp.buf.code_action()<cr>",
+          { buffer = args.buf, desc = "Code Action" })
+        vim.keymap.set("n", "<leader>lk", "<cmd>lua vim.diagnostic.jump({count=-1})<cr>",
+          { buffer = args.buf, desc = "Previous Diagnostic" })
+        vim.keymap.set("n", "<leader>lj", "<cmd>lua vim.diagnostic.jump({count=1})<cr>",
+          { buffer = args.buf, desc = "Next Diagnostic" })
       end,
     })
 

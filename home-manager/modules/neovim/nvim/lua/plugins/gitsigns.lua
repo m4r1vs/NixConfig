@@ -13,7 +13,7 @@ return {
       end
 
       -- Navigation
-      map("n", "<leader>gp", function()
+      map("n", "<leader>gn", function()
         if vim.wo.diff then
           return "]h"
         end
@@ -21,9 +21,9 @@ return {
           gs.next_hunk()
         end)
         return "<Ignore>"
-      end, { expr = true })
+      end, { expr = true, desc = "Next Hunk" })
 
-      map("n", "<leader>gn", function()
+      map("n", "<leader>gp", function()
         if vim.wo.diff then
           return "[h"
         end
@@ -31,17 +31,17 @@ return {
           gs.prev_hunk()
         end)
         return "<Ignore>"
-      end, { expr = true })
+      end, { expr = true, desc = "Previous Hunk" })
 
-      map("n", "<leader>gb", gs.toggle_current_line_blame)
+      map("n", "<leader>gb", gs.toggle_current_line_blame, { desc = "Toggle Blame" })
       map("n", "<leader>gB", function()
         gs.blame_line({ full = true })
-      end)
-      map("n", "<leader>gd", gs.diffthis)
+      end, { desc = "Blame Line" })
+      map("n", "<leader>gd", gs.diffthis, { desc = "Diff This" })
       map("n", "<leader>gD", function()
         gs.diffthis("~")
-      end)
-      map("n", "<leader>gt", gs.toggle_deleted)
+      end, { desc = "Diff This ~" })
+      map("n", "<leader>gt", gs.toggle_deleted, { desc = "Toggle Deleted" })
     end,
   }
 }

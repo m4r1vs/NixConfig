@@ -7,11 +7,11 @@ return {
   event = "VeryLazy",
   init = function()
     local telescope = require("telescope.builtin")
-    vim.keymap.set("n", "<leader>sf", telescope.find_files, { desc = "Telescope find files" })
-    vim.keymap.set("n", "<leader>st", telescope.treesitter, { desc = "Telescope Treesitter" })
-    vim.keymap.set("n", "<leader>sr", telescope.live_grep, { desc = "Telescope live grep" })
-    vim.keymap.set("n", "<leader>sb", telescope.buffers, { desc = "Telescope buffers" })
-    vim.keymap.set("n", "<leader>sd", telescope.buffers, { desc = "Telescope diagnostics" })
+    vim.keymap.set("n", "<leader>sf", telescope.find_files, { desc = "Files" })
+    vim.keymap.set("n", "<leader>st", telescope.treesitter, { desc = "Treesitter" })
+    vim.keymap.set("n", "<leader>sr", telescope.live_grep, { desc = "Live Grep" })
+    vim.keymap.set("n", "<leader>sb", telescope.buffers, { desc = "Buffers" })
+    vim.keymap.set("n", "<leader>sd", telescope.diagnostics, { desc = "Diagnostics" })
   end,
   opts = {
     defaults = {

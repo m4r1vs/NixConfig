@@ -117,7 +117,7 @@ vim.keymap.set("n", "<leader>x", function()
   else
     vim.cmd("copen")
   end
-end)
+end, { desc = "Toggle Quickfix" })
 
 -- Treat .svx files as markdown
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
@@ -146,8 +146,8 @@ vim.api.nvim_create_autocmd('BufWinEnter', {
 })
 
 -- Move selected lines up and down in visual mode
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { noremap = true, silent = true })
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { noremap = true, silent = true })
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { noremap = true, silent = true, desc = "Move lines down" })
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { noremap = true, silent = true, desc = "Move lines up" })
 
 -- Toggle booleans under cursor
 vim.keymap.set("n", "<leader>rb", function()
@@ -179,11 +179,11 @@ vim.keymap.set("n", "<leader>rb", function()
   if new_word then
     vim.cmd("normal! \"_ciw" .. new_word)
   end
-end, { noremap = true, silent = true })
+end, { noremap = true, silent = true, desc = "Toggle Boolean" })
 
 -- Remap > and < in visual mode to keep the selection
-vim.api.nvim_set_keymap("v", ">", ">gv", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("v", "<", "<gv", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("v", ">", ">gv", { noremap = true, silent = true, desc = "Indent" })
+vim.api.nvim_set_keymap("v", "<", "<gv", { noremap = true, silent = true, desc = "Outdent" })
 
 -- Map j/k to gj/gk for wrapped line navigation
 vim.keymap.set("n", "j", "gj", { noremap = true, silent = true })
@@ -201,13 +201,13 @@ vim.diagnostic.config {
 }
 
 -- Create new tab with CTRL-T and open telescope picker
-vim.keymap.set("n", "<C-T>", ":tabnew<CR>:Telescope find_files<CR>")
+vim.keymap.set("n", "<C-T>", ":tabnew<CR>:Telescope find_files<CR>", { desc = "New Tab + Telescope" })
 
 -- Use <leader>" to change current selection ' to "
-vim.keymap.set("v", "<leader>\"", ":s/'/\"/g<CR>")
+vim.keymap.set("v", "<leader>\"", ":s/'/\"/g<CR>", { desc = "Change ' to \"" })
 
 -- Use <leader>rs to sort the current selection (visual) or inside brackets (normal)
-vim.keymap.set("v", "<leader>rs", ":sort<CR>")
+vim.keymap.set("v", "<leader>rs", ":sort<CR>", { desc = "Sort Selection" })
 vim.keymap.set("n", "<leader>rs", function()
   local function sort_in_pair(open, close)
     local start_pos = vim.fn.searchpairpos(open, "", close, "bnW")
@@ -233,10 +233,10 @@ vim.keymap.set("n", "<leader>rs", function()
       end
     end
   end
-end, { noremap = true, silent = true })
+end, { noremap = true, silent = true, desc = "Sort in Brackets" })
 
 -- Use <leader>ro to convert the current selection to an ordered list
-vim.keymap.set("v", "<leader>ro", ":!nl -w 1 -s '. '<CR>")
+vim.keymap.set("v", "<leader>ro", ":!nl -w 1 -s '. '<CR>", { desc = "Ordered List" })
 
 -- Use <leader>rq to surround the current selection with triple backticks
 vim.keymap.set("v", "<leader>rq", function()
@@ -248,7 +248,7 @@ vim.keymap.set("v", "<leader>rq", function()
   vim.fn.setreg('"', wrapped)
   vim.cmd('normal! gv""p')
   vim.fn.setreg('"', old_reg, old_regtype)
-end)
+end, { desc = "Surround with backticks" })
 
 -- Change cursor depending on mode
 vim.opt.guicursor = "n-v-c-sm:block,i-ci-ve:ver25,r-cr-o:hor20"
@@ -280,36 +280,36 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 })
 
 -- Navigate quickly through Quickfix List
-vim.keymap.set("n", "<F2>", vim.cmd.cprevious)
-vim.keymap.set("n", "<F3>", vim.cmd.cnext)
+vim.keymap.set("n", "<F2>", vim.cmd.cprevious, { desc = "Previous Quickfix" })
+vim.keymap.set("n", "<F3>", vim.cmd.cnext, { desc = "Next Quickfix" })
 
-vim.keymap.set("n", "<F7>", vim.cmd.cprevious)
-vim.keymap.set("n", "<F9>", vim.cmd.cnext)
+vim.keymap.set("n", "<F7>", vim.cmd.cprevious, { desc = "Previous Quickfix" })
+vim.keymap.set("n", "<F9>", vim.cmd.cnext, { desc = "Next Quickfix" })
 
 -- Resize splits with Ctrl+Alt+h/j/k/l
-vim.keymap.set("n", "<C-M-h>", ":vertical resize -2<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<C-M-l>", ":vertical resize +2<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<C-M-k>", ":resize -2<CR>", { noremap = true, silent = true })
-vim.keymap.set("n", "<C-M-j>", ":resize +2<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<C-M-h>", ":vertical resize -2<CR>", { noremap = true, silent = true, desc = "Resize split left" })
+vim.keymap.set("n", "<C-M-l>", ":vertical resize +2<CR>", { noremap = true, silent = true, desc = "Resize split right" })
+vim.keymap.set("n", "<C-M-k>", ":resize -2<CR>", { noremap = true, silent = true, desc = "Resize split up" })
+vim.keymap.set("n", "<C-M-j>", ":resize +2<CR>", { noremap = true, silent = true, desc = "Resize split down" })
 
 -- Close window with leader+q
-vim.keymap.set("n", "<leader>q", "<C-w>q", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>q", "<C-w>q", { noremap = true, silent = true, desc = "Close Window" })
 
 -- Close all windows with leader+Q
-vim.keymap.set("n", "<leader>Q", ":qa<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>Q", ":qa<CR>", { noremap = true, silent = true, desc = "Quit All" })
 
 -- Close buffer with leader+c
-vim.keymap.set("n", "<leader>c", ":bd<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>c", ":bd<CR>", { noremap = true, silent = true, desc = "Close Buffer" })
 
 -- Force close buffer with leader+C
-vim.keymap.set("n", "<leader>C", ":bd!<CR>", { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>C", ":bd!<CR>", { noremap = true, silent = true, desc = "Force Close Buffer" })
 
 -- Never yank text that is pasted over
 vim.keymap.set("x", "p", "P", { noremap = true, silent = true })
 
 -- Use leader+p/P to always paste into a new line below/above current one
-vim.keymap.set("n", "<Leader>p", "o<Esc>p", { noremap = true, silent = true })
-vim.keymap.set("n", "<Leader>P", "O<Esc>p", { noremap = true, silent = true })
+vim.keymap.set("n", "<Leader>p", "o<Esc>p", { noremap = true, silent = true, desc = "Paste Below" })
+vim.keymap.set("n", "<Leader>P", "O<Esc>p", { noremap = true, silent = true, desc = "Paste Above" })
 
 -- Do not show diagnostics icons next to line numbers
 vim.diagnostic.config({
@@ -327,8 +327,8 @@ vim.diagnostic.config({
 })
 
 -- Use leader+w/W to replace all occurances of the current word/WORD in the file
-vim.keymap.set("n", "<leader>w", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
-vim.keymap.set("n", "<leader>W", [[:%s/\<<C-r><C-a>\>/<C-r><C-a>/gI<Left><Left><Left>]])
+vim.keymap.set("n", "<leader>w", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Replace word" })
+vim.keymap.set("n", "<leader>W", [[:%s/\<<C-r><C-a>\>/<C-r><C-a>/gI<Left><Left><Left>]], { desc = "Replace WORD" })
 
 -- Use escape to remove highlights
-vim.keymap.set("n", "<Esc>", [[<Esc><Cmd>nohlsearch<CR>]], { noremap = true, silent = true })
+vim.keymap.set("n", "<Esc>", [[<Esc><Cmd>nohlsearch<CR>]], { noremap = true, silent = true, desc = "Clear Highlight" })

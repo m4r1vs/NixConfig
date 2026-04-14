@@ -1,11 +1,12 @@
 -- Highlight TODO comments and more
 
-vim.keymap.set("n", "<leader>sn", ":Trouble todo<CR>")
-
 return {
   "folke/todo-comments.nvim",
   dependencies = { "nvim-lua/plenary.nvim" },
   event = "VeryLazy",
+  keys = {
+    { "<leader>sn", ":Trouble todo<CR>", desc = "Todo (Trouble)" },
+  },
   opts = {
     signs = false,
     keywords = {

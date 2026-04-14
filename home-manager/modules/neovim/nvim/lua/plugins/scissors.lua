@@ -3,8 +3,8 @@ return {
   "chrisgrieser/nvim-scissors",
   dependencies = "nvim-telescope/telescope.nvim",
   keys = {
-    { "<leader>ne", "<cmd>ScissorsEditSnippet<CR>" },
-    { "<leader>na", "<cmd>ScissorsAddNewSnippet<CR>", mode = "x" },
+    { "<leader>ne", "<cmd>ScissorsEditSnippet<CR>",   desc = "Edit Snippet" },
+    { "<leader>na", "<cmd>ScissorsAddNewSnippet<CR>", mode = "x",           desc = "Add Snippet" },
   },
   opts = {
     telescope = {
