@@ -19,6 +19,7 @@ return {
       { "<leader>n", group = "Snippets" },
       { "<leader>h", group = "Harpoon" },
       { "<leader>z", group = "Zen Mode" },
+      { "<leader>u", group = "UI/UX" },
       { "<leader>m", group = "Copilot" },
     },
   },

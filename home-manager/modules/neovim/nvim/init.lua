@@ -250,6 +250,83 @@ vim.keymap.set("v", "<leader>rq", function()
   vim.fn.setreg('"', old_reg, old_regtype)
 end, { desc = "Surround with backticks" })
 
+-- Use <leader>uw to toggle word wrap
+vim.keymap.set("n", "<leader>uw", function()
+  vim.wo.wrap = not vim.wo.wrap
+end, { desc = "Toggle Word Wrap" })
+
+-- Use <leader>un to toggle line numbers
+vim.keymap.set("n", "<leader>un", function()
+  if vim.wo.number and not vim.wo.relativenumber then
+    vim.wo.number = false
+  else
+    vim.wo.number = true
+    vim.wo.relativenumber = false
+  end
+end, { desc = "Toggle Line Numbers" })
+
+-- Use <leader>uN to toggle relative line numbers
+vim.keymap.set("n", "<leader>uN", function()
+  if vim.wo.relativenumber then
+    vim.wo.relativenumber = false
+    vim.wo.number = false
+  else
+    vim.wo.relativenumber = true
+    vim.wo.number = true
+  end
+end, { desc = "Toggle Relative Line Numbers" })
+
+-- Toggle virtualedit (lets cursor move past end of line, great for visual block)
+vim.keymap.set("n", "<leader>uv", function()
+  if vim.o.virtualedit == "all" then
+    vim.o.virtualedit = ""
+  else
+    vim.o.virtualedit = "all"
+  end
+end, { desc = "Toggle Virtual Edit" })
+
+-- Toggle colorcolumn at 80 (highlights line length limit)
+vim.keymap.set("n", "<leader>uc", function()
+  if vim.wo.colorcolumn == "" then
+    vim.wo.colorcolumn = "80"
+  else
+    vim.wo.colorcolumn = ""
+  end
+end, { desc = "Toggle Color Column" })
+
+-- Toggle cursorcolumn (crosshair mode)
+vim.keymap.set("n", "<leader>u+", function()
+  vim.wo.cursorcolumn = not vim.wo.cursorcolumn
+end, { desc = "Toggle Cursor Crosshair" })
+
+-- Toggle conceal level (useful in markdown/JSON to see raw text)
+vim.keymap.set("n", "<leader>uC", function()
+  if vim.wo.conceallevel > 0 then
+    vim.wo.conceallevel = 0
+  else
+    vim.wo.conceallevel = 2
+  end
+end, { desc = "Toggle Conceal" })
+
+-- Toggle spell checking
+vim.keymap.set("n", "<leader>us", function()
+  vim.wo.spell = not vim.wo.spell
+end, { desc = "Toggle Spell Check" })
+
+-- Toggle scrolloff between 0 and 8 (controls how much context stays visible while scrolling)
+vim.keymap.set("n", "<leader>uz", function()
+  if vim.o.scrolloff == 12 then
+    vim.o.scrolloff = 0
+  else
+    vim.o.scrolloff = 12
+  end
+end, { desc = "Toggle Scrolloff" })
+
+-- Toggle list mode (shows hidden chars: tabs, trailing spaces, etc.)
+vim.keymap.set("n", "<leader>ul", function()
+  vim.wo.list = not vim.wo.list
+end, { desc = "Toggle List Mode (Show Hidden Chars)" })
+
 -- Change cursor depending on mode
 vim.opt.guicursor = "n-v-c-sm:block,i-ci-ve:ver25,r-cr-o:hor20"
 
