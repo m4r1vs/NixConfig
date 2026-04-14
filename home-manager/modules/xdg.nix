@@ -8,6 +8,7 @@
 }:
 with lib; let
   cfg = config.configured.xdg;
+  theme = systemArgs.theme;
 in {
   options.configured.xdg = {
     enable = mkEnableOption "Cross-Desktop-Group";
@@ -64,7 +65,7 @@ in {
           name = "Keyboard Shortcuts";
           genericName = "From Hyprland";
           icon = "system-help";
-          exec = "${lib.getExe pkgs.hyprland-which-key}";
+          exec = "${lib.getExe pkgs.hyprland-which-key} --accent-color \"${theme.secondaryColor.hex}\" --accent-color-light \"${theme.primaryColor.hex}\" --background-color \"${theme.backgroundColor}\" --background-color-light \"${theme.backgroundColorLight}\"";
           type = "Application";
           categories = ["Utility" "System"];
         };

@@ -199,11 +199,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1776193874,
-        "narHash": "sha256-/Nizxh38Pe0Cp4myrJ6m67juCRlB6ye+1EWYCkRobI8=",
+        "lastModified": 1776200327,
+        "narHash": "sha256-Q8/3e8gNtcNVCt8zGKXxQlxPXmZ7RSZtM8/vTdPUV5o=",
         "owner": "m4r1vs",
         "repo": "golazo",
-        "rev": "bed5bd2db08c5828127c8eb726a6c0a07e486d78",
+        "rev": "7d5a810bbc4a6c4e75bb8584c12480b73faba72f",
         "type": "github"
       },
       "original": {
@@ -264,11 +264,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1776196043,
-        "narHash": "sha256-nvnJAPOn4C4kCsISA5inK5ztZpwYwC9l3rhRNBGVFR4=",
+        "lastModified": 1776202995,
+        "narHash": "sha256-DCXSjyHYKYloSQPcYAi00O69apcD3Lb49POa3TpyDNY=",
         "owner": "m4r1vs",
         "repo": "hyprland-which-key",
-        "rev": "c3c4ee1d854d5c99700832346fcbb3880847205d",
+        "rev": "9dac4704aa1bc0e7baaa543cd4c01240aebb3ff7",
         "type": "gitlab"
       },
       "original": {
@@ -480,11 +480,11 @@
     },
     "nixpkgs_master": {
       "locked": {
-        "lastModified": 1776195597,
-        "narHash": "sha256-SJkmAB+Dm2oQ+upMDiF+YqcW6VarviIOQOwNLFzSa7s=",
+        "lastModified": 1776202106,
+        "narHash": "sha256-FP8geCvI8iziWcTuycmh+1+cxo7YCnlvu7RRmcp1PpI=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "115bef8c3565cc0b4f27c0c6668a226e41ba21fb",
+        "rev": "b6fb7fa7cd8ae566026133bc65d2085b8199878d",
         "type": "github"
       },
       "original": {
