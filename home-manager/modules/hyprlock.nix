@@ -4,6 +4,7 @@
   pkgs,
   scripts,
   systemArgs,
+  osConfig,
   ...
 }:
 with lib; let
@@ -25,7 +26,7 @@ in {
         };
         auth = {
           fingerprint = {
-            enabled = false;
+            enabled = osConfig.services.fprintd.enable;
           };
           pam = {
             enabled = true;
