@@ -285,6 +285,15 @@ in {
           type = "Application";
           categories = ["Utility"];
         };
+        random-album = {
+          name = "Random Album of the Day";
+          genericName = "SUPER+Shift+F8";
+          comment = "Query bandcamp for a random daily album to play on Spotify";
+          icon = "spotify-client";
+          exec = "${scripts.random-album-of-the-day}";
+          type = "Application";
+          categories = ["Music"];
+        };
         rofi-powermode = mkIf hasPowerProfiles {
           name = "Select Performance Mode";
           genericName = "Performance/Auto/Light";
