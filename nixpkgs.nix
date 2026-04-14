@@ -24,6 +24,7 @@ in {
           */
 
           atai = inputs.atai.packages.${stdenv.hostPlatform.system}.atai;
+          hyprland-which-key = inputs.hyprland-which-key.packages.${stdenv.hostPlatform.system}.default;
 
           # TODO: add PR to add to nixpkgs
           clippy-darwin = pkgsUnstable.buildGoModule {

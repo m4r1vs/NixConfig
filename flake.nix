@@ -27,6 +27,11 @@
       url = "gitlab:m4r1vs/atai?ref=master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hyprland-which-key = {
+      # Cycle mute state of chrome tabs remotely
+      url = "gitlab:m4r1vs/hyprland-which-key?ref=master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     stummumschalterung = {
       # Cycle mute state of chrome tabs remotely
       url = "gitlab:m4r1vs/stummumschalterung?ref=trunk";

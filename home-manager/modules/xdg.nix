@@ -60,6 +60,14 @@ in {
           type = "Application";
           categories = ["Utility" "System" "Settings"];
         };
+        hyprland-which-key = {
+          name = "Keyboard Shortcuts";
+          genericName = "From Hyprland";
+          icon = "system-help";
+          exec = "${lib.getExe pkgs.hyprland-which-key}";
+          type = "Application";
+          categories = ["Utility" "System"];
+        };
         weather = {
           name = "Weather";
           genericName = "from wttr.in";

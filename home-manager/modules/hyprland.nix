@@ -126,9 +126,9 @@ in {
           blur = {
             special = true;
             enabled = true;
-            size = 5;
+            size = 2;
             vibrancy = 0.35;
-            passes = 4;
+            passes = 3;
             new_optimizations = true;
             ignore_opacity = true;
             xray = false;
@@ -212,61 +212,61 @@ in {
             "SUPER, k, Bring active to top up, bringactivetotop, u"
             "SUPER, j, Bring active to top down, bringactivetotop, d"
 
-            "SUPER, t, Toggle split, togglesplit"
+            "SUPER, t, Toggle split vertical/horizontal, togglesplit"
             "SUPER+Shift, N, Move current workspace to next monitor, movecurrentworkspacetomonitor, +1"
 
             "SUPER, F, Toggle fullscreen, fullscreen,"
             "SUPER+Shift, F, Toggle fake fullscreen, fullscreenstate, 2,"
-            "SUPER+Shift, Space, Toggle floating, togglefloating"
+            "SUPER+Shift, Space, Toggle active window floating, togglefloating"
 
-            "SUPER, Return, Open terminal, exec, ${lib.getExe pkgs.ghostty}"
-            "SUPER+Shift, Return, Rofi SSH, exec, ${scripts.rofi-launch} ssh"
+            "SUPER, Return, Open Ghostty Terminal Emulator, exec, ${lib.getExe pkgs.ghostty}"
+            "SUPER+Shift, Return, SSH Session Selection, exec, ${scripts.rofi-launch} ssh"
             "SUPER, d, Rofi search, exec, ${scripts.rofi-launch} search"
-            "SUPER, s, Screenshot, exec, ${scripts.screenshot}"
+            "SUPER, s, Simple Screenshot, exec, ${scripts.screenshot}"
             "SUPER, E, Open file manager, exec, ${lib.getExe pkgs.ghostty} --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi ~/Downloads/"
-            "SUPER, m, Rofi emoji, exec, ${scripts.rofi-launch} emoji"
+            "SUPER, m, Emoji Picker, exec, ${scripts.rofi-launch} emoji"
             "SUPER, SPACE, Switch keyboard layout, exec, ${scripts.switch-kb-layout}"
-            "SUPER, c, Rofi calculator, exec, ${scripts.rofi-launch} calc"
+            "SUPER, c, Query Wolfram|Alpha with ChatGPT fallback, exec, ${scripts.rofi-launch} calc"
             "SUPER, p, Toggle media playback, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"
 
             "SUPER, backslash, Mute audio, exec, ${pkgs.pamixer}/bin/pamixer -t"
 
-            ",F8, Toggle Spotify, togglespecialworkspace, spotify_player"
+            ",F8, Toggle Spotify Workspace, togglespecialworkspace, spotify_player"
             ",F8, Launch Spotify if not running, exec, pgrep spotify_player || ${lib.getExe pkgs.ghostty} --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
 
             "SUPER, F8, Like current track on Spotify, exec, ${pkgs.spotify-player}/bin/spotify_player like && ${scripts.nixos-notify} -e -t 1800 \"Liked currentry playing Track on Spotify\""
-            "Shift, F8, Random album of the day, exec, ${scripts.random-album-of-the-day}"
+            "Shift, F8, Play a random album of the day, exec, ${scripts.random-album-of-the-day}"
 
-            ",F7, Wireless screen, exec, ${scripts.wireless-screen}"
+            ",F7, Wireless virtual Screen, exec, ${scripts.wireless-screen}"
 
-            ",F11, Toggle Obsidian Neovim, togglespecialworkspace, obsidian_nvim"
-            ",F11, Launch Obsidian, exec, ${scripts.launch-once {
+            ",F11, Toggle Obsidian Neovim Workspace, togglespecialworkspace, obsidian_nvim"
+            ",F11, Launch Obsidian if not launched, exec, ${scripts.launch-once {
               command = "${pkgs.obsidian}/bin/obsidian";
               grep = "initialClass: obsidian";
               useHypr = true;
             }}"
-            ",F11, Launch Obsidian Neovim, exec, ${scripts.launch-once {
+            ",F11, Launch Neovim in Obsidian Vault, exec, ${scripts.launch-once {
               command = "${lib.getExe pkgs.ghostty} --class=ghostty.obsidian -e ${config.programs.neovim.finalPackage}/bin/nvim \"~/Documents/Marius\\\'\\\ Remote\\\ Vault\"";
               grep = "ghostty\\\.obsidian";
               useHypr = true;
             }}"
-            "Shift, F11, Launch Obsidian, exec, ${scripts.launch-once {
+            "Shift, F11, Launch Obsidian if not launched, exec, ${scripts.launch-once {
               command = "${pkgs.obsidian}/bin/obsidian";
               grep = "initialClass: obsidian";
               useHypr = true;
             }}"
-            "Shift, F11, Toggle Obsidian, togglespecialworkspace, obsidian"
+            "Shift, F11, Toggle Obsidian Workspace, togglespecialworkspace, obsidian"
 
-            "SUPER+Shift, s, Screenshot with edit, exec, ${scripts.screenshot} edit"
-            "SUPER+Shift, c, Toggle notification center, exec, ${pkgs.swaynotificationcenter}/bin/swaync-client -t"
-            "SUPER+Shift, d, Toggle dark mode, exec, ${pkgs.darkman}/bin/darkman toggle"
-            "SUPER+Shift, w, Rofi wallpaper, exec, ${scripts.rofi-launch} wallpaper"
+            "SUPER+Shift, s, Take Screenshot and then edit it, exec, ${scripts.screenshot} edit"
+            "SUPER+Shift, c, Toggle Notification Center, exec, ${pkgs.swaynotificationcenter}/bin/swaync-client -t"
+            "SUPER+Shift, d, Toggle Dark Mode, exec, ${pkgs.darkman}/bin/darkman toggle"
+            "SUPER+Shift, w, Change Wallpaper, exec, ${scripts.rofi-launch} wallpaper"
             "SUPER+Shift, z, Toggle zen mode, exec, ${scripts.toggle-zen}"
             "SUPER+Shift, P, Color picker, exec, ${pkgs.hyprpicker}/bin/hyprpicker -a"
-            "SUPER+Shift, q, Rofi power menu, exec, ${scripts.rofi-launch} power"
-            "SUPER+Shift, b, Rofi bluetooth, exec, ${scripts.rofi-launch} bluetooth"
+            "SUPER+Shift, q, Power Menu, exec, ${scripts.rofi-launch} power"
+            "SUPER+Shift, b, Rofi Bluetooth, exec, ${scripts.rofi-launch} bluetooth"
             "SUPER+Shift, i, 1Password quick access, exec, ${pkgs._1password-gui}/bin/1password --quick-access --ozone-platform-hint=x11"
-            "SUPER+Shift, v, Rofi clipboard history, exec, ${scripts.rofi-launch} cliphist"
+            "SUPER+Shift, v, Rofi Clipboard History, exec, ${scripts.rofi-launch} cliphist"
 
             # bound to mousewheel left/right
             "Ctrl+Shift, Left, Previous workspace, workspace, m-1"
@@ -277,8 +277,8 @@ in {
                 i: let
                   ws = i + 1;
                 in [
-                  "SUPER, code:1${toString i}, Switch to workspace ${toString ws}, workspace, ${toString ws}"
-                  "SUPER+Shift, code:1${toString i}, Move to workspace ${toString ws}, movetoworkspace, ${toString ws}"
+                  "SUPER, ${toString ws}, Switch to workspace ${toString ws}, workspace, ${toString ws}"
+                  "SUPER+Shift, ${toString ws}, Move to workspace ${toString ws}, movetoworkspace, ${toString ws}"
                 ]
               )
               9)
