@@ -67,6 +67,54 @@ in {
           categories = ["Music"];
           noDisplay = true;
         };
+        nvim = {
+          name = "NeoVim";
+          genericName = "New Improved Vim - Text Editor";
+          icon = "vim";
+          type = "Application";
+          exec = "${pkgs.ghostty}/bin/ghostty -e nvim %u";
+          settings = {
+            Keywords = "Text;editor";
+          };
+          startupNotify = false;
+          terminal = false;
+          categories = ["Utility" "TextEditor" "Development"];
+          mimeType = [
+            "text/plain"
+
+            "text/html"
+            "text/css"
+            "text/javascript"
+            "application/javascript"
+            "application/typescript"
+
+            "application/json"
+            "application/xml"
+            "text/xml"
+            "text/csv"
+            "application/x-yaml"
+            "text/yaml"
+
+            "application/x-sh"
+            "application/x-shellscript"
+            "text/x-shellscript"
+
+            "text/x-python"
+            "text/x-csrc"
+            "text/x-chdr"
+            "text/x-c++src"
+            "text/x-java-source"
+            "text/x-go"
+            "text/x-nix"
+            "text/x-rust"
+            "text/x-lua"
+
+            "text/markdown"
+            "text/x-markdown"
+            "text/x-rst"
+            "text/x-tex"
+          ];
+        };
         blueman = {
           name = "Bluetooth";
           genericName = "Blueman";
