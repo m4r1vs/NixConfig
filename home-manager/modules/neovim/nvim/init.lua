@@ -275,7 +275,7 @@ vim.keymap.set("n", "<S-Tab>", "gT", { noremap = true, silent = true })
 -- Highlight yanked text
 vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function()
-    vim.highlight.on_yank({ higroup = "YankHighlight", timeout = 100 })
+    vim.hl.on_yank({ higroup = "YankHighlight", timeout = 100 })
   end,
 })
 
