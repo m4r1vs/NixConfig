@@ -97,8 +97,8 @@
             // {
               system = "x86_64-linux";
               theme = makeTheme {
-                primary = "purplish_grey";
-                secondary = "red";
+                primary = "purple";
+                secondary = "magenta";
               };
               hostname = "nixpad";
             };
