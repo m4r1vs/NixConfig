@@ -15,6 +15,11 @@ in {
     enable = mkEnableOption "Tiling Wayland Window Manager";
   };
   config = mkIf cfg.enable {
+    home.activation.copyWallpapers = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      $DRY_RUN_CMD mkdir -p $HOME/Pictures/Wallpapers
+      $DRY_RUN_CMD cp -rn ${../wallpaper}/* $HOME/Pictures/Wallpapers/ 2>/dev/null || true
+      $DRY_RUN_CMD chmod u+w -R $HOME/Pictures/Wallpapers 2>/dev/null || true
+    '';
     services.configured = {
       cliphist.enable = true;
       hypridle.enable = true;
@@ -239,7 +244,7 @@ in {
             "SUPER+Shift, s, exec, ${scripts.screenshot} edit"
             "SUPER+Shift, c, exec, ${pkgs.swaynotificationcenter}/bin/swaync-client -t"
             "SUPER+Shift, d, exec, ${pkgs.darkman}/bin/darkman toggle"
-            "SUPER+Shift, w, exec, ${scripts.random-wallpaper ../wallpaper}"
+            "SUPER+Shift, w, exec, ${scripts.rofi-wallpaper}"
             "SUPER+Shift, z, exec, ${scripts.toggle-zen}"
             "SUPER+Shift, P, exec, ${pkgs.hyprpicker}/bin/hyprpicker -a"
             "SUPER+Shift, q, exec,  ${pkgs.rofi}/bin/rofi -show power-menu -modi power-menu:${scripts.rofi-power-menu} -theme-str \"entry {placeholder:\\\"Power Menu...\\\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}window{padding: 38% 44%;}\""
