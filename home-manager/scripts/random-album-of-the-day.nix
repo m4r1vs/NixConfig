@@ -11,6 +11,8 @@ in {
     ''
       set -o pipefail
 
+      ${scripts.nixos-notify} -e -h string:synchronous:random-album "Connecting to Bandcamp..."
+
       HTML=$(${pkgs.curl}/bin/curl -s "https://daily.bandcamp.com/album-of-the-day")
       RANDOM_ALBUM_LINE=$(echo "$HTML" | grep '<a class="title" href="/album-of-the-day/' | ${pkgs.coreutils}/bin/shuf -n 1)
       RANDOM_ALBUM=$(echo "$RANDOM_ALBUM_LINE" | awk -F '">|</' '{print $3}' | sed -e 's/“//g ; s/”//g')
@@ -45,10 +47,10 @@ in {
           bash
           */
           ''
-            RESPONSE=$(${scripts.nixos-notify} --action="open=Open on Bandcamp" -e "Playing a random Album of the Day: \"$RANDOM_ALBUM\"")
+            RESPONSE=$(${scripts.nixos-notify} -h string:synchronous:random-album --action="open=Open on Bandcamp" "Playing a random Album of the Day: \"$RANDOM_ALBUM\"")
 
             if [[ "$RESPONSE" == *"open"* ]]; then
-              ${scripts.nixos-notify} -e -t 1000 "$(${pkgs.xdg-utils}/bin/xdg-open "https://daily.bandcamp.com$ALBUM_PATH")"
+              ${scripts.nixos-notify} -e -t 2000 "$(${pkgs.xdg-utils}/bin/xdg-open "https://daily.bandcamp.com$ALBUM_PATH")"
             fi
 
             exit 0''
