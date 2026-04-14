@@ -48,7 +48,7 @@ in {
         macos-icon = "official";
         mouse-hide-while-typing = true;
         window-padding-balance = true;
-        background-blur = mkIf isDarwin 30;
+        background-blur = mkIf isDarwin 35;
         window-colorspace = mkIf isDarwin "display-p3";
         link-url = true;
         keybind =
@@ -96,10 +96,7 @@ in {
           cursor-text = "#100f0f";
           selection-background = "#403e3c";
           selection-foreground = "#cecdc3";
-          background-opacity =
-            if isDarwin
-            then 0.92
-            else 0.84;
+          background-opacity = 0.92;
         };
         flexoki-light = {
           palette = [
@@ -126,10 +123,7 @@ in {
           cursor-text = "#fffcf0";
           selection-background = "#cecdc3";
           selection-foreground = "#100f0f";
-          background-opacity =
-            if isDarwin
-            then 0.92
-            else 0.82;
+          background-opacity = 0.92;
         };
       };
     };
