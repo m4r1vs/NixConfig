@@ -15,19 +15,29 @@ in {
         bash
         */
         ''
-          ${pkgs.hyprland}/bin/hyprctl switchxkblayout all next && sleep 0.05
-          layMain=$(${pkgs.hyprland}/bin/hyprctl -j devices | jq '.keyboards' | jq '.[] | select (.main == true)' | awk -F '"' '{if ($2=="active_keymap") print $4}')
+          before=$(${pkgs.hyprland}/bin/hyprctl -j devices | ${pkgs.jq}/bin/jq -r '.keyboards[] | select(.main == true) | .active_keymap')
+          ${pkgs.hyprland}/bin/hyprctl switchxkblayout all next
+          # Wait up to 0.5s for the layout to change
+          for i in {1..10}; do
+            layMain=$(${pkgs.hyprland}/bin/hyprctl -j devices | ${pkgs.jq}/bin/jq -r '.keyboards[] | select(.main == true) | .active_keymap')
+            if [ "$layMain" != "$before" ]; then
+              break
+            fi
+            sleep 0.05
+          done
         ''
       else
         /*
         bash
         */
         ''
-          layMain=$(${pkgs.xorg.setxkbmap}/bin/setxkbmap -query | awk '/layout:/ {print $2}')
-          if [[ $layMain == "us" ]]; then
+          currentLayout=$(${pkgs.xorg.setxkbmap}/bin/setxkbmap -query | awk '/layout:/ {print $2}')
+          if [[ $currentLayout == "us" ]]; then
             ${pkgs.xorg.setxkbmap}/bin/setxkbmap de
+            layMain="de"
           else
             ${pkgs.xorg.setxkbmap}/bin/setxkbmap us
+            layMain="us"
           fi
         ''
     }
