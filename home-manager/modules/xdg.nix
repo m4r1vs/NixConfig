@@ -137,7 +137,7 @@ in {
           exec = "${lib.getExe pkgs.ghostty} --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player";
           icon = "spotify-client";
           type = "Application";
-          categories = ["Music"];
+          categories = ["Music" "X-Spotify"];
           noDisplay = true;
         };
         spotify-like = {
@@ -147,7 +147,7 @@ in {
           icon = "spotify-client";
           exec = "${scripts.spotify-like}";
           type = "Application";
-          categories = ["Music"];
+          categories = ["Music" "X-Spotify"];
           noDisplay = false;
         };
         nvim = {
@@ -308,7 +308,7 @@ in {
           icon = "spotify-client";
           exec = "${scripts.random-album-of-the-day}";
           type = "Application";
-          categories = ["Music"];
+          categories = ["Music" "X-Spotify"];
         };
         rofi-powermode = mkIf hasPowerProfiles {
           name = "Select Performance Mode";
