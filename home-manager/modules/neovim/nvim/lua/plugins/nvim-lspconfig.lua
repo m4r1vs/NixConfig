@@ -107,7 +107,7 @@ return {
     vim.lsp.enable("lua_ls")
     vim.lsp.enable("nil_ls")
     vim.lsp.enable("nixd")
-    vim.lsp.enable("ty")
+    vim.lsp.enable("ruff")
     vim.lsp.enable("rust_analyzer")
     vim.lsp.enable("sourcekit")
     vim.lsp.enable("svelte")
@@ -117,6 +117,7 @@ return {
     vim.lsp.enable("terraformls")
     vim.lsp.enable("texlab")
     vim.lsp.enable("tinymist")
+    vim.lsp.enable("ty")
     vim.lsp.enable("yamlls")
     vim.lsp.enable("zls")
 
@@ -139,3 +140,4 @@ return {
     end
   end,
 }
+

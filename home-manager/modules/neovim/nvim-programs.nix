@@ -37,6 +37,7 @@ in
       nodejs_22
       prettierd
       ripgrep
+      ruff
       rumdl
       shfmt
       stylua
