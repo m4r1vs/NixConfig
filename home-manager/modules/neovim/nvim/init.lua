@@ -248,12 +248,15 @@ vim.keymap.set("v", "<leader>rq", function()
   vim.fn.setreg('"', wrapped)
   vim.cmd('normal! gv""p')
   vim.fn.setreg('"', old_reg, old_regtype)
-end, { desc = "Surround with backticks" })
+end, { desc = "Make Codeblock" })
 
 -- Use <leader>uw to toggle word wrap
 vim.keymap.set("n", "<leader>uw", function()
   vim.wo.wrap = not vim.wo.wrap
 end, { desc = "Toggle Word Wrap" })
+
+-- Use <leader>ur to restart neovim
+vim.keymap.set("n", "<leader>ur", ":restart<CR>", { desc = "Restart NeoVim" })
 
 -- Use <leader>un to toggle line numbers
 vim.keymap.set("n", "<leader>un", function()
@@ -370,16 +373,32 @@ vim.keymap.set("n", "<C-M-k>", ":resize -2<CR>", { noremap = true, silent = true
 vim.keymap.set("n", "<C-M-j>", ":resize +2<CR>", { noremap = true, silent = true, desc = "Resize split down" })
 
 -- Close window with leader+q
-vim.keymap.set("n", "<leader>q", "<C-w>q", { noremap = true, silent = true, desc = "Close Window" })
+vim.keymap.set("n", "<leader>q", "<C-w>q", { noremap = true, silent = true, desc = "Close Window/Split/Tab" })
 
 -- Close all windows with leader+Q
-vim.keymap.set("n", "<leader>Q", ":qa<CR>", { noremap = true, silent = true, desc = "Quit All" })
+vim.keymap.set("n", "<leader>Q", ":qa<CR>", { noremap = true, silent = true, desc = "Quit NeoVim" })
 
 -- Close buffer with leader+c
 vim.keymap.set("n", "<leader>c", ":bd<CR>", { noremap = true, silent = true, desc = "Close Buffer" })
 
 -- Force close buffer with leader+C
 vim.keymap.set("n", "<leader>C", ":bd!<CR>", { noremap = true, silent = true, desc = "Force Close Buffer" })
+
+-- Save file with leader+ww
+vim.keymap.set("n", "<leader>ww", ":w<CR>", { noremap = true, silent = true, desc = "Save File" })
+
+-- Force save file with leader+wf
+vim.keymap.set("n", "<leader>wf", ":w!<CR>", { noremap = true, silent = true, desc = "Force Save File" })
+
+-- Save file without formatting with leader+wu
+vim.keymap.set("n", "<leader>wu", ":noa w<CR>",
+  { noremap = true, silent = true, desc = "Save File Without Formatting" })
+
+-- Save file and quit with leader+wq
+vim.keymap.set("n", "<leader>wq", ":wq<CR>", { noremap = true, silent = true, desc = "Save and Quit" })
+
+-- Discard changes with leader+we
+vim.keymap.set("n", "<leader>we", ":e!<CR>", { noremap = true, silent = true, desc = "Discard Changes" })
 
 -- Never yank text that is pasted over
 vim.keymap.set("x", "p", "P", { noremap = true, silent = true })
@@ -404,8 +423,8 @@ vim.diagnostic.config({
 })
 
 -- Use leader+w/W to replace all occurances of the current word/WORD in the file
-vim.keymap.set("n", "<leader>w", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Replace word" })
-vim.keymap.set("n", "<leader>W", [[:%s/\<<C-r><C-a>\>/<C-r><C-a>/gI<Left><Left><Left>]], { desc = "Replace WORD" })
+vim.keymap.set("n", "<leader>rw", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Replace word" })
+vim.keymap.set("n", "<leader>rW", [[:%s/\<<C-r><C-a>\>/<C-r><C-a>/gI<Left><Left><Left>]], { desc = "Replace WORD" })
 
 -- Use escape to remove highlights
 vim.keymap.set("n", "<Esc>", [[<Esc><Cmd>nohlsearch<CR>]], { noremap = true, silent = true, desc = "Clear Highlight" })
