@@ -32,8 +32,11 @@
         cliphist)
           ${scripts.rofi-cliphist}
           ;;
+        powermode)
+          ${scripts.rofi-powermode}
+          ;;
         *)
-          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|cliphist}"
+          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|cliphist|powermode}"
           exit 1
           ;;
       esac
