@@ -121,6 +121,16 @@ in {
           categories = ["Music"];
           noDisplay = true;
         };
+        spotify-like = {
+          name = "Like Currently Playing";
+          genericName = "SUPER+F8";
+          comment = "Like the currently playing track on Spotify";
+          icon = "spotify-client";
+          exec = "${scripts.spotify-like}";
+          type = "Application";
+          categories = ["Music"];
+          noDisplay = false;
+        };
         nvim = {
           name = "NeoVim";
           genericName = "New Improved Vim - Text Editor";

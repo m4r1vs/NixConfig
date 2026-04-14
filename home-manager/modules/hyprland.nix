@@ -228,7 +228,7 @@ in {
             ",F8, Toggle Spotify Workspace, togglespecialworkspace, spotify_player"
             ",F8, Launch Spotify if not running, exec, pgrep spotify_player || ${lib.getExe pkgs.ghostty} --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
 
-            "SUPER, F8, Like current track on Spotify, exec, ${pkgs.spotify-player}/bin/spotify_player like && ${scripts.nixos-notify} -e -t 1800 \"Liked currentry playing Track on Spotify\""
+            "SUPER, F8, Like current track on Spotify, exec, ${scripts.spotify-like}"
             "Shift, F8, Play a random album of the day, exec, ${scripts.random-album-of-the-day}"
 
             ",F7, Wireless virtual Screen, exec, ${scripts.wireless-screen}"
