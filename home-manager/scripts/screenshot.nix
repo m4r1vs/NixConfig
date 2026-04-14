@@ -10,7 +10,7 @@
       ${pkgs.hyprshot}/bin/hyprshot -m region -o "/tmp" --freeze -f "tmp_screenshot.png" --silent 2> "$HYPR_STDOUT"
 
       if cat $HYPR_STDOUT | grep -q "cancelled"; then
-        ${scripts.nixos-notify} -e "Screenshot Cancelled"
+        ${scripts.nixos-notify} -e -h string:synchronous:screenshot-cancelled "Screenshot Cancelled"
         exit 0
       fi
 
@@ -27,7 +27,7 @@
         FINAL_DESTINATION="~/Pictures/Screenshots"
       fi
 
-      RESPONSE="$(${scripts.nixos-notify} -e -i "$OUTPUT" --action="gimp=Open in Gimp" --action="path=Copy Path" "Copied and saved to $FINAL_DESTINATION")"
+      RESPONSE="$(${scripts.nixos-notify} -h string:synchronous:screenshot-taken -i "$OUTPUT" --action="gimp=Open in Gimp" --action="path=Copy Path" "Copied and saved to $FINAL_DESTINATION")"
 
       if [[ "$RESPONSE" == *"gimp"* ]]; then
           ${pkgs.gimp}/bin/gimp "$OUTPUT" &
