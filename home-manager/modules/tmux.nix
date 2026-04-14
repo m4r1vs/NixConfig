@@ -8,6 +8,7 @@
 with lib; let
   cfg = config.programs.configured.tmux;
   theme = systemArgs.theme;
+  isDarwin = systemArgs.system == "aarch64-darwin";
   mkTmuxWindowStatusFormat = {
     shellIconMap,
     showPaneCount,
@@ -62,7 +63,10 @@ in {
         rustup = "";
         spotify_player = "";
         ssh = "󰒍";
-        sudo = "  root";
+        sudo =
+          if isDarwin
+          then "  root"
+          else "";
         terraform = "";
         tmux = ""; # on macos zsh is not always immediately loaded
         yazi = "󰇥";
