@@ -89,6 +89,22 @@ in {
           type = "Application";
           categories = ["Utility"];
         };
+        screenshot_simple = {
+          name = "Take Screenshot";
+          genericName = "SUPER+S";
+          icon = "gnome-screenshot";
+          exec = "${scripts.screenshot}";
+          type = "Application";
+          categories = ["Utility"];
+        };
+        screenshot_edit = {
+          name = "Take Screenshot and Edit";
+          genericName = "SUPER+Shift+S";
+          icon = "com.github.phase1geo.annotator";
+          exec = "${scripts.screenshot} edit";
+          type = "Application";
+          categories = ["Utility"];
+        };
         asciiquarium = {
           name = "Asciiquarium";
           genericName = "Fish.. and more!";
