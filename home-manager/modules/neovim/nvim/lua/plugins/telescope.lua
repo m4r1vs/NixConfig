@@ -7,11 +7,15 @@ return {
   event = "VeryLazy",
   init = function()
     local telescope = require("telescope.builtin")
-    vim.keymap.set("n", "<leader>sf", telescope.find_files, { desc = "Files" })
-    vim.keymap.set("n", "<leader>st", telescope.treesitter, { desc = "Treesitter" })
-    vim.keymap.set("n", "<leader>sr", telescope.live_grep, { desc = "Live Grep" })
+    vim.keymap.set("n", "<leader>sf", telescope.find_files, { desc = "Find Files" })
+    vim.keymap.set("n", "<leader>st", telescope.treesitter, { desc = "Treesitter Symbols" })
+    vim.keymap.set("n", "<leader>sr", telescope.live_grep, { desc = "R.I.P. Grep" })
     vim.keymap.set("n", "<leader>sb", telescope.buffers, { desc = "Buffers" })
-    vim.keymap.set("n", "<leader>sd", telescope.diagnostics, { desc = "Diagnostics" })
+    vim.keymap.set("n", "<leader>sd", telescope.diagnostics, { desc = "Workspace Diagnostics" })
+    vim.keymap.set("n", "<leader>sp", telescope.planets, { desc = "Use a Telescope" })
+    vim.keymap.set("n", "<leader>sc", telescope.commands, { desc = "VIM Commands" })
+    vim.keymap.set("n", "<leader>sl", telescope.lsp_dynamic_workspace_symbols, { desc = "LSP Workspace Symbols" })
+    vim.keymap.set("n", "<leader>sm", telescope.builtin, { desc = "Telescopes" })
   end,
   opts = {
     defaults = {
@@ -20,6 +24,8 @@ return {
           ["<C-j>"] = require('telescope.actions').move_selection_next,
           ["<C-k>"] = require('telescope.actions').move_selection_previous,
           ["<C-l>"] = require('telescope.actions').select_default,
+          ["<M-j>"] = require('telescope.actions').move_selection_next,
+          ["<M-k>"] = require('telescope.actions').move_selection_previous,
         },
       },
     },
