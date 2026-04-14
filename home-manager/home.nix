@@ -7,6 +7,7 @@
   isDesktop = osConfig.configured ? desktop && osConfig.configured.desktop.enable;
   isWSL = osConfig ? wsl && osConfig.wsl.enable;
   isDarwin = systemArgs.system == "aarch64-darwin";
+  hasPowerProfiles = osConfig.services.power-profiles-daemon.enable or false;
 in {
   imports = [
     ./modules
@@ -27,6 +28,7 @@ in {
       darkman.enable = isDesktop;
       kdeconnect.enable = isDesktop;
       ollama.enable = false;
+      auto-power-management.enable = hasPowerProfiles;
     };
     blueman-applet.enable = isDesktop;
     mpris-proxy.enable = isDesktop;
