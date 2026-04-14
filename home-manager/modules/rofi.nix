@@ -22,7 +22,7 @@ in {
           background-color: transparent;
         }
         window {
-          background-color: rgba(0, 0, 0, 0.24);
+          background-color: rgba(0, 0, 0, 0.38);
         }
         entry {
           text-color: #EFE7DD;
@@ -32,7 +32,7 @@ in {
           text-color: #EFE7DD;
         }
         element selected {
-          background-color: rgba(${theme.secondaryColor.rgb}, 0.48);
+          background-color: rgba(${theme.secondaryColor.rgb}, 0.78);
           border-radius: 5px;
         }
       '';
@@ -45,7 +45,7 @@ in {
           background-color: transparent;
         }
         window {
-          background-color: rgba(245, 230, 204, 0.24);
+          background-color: rgba(245, 230, 204, 0.38);
         }
         entry {
           text-color: #000000;
@@ -55,7 +55,7 @@ in {
           text-color: #000000;
         }
         element selected {
-          background-color: rgba(${theme.secondaryColor.rgb}, 0.48);
+          background-color: rgba(${theme.primaryColor.rgb}, 0.78);
           border-radius: 5px;
         }
       '';
