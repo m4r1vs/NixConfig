@@ -5,10 +5,15 @@
   ...
 }:
 with lib; let
-  cfg = config.boot.configured.secureboot;
+  cfg = config.configured.limine;
 in {
-  options.boot.configured.secureboot = {
-    enable = mkEnableOption "Enable secureboot using Limine.";
+  options.configured.limine = {
+    enable = mkEnableOption "Enable Limine bootloader.";
+    secureboot = mkOption {
+      type = types.bool;
+      default = false;
+      description = "Enable secureboot using Limine.";
+    };
     configLimit = mkOption {
       type = types.int;
       default = 5;
@@ -35,8 +40,8 @@ in {
           #TODO: add resolution on update to NixOS 26.05
           enable = true;
           efiSupport = true;
-          secureBoot.enable = true;
-          enrollConfig = true;
+          secureBoot.enable = cfg.secureboot;
+          enrollConfig = cfg.secureboot;
           maxGenerations = cfg.configLimit;
           extraEntries = optionalString (cfg.windowsPartUUID != null) ''
             /Microslop Windows 11
