@@ -76,7 +76,7 @@ if vim.g.started_by_firenvim == true then
   vim.opt.laststatus = 0
   vim.opt.cmdheight = 0
   vim.opt.wrap = true
-  vim.cmd("set guifont=JetBrainsMono\\ Nerd\\ Font\\ Mono:h10")
+  vim.cmd("set guifont=JetBrainsMono\\ Nerd\\ Font\\ Mono:h16")
 
   vim.api.nvim_create_autocmd({ "BufEnter" }, {
     pattern = "github.com_*.txt",
@@ -203,8 +203,9 @@ vim.diagnostic.config {
 -- Create new tab with CTRL-T and open telescope picker
 vim.keymap.set("n", "<C-T>", ":tabnew<CR>:Telescope find_files<CR>", { desc = "New Tab + Telescope" })
 
--- Use <leader>" to change current selection ' to "
-vim.keymap.set("v", "<leader>\"", ":s/'/\"/g<CR>", { desc = "Change ' to \"" })
+-- Use <leader>r" to change ' to "
+vim.keymap.set("v", "<leader>r\"", ":s/'/\"/g<CR>", { desc = "Change ' to \"" })
+vim.keymap.set("n", "<leader>r\"", ":%s/'/\"/g<CR>", { desc = "Change ' to \"" })
 
 -- Use <leader>rs to sort the current selection (visual) or inside brackets (normal)
 vim.keymap.set("v", "<leader>rs", ":sort<CR>", { desc = "Sort Selection" })
@@ -288,6 +289,9 @@ vim.keymap.set("n", "<leader>uv", function()
   end
 end, { desc = "Toggle Virtual Edit" })
 
+-- Update lazy.nvim plugins
+vim.keymap.set("n", "<leader>uU", ":silent Lazy update<CR>", { desc = "Update Lazy Plugins" })
+
 -- Toggle colorcolumn at 80 (highlights line length limit)
 vim.keymap.set("n", "<leader>uc", function()
   if vim.wo.colorcolumn == "" then
@@ -316,8 +320,8 @@ vim.keymap.set("n", "<leader>us", function()
   vim.wo.spell = not vim.wo.spell
 end, { desc = "Toggle Spell Check" })
 
--- Toggle scrolloff between 0 and 8 (controls how much context stays visible while scrolling)
-vim.keymap.set("n", "<leader>uz", function()
+-- Toggle scrolloff between 0 and 12 (controls how much context stays visible while scrolling)
+vim.keymap.set("n", "<leader>uZ", function()
   if vim.o.scrolloff == 12 then
     vim.o.scrolloff = 0
   else
