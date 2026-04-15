@@ -33,7 +33,6 @@ in {
       android-tools # android studio and emulator
       atai # openai wrapper to write in the terminal for me
       dbeaver-bin # database explorer (postgres, mysql, etc.)
-      gemini-cli # vibecoding
       obsidian # notes
       prismlauncher # minecraft mod launcher
       yt-dlp # youtube downloader
