@@ -40,10 +40,6 @@ in {
         tree = "${pkgs.lsd}/bin/lsd --tree";
         g3 = "${pkgs.gemini-cli}/bin/gemini -m gemini-3.1-pro-preview";
         present = "${pkgs.zathura}/bin/zathura --mode=presentation";
-        rebuild =
-          if isDarwin
-          then "sudo darwin-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname} && sudo yabai --load-sa"
-          else "sudo nixos-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}";
         vi = "nvim";
         vim = "nvim";
         stty = mkIf isDarwin "/bin/stty";
