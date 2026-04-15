@@ -276,7 +276,7 @@ in {
           name = "Wolfram|Alpha Query with ChatGPT Fallback";
           genericName = "SUPER+C";
           comment = "Rofi based calculator";
-          icon = "accessories-calculator";
+          icon = "wolfram-language";
           exec = "${scripts.rofi-launch} calc";
           type = "Application";
           categories = ["Utility"];
