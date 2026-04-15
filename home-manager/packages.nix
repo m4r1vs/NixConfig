@@ -71,6 +71,7 @@ in {
           hyprpicker # color picker
           hyprshot # screenshot tool
           hyprutils # hyprland stuff
+          nwg-displays # monitor manager
           swayimg # image viewer
         ]
         else [
