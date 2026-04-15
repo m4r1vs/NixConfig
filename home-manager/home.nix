@@ -51,6 +51,7 @@ in {
       direnv.enable = true;
       docker-darwin.enable = isDarwin;
       fzf.enable = true;
+      gemini-cli.enable = true;
       ghostty.enable = isDesktop || isWSL || isDarwin;
       git.enable = true;
       lazygit.enable = true;
