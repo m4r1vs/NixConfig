@@ -33,6 +33,13 @@ in {
           maxGenerations = cfg.configLimit;
           extraConfig = ''
             TIMEOUT=10
+
+            ${optionalString (cfg.windowsPartUUID != null) ''
+              /Microslop Windows 11
+                  protocol: efi
+                  path: guid(${cfg.windowsPartUUID}):/EFI/Microsoft/Boot/bootmgfw.efi
+                  comment: League of Legends works there, be warned
+            ''}
           '';
           style = {
             wallpapers = [../home-manager/wallpaper/Artemis_II_Earthset.jpg];
