@@ -19,7 +19,7 @@
   };
 
   specialisation = {
-    x11.configuration = {
+    "i3 Tiling Window Manager".configuration = {
       configured.desktop.x11 = lib.mkForce true;
     };
     "Steam Big Picture".configuration = {
@@ -45,7 +45,7 @@
   */
   boot.configured.secureboot = {
     enable = true;
-    consoleMode = 4;
+    windowsPartUUID = "bf2df441-4059-45e1-886a-6cf5e8def333";
   };
 
   /*

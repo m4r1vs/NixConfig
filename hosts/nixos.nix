@@ -22,10 +22,10 @@ with lib; {
   boot = {
     tmp.cleanOnBoot = true;
     loader = {
-      timeout = lib.mkForce 1;
+      timeout = lib.mkDefault 1;
       systemd-boot = {
-        enable = true;
-        configurationLimit = 20;
+        enable = lib.mkDefault true;
+        configurationLimit = lib.mkDefault 20;
       };
       efi.canTouchEfiVariables = true;
     };

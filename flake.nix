@@ -67,11 +67,6 @@
       url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    lanzaboote = {
-      # Enable Secureboot
-      url = "github:nix-community/lanzaboote/v1.0.0";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   nixConfig = {
@@ -119,7 +114,6 @@
               ./hosts/nixpad
               ./hosts/nixos.nix
 
-              inputs.lanzaboote.nixosModules.lanzaboote
               inputs.disko.nixosModules.disko
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
@@ -149,7 +143,6 @@
               ./hosts/yannix
               ./hosts/nixos.nix
 
-              inputs.lanzaboote.nixosModules.lanzaboote
               inputs.disko.nixosModules.disko
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
@@ -235,7 +228,6 @@
               ./hosts/desknix
               ./hosts/nixos.nix
 
-              inputs.lanzaboote.nixosModules.lanzaboote
               inputs.disko.nixosModules.disko
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
