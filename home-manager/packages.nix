@@ -14,10 +14,11 @@ in {
   home.packages = with pkgs;
     [
       # Install on every system:
+      (writeShellScriptBin "rebuild" scripts.rebuild)
       astroterm # show stars in terminal
       fastfetch # new neofetch
-      kubectl # kubernetes CLI
       golazo # show soccer scores in terminal
+      kubectl # kubernetes CLI
       pastel # manipulate colors and palettes
       xdg-utils # xdg-open, etc.
     ]
