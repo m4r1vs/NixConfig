@@ -22,6 +22,9 @@
     x11.configuration = {
       configured.desktop.x11 = lib.mkForce true;
     };
+    "Steam Big Picture".configuration = {
+      configured.desktop.gamescope = lib.mkForce true;
+    };
   };
 
   services = {
