@@ -63,7 +63,7 @@ in {
           type = "Application";
           categories = ["Utility" "System" "Settings"];
         };
-        hyprland-which-key = {
+        hyprland-which-key = lib.mkIf osConfig.programs.hyprland.enable {
           name = "Keyboard Shortcuts";
           genericName = "From Hyprland";
           icon = "system-help";
