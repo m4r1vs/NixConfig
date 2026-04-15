@@ -214,6 +214,22 @@ in {
           categories = ["Settings"];
           noDisplay = true;
         };
+        rebuild = {
+          name = "Rebuild System Configuration";
+          comment = "Rebuild NixOS system Config";
+          icon = "builder";
+          exec = "${lib.getExe pkgs.ghostty} --wait-after-command=true -e ${scripts.rebuild}";
+          type = "Application";
+          categories = ["Utility"];
+        };
+        settings = {
+          name = "Open and Edit System Configuration";
+          comment = "Edit NixOS system config";
+          icon = "mateconf-editor";
+          exec = "${lib.getExe pkgs.ghostty} -e nvim \"/home/${systemArgs.username}/NixConfig/\"";
+          type = "Application";
+          categories = ["Utility" "Settings"];
+        };
         brave-browser = {
           name = "Personal Browser";
           exec = ''${pkgs.brave}/bin/brave --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation %U'';
