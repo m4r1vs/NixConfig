@@ -53,6 +53,7 @@ in {
         page_size_in_rows = 20;
         play_icon = " ";
         pause_icon = "󰕿";
+        playlist_page_default = true;
         liked_icon = " ";
         border_type = "Double";
         progress_bar_type = "Rectangle";
