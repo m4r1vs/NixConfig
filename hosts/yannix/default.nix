@@ -52,13 +52,6 @@
     };
   };
 
-  /*
-  Enable Secure Boot
-  */
-  boot.configured.secureboot = {
-    enable = false;
-  };
-
   system = {
     nixos.label = systemArgs.hostname + ".dhruva.hamburg";
   };

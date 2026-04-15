@@ -16,7 +16,7 @@
   };
 
   specialisation = {
-    x11.configuration = {
+    "i3 Tiling Window Manager".configuration = {
       configured.desktop.x11 = lib.mkForce true;
     };
   };

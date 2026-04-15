@@ -16,6 +16,11 @@
       enable = true;
       x11 = false;
     };
+    limine = {
+      secureboot = true;
+      resolution = "2560x1440";
+      windowsPartUUID = "bf2df441-4059-45e1-886a-6cf5e8def333";
+    };
   };
 
   specialisation = {
@@ -38,15 +43,6 @@
         fileSystems = ["/"];
       };
     };
-  };
-
-  /*
-  Enable Secure Boot
-  */
-  boot.configured.secureboot = {
-    enable = true;
-    resolution = "2560x1440";
-    windowsPartUUID = "bf2df441-4059-45e1-886a-6cf5e8def333";
   };
 
   /*

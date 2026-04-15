@@ -14,6 +14,7 @@
       enable = true;
       x11 = false;
     };
+    limine.secureboot = true;
   };
 
   specialisation = {
@@ -48,13 +49,6 @@
         fileSystems = ["/"];
       };
     };
-  };
-
-  /*
-  Enable Secure Boot
-  */
-  boot.configured.secureboot = {
-    enable = true;
   };
 
   system = {
