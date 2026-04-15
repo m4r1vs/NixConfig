@@ -32,6 +32,7 @@ in {
         systemd-boot.enable = mkForce false;
         timeout = 5;
         limine = {
+          #TODO: add resolution on update to NixOS 26.05
           enable = true;
           efiSupport = true;
           secureBoot.enable = true;
