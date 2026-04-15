@@ -273,6 +273,7 @@ in {
                 in [
                   "SUPER, ${toString ws}, Switch to workspace ${toString ws}, workspace, ${toString ws}"
                   "SUPER+Shift, ${toString ws}, Move to workspace ${toString ws}, movetoworkspace, ${toString ws}"
+                  "SUPER+CTRL, ${toString ws}, Move to workspace ${toString ws} silently, movetoworkspacesilent, ${toString ws}"
                 ]
               )
               9)
