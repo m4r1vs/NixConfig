@@ -163,8 +163,8 @@ in {
             src = pkgs.fetchFromGitHub {
               owner = "m4r1vs";
               repo = "tmux";
-              rev = "159971c823a31d989925f8ad82774bb949f97e20";
-              hash = "sha256-TP0jL+oA/qHHlOYG2zyDZmSxa39+UgLWM2NvPEoVXyE=";
+              rev = "4e4c003a27e4872e080f5c5f5ade5ba86dc68ae9";
+              hash = "sha256-H2SXYD2IGQLSOkiyPW2yFnlv905Aw8J4NbPWuTqKt60=";
             };
           };
 
