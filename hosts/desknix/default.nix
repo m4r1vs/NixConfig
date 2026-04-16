@@ -19,6 +19,7 @@
     limine = {
       secureboot = true;
       resolution = "2560x1440";
+      memtest = true;
       windowsPartUUID = "bf2df441-4059-45e1-886a-6cf5e8def333";
     };
   };
