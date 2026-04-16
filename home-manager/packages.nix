@@ -21,6 +21,7 @@ in {
       kubectl # kubernetes CLI
       pastel # manipulate colors and palettes
       xdg-utils # xdg-open, etc.
+      gh # GitHub CLI
     ]
     ++ lib.optionals isDarwin [
       # Install on MacOS only:
