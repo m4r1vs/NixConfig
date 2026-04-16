@@ -27,11 +27,11 @@
     done
 
     # Show rofi with icon support and a grid layout matching the emoji picker style
-    # Uses a transparent background to let Hyprland's "blur,rofi" layer rule work
+    # Lets Hyprland's "blur,rofi" layer rule work through the themed background
     CHOICE_INDEX=$(echo -e "$OPTIONS" | ${pkgs.rofi}/bin/rofi -dmenu -i -p "Wallpaper" \
         -format i \
         -show-icons \
-        -theme-str "window { background-color: transparent; padding: 15% 25%; } listview { dynamic: true; columns: 3; lines: 4; spacing: 20px; layout: vertical; flow: horizontal; } element { orientation: vertical; padding: 10px; } element-icon { size: 200px; } element-text { enabled: true; horizontal-align: 0.5; } icon-current-entry { enabled: false; } inputbar { padding: 0 0 20px 0; }")
+        -theme-str "window { padding: 15% 25%; } listview { dynamic: true; columns: 3; lines: 4; spacing: 20px; layout: vertical; flow: horizontal; } element { orientation: vertical; padding: 10px; } element-icon { size: 200px; } element-text { enabled: true; horizontal-align: 0.5; } icon-current-entry { enabled: false; } inputbar { padding: 0 0 20px 0; }")
 
     if [ -z "$CHOICE_INDEX" ] || [ "$CHOICE_INDEX" -lt 0 ]; then
         exit 0
