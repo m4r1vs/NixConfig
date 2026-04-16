@@ -14,7 +14,11 @@
       enable = true;
       x11 = false;
     };
-    limine.secureboot = true;
+    limine = {
+      memtest = true;
+      secureboot = true;
+      resolution = "1920x1080";
+    };
   };
 
   specialisation = {

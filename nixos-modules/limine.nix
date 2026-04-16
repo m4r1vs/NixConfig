@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   config,
   systemArgs,
   ...
@@ -29,6 +30,7 @@ in {
       default = null;
       description = "The PARTUUID of the Windows EFI partition.";
     };
+    memtest = mkEnableOption "Enable memtest86+ entry.";
   };
 
   config = mkIf cfg.enable {
@@ -43,12 +45,22 @@ in {
           secureBoot.enable = cfg.secureboot;
           enrollConfig = cfg.secureboot;
           maxGenerations = cfg.configLimit;
-          extraEntries = optionalString (cfg.windowsPartUUID != null) ''
-            /Microslop Windows 11
-                protocol: efi
-                path: guid(${cfg.windowsPartUUID}):/EFI/Microsoft/Boot/bootmgfw.efi
-                comment: League of Legends works there, be warned!
-          '';
+          additionalFiles = mkIf cfg.memtest {
+            "efi/memtest86/memtest.efi" = "${pkgs.memtest86-efi}/BOOTX64.efi";
+          };
+          extraEntries =
+            (optionalString (cfg.windowsPartUUID != null) ''
+              /Microslop Windows 11
+                  protocol: efi
+                  path: guid(${cfg.windowsPartUUID}):/EFI/Microsoft/Boot/bootmgfw.efi
+                  comment: League of Legends works there, be warned!
+            '')
+            + (optionalString cfg.memtest ''
+              /Memtest86+
+                  protocol: efi
+                  path: boot():/limine/efi/memtest86/memtest.efi
+                  comment: Find out if memory is broken (just like mine on April 21st)
+            '');
           style = {
             wallpapers = [../home-manager/wallpaper/Artemis_II_Earthset.jpg];
             wallpaperStyle = "stretched";
