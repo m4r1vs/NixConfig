@@ -22,6 +22,7 @@
       memtest = true;
       windowsPartUUID = "bf2df441-4059-45e1-886a-6cf5e8def333";
     };
+    system-sounds.enable = true;
   };
 
   specialisation = {

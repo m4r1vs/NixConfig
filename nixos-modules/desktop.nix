@@ -29,6 +29,7 @@ in {
       i3.enable = cfg.x11 && !cfg.gamescope;
       hyprland.enable = !cfg.x11 && !cfg.gamescope;
       limine.enable = true;
+      system-sounds.enable = true;
     };
 
     networking.extraHosts = ''

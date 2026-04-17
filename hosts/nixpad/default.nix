@@ -19,6 +19,7 @@
       secureboot = true;
       resolution = "1920x1080";
     };
+    system-sounds.enable = true;
   };
 
   specialisation = {

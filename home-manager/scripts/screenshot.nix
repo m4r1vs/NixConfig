@@ -1,6 +1,8 @@
 {
   pkgs,
   scripts,
+  config,
+  lib,
   ...
 }: {
   screenshot =
@@ -13,6 +15,10 @@
         ${scripts.nixos-notify} -e -h string:synchronous:screenshot-cancelled "Screenshot Cancelled"
         exit 0
       fi
+
+      ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.screenshot.enable) ''
+        ${pkgs.mpv}/bin/mpv --no-video --volume=80 ${config.configured.system-sounds.screenshot.soundFile} &
+      ''}
 
       FINAL_DESTINATION="/tmp"
       OUTPUT="/tmp/tmp_screenshot.png"
