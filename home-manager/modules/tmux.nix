@@ -28,7 +28,7 @@ with lib; let
     format =
       "#{?#{==:#{pane_current_command},zsh},"
       + "#{?#{window_active},,} ${pathFormat},"
-      + "${"${iconSubstitutions}pane_current_command${closeSubstitutions}"}"
+      + "${"${iconSubstitutions}#{pane_current_command}${closeSubstitutions}"}"
       + " ${pathFormat}"
       + "}${
         if showPaneCount
@@ -115,6 +115,7 @@ in {
           bind-key -n M-L switch-client -n
           bind-key -n M-H switch-client -p
           bind-key -n M-N new-session
+          bind-key -n M-X run-shell 'if [ "$(tmux list-sessions | wc -l)" -eq 1 ]; then tmux new-session -d; fi; tmux switch-client -n; tmux kill-session -t "#S"'
 
           bind-key C-e copy-mode \; if-shell -F "#{pane_in_mode}" "send-keys C-e" "copy-mode \; send-keys C-e"
           bind-key C-y copy-mode \; if-shell -F "#{pane_in_mode}" "send-keys C-y" "copy-mode \; send-keys C-y"
@@ -167,32 +168,30 @@ in {
 
           # If getting strings cut in left status or right
           # Here 20 is the length of the characters in the string
-          set -g status-right-length 20
-          set -g status-left-length 20
+          set -g status-right-length 60
+          set -g status-left-length 60
+
+          set -g status-interval 1
+
+          # Update status bar immediately on session/window changes
+          set-hook -g client-session-changed 'refresh-client -S'
+          set-hook -g session-window-changed 'refresh-client -S'
+          set-hook -g window-pane-changed    'refresh-client -S'
+          set-hook -g after-new-window       'refresh-client -S'
+          set-hook -g after-new-session      'refresh-client -S'
+          set-hook -g session-closed         'refresh-client -S'
         '';
-      plugins = with pkgs; [
-        tmuxPlugins.vim-tmux-navigator
-        tmuxPlugins.jump
-        tmuxPlugins.yank
+      plugins = with pkgs.tmuxPlugins; [
+        vim-tmux-navigator
+        jump
+        yank
         {
-          plugin =
-            tmuxPlugins.mkTmuxPlugin
-            {
-              pluginName = "minimal-tmux-status";
-              version = "1.0";
-              src = pkgs.fetchFromGitHub {
-                owner = "niksingh710";
-                repo = "minimal-tmux-status";
-                rev = "67e2f5205de1b46f99af1d92013fb38fec5b05d9";
-                sha256 = "sha256-T5eoG861JJdGj6swp4+icjzwtSB5TY4efy5FeYbgHeg=";
-              };
-              rtpFilePath = "minimal.tmux";
-            };
+          plugin = minimal-tmux-status;
           extraConfig = ''
             set -g @minimal-tmux-fg "#000000"
             set -g @minimal-tmux-bg "${theme.primaryColor.hex}"
             set -g @minimal-tmux-justify "centre"
-            set -g @minimal-tmux-indicator-str "   󰴻   "
+            set -g @minimal-tmux-indicator-str ""
             set -g @minimal-tmux-indicator true
             set -g @minimal-tmux-status "bottom"
 
@@ -220,8 +219,11 @@ in {
             }} "
 
             # Not recommended to change these values
-            set -g @minimal-tmux-status-right " %d.%m. 󰥔 %H:%M"
-            set -g @minimal-tmux-status-left ""
+            set -g @minimal-tmux-status-right "                                             %d.%m. 󰥔 %H:%M"
+            set -g @minimal-tmux-status-left "#(tmux ls -F '##{?session_attached,#[fg=${theme.secondaryColor.hex}],#[fg=#826F62]} ${lib.replaceStrings ["#"] ["##"] (mkTmuxWindowStatusFormat {
+              shellIconMap = cfg.shellIconMap;
+              showPaneCount = false;
+            })} (##{session_windows}) #[fg=default]' | tr -d '\n'; printf '%%60s' \"\")"
           '';
         }
       ];
