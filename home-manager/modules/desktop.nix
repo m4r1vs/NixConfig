@@ -17,6 +17,10 @@ with lib;
         programs.configured = {
           hyprland.enable = true;
           hyprlock.enable = true;
+          waybar.enable = true;
+        };
+        services = {
+          swww.enable = true;
         };
       }
       else {}
