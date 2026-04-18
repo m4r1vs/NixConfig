@@ -44,9 +44,6 @@ in {
         amberol # fancy mp3 player
         diebahn # deutsche bahn arrivals/departures/delays
         gimp-with-plugins # maxxed out gimp
-        shortwave # Web Radio
-        whatsapp-electron # whatsapp
-        signal-desktop # Signal messenger
         gnome-chess # chess
         gnome-clocks # alarms, timers, etc.
         gnome-decoder # qr code generator
@@ -60,7 +57,11 @@ in {
         networkmanagerapplet # show wifi/ethernet in sys. tray
         pavucontrol # sound manager
         polkit_gnome # policy agent
+        shortwave # Web Radio
+        signal-desktop # Signal messenger
         stockfish # chess engine to play against computer
+        superTuxKart # Mario Kart Linux
+        whatsapp-electron # whatsapp
         wireplumber # pipewire manager
       ]
       ++ (
