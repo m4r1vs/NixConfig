@@ -73,16 +73,19 @@ in {
 
     specialisation = {
       "Hyprland (Wayland)".configuration = mkIf cfg.windowManagers.hyprland.enable {
+        environment.etc."nixos_active_specialisation".text = "Hyprland (Wayland)";
         configured.hyprland.enable = lib.mkForce true;
         configured.i3.enable = lib.mkForce false;
         configured.gamescope.enable = lib.mkForce false;
       };
       "i3 (X Window System)".configuration = mkIf cfg.windowManagers.i3.enable {
+        environment.etc."nixos_active_specialisation".text = "i3 (X Window System)";
         configured.hyprland.enable = lib.mkForce false;
         configured.i3.enable = lib.mkForce true;
         configured.gamescope.enable = lib.mkForce false;
       };
       "Steam Gamescope (Wayland)".configuration = mkIf cfg.windowManagers.gamescope.enable {
+        environment.etc."nixos_active_specialisation".text = "Steam Gamescope (Wayland)";
         configured.hyprland.enable = lib.mkForce false;
         configured.i3.enable = lib.mkForce false;
         configured.gamescope.enable = lib.mkForce true;
