@@ -262,6 +262,15 @@ in {
           type = "Application";
           categories = ["Network" "Utility"];
         };
+        rofi-obsidian = {
+          name = "Search Obsidian Notes";
+          genericName = "SUPER+Shift+O";
+          comment = "Search Obsidian Notes using rofi";
+          icon = "obsidian";
+          exec = "${scripts.rofi-launch} obsidian";
+          type = "Application";
+          categories = ["Utility"];
+        };
         rofi-emoji = {
           name = "Emoji Picker";
           genericName = "SUPER+M";
