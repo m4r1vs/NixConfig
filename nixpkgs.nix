@@ -204,7 +204,6 @@ in {
                 "pulseaudio-backend"
                 "media-control"
                 "daemon"
-                "notify"
                 "streaming"
               ];
           };

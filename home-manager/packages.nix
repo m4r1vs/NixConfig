@@ -44,6 +44,8 @@ in {
         amberol # fancy mp3 player
         diebahn # deutsche bahn arrivals/departures/delays
         gimp-with-plugins # maxxed out gimp
+        gnome-calculator
+        gnome-calendar # Calendar
         gnome-chess # chess
         gnome-clocks # alarms, timers, etc.
         gnome-decoder # qr code generator

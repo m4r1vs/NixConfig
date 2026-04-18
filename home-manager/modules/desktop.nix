@@ -16,11 +16,16 @@ with lib;
       then {
         programs.configured = {
           hyprland.enable = true;
-          hyprlock.enable = true;
-          waybar.enable = true;
+          hyprlock.enable = false;
+          noctalia-shell.enable = true;
         };
         services = {
-          swww.enable = true;
+          swww.enable = false;
+          configured = {
+            cliphist.enable = true;
+            hypridle.enable = false;
+            swaync.enable = false;
+          };
         };
       }
       else {}

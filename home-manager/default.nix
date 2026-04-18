@@ -3,6 +3,7 @@
   config,
   pkgs,
   systemArgs,
+  inputs,
   ...
 }:
 with lib; let
@@ -18,7 +19,7 @@ in {
       useUserPackages = true;
       users.${systemArgs.username} = import ./home.nix;
       extraSpecialArgs = {
-        inherit systemArgs;
+        inherit systemArgs inputs;
         scripts = (import ./makeScripts.nix) {inherit pkgs systemArgs config;};
       };
     };

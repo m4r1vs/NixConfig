@@ -112,6 +112,11 @@ in {
     services = {
       configured.kmscon.enable = true;
 
+      gnome = {
+        evolution-data-server.enable = true;
+        gnome-online-accounts.enable = true;
+      };
+
       /*
       Touchpad support
       */

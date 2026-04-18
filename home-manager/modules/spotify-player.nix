@@ -62,7 +62,6 @@ in {
           if isDesktop
           then "Always"
           else "Never";
-        notify_streaming_only = true;
         default_device = systemArgs.hostname;
         cover_img_width = 15;
         cover_img_length = 33;

@@ -25,7 +25,7 @@ in {
 
   services = {
     configured = {
-      darkman.enable = isDesktop;
+      darkman.enable = false;
       kdeconnect.enable = isDesktop;
       ollama.enable = false;
       auto-power-management.enable = hasPowerProfiles;

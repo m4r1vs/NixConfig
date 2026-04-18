@@ -4,10 +4,12 @@
   scripts,
   pkgs,
   osConfig,
+  inputs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.hyprland;
+  noctalia-shell-bin = lib.getExe inputs.noctalia.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in {
   options.programs.configured.hyprland = {
     enable = mkEnableOption "Tiling Wayland Window Manager";
@@ -18,11 +20,6 @@ in {
       $DRY_RUN_CMD cp -rn ${../wallpaper}/* $HOME/Pictures/Wallpapers/ 2>/dev/null || true
       $DRY_RUN_CMD chmod u+w -R $HOME/Pictures/Wallpapers 2>/dev/null || true
     '';
-    services.configured = {
-      cliphist.enable = true;
-      hypridle.enable = true;
-      swaync.enable = true;
-    };
     wayland.windowManager.hyprland = {
       enable = true;
       plugins = with pkgs; [
@@ -30,10 +27,9 @@ in {
       ];
       settings = {
         exec-once = [
-          "${pkgs.waybar}/bin/waybar"
+          "QS_ICON_THEME=Papirus ${noctalia-shell-bin}"
           "${pkgs._1password-gui}/bin/1password --silent --ozone-platform-hint=x11"
-          "${scripts.volume-change-notify}"
-          "${scripts.brightness-change-notify}"
+          "${lib.getExe pkgs.dex} --autostart"
         ];
         cursor = {
           inactive_timeout = 3;
@@ -52,7 +48,7 @@ in {
         ];
         input = {
           kb_layout = "us,de";
-          kb_options = "caps:escape";
+          kb_options = "caps:escape,grp:win_space_toggle";
           touchpad = {
             natural_scroll = true;
           };
@@ -208,12 +204,10 @@ in {
             "SUPER+Shift, Space, Toggle active window floating, togglefloating"
 
             "SUPER, Return, Open Ghostty Terminal Emulator, exec, ${lib.getExe pkgs.ghostty}"
-            "SUPER+Shift, Return, SSH Session Selection, exec, ${scripts.rofi-launch} ssh"
-            "SUPER, d, Rofi search, exec, ${scripts.rofi-launch} search"
+            "SUPER, d, Rofi search, exec, ${noctalia-shell-bin} ipc call launcher toggle"
             "SUPER, s, Simple Screenshot, exec, ${scripts.screenshot}"
             "SUPER, E, Open file manager, exec, ${lib.getExe pkgs.ghostty} --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi ~/Downloads/"
-            "SUPER, m, Emoji Picker, exec, ${scripts.rofi-launch} emoji"
-            "SUPER, SPACE, Switch keyboard layout, exec, ${scripts.switch-kb-layout}"
+            "SUPER, m, Emoji Picker, exec, ${noctalia-shell-bin} ipc call launcher emoji"
             "SUPER, c, Query Wolfram|Alpha with ChatGPT fallback, exec, ${scripts.rofi-launch} calc"
             "SUPER, p, Toggle media playback, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"
 
@@ -246,15 +240,14 @@ in {
             "Shift, F11, Toggle Obsidian Workspace, togglespecialworkspace, obsidian"
 
             "SUPER+Shift, s, Take Screenshot and then edit it, exec, ${scripts.screenshot} edit"
-            "SUPER+Shift, c, Toggle Notification Center, exec, ${pkgs.swaynotificationcenter}/bin/swaync-client -t"
-            "SUPER+Shift, d, Toggle Dark Mode, exec, ${pkgs.darkman}/bin/darkman toggle"
-            "SUPER+Shift, w, Change Wallpaper, exec, ${scripts.rofi-launch} wallpaper"
+            "SUPER+Shift, d, Toggle Dark Mode, exec, ${noctalia-shell-bin} ipc call darkMode toggle"
+            "SUPER+Shift, w, Change Wallpaper, exec, ${noctalia-shell-bin} ipc call wallpaper toggle"
             "SUPER+Shift, z, Toggle zen mode, exec, ${scripts.toggle-zen}"
             "SUPER+Shift, P, Color picker, exec, ${pkgs.hyprpicker}/bin/hyprpicker -a"
-            "SUPER+Shift, q, Power Menu, exec, ${scripts.rofi-launch} power"
-            "SUPER+Shift, b, Rofi Bluetooth, exec, ${scripts.rofi-launch} bluetooth"
+            "SUPER+Shift, q, Power Menu, exec, ${noctalia-shell-bin} ipc call sessionMenu toggle"
+            "SUPER+Shift, b, Rofi Bluetooth, exec, ${noctalia-shell-bin} ipc call bluetooth togglePanel"
             "SUPER+Shift, i, 1Password quick access, exec, ${pkgs._1password-gui}/bin/1password --quick-access --ozone-platform-hint=x11"
-            "SUPER+Shift, v, Rofi Clipboard History, exec, ${scripts.rofi-launch} cliphist"
+            "SUPER+Shift, v, Rofi Clipboard History, exec, ${noctalia-shell-bin} ipc call launcher clipboard"
             "SUPER+Shift, o, Obsidian Search, exec, ${scripts.rofi-launch} obsidian"
 
             # bound to mousewheel left/right
