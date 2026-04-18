@@ -28,6 +28,7 @@ in {
     configured = {
       i3.enable = cfg.x11 && !cfg.gamescope;
       hyprland.enable = !cfg.x11 && !cfg.gamescope;
+      gamescope.enable = cfg.gamescope;
       limine.enable = true;
       system-sounds.enable = true;
     };
@@ -109,39 +110,11 @@ in {
       */
       dbus.enable = true;
       blueman.enable = true;
-
-      displayManager = lib.mkIf cfg.gamescope {
-        autoLogin = {
-          enable = true;
-          user = systemArgs.username;
-        };
-        defaultSession = "steam-gamescope";
-      };
-
-      greetd = lib.mkIf cfg.gamescope {
-        enable = true;
-        settings = {
-          default_session = {
-            command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd steam-gamescope";
-            user = systemArgs.username;
-          };
-          initial_session = {
-            command = "steam-gamescope";
-            user = systemArgs.username;
-          };
-        };
-      };
     };
 
     security = {
       polkit.enable = true;
       rtkit.enable = true;
-      pam.services = lib.mkIf cfg.gamescope {
-        greetd.kwallet = {
-          enable = true;
-          package = pkgs.kdePackages.kwallet-pam;
-        };
-      };
     };
 
     boot = {
@@ -223,16 +196,11 @@ in {
     programs = {
       virt-manager.enable = isX86;
       dconf.enable = true;
-      gamescope.enable = cfg.gamescope;
       steam = lib.mkIf isX86 {
         enable = true;
         remotePlay.openFirewall = true;
         dedicatedServer.openFirewall = true;
         localNetworkGameTransfers.openFirewall = true;
-        gamescopeSession = {
-          enable = cfg.gamescope;
-          args = ["--force-grab-cursor"];
-        };
       };
       kdeconnect.enable = true;
       _1password.enable = true;
