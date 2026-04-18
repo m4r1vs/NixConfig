@@ -34,7 +34,6 @@ in {
     mpris-proxy.enable = isDesktop;
     network-manager-applet.enable = isDesktop;
     polkit-gnome.enable = isDesktop;
-    swww.enable = isDesktop;
   };
 
   dconf.settings = lib.mkIf isDesktop {
@@ -65,7 +64,6 @@ in {
       ssh.enable = true;
       swappy.enable = isDesktop;
       tmux.enable = true;
-      waybar.enable = isDesktop;
       yazi.enable = true;
       zsh.enable = true;
     };
