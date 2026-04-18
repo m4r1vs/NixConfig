@@ -108,8 +108,8 @@ in {
           rounding = 5;
           rounding_power = 3;
           dim_inactive = true;
-          dim_strength = 0.10;
-          inactive_opacity = 0.96;
+          dim_strength = 0.12;
+          inactive_opacity = 0.94;
           dim_special = 0.2;
           dim_around = 0.2;
           shadow = {
