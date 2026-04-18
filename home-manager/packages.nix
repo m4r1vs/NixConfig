@@ -6,7 +6,7 @@
   ...
 }: let
   isDesktop = osConfig.configured ? desktop && osConfig.configured.desktop.enable;
-  isWayland = osConfig.configured ? desktop && !osConfig.configured.desktop.x11;
+  isWayland = osConfig.configured ? desktop && !osConfig.configured.i3.enable;
   isDarwin = systemArgs.system == "aarch64-darwin";
   isX86 = systemArgs.system == "x86_64-linux";
   isGraphical = isDarwin || isDesktop;

@@ -11,13 +11,11 @@
   configured = {
     desktop = {
       enable = true;
-      x11 = false;
-    };
-  };
-
-  specialisation = {
-    "i3 Tiling Window Manager".configuration = {
-      configured.desktop.x11 = lib.mkForce true;
+      windowManagers = {
+        hyprland.enable = true;
+        i3.enable = true;
+        gamescope.enable = true;
+      };
     };
   };
 
