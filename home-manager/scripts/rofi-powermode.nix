@@ -8,6 +8,7 @@
     performance="󰓅 Performance"
     auto="󰾅 Auto"
     light="󰾆 Light"
+    ultralight="󰾆 Ultralight"
 
     # Get current mode
     current_mode=$(${scripts.powermode} query)
@@ -23,9 +24,12 @@
       power-saver)
         light="󰾆 Light (Active)"
         ;;
+      ultralight)
+        ultralight="󰾆 Ultralight (Active)"
+        ;;
     esac
 
-    options="$performance\n$auto\n$light"
+    options="$performance\n$auto\n$light\n$ultralight"
 
     chosen="$(echo -e "$options" | ${pkgs.rofi}/bin/rofi -dmenu -i -p "Power Mode" -theme-str "entry {placeholder:\"Select Power Profile...\";}window{padding: 40% 40%;}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 22;}")"
 
@@ -38,6 +42,9 @@
         ;;
       "$light")
         ${scripts.powermode} light
+        ;;
+      "$ultralight")
+        ${scripts.powermode} ultralight
         ;;
     esac
   '';
