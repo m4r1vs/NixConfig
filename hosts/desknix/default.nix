@@ -1,7 +1,6 @@
 {
   config,
   systemArgs,
-  lib,
   ...
 }: {
   imports = [
@@ -14,7 +13,11 @@
     razer.enable = true;
     desktop = {
       enable = true;
-      x11 = false;
+      windowManagers = {
+        hyprland.enable = true;
+        i3.enable = true;
+        gamescope.enable = true;
+      };
     };
     limine = {
       secureboot = true;
@@ -27,15 +30,6 @@
       windowsPartUUID = "bf2df441-4059-45e1-886a-6cf5e8def333";
     };
     system-sounds.enable = true;
-  };
-
-  specialisation = {
-    "i3 Tiling Window Manager".configuration = {
-      configured.desktop.x11 = lib.mkForce true;
-    };
-    "Steam Big Picture".configuration = {
-      configured.desktop.gamescope = lib.mkForce true;
-    };
   };
 
   services = {

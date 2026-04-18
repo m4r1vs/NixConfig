@@ -3,13 +3,11 @@
   scripts,
   config,
   ...
-}: let
-  isWayland = !config.configured.desktop.x11;
-in {
+}: {
   switch-kb-layout = pkgs.writeShellScript "switch-kb-layout" ''
 
     ${
-      if isWayland
+      if config.configured.hyprland.enable
       then
         /*
         bash
@@ -26,7 +24,8 @@ in {
             sleep 0.05
           done
         ''
-      else
+      else if config.configured.i3.enable
+      then
         /*
         bash
         */
@@ -39,6 +38,14 @@ in {
             ${pkgs.xorg.setxkbmap}/bin/setxkbmap us
             layMain="us"
           fi
+        ''
+      else
+        /*
+        bash
+        */
+        ''
+          echo "Not Implemented"
+          exit 3
         ''
     }
 

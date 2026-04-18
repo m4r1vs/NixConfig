@@ -4,23 +4,21 @@
   ...
 }:
 with lib;
-  optionalAttrs (osConfig.configured ? desktop) (
-    let
-      desktop = osConfig.configured.desktop;
-    in {
-      config = mkIf desktop.enable (
-        if (desktop.x11)
-        then {
-          programs.configured = {
-            i3.enable = true;
-          };
-        }
-        else {
-          programs.configured = {
-            hyprland.enable = true;
-            hyprlock.enable = true;
-          };
-        }
-      );
-    }
-  )
+  optionalAttrs (osConfig.configured ? desktop) {
+    config = mkIf osConfig.configured.desktop.enable (
+      if (osConfig.configured.i3.enable)
+      then {
+        programs.configured = {
+          i3.enable = true;
+        };
+      }
+      else if (osConfig.configured.hyprland.enable)
+      then {
+        programs.configured = {
+          hyprland.enable = true;
+          hyprlock.enable = true;
+        };
+      }
+      else {}
+    );
+  }

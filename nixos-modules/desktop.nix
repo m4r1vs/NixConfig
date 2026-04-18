@@ -11,27 +11,87 @@ with lib; let
 in {
   options.configured.desktop = {
     enable = mkEnableOption "Enable a Desktop Environment";
-    x11 = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Use x11 instead of Wayland";
-    };
-    gamescope = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable gamescope session";
+    windowManagers = {
+      hyprland = {
+        enable = mkEnableOption "Enable Hyprland Specialisation";
+        default = mkOption {
+          type = types.bool;
+          default = true;
+          description = "Make Hyprland the default";
+        };
+      };
+      i3 = {
+        enable = mkEnableOption "Enable i3 (X Window Server) Specialisation";
+        default = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Make i3 the default";
+        };
+      };
+      gamescope = {
+        enable = mkEnableOption "Enable Gamescope (Steam Big Picture) Specialisation";
+        default = mkOption {
+          type = types.bool;
+          default = false;
+          description = "Make Gamescope the default";
+        };
+      };
     };
   };
   config = mkIf cfg.enable {
+    assertions = [
+      {
+        assertion =
+          (count (x: x) [
+            cfg.windowManagers.hyprland.default
+            cfg.windowManagers.i3.default
+            cfg.windowManagers.gamescope.default
+          ])
+          <= 1;
+        message = "Only one window manager can be the default.";
+      }
+      {
+        assertion = cfg.windowManagers.hyprland.default -> cfg.windowManagers.hyprland.enable;
+        message = "Hyprland is set as default but not enabled.";
+      }
+      {
+        assertion = cfg.windowManagers.i3.default -> cfg.windowManagers.i3.enable;
+        message = "i3 is set as default but not enabled.";
+      }
+      {
+        assertion = cfg.windowManagers.gamescope.default -> cfg.windowManagers.gamescope.enable;
+        message = "Gamescope is set as default but not enabled.";
+      }
+    ];
+
     environment.pathsToLink = ["/share/xdg-desktop-portal" "/share/applications"];
 
     configured = {
-      i3.enable = cfg.x11 && !cfg.gamescope;
-      hyprland.enable = !cfg.x11 && !cfg.gamescope;
-      gamescope.enable = cfg.gamescope;
       limine.enable = true;
       system-sounds.enable = true;
     };
+
+    specialisation = {
+      "Hyprland (Wayland)".configuration = mkIf cfg.windowManagers.hyprland.enable {
+        configured.hyprland.enable = lib.mkForce true;
+        configured.i3.enable = lib.mkForce false;
+        configured.gamescope.enable = lib.mkForce false;
+      };
+      "i3 (X Window System)".configuration = mkIf cfg.windowManagers.i3.enable {
+        configured.hyprland.enable = lib.mkForce false;
+        configured.i3.enable = lib.mkForce true;
+        configured.gamescope.enable = lib.mkForce false;
+      };
+      "Steam Gamescope (Wayland)".configuration = mkIf cfg.windowManagers.gamescope.enable {
+        configured.hyprland.enable = lib.mkForce false;
+        configured.i3.enable = lib.mkForce false;
+        configured.gamescope.enable = lib.mkForce true;
+      };
+    };
+
+    configured.hyprland.enable = cfg.windowManagers.hyprland.enable && cfg.windowManagers.hyprland.default;
+    configured.i3.enable = cfg.windowManagers.i3.enable && cfg.windowManagers.i3.default;
+    configured.gamescope.enable = cfg.windowManagers.gamescope.enable && cfg.windowManagers.gamescope.default;
 
     networking.extraHosts = ''
       127.0.0.1 artpc17

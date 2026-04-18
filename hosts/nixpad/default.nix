@@ -1,8 +1,4 @@
-{
-  systemArgs,
-  lib,
-  ...
-}: {
+{systemArgs, ...}: {
   imports = [
     ./disks.nix
     ./hardware-configuration.nix
@@ -12,7 +8,11 @@
     nvidia.enable = false;
     desktop = {
       enable = true;
-      x11 = false;
+      windowManagers = {
+        hyprland.enable = true;
+        i3.enable = true;
+        gamescope.enable = true;
+      };
     };
     limine = {
       memtest = true;
@@ -20,12 +20,6 @@
       resolution = "1920x1080";
     };
     system-sounds.enable = true;
-  };
-
-  specialisation = {
-    x11.configuration = {
-      configured.desktop.x11 = lib.mkForce true;
-    };
   };
 
   services = {
