@@ -3,7 +3,7 @@
     pkgs.writeShellScript "cycle-windows-${direction}"
     ''
       # Get all windows in a predictable order (by workspace ID, then coordinates)
-      windows=$(${pkgs.hyprland}/bin/hyprctl clients -j | ${pkgs.jq}/bin/jq -r '. | sort_by(.workspace.id, .at[1], .at[0]) | .[].address')
+      windows=$(${pkgs.hyprland}/bin/hyprctl clients -j | ${pkgs.jq}/bin/jq -r 'map(select(.workspace.id > 0)) | sort_by(.workspace.id, .at[1], .at[0]) | .[].address')
       active=$(${pkgs.hyprland}/bin/hyprctl activewindow -j | ${pkgs.jq}/bin/jq -r '.address // empty')
 
       if [ -z "$windows" ]; then
