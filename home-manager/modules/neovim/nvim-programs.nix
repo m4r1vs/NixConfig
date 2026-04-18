@@ -30,6 +30,7 @@ with pkgs; [
   nil
   nixd
   nodejs_22
+  pastel
   prettierd
   ripgrep
   ruff
