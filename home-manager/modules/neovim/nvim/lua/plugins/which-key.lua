@@ -11,16 +11,17 @@ return {
       rules = false,
     },
     spec = {
-      { "<leader>s", group = "Search" },
-      { "<leader>g", group = "Git" },
-      { "<leader>l", group = "LSP" },
-      { "<leader>e", group = "Yazi File Manager" },
-      { "<leader>w", group = "File Operations" },
-      { "<leader>r", group = "Replace/Refactor" },
-      { "<leader>n", group = "Snippets" },
-      { "<leader>h", group = "Harpoon" },
-      { "<leader>u", group = "UI/UX" },
-      { "<leader>m", group = "Copilot" },
+      { "<leader>s",  group = "Search" },
+      { "<leader>g",  group = "Git" },
+      { "<leader>l",  group = "LSP" },
+      { "<leader>e",  group = "Yazi File Manager" },
+      { "<leader>w",  group = "File Operations" },
+      { "<leader>r",  group = "Replace/Refactor",    mode = { "x", "v", "n" } },
+      { "<leader>rc", group = "Color Manipulations", mode = { "v" } },
+      { "<leader>n",  group = "Snippets",            mode = { "x", "v", "n" } },
+      { "<leader>h",  group = "Harpoon" },
+      { "<leader>u",  group = "UI/UX" },
+      { "<leader>m",  group = "Copilot" },
     },
   },
   keys = {
@@ -33,4 +34,3 @@ return {
     },
   },
 }
-

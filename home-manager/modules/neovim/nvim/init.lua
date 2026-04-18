@@ -181,6 +181,36 @@ vim.keymap.set("n", "<leader>rb", function()
   end
 end, { noremap = true, silent = true, desc = "Toggle Boolean" })
 
+-- Map leader rch to convert the current selection to hex color code
+vim.keymap.set("v", "<leader>rch", function()
+  vim.cmd('normal! "cy')
+  local color_text = vim.fn.getreg('c')
+  color_text = vim.trim(color_text)
+  local result = vim.fn.system({ "pastel", "format", "hex", color_text })
+  if vim.v.shell_error == 0 then
+    result = vim.trim(result)
+    vim.fn.setreg('c', result)
+    vim.cmd('normal! gv"cp')
+  else
+    vim.notify("Pastel failed to parse color: " .. result, vim.log.levels.ERROR)
+  end
+end, { noremap = true, silent = true, desc = "Convert to Hex" })
+
+-- Map leader rcr to convert the current selection to rgb color code
+vim.keymap.set("v", "<leader>rcr", function()
+  vim.cmd('normal! "cy')
+  local color_text = vim.fn.getreg('c')
+  color_text = vim.trim(color_text)
+  local result = vim.fn.system({ "pastel", "format", "rgb", color_text })
+  if vim.v.shell_error == 0 then
+    result = vim.trim(result)
+    vim.fn.setreg('c', result)
+    vim.cmd('normal! gv"cp')
+  else
+    vim.notify("Pastel failed to parse color: " .. result, vim.log.levels.ERROR)
+  end
+end, { noremap = true, silent = true, desc = "Convert to RGB" })
+
 -- Remap > and < in visual mode to keep the selection
 vim.api.nvim_set_keymap("v", ">", ">gv", { noremap = true, silent = true, desc = "Indent" })
 vim.api.nvim_set_keymap("v", "<", "<gv", { noremap = true, silent = true, desc = "Outdent" })
