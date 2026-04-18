@@ -20,6 +20,10 @@
       secureboot = true;
       resolution = "2560x1440";
       memtest = true;
+      wallpapers = [
+        ../../home-manager/wallpaper/New_York_Garden.jpg
+        ../../home-manager/wallpaper/New_York_Subway.jpg
+      ];
       windowsPartUUID = "bf2df441-4059-45e1-886a-6cf5e8def333";
     };
     system-sounds.enable = true;
