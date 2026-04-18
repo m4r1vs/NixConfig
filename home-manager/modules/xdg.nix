@@ -64,9 +64,8 @@ in {
           categories = ["Utility" "System" "Settings"];
         };
         hyprland-which-key = lib.mkIf osConfig.programs.hyprland.enable {
-          name = "Keyboard Shortcuts";
-          genericName = "From Hyprland";
-          icon = "system-help";
+          name = "Keyboard Shortcuts and Commands";
+          icon = "preferences-desktop-keyboard-shortcuts";
           exec = "${lib.getExe pkgs.hyprland-which-key} --accent-color \"${theme.secondaryColor.hex}\" --accent-color-light \"${theme.primaryColor.hex}\" --background-color \"${theme.backgroundColor}\" --background-color-light \"${theme.backgroundColorLight}\"";
           type = "Application";
           categories = ["Utility" "System"];
@@ -208,7 +207,7 @@ in {
         };
         "${systemArgs.hostname}" = {
           name = "Marius' ${systemArgs.hostname}";
-          genericName = "NixOS on ${systemArgs.hostname}";
+          genericName = "${osConfig.system.nixos.distroName} on ${systemArgs.hostname}";
           icon = "element4l";
           type = "Application";
           categories = ["Settings"];
