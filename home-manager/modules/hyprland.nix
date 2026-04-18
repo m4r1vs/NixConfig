@@ -173,10 +173,6 @@ in {
           "float,initialClass:^(ghostty.obsidian)$"
           "size 1600 900, initialClass:^(ghostty.obsidian)$"
           "workspace special:obsidian_nvim silent,initialClass:^(ghostty.obsidian)$"
-
-          "float,initialClass:^(obsidian)$"
-          "size 1600 900, initialClass:^(obsidian)$"
-          "workspace special:obsidian silent,initialClass:^(obsidian)$"
         ];
         monitor = [
           "eDP-1,1920x1080@60.01,0x0, 1" # Internal
@@ -234,7 +230,7 @@ in {
             ",F11, Toggle Obsidian Neovim Workspace, togglespecialworkspace, obsidian_nvim"
             ",F11, Launch Obsidian if not launched, exec, ${scripts.launch-once {
               command = "${pkgs.obsidian}/bin/obsidian";
-              grep = "initialClass: obsidian";
+              grep = "initialTitle:.*Obsidian.*";
               useHypr = true;
             }}"
             ",F11, Launch Neovim in Obsidian Vault, exec, ${scripts.launch-once {
@@ -259,6 +255,7 @@ in {
             "SUPER+Shift, b, Rofi Bluetooth, exec, ${scripts.rofi-launch} bluetooth"
             "SUPER+Shift, i, 1Password quick access, exec, ${pkgs._1password-gui}/bin/1password --quick-access --ozone-platform-hint=x11"
             "SUPER+Shift, v, Rofi Clipboard History, exec, ${scripts.rofi-launch} cliphist"
+            "SUPER+Shift, o, Obsidian Search, exec, ${scripts.rofi-launch} obsidian"
 
             # bound to mousewheel left/right
             "Ctrl+Shift, Left, Previous workspace, workspace, m-1"
