@@ -33,7 +33,7 @@ in {
         animation-window-mass = 0.5;
         blur = {
           method = "dual_kawase";
-          strength = 10;
+          strength = 4;
         };
         blur-background-exclude = [
           "window_type = 'dock'"
