@@ -105,8 +105,8 @@ in {
           preserve_split = true;
         };
         decoration = {
-          rounding = 5;
-          rounding_power = 3;
+          rounding = 6;
+          rounding_power = 4;
           dim_inactive = true;
           dim_strength = 0.12;
           inactive_opacity = 0.94;
@@ -250,6 +250,7 @@ in {
             "SUPER+Shift, d, Toggle Dark Mode, exec, ${pkgs.darkman}/bin/darkman toggle"
             "SUPER+Shift, w, Change Wallpaper, exec, ${scripts.rofi-launch} wallpaper"
             "SUPER+Shift, z, Toggle zen mode, exec, ${scripts.toggle-zen}"
+            "SUPER, g, Toggle Hyprland zoomed out mode, exec, ${scripts.toggle-hypr-zoomed-out}"
             "SUPER+Shift, P, Color picker, exec, ${pkgs.hyprpicker}/bin/hyprpicker -a"
             "SUPER+Shift, q, Power Menu, exec, ${scripts.rofi-launch} power"
             "SUPER+Shift, b, Rofi Bluetooth, exec, ${scripts.rofi-launch} bluetooth"
