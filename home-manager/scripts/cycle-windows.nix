@@ -27,6 +27,7 @@
 
       if [ -n "$next_window" ]; then
         ${pkgs.hyprland}/bin/hyprctl dispatch focuswindow address:"$next_window"
+        ${pkgs.hyprland}/bin/hyprctl dispatch bringactivetotop
       fi
     '';
 }
