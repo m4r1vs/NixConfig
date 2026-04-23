@@ -23,6 +23,7 @@ in {
         @define-color main-bg ${theme.backgroundColorLight};
         @define-color main-fg #000000;
         @define-color wb-act-bg ${theme.primaryColor.hex};
+        @define-color wb-urg-bg ${theme.secondaryColor.hex};
         @define-color wb-act-fg rgba(252,252,252,1);
         @define-color wb-hvr-bg rgba(0,0,0,0.1);
         @define-color wb-hvr-fg #000000;
@@ -38,6 +39,7 @@ in {
         @define-color main-bg ${theme.backgroundColor};
         @define-color main-fg rgba(214,214,214,1);
         @define-color wb-act-bg ${theme.primaryColor.hex};
+        @define-color wb-urg-bg ${theme.secondaryColor.hex};
         @define-color wb-act-fg rgba(252,252,252,1);
         @define-color wb-hvr-bg rgba(61,61,61,0.4);
         @define-color wb-hvr-fg rgba(214,214,214,0.8);
@@ -58,18 +60,15 @@ in {
           gtk-layer-shell = true;
           reload_style_on_change = true;
 
-          modules-left = ["group/time-and-sysinfo" "group/media-and-volume"];
+          modules-left = ["group/os-logo" "group/media-and-volume"];
           modules-center = ["group/workspaces-and-privacy"];
           modules-right = ["group/misc" "group/tray-and-battery"];
 
-          "group/time-and-sysinfo" = {
+          "group/os-logo" = {
             orientation = "horizontal";
             modules = [
-              "clock"
-              "cpu"
-              "custom/cpuinfo"
-              "memory"
-              "disk"
+              "custom/os-logo"
+              "hyprland/window"
             ];
           };
 
@@ -95,7 +94,9 @@ in {
             modules = [
               "backlight"
               "network"
-              "custom/notifications"
+              "cpu"
+              "memory"
+              "disk"
             ];
           };
 
@@ -103,31 +104,33 @@ in {
             orientation = "horizontal";
             modules = [
               "custom/weather"
+              "custom/gcal"
               "tray"
               "battery"
+              "custom/notifications"
+              "clock"
             ];
           };
 
           clock = {
             format = "{:%H:%M %p}";
             rotate = 0;
-            format-alt = "{:%R 󰃭 %d·%m·%y}";
             tooltip-format = "<span>{calendar}</span>";
             calendar = {
               mode = "month";
               mode-mon-col = 3;
               on-scroll = 1;
-              on-click-right = "mode";
+              iso8601 = true;
               format = {
-                months = "<span color='#ffead3'><b>{}</b></span>";
-                weekdays = "<span color='#ffcc66'><b>{}</b></span>";
-                today = "<span color='#ff6699'><b>{}</b></span>";
+                months = "<span color='${theme.primaryColor.hex}'><b>{}</b></span>";
+                weekdays = "<span color='${theme.secondaryColor.hex}'><b>{}</b></span>";
+                today = "<span color='#D14D41'><b>{}</b></span>";
               };
             };
             actions = {
+              on-click = "mode";
               on-click-right = "mode";
-              on-click-forward = "tz_up";
-              on-click-backward = "tz_down";
+              on-click-middle = "shift_reset";
               on-scroll-up = "shift_up";
               on-scroll-down = "shift_down";
             };
@@ -137,7 +140,6 @@ in {
             interval = 10;
             format = " {usage}%";
             rotate = 0;
-            format-icons = ["▁" "▂" "▃" "▄" "▅" "▆" "▇" "█"];
           };
 
           memory = {
@@ -147,25 +149,34 @@ in {
               m = 30;
             };
             interval = 30;
-            format = " {used}GB";
+            format = " {avail}GiB";
             rotate = 0;
-            format-m = " {used}GB";
-            format-h = " {used}GB";
-            format-c = " {used}GB";
-            max-length = 10;
+            format-m = " {avail}GiB";
+            format-h = " {avail}GiB";
+            format-c = " {avail}GiB";
+            max-length = 14;
             tooltip = true;
             tooltip-format = " {percentage}%\n {used:0.1f}GB/{total:0.1f}GB";
           };
 
-          "custom/cpuinfo" = {
-            exec = "${scripts.cpu-info}";
-            return-type = "json";
-            format = "{}";
+          "custom/os-logo" = {
+            exec = "echo '  '";
+            interval = "once";
             rotate = 0;
-            interval = 10;
-            tooltip = true;
-            max-length = 1000;
+            tooltip = false;
+            on-click = "${scripts.rofi-launch} search";
+            on-click-right = "${scripts.rofi-launch} power";
           };
+
+          # "custom/cpuinfo" = {
+          #   exec = "${scripts.cpu-info}";
+          #   return-type = "json";
+          #   format = "{}";
+          #   rotate = 0;
+          #   interval = 10;
+          #   tooltip = true;
+          #   max-length = 1000;
+          # };
 
           "custom/media" = {
             exec = "${scripts.mediaplayer-wrapper}";
@@ -208,10 +219,22 @@ in {
           };
 
           "custom/weather" = {
-            format = "{}°C";
+            format = "{}";
             tooltip = true;
             interval = 1800;
-            exec = "${pkgs.wttrbar}/bin/wttrbar --location Hamburg --custom-indicator \"{temp_C}\"";
+            exec = "${pkgs.wttrbar}/bin/wttrbar --nerd --location Hamburg --custom-indicator \"{ICON} {temp_C}°C\"";
+            on-click = "${lib.getExe pkgs.ghostty} --class=ghostty.weather --wait-after-command=true -e ${pkgs.curl}/bin/curl https://wttr.in";
+            on-click-right = "${pkgs.xdg-utils}/bin/xdg-open https://www.wetteronline.de/regenradar/hamburg";
+            return-type = "json";
+          };
+
+          "custom/gcal" = {
+            exec = "${scripts.waybar-gcal}";
+            on-click = "${pkgs.xdg-utils}/bin/xdg-open https://calendar.google.com/calendar/r";
+            interval = 300;
+            format = "{}";
+            rotate = 0;
+            tooltip = true;
             return-type = "json";
           };
 
@@ -225,6 +248,32 @@ in {
             on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch workspace +1";
             persistent-workspaces = {};
           };
+
+          "hyprland/window" = {
+            rotate = 0;
+            format = "{title}";
+            rewrite = {
+              "^$" = "";
+              "(.*) - Brave" = " $1";
+              "(.*) - Discord" = " $1";
+              "/nix/store/(.+)/(.*)" = "󰊠 $2";
+              "^Ghostty$" = "󰊠 Ghostty";
+              "Yazi: (.*)" = "󰇥 $1";
+              "Volume Control" = " Volume Control";
+              "KDE Connect" = " KDE Connect";
+              "Shortwave" = " Shortwave";
+              "Signal" = "󰭻 Signal";
+              "Steam" = " Steam";
+              "Bluetooth Devices" = "󰂯 Bluetooth Manager";
+              "(.*) - Obsidian (.*)" = "󰂺 $1";
+              "WhatsApp Electron :: (.*)" = " $1";
+              "^.+$" = "󰁕 $0 ";
+            };
+            max-length = 54;
+            separate-outputs = true;
+            icon = false;
+          };
+
           backlight = {
             device = "intel_backlight";
             rotate = 0;
@@ -267,35 +316,12 @@ in {
               hands-free = "";
               headset = "";
               phone = "";
-              portable = "";
+              portable = "󰓃";
               car = "";
               default = ["" "" ""];
             };
           };
 
-          # "pulseaudio#microphone = {
-          #     "format = "{format_source}";
-          #     "rotate = 0;
-          #     "format-source = "";
-          #     "format-source-muted = "";
-          #     "on-click = "pavucontrol -t 4";
-          #     "on-click-middle = "volumecontrol.sh -i m";
-          #     "on-scroll-up = "volumecontrol.sh -i i";
-          #     "on-scroll-down = "volumecontrol.sh -i d";
-          #     "tooltip-format = "{format_source} {source_desc} // {source_volume}%";
-          #     "scroll-step = 5
-          # };
-
-          #    "custom/updates = {
-          #        "exec = "systemupdate.sh";
-          #        "return-type = "json";
-          #        "format = "{}";
-          #        "rotate = 0;
-          #        "on-click = "hyprctl dispatch exec 'systemupdate.sh up'";
-          #        "interval = 86400, // once every day
-          #        "tooltip = true;
-          #        "signal = 20;
-          #    };
           privacy = {
             icon-size = 10;
             icon-spacing = 5;
@@ -312,12 +338,29 @@ in {
                 tooltip-icon-size = 24;
               }
             ];
+            ignore = [
+              {
+                type = "audio-in";
+                name = "cava";
+              }
+            ];
           };
 
           tray = {
             icon-size = 14;
             rotate = 0;
             spacing = 5;
+            icons = {
+              "blueman" = "bluetooth";
+              "whatsapp" = "whatsapp";
+              "KDE Connect Indicator" = "kdeconnect";
+              "whatsapp-electron_status_icon_1" = "whatsapp";
+              "steam" = "steam";
+              "1password" = "1password";
+              "1password-panel" = "1password";
+              "1password-locked" = "1password";
+              "1password-panel-locked" = "1password";
+            };
           };
 
           battery = {
@@ -331,48 +374,6 @@ in {
             format-charging = " {capacity}%";
             format-plugged = " {capacity}%";
             format-icons = ["󰂎" "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹"];
-          };
-
-          "custom/l_end" = {
-            format = " ";
-            interval = "once";
-            tooltip = false;
-          };
-
-          "custom/r_end" = {
-            format = " ";
-            interval = "once";
-            tooltip = false;
-          };
-
-          "custom/sl_end" = {
-            format = " ";
-            interval = "once";
-            tooltip = false;
-          };
-
-          "custom/sr_end" = {
-            format = " ";
-            interval = "once";
-            tooltip = false;
-          };
-
-          "custom/rl_end" = {
-            format = " ";
-            interval = "once";
-            tooltip = false;
-          };
-
-          "custom/rr_end" = {
-            format = " ";
-            interval = "once";
-            tooltip = false;
-          };
-
-          "custom/padd" = {
-            format = "  ";
-            interval = "once";
-            tooltip = false;
           };
         };
       };

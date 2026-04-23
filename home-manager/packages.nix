@@ -34,6 +34,7 @@ in {
       android-tools # android studio and emulator
       atai # openai wrapper to write in the terminal for me
       dbeaver-bin # database explorer (postgres, mysql, etc.)
+      gcalcli # Google Calendar CLI
       obsidian # notes
       prismlauncher # minecraft mod launcher
       yt-dlp # youtube downloader
