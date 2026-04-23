@@ -32,6 +32,7 @@ in {
         exec-once = [
           "${pkgs.waybar}/bin/waybar"
           "${pkgs._1password-gui}/bin/1password --silent --ozone-platform-hint=x11"
+          "${scripts.hyprland-startup-workspaces}"
           "${scripts.volume-change-notify}"
           "${scripts.brightness-change-notify}"
         ];
@@ -150,6 +151,12 @@ in {
         };
         windowrulev2 = [
           "noblur,class:^()$,title:^()$"
+
+          "workspace 1, initialClass:^(brave-browser)$"
+          "workspace 2, initialClass:^(ghostty.startup_workspace_2)$"
+          "workspace 3, initialTitle:^(.*)( - Obsidian)(.*)$"
+          "workspace 9, initialClass:^(signal)$"
+          "workspace 9, initialTitle:^(WhatsApp Electron)(.*)$"
 
           "float,initialClass:^(ghostty.yazi)$"
           "size 1400 700, initialClass:^(ghostty.yazi)$"
