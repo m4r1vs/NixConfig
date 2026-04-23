@@ -63,6 +63,7 @@ in {
           then "Always"
           else "Never";
         notify_streaming_only = true;
+        notify_transient = true;
         default_device = systemArgs.hostname;
         cover_img_width = 15;
         cover_img_length = 33;
