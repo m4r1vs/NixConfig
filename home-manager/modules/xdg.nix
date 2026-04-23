@@ -213,6 +213,14 @@ in {
           categories = ["Settings"];
           noDisplay = true;
         };
+        update = {
+          name = "Update System Packages";
+          genericName = "Fetch latest from nixpkgs";
+          icon = "builder";
+          exec = "${lib.getExe pkgs.ghostty} --wait-after-command=true -e \"${lib.getExe pkgs.nix} flake update --flake ~/NixConfig\"";
+          type = "Application";
+          categories = ["Utility"];
+        };
         rebuild = {
           name = "Rebuild System Configuration";
           comment = "Rebuild NixOS system Config";
