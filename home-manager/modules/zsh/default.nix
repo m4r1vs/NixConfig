@@ -34,12 +34,12 @@ in {
         size = 50000;
       };
       shellAliases = {
-        lg = "${pkgs.lazygit}/bin/lazygit";
-        ls = "${pkgs.lsd}/bin/lsd";
-        la = "${pkgs.lsd}/bin/lsd -la";
-        tree = "${pkgs.lsd}/bin/lsd --tree";
-        g3 = "${pkgs.gemini-cli}/bin/gemini -m gemini-3.1-pro-preview";
-        present = "${pkgs.zathura}/bin/zathura --mode=presentation";
+        lg = "${lib.getExe pkgs.lazygit}";
+        ls = "${lib.getExe pkgs.lsd}";
+        la = "${lib.getExe pkgs.lsd} -la";
+        tree = "${lib.getExe pkgs.lsd} --tree";
+        g3 = "${lib.getExe pkgs.gemini-cli} -m gemini-3.1-pro-preview";
+        present = "${lib.getExe pkgs.zathura} --mode=presentation";
         vi = "nvim";
         vim = "nvim";
         stty = mkIf isDarwin "/bin/stty";
