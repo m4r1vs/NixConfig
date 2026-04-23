@@ -56,7 +56,7 @@ in {
         };
         background = [
           {
-            path = "${builtins.path {path = ../wallpaper/Hamburger_Fernsehturm.jpg;}}";
+            path = "${builtins.path {path = ../wallpaper/Birch_Trunks.jpg;}}";
           }
         ];
         label = [
