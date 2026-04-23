@@ -17,6 +17,7 @@ in {
       commandLineArgs = [
         "--ozone-platform-hint=auto"
         "--enable-features=TouchpadOverscrollHistoryNavigation"
+        "--password-store=kwallet5"
       ];
     };
   };

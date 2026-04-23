@@ -239,7 +239,7 @@ in {
         };
         brave-browser = {
           name = "Personal Browser";
-          exec = ''${pkgs.brave}/bin/brave --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation %U'';
+          exec = ''${pkgs.brave}/bin/brave --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation --password-store=kwallet5 %U'';
           icon = "brave-browser-nightly";
           terminal = false;
           type = "Application";
