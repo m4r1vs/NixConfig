@@ -261,6 +261,7 @@ in {
             "SUPER+Shift, w, Change Wallpaper, exec, ${scripts.rofi-launch} wallpaper"
             "SUPER+Shift, z, Toggle zen mode, exec, ${scripts.toggle-zen}"
             "SUPER, g, Toggle Hyprland zoomed out mode, exec, ${scripts.toggle-hypr-zoomed-out}"
+            "SUPER+Shift, g, Toggle workspace floating, workspaceopt, allfloat"
             "SUPER+Shift, P, Color picker, exec, ${pkgs.hyprpicker}/bin/hyprpicker -a"
             "SUPER+Shift, q, Power Menu, exec, ${scripts.rofi-launch} power"
             "SUPER+Shift, b, Rofi Bluetooth, exec, ${scripts.rofi-launch} bluetooth"
