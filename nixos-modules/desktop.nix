@@ -181,6 +181,7 @@ in {
     };
 
     boot = {
+      kernelPackages = pkgs.linuxPackages_zen;
       binfmt.emulatedSystems =
         if isX86
         then ["aarch64-linux"]
