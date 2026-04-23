@@ -10,9 +10,21 @@
 with lib; let
   cfg = config.programs.configured.hyprlock;
   theme = systemArgs.theme;
+
+  scale = val: builtins.floor (val * cfg.scaling);
+  scaleStr = valStr: let
+    parts = lib.splitString "," (toString valStr);
+    scaled = map (p: toString (scale (lib.toInt (lib.trim p)))) parts;
+  in
+    lib.concatStringsSep ", " scaled;
 in {
   options.programs.configured.hyprlock = {
     enable = mkEnableOption "Enable custom hyprlock configuration";
+    scaling = mkOption {
+      type = types.float;
+      default = 1.0;
+      description = "Scaling factor for hyprlock elements";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -52,11 +64,11 @@ in {
             text = "$TIME";
             font_family = "Clock BoldSerif";
             color = "rgba(${theme.backgroundColorLightRGB},0.86)";
-            font_size = 74;
+            font_size = scale 74;
             text_align = "center";
             halign = "center";
             valign = "center";
-            position = "0, 228";
+            position = scaleStr "0, 228";
             shadow_size = 4;
             shadow_passes = 4;
             shadow_color = "rgb(0,0,0)";
@@ -65,9 +77,9 @@ in {
           {
             text = "cmd[update:2000] ${scripts.battery-status}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
-            font_size = 12;
+            font_size = scale 12;
             font_family = "JetBrainsMono NF SemiBold";
-            position = "-24, -24";
+            position = scaleStr "-24, -24";
             text_align = "right";
             halign = "right";
             valign = "top";
@@ -79,9 +91,9 @@ in {
           {
             text = "cmd[update:6000] ${scripts.mpris-hyprlock} --title";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
-            font_size = 12;
+            font_size = scale 12;
             font_family = "JetBrainsMono NF SemiBold";
-            position = "118, -24";
+            position = scaleStr "118, -24";
             text_align = "left";
             halign = "left";
             valign = "top";
@@ -93,9 +105,9 @@ in {
           {
             text = "cmd[update:6000] ${scripts.mpris-hyprlock} --length";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
-            font_size = 12;
+            font_size = scale 12;
             font_family = "JetBrainsMono NF SemiBold";
-            position = "118, -80";
+            position = scaleStr "118, -80";
             text_align = "left";
             halign = "left";
             valign = "top";
@@ -107,9 +119,9 @@ in {
           {
             text = "cmd[update:6000] ${scripts.mpris-hyprlock} --source";
             color = "rgba(${theme.secondaryColor.rgb}, 0.32)";
-            font_size = 64;
+            font_size = scale 64;
             font_family = "JetBrainsMono Nerd Font";
-            position = "-24, -6";
+            position = scaleStr "-24, -6";
             text_align = "left";
             zindex = 1;
             halign = "left";
@@ -123,8 +135,8 @@ in {
             text = "cmd[update:6000] ${scripts.mpris-hyprlock} --artist";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
             font_family = "JetBrainsMono Nerd Font";
-            font_size = 12;
-            position = "118, -46";
+            font_size = scale 12;
+            position = scaleStr "118, -46";
             text_align = "left";
             halign = "left";
             valign = "top";
@@ -137,11 +149,11 @@ in {
             text = "cmd[update:60000] echo \"$(date +\"%a, %b %d\")  $(${pkgs.wttrbar}/bin/wttrbar --nerd --custom-indicator \"{ICON} {temp_C}°\" | ${pkgs.jq}/bin/jq .text -r)\"";
             font_family = "JetBrainsMono NF Light";
             color = "rgba(${theme.backgroundColorLightRGB},0.72)";
-            font_size = 15;
+            font_size = scale 15;
             text_align = "center";
             halign = "center";
             valign = "center";
-            position = "0, 152";
+            position = scaleStr "0, 152";
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
@@ -150,8 +162,8 @@ in {
         ];
         input-field = [
           {
-            size = "338, 42";
-            position = "0, 38";
+            size = scaleStr "338, 42";
+            position = scaleStr "0, 38";
             halign = "center";
             valign = "center";
             monitor = "";
@@ -171,13 +183,13 @@ in {
         ];
         image = [
           {
-            size = 82;
+            size = scale 82;
             rounding = 5;
             border_size = 0;
             rotate = 0;
             reload_time = 6;
             reload_cmd = "${scripts.mpris-hyprlock} --arturl";
-            position = "24, -21";
+            position = scaleStr "24, -21";
             halign = "left";
             valign = "top";
             zindex = 2;
