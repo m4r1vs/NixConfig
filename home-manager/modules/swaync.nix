@@ -17,9 +17,7 @@ in {
       enable = true;
       package = pkgs.swaynotificationcenter;
       style =
-        /*
-        css
-        */
+        # css
         ''
           * {
             all: unset;
