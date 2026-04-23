@@ -48,6 +48,7 @@ in {
         bun = "";
         caffeinate = "";
         cargo = "";
+        docker = "󰡨";
         ghostty = "󰊠";
         golazo = "󰒸";
         htop = "";
