@@ -225,9 +225,6 @@ in {
             "SUPER, m, Emoji Picker, exec, ${scripts.rofi-launch} emoji"
             "SUPER, SPACE, Switch keyboard layout, exec, ${scripts.switch-kb-layout}"
             "SUPER, c, Query Wolfram|Alpha with ChatGPT fallback, exec, ${scripts.rofi-launch} calc"
-            "SUPER, p, Toggle media playback, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"
-
-            "SUPER, backslash, Mute audio, exec, ${pkgs.pamixer}/bin/pamixer -t"
 
             ",F8, Toggle Spotify Workspace, togglespecialworkspace, spotify_player"
             ",F8, Launch Spotify if not running, exec, pgrep spotify_player || ${lib.getExe pkgs.ghostty} --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
@@ -286,21 +283,24 @@ in {
               9)
           );
         binddle = [
+          # Allow on lockscreen (l flag) and allow repeat (e flag)
           "SUPER, bracketright, Increase volume, exec, ${pkgs.pamixer}/bin/pamixer -i 5"
           "SUPER, slash, Decrease volume, exec, ${pkgs.pamixer}/bin/pamixer -d 5"
+          "SUPER, p, Toggle media playback (play/pause), exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"
+          "SUPER, backslash, Mute audio, exec, ${pkgs.pamixer}/bin/pamixer -t"
+          "SUPER+Shift, bracketright, Increase brightness, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%+"
+          "SUPER+Shift, slash, Decrease brightness, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%-"
         ];
         binddm = [
+          # Bind Mouse (m flag)
           "SUPER, mouse:272, Move window, movewindow"
           "SUPER, mouse:273, Resize window, resizewindow"
           "SUPER, X, Resize window, resizewindow"
           "SUPER, Y, Move window, movewindow"
           "SUPER, Z, Move window, movewindow"
         ];
-        "$moveactivewindow" = "grep -q \"true\" <<< $(${pkgs.hyprland}/bin/hyprctl activewindow -j | jq -r .floating) && ${pkgs.hyprland}/bin/hyprctl dispatch moveactive";
         bindde = [
-          "SUPER+Shift, bracketright, Increase brightness, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%+"
-          "SUPER+Shift, slash, Decrease brightness, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%-"
-
+          # Allow repeat (e flag)
           "SUPER+Shift, h, Move window left, exec, $moveactivewindow -30 0 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow l"
           "SUPER+Shift, l, Move window right, exec, $moveactivewindow 30 0 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow r"
           "SUPER+Shift, k, Move window up, exec, $moveactivewindow  0 -30 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow u"
@@ -311,6 +311,7 @@ in {
           "SUPER+alt, k, Resize window up, resizeactive, 0 -30"
           "SUPER+alt, j, Resize window down, resizeactive, 0 30"
         ];
+        "$moveactivewindow" = "grep -q \"true\" <<< $(${pkgs.hyprland}/bin/hyprctl activewindow -j | jq -r .floating) && ${pkgs.hyprland}/bin/hyprctl dispatch moveactive";
       };
     };
   };
