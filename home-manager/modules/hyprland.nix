@@ -77,6 +77,9 @@ in {
         ];
         gesture = [
           "3, horizontal, workspace"
+          "4, horizontal, move"
+          "4, down, close"
+          "3, up, fullscreen"
         ];
         opengl = {
           nvidia_anti_flicker = false;
@@ -139,14 +142,14 @@ in {
             "smooth, 0.05, 0.9, 0.1, 1"
           ];
           animation = [
-            "windows, 1, 1.5, smooth, popin 75%"
-            "windowsIn, 1, 1.5, smooth, popin 75%"
-            "windowsOut, 1, 1.5, smooth, popin 75%"
-            "windowsMove, 1, 1.5, smooth, slide"
+            "windows, 1, 2, smooth, popin 75%"
+            "windowsIn, 1, 2, smooth, popin 75%"
+            "windowsOut, 1, 2, smooth, popin 75%"
+            "windowsMove, 1, 2, smooth, slide"
             "layers, 1, 3.3, smooth, fade"
             "fade, 1, 3.3, smooth"
-            "workspaces, 1, 1.5, smooth, slide"
-            "specialWorkspace, 1, 2, smooth, slidefadevert 6%"
+            "workspaces, 1, 2, smooth, slide"
+            "specialWorkspace, 1, 2.5, smooth, slidefadevert 6%"
           ];
         };
         windowrulev2 = [
