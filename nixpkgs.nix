@@ -90,6 +90,7 @@ in {
           neovim = pkgsUnstable.neovim;
           neovim-unwrapped = pkgsUnstable.neovim-unwrapped;
           opencode = pkgsUnstable.opencode;
+          swaynotificationcenter = pkgsUnstable.swaynotificationcenter;
           ty = pkgsUnstable.ty;
           yazi = pkgsUnstable.yazi;
           yaziPlugins = pkgsUnstable.yaziPlugins;
