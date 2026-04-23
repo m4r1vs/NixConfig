@@ -231,7 +231,16 @@ vim.diagnostic.config {
 }
 
 -- Create new tab with CTRL-T and open telescope picker
-vim.keymap.set("n", "<C-T>", ":tabnew<CR>:Telescope find_files<CR>", { desc = "New Tab + Telescope" })
+vim.keymap.set("n", "<C-T>", function()
+  require("telescope.builtin").find_files({
+    prompt_title = "New Tab with File",
+    attach_mappings = function(_, _)
+      local actions = require("telescope.actions")
+      actions.select_default:replace(actions.select_tab)
+      return true
+    end,
+  })
+end, { desc = "New Tab + Telescope" })
 
 -- Use <leader>r" to change ' to "
 vim.keymap.set("v", "<leader>r\"", ":s/'/\"/g<CR>", { desc = "Change ' to \"" })
