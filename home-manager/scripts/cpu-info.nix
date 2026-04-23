@@ -26,7 +26,7 @@
       }
 
       init_query() {
-          cpu_info_file="/tmp/hyde-''${UID}-processors"
+          cpu_info_file="/tmp/waybar-cpu-info-''${UID}-processors"
 
           # Source the file to load existing variables
           [[ -f "''${cpu_info_file}" ]] && source "''${cpu_info_file}"
@@ -57,20 +57,20 @@
       get_temp_color() {
           local temp=$1
           declare -A temp_colors=(
-              [90]="#8b0000" # Dark Red for 90 and above
-              [85]="#ad1f2f" # Red for 85 to 89
-              [80]="#d22f2f" # Light Red for 80 to 84
-              [75]="#ff471a" # Orange-Red for 75 to 79
-              [70]="#ff6347" # Tomato for 70 to 74
-              [65]="#ff8c00" # Dark Orange for 65 to 69
-              [60]="#ffa500" # Orange for 60 to 64
-              [45]=""        # No color for 45 to 59
-              [40]="#add8e6" # Light Blue for 40 to 44
-              [35]="#87ceeb" # Sky Blue for 35 to 39
-              [30]="#4682b4" # Steel Blue for 30 to 34
-              [25]="#4169e1" # Royal Blue for 25 to 29
-              [20]="#0000ff" # Blue for 20 to 24
-              [0]="#00008b"  # Dark Blue for below 20
+              [90]="#d14d41" # Red
+              [85]="#da702c" # Orange
+              [80]="#da702c" # Orange
+              [75]="#da702c" # Orange
+              [70]="#da702c" # Orange
+              [65]="#da702c" # Orange
+              [60]="#d0a215" # Yellow
+              [45]="" # Default
+              [40]="" # Default
+              [35]="" # Default
+              [30]="" # Default
+              [25]="" # Default
+              [20]="" # Default
+              [0]="" # Default
           )
 
           for threshold in $(echo "''${!temp_colors[@]}" | tr ' ' '\n' | sort -nr); do
@@ -107,7 +107,7 @@
           awk -v stat="$diffStat" -v idle="$diffIdle" 'BEGIN {printf "%.1f", (stat/(stat+idle))*100}'
       }
 
-      cpuinfo_file="/tmp/hyde-''${UID}-processors"
+      cpuinfo_file="/tmp/waybar-cpu-info-''${UID}-processors"
       # shellcheck disable=SC1090
       source "''${cpuinfo_file}"
       init_query
