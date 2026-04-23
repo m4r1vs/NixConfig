@@ -92,6 +92,7 @@ in {
           opencode = pkgsUnstable.opencode;
           swaynotificationcenter = pkgsUnstable.swaynotificationcenter;
           ty = pkgsUnstable.ty;
+          waybar = pkgsUnstable.waybar;
           yazi = pkgsUnstable.yazi;
           yaziPlugins = pkgsUnstable.yaziPlugins;
 
