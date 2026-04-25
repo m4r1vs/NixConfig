@@ -31,7 +31,7 @@ in {
       settings = {
         exec-once = [
           "${pkgs.waybar}/bin/waybar"
-          "${pkgs._1password-gui}/bin/1password --silent --ozone-platform-hint=x11"
+          "${pkgs._1password-gui}/bin/1password --silent"
           "${scripts.hyprland-startup-workspaces}"
           "${scripts.volume-change-notify}"
           "${scripts.brightness-change-notify}"
@@ -262,7 +262,7 @@ in {
             "SUPER+Shift, P, Color picker, exec, ${pkgs.hyprpicker}/bin/hyprpicker -a"
             "SUPER+Shift, q, Power Menu, exec, ${scripts.rofi-launch} power"
             "SUPER+Shift, b, Rofi Bluetooth, exec, ${scripts.rofi-launch} bluetooth"
-            "SUPER+Shift, i, 1Password quick access, exec, ${pkgs._1password-gui}/bin/1password --quick-access --ozone-platform-hint=x11"
+            "SUPER+Shift, i, 1Password quick access, exec, ${pkgs._1password-gui}/bin/1password --quick-access"
             "SUPER+Shift, v, Rofi Clipboard History, exec, ${scripts.rofi-launch} cliphist"
             "SUPER+Shift, o, Obsidian Search, exec, ${scripts.rofi-launch} obsidian"
 
