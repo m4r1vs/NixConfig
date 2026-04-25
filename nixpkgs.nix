@@ -213,10 +213,10 @@ in {
 
           # Add fn-X and fn-Y shortcuts to resize/move windows
           yabai = pkgsUnstable.yabai.overrideAttrs {
-            version = "7.1.18";
+            version = "7.1.24";
             src = pkgs.fetchzip {
-              url = "https://github.com/m4r1vs/yabai/raw/48c4fac997579ee007e5486f846f50f199263c3b/bin.tar.gz";
-              hash = "sha256-zyWS5St2xIl40LB5yxYhoy8oI+jK+Wnvlj5UoezrSmw=";
+              url = "https://github.com/m4r1vs/yabai/raw/19efbf5bdf77e19f87202fb275dfa2adcd2ccd6e/bin.tar.gz";
+              hash = "sha256-la2muT7NjkQoYvypybCP0fCymITEK8kSRvk+8bva7w0=";
             };
             installPhase = ''
               runHook preInstall
