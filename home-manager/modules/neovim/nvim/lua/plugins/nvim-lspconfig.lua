@@ -131,7 +131,7 @@ return {
     }
 
     local configs = require("lspconfig.configs")
-    for server, config in ipairs(configs) do
+    for server, config in pairs(configs) do
       if config.manager ~= nil then
         vim.lsp.config(server, {
           capabilities = capabilities
