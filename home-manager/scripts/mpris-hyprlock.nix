@@ -140,7 +140,12 @@
       	fi
       	;;
       --source)
-      	echo "$SOURCE_ICON"
+        title=$(get_metadata "xesam:title")
+        if [ -z "$title" ]; then
+          echo ""
+        else
+          echo "$SOURCE_ICON"
+        fi
       	;;
       *)
       	echo "Invalid option: $1"

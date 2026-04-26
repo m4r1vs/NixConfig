@@ -28,7 +28,10 @@ in {
         enable = true;
         package = pkgs.kdePackages.kwallet-pam;
       };
-      hyprlock = {};
+      hyprlock.kwallet = {
+        enable = true;
+        package = pkgs.kdePackages.kwallet-pam;
+      };
     };
     programs = {
       hyprland.enable = true;

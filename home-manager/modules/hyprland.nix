@@ -30,6 +30,7 @@ in {
       ];
       settings = {
         exec-once = [
+          "${lib.getExe pkgs.hyprlock} || hyprctl dispatch exit"
           "${pkgs.waybar}/bin/waybar"
           "${pkgs._1password-gui}/bin/1password --silent"
           "${scripts.hyprland-startup-workspaces}"
@@ -40,17 +41,21 @@ in {
           inactive_timeout = 3;
           use_cpu_buffer = 1;
         };
-        env = lib.mkIf osConfig.configured.nvidia.enable [
-          "LIBVA_DRIVER_NAME,nvidia"
-          "GBM_BACKEND,nvidia-drm"
-          "__GLX_VENDOR_LIBRARY_NAME,nvidia"
-          "__NV_PRIME_RENDER_OFFLOAD,1"
-          "__GL_GSYNC_ALLOWED,1"
-          "__GL_VRR_ALLOWED,1"
-          "WLR_DRM_NO_ATOMIC,1"
-          "__VK_LAYER_NV_optimus,NVIDIA_only"
-          "NVD_BACKEND,direct"
-        ];
+        env =
+          [
+            "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
+          ]
+          ++ lib.optionals osConfig.configured.nvidia.enable [
+            "LIBVA_DRIVER_NAME,nvidia"
+            "GBM_BACKEND,nvidia-drm"
+            "__GLX_VENDOR_LIBRARY_NAME,nvidia"
+            "__NV_PRIME_RENDER_OFFLOAD,1"
+            "__GL_GSYNC_ALLOWED,1"
+            "__GL_VRR_ALLOWED,1"
+            "WLR_DRM_NO_ATOMIC,1"
+            "__VK_LAYER_NV_optimus,NVIDIA_only"
+            "NVD_BACKEND,direct"
+          ];
         input = {
           kb_layout = "us,de";
           kb_options = "caps:escape";
@@ -129,7 +134,7 @@ in {
             special = true;
             enabled = true;
             size = 2;
-            vibrancy = 0.35;
+            vibrancy = 0.55;
             passes = 3;
             new_optimizations = true;
             ignore_opacity = true;

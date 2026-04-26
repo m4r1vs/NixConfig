@@ -89,7 +89,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:6000] ${scripts.mpris-hyprlock} --title";
+            text = "cmd[update:4000] ${scripts.mpris-hyprlock} --title";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             font_size = scale 12;
             font_family = "JetBrainsMono NF SemiBold";
@@ -103,7 +103,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:6000] ${scripts.mpris-hyprlock} --length";
+            text = "cmd[update:4000] ${scripts.mpris-hyprlock} --length";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
             font_size = scale 12;
             font_family = "JetBrainsMono NF SemiBold";
@@ -117,7 +117,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:6000] ${scripts.mpris-hyprlock} --source";
+            text = "cmd[update:4000] ${scripts.mpris-hyprlock} --source";
             color = "rgba(${theme.secondaryColor.rgb}, 0.32)";
             font_size = scale 64;
             font_family = "JetBrainsMono Nerd Font";
@@ -132,7 +132,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:6000] ${scripts.mpris-hyprlock} --artist";
+            text = "cmd[update:4000] ${scripts.mpris-hyprlock} --artist";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
             font_family = "JetBrainsMono Nerd Font";
             font_size = scale 12;
@@ -159,6 +159,20 @@ in {
             shadow_color = "rgb(0,0,0)";
             shadow_boost = 1;
           }
+          {
+            text = "Please Authenticate 󰌾";
+            color = "rgba(245,230,204,0.72)";
+            font_size = scale 24;
+            font_family = "JetBrainsMono Nerd Font Propo";
+            halign = "center";
+            valign = "bottom";
+            position = scaleStr "0, 32";
+            shadow_size = 2;
+            shadow_passes = 3;
+            shadow_color = "rgb(0,0,0)";
+            shadow_boost = 1;
+            text_align = "center";
+          }
         ];
         input-field = [
           {
@@ -168,6 +182,7 @@ in {
             valign = "center";
             monitor = "";
             dots_center = true;
+            dots_size = 0.12;
             fade_on_empty = false;
             font_color = "rgba(255,255,255,0.76)";
             rounding = 0;
@@ -187,7 +202,7 @@ in {
             rounding = 5;
             border_size = 0;
             rotate = 0;
-            reload_time = 6;
+            reload_time = 4;
             reload_cmd = "${scripts.mpris-hyprlock} --arturl";
             position = scaleStr "24, -21";
             halign = "left";
