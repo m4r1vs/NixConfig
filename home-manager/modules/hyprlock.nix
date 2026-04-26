@@ -56,7 +56,7 @@ in {
         };
         background = [
           {
-            path = "${builtins.path {path = ../wallpaper/Birch_Trunks.jpg;}}";
+            path = "${builtins.path {path = ../wallpaper/Staten_Island_Ferry.jpg;}}";
           }
         ];
         label = [
@@ -160,39 +160,39 @@ in {
             shadow_boost = 1;
           }
           {
-            text = "Please Authenticate 󰌾";
-            color = "rgba(245,230,204,0.72)";
-            font_size = scale 24;
-            font_family = "JetBrainsMono Nerd Font Propo";
-            halign = "center";
+            text = " ${systemArgs.username}";
+            color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
+            font_size = scale 12;
+            font_family = "JetBrainsMono NF SemiBold";
+            position = scaleStr "24, 24";
+            text_align = "left";
+            halign = "left";
             valign = "bottom";
-            position = scaleStr "0, 32";
             shadow_size = 2;
             shadow_passes = 3;
             shadow_color = "rgb(0,0,0)";
-            shadow_boost = 1;
-            text_align = "center";
+            shadow_boost = 0.9;
           }
         ];
         input-field = [
           {
-            size = scaleStr "338, 42";
-            position = scaleStr "0, 38";
+            size = scaleStr "400, 72";
+            position = scaleStr "0, 172";
             halign = "center";
-            valign = "center";
+            valign = "bottom";
             monitor = "";
             dots_center = true;
-            dots_size = 0.12;
+            dots_size = 0.20;
             fade_on_empty = false;
-            font_color = "rgba(255,255,255,0.76)";
+            font_color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             rounding = 0;
-            check_color = "rgba(${theme.primaryColor.rgb},1)";
+            check_color = "rgba(${theme.primaryColor.rgb},0.67)";
             inner_color = "rgba(0,0,0,0)";
-            fail_color = "rgba(${theme.secondaryColor.rgb},1)";
+            fail_color = "rgba(175,48,41,0.76)";
             outline_thickness = 0;
-            font_family = "JetBrainsMono Nerd Font";
-            fail_text = "Keep Trying.";
-            placeholder_text = "";
+            font_family = "JetBrainsMono Nerd Font Propo";
+            fail_text = " 󰌾 ";
+            placeholder_text = " 󰌾 ";
             swap_font_color = true;
           }
         ];
