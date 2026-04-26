@@ -32,6 +32,14 @@
     system-sounds.enable = true;
   };
 
+  /*
+  We use the TPM to auto-unlock the LUKS encrypted drive on boot.
+  Enabled by running once: `sudo systemd-cryptenroll --wipe-slot=tpm2 --tpm2-device=auto --tpm2-pcrs=0,7 /dev/sda2`
+  */
+  boot.initrd.luks.devices."rootfs" = {
+    device = "94f0f658-8423-4091-8103-92a5a6fec954";
+  };
+
   services = {
     /*
     B-Tree FS
