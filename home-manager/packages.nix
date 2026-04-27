@@ -52,7 +52,6 @@ in {
         gnome-weather # weather forecast
         inkscape-with-extensions # maxxed out inkscape
         jetbrains.idea # intellij idea ultimate
-        kdePackages.kwalletmanager # view keychain
         libnotify # send notifications from terminal
         nautilus # file browser
         networkmanagerapplet # show wifi/ethernet in sys. tray

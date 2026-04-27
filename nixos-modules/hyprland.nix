@@ -24,14 +24,11 @@ in {
     };
 
     security.pam.services = {
-      greetd.kwallet = {
-        enable = true;
-        package = pkgs.kdePackages.kwallet-pam;
-      };
-      hyprlock.kwallet = {
-        enable = true;
-        package = pkgs.kdePackages.kwallet-pam;
-      };
+      greetd.enableGnomeKeyring = true;
+      login.enableGnomeKeyring = true;
+      greetd-password.enableGnomeKeyring = true;
+      gdm-password.enableGnomeKeyring = true;
+      hyprlock.enableGnomeKeyring = true;
     };
     programs = {
       hyprland.enable = true;
@@ -39,14 +36,11 @@ in {
     };
     services = {
       greetd = {
+        useTextGreeter = true;
         enable = true;
         settings = {
           default_session = {
             command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${pkgs.hyprland}/bin/Hyprland";
-            user = systemArgs.username;
-          };
-          initial_session = {
-            command = "${pkgs.hyprland}/bin/Hyprland > ~/.hyprland.log 2>&1";
             user = systemArgs.username;
           };
         };

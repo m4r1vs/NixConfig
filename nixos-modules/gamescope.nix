@@ -39,12 +39,8 @@ in {
     };
 
     security.pam.services = {
-      greetd.kwallet = {
-        enable = true;
-        package = pkgs.kdePackages.kwallet-pam;
-      };
+      greetd.enableGnomeKeyring = false;
     };
-
     programs = {
       gamescope.enable = true;
       steam = mkIf isX86 {

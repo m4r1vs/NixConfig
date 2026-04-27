@@ -171,6 +171,7 @@ in {
       /*
       Misc
       */
+      gnome.gnome-keyring.enable = true;
       dbus.enable = true;
       blueman.enable = true;
     };
@@ -258,6 +259,7 @@ in {
     };
 
     programs = {
+      seahorse.enable = true;
       virt-manager.enable = isX86;
       dconf.enable = true;
       steam = lib.mkIf isX86 {
@@ -281,7 +283,6 @@ in {
           mkdir -p $out/share/icons
           ln -s ${bibata-cursors}/share/icons/Bibata-Modern-Ice $out/share/icons/default
         '')
-        kdePackages.kwallet
         qemu
         quickemu
       ];

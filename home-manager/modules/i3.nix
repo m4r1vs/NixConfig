@@ -99,11 +99,6 @@ in {
             notification = false;
           }
           {
-            command = "${pkgs.kdePackages.kwallet-pam}/libexec/pam_kwallet_init";
-            always = true;
-            notification = false;
-          }
-          {
             command = "${pkgs._1password-gui}/bin/1password --silent --ozone-platform-hint=x11";
             always = true;
             notification = false;

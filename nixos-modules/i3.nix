@@ -28,10 +28,7 @@ in {
       };
     };
     security.pam.services = {
-      greetd.kwallet = {
-        enable = true;
-        package = pkgs.kdePackages.kwallet-pam;
-      };
+      greetd.enableGnomeKeyring = true;
     };
     services = {
       greetd = {
