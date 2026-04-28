@@ -31,18 +31,25 @@ in {
       hyprlock.enableGnomeKeyring = true;
     };
     programs = {
-      hyprland.enable = true;
-      hyprlock.enable = true;
+      hyprland = {
+        enable = true;
+        package = pkgs.hyprland;
+      };
+      hyprlock = {
+        enable = true;
+        package = pkgs.hyprlock;
+      };
     };
     services = {
       greetd = {
         useTextGreeter = true;
         enable = true;
-        settings = {
+        settings = rec {
           default_session = {
-            command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${pkgs.hyprland}/bin/Hyprland";
+            command = "${pkgs.hyprland}/bin/Hyprland > ~/.hyprland.log 2>&1";
             user = systemArgs.username;
           };
+          initial_session = default_session;
         };
       };
     };
