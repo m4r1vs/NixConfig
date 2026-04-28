@@ -97,6 +97,7 @@ in {
               "cpu"
               "memory"
               "disk"
+              "custom/caffeinate"
             ];
           };
 
@@ -237,6 +238,15 @@ in {
             rotate = 0;
             tooltip = true;
             return-type = "json";
+          };
+
+          "custom/caffeinate" = {
+            exec = "${scripts.caffeinate}";
+            format = "{}";
+            interval = 5;
+            on-click = "${scripts.caffeinate} toggle";
+            return-type = "json";
+            tooltip = true;
           };
 
           "hyprland/workspaces" = {

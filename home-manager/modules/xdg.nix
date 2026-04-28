@@ -278,6 +278,14 @@ in {
             "x-scheme-handler/https"
           ];
         };
+        caffeinate = {
+          name = "Toggle Caffeination";
+          genericName = "Cannot sleep on coffee";
+          icon = "io.github.java_decompiler.jd-gui";
+          exec = "${scripts.caffeinate} toggle";
+          type = "Application";
+          categories = ["Utility"];
+        };
         rofi-ssh = {
           name = "SSH Launcher";
           genericName = "SUPER+Shift+Enter";
