@@ -286,6 +286,14 @@ in {
           type = "Application";
           categories = ["Utility"];
         };
+        cleartext-wifi = {
+          name = "Show Wi-Fi Password";
+          genericName = "Will also be copied";
+          icon = "wifi-radar";
+          exec = "${scripts.cleartext-wifi}";
+          type = "Application";
+          categories = ["Utility"];
+        };
         rofi-ssh = {
           name = "SSH Launcher";
           genericName = "SUPER+Shift+Enter";
