@@ -5,12 +5,12 @@
   lib,
   ...
 }: {
-  gracefull-systemctl =
-    pkgs.writeShellScript "gracefull-systemctl"
+  gracefull-run = command:
+    pkgs.writeShellScript "gracefull-run"
     ''
       hour=$(${pkgs.coreutils}/bin/date +%H)
 
-      if (( hour >= 5 && hour < 12 )); then
+      if (( hour >= 5 && hour < 13 )); then
         GOODBYE_STRING="Goodbye  "
       elif (( hour >= 13 && hour < 16 )); then
         GOODBYE_STRING="Enjoy your Day  "
@@ -30,6 +30,6 @@
 
       ${pkgs.psmisc}/bin/killall -q -w brave
 
-      systemctl $1
+      ${command}
     '';
 }

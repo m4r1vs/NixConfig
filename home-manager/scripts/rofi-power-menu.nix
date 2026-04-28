@@ -1,6 +1,7 @@
 {
   pkgs,
   scripts,
+  systemArgs,
   ...
 }: {
   rofi-power-menu =
@@ -37,11 +38,11 @@
       declare -A actions
       actions[lockscreen]="loginctl lock-session ''${XDG_SESSION_ID-}"
       #actions[switchuser]="???"
-      actions[logout]="loginctl terminate-session ''${XDG_SESSION_ID-}"
+      actions[logout]="${scripts.gracefull-run "loginctl terminate-user ${systemArgs.username}"}"}
       actions[suspend]="systemctl suspend"
       actions[hibernate]="systemctl hibernate"
-      actions[reboot]="${scripts.gracefull-systemctl} reboot"
-      actions[shutdown]="${scripts.gracefull-systemctl} poweroff"
+      actions[reboot]="${scripts.gracefull-run "systemctl reboot"}"
+      actions[shutdown]="${scripts.gracefull-run "systemctl poweroff"}"
 
       # By default, ask for confirmation for actions that are irreversible
       confirmations=(reboot shutdown logout)
