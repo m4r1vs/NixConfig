@@ -5,7 +5,9 @@ require("session"):setup {
   sync_yanked = true,
 }
 
-require("git"):setup()
+require("git"):setup {
+  order = 1500,
+}
 
 -- Remove percentage from status bar
 function Status:percentage()
