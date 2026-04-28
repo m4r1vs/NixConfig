@@ -58,7 +58,6 @@
       }
 
       if [[ "$PLAYER" == *"brave"* ]]; then
-          SPACING="       "
           SOURCE_ICON=" 󰖟 "
       elif [[ "$PLAYER" == *"spotify"* ]]; then
           SOURCE_ICON="  "
@@ -70,6 +69,36 @@
           SOURCE_ICON="  "
       else
           SOURCE_ICON="  "
+      fi
+
+      url=$(get_metadata "mpris:artUrl")
+      ART_PATH=""
+      if [ -n "$url" ]; then
+        if [[ "$url" == file://* ]]; then
+          ART_PATH=''${url#file://}
+        elif [[ "$url" == http* ]]; then
+          url_hash=$(echo -n "$url" | sha256sum | cut -d ' ' -f 1)
+          ART_PATH="/tmp/hyprlock_art_''${url_hash}.jpeg"
+          if [ ! -f "$ART_PATH" ]; then
+            ${pkgs.wget}/bin/wget -q -O "$ART_PATH" "$url"
+            if [ $? -ne 0 ]; then
+              rm -f "$ART_PATH"
+              ART_PATH=""
+            fi
+          fi
+        fi
+      fi
+
+      if [[ -n "$ART_PATH" && -f "$ART_PATH" ]]; then
+        dimensions=$(${pkgs.imagemagick}/bin/identify -format "%w %h" "$ART_PATH" 2>/dev/null)
+        if [[ -n "$dimensions" ]]; then
+          width=$(echo "$dimensions" | cut -d ' ' -f 1)
+          height=$(echo "$dimensions" | cut -d ' ' -f 2)
+          is_widescreen=$(echo "scale=2; $width / $height > 1.4" | ${pkgs.bc}/bin/bc)
+          if [[ "$is_widescreen" -eq 1 ]]; then
+            SPACING="       "
+          fi
+        fi
       fi
 
       # Parse the argument
@@ -84,33 +113,7 @@
       	fi
       	;;
       --arturl)
-      	url=$(get_metadata "mpris:artUrl")
-      	if [ -z "$url" ]; then
-      		echo ""
-      	else
-      		if [[ "$url" == file://* ]]; then
-      			url=''${url#file://}
-      		elif [[ "$url" == http* ]]; then
-      			url_hash=$(echo -n "$url" | sha256sum | cut -d ' ' -f 1)
-
-      			tmp_art_path="/tmp/hyprlock_art_''${url_hash}.jpeg"
-
-      			if [ ! -f "$tmp_art_path" ]; then
-      				${pkgs.wget}/bin/wget -q -O "$tmp_art_path" "$url"
-      				if [ $? -ne 0 ]; then
-      					rm -f "$tmp_art_path"
-      					url=""
-      				else
-      					url="$tmp_art_path"
-      				fi
-      			else
-      				url="$tmp_art_path"
-      			fi
-      		else
-      			url=""
-      		fi
-      		echo "$url"
-      	fi
+        echo "$ART_PATH"
       	;;
       --artist)
       	artist=$(get_metadata "xesam:artist")
