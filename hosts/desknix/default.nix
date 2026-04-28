@@ -26,6 +26,10 @@
       wallpapers = [
         ../../home-manager/wallpaper/New_York_Garden.jpg
         ../../home-manager/wallpaper/New_York_Subway.jpg
+        ../../home-manager/wallpaper/Staten_Island_Ferry.jpg
+        ../../home-manager/wallpaper/New_York_Chinatown.jpg
+        ../../home-manager/wallpaper/New_York_from_Staten_Island.jpg
+        ../../home-manager/wallpaper/Northern_Manhattan_Forest.jpg
       ];
       windowsPartUUID = "bf2df441-4059-45e1-886a-6cf5e8def333";
     };
