@@ -96,10 +96,6 @@ in {
     configured.i3.enable = cfg.windowManagers.i3.enable && cfg.windowManagers.i3.default;
     configured.gamescope.enable = cfg.windowManagers.gamescope.enable && cfg.windowManagers.gamescope.default;
 
-    networking.extraHosts = ''
-      127.0.0.1 artpc17
-    '';
-
     # Fix libstrongswan not working due to missing config file
     environment.etc."strongswan.conf" = {
       enable = true;
