@@ -270,6 +270,7 @@ in {
               "(.*) - Google Search - Brave" = " $1";
               "Google Maps - Brave" = "󰗵 Google Maps";
               "(.*) - Google Maps - Brave" = "󰗵 $1";
+              "(.*) - Wikipedia - Brave" = "󰖬 $1";
               "(.*) - Google Photos - Brave" = " Viewing $1";
               "Nerd Fonts - (.*) - Brave" = " Nerd Fonts";
               "tagesschau.de - (.*) \\\| tagesschau.de - Brave" = " Tagesschau";
@@ -288,6 +289,9 @@ in {
               "ChatGPT - Brave" = "󰙓 ChatGPT";
               "Monkeytype \\\| (.*) - Brave" = "󰌓 monkey see, monkey type";
               "NixOS Search - (.*) - Brave" = " Nix Search: $1";
+              "([^/ ]+/[^/ ]+):.* - Brave" = " $1";
+              "(.*) · (.+) · ([^/ ]+/[^/ ]+) - Brave" = " $3 - $2";
+              "(.+) · ([^/ ]+/[^/ ]+) - Brave" = " $2 - $1";
               "(.*) - Discord" = " $1";
               "(.*) — 1Password" = "󰌋 $1";
               "1Password" = "󰌋 Authorize 1Password";
