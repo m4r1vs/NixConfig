@@ -71,6 +71,7 @@ in {
         terraform = "";
         tmux = ""; # on macos zsh is not always immediately loaded
         yazi = "󰇥";
+        "\," = "󰸣";
       };
       description = "Map program-names to their icons";
     };
