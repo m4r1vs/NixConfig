@@ -80,6 +80,7 @@ in {
           */
 
           colima = pkgsUnstable.colima;
+          hyprlock = pkgsUnstable.hyprlock;
           direnv = pkgsUnstable.direnv;
           gemini-cli = pkgsUnstable.gemini-cli;
           ghostty =
