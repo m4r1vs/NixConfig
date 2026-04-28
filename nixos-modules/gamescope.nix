@@ -30,10 +30,6 @@ in {
             command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd steam-gamescope";
             user = systemArgs.username;
           };
-          initial_session = {
-            command = "steam-gamescope";
-            user = systemArgs.username;
-          };
         };
       };
     };

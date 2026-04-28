@@ -38,10 +38,6 @@ in {
             command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd startx";
             user = systemArgs.username;
           };
-          initial_session = {
-            command = "startx > ~/.i3.log 2>&1";
-            user = systemArgs.username;
-          };
         };
       };
       xserver = {
