@@ -43,16 +43,20 @@ in {
     ++ lib.optionals isDesktop ([
         # Install on NixOS Desktop only
         amberol # fancy mp3 player
+        apostrophe # Markdown Viewer
         diebahn # deutsche bahn arrivals/departures/delays
+        gaphor # UML and SysML Editor
         gimp-with-plugins # maxxed out gimp
         gnome-chess # chess
         gnome-clocks # alarms, timers, etc.
         gnome-decoder # qr code generator
         gnome-network-displays # airplay, chromecast, miracast
         gnome-weather # weather forecast
+        gradia # Screenshot annotation tool
         inkscape-with-extensions # maxxed out inkscape
         jetbrains.idea # intellij idea ultimate
         libnotify # send notifications from terminal
+        loupe # Gnome Image Viewer
         nautilus # file browser
         networkmanagerapplet # show wifi/ethernet in sys. tray
         pavucontrol # sound manager
