@@ -64,6 +64,7 @@ in {
         rustup = "";
         spotify_player = "";
         ssh = "󰒍";
+        scp = "󰡰";
         sudo =
           if isDarwin
           then "  root"
