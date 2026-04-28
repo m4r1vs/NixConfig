@@ -184,6 +184,7 @@ in {
       Misc
       */
       gnome.gnome-keyring.enable = true;
+      gvfs.enable = true;
       blueman.enable = true;
     };
 
