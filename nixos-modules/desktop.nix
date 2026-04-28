@@ -169,10 +169,21 @@ in {
       };
 
       /*
+      DBus
+      */
+      dbus = {
+        enable = true;
+        implementation = "broker";
+        packages = with pkgs; [
+          gcr
+          gnome-settings-daemon
+        ];
+      };
+
+      /*
       Misc
       */
       gnome.gnome-keyring.enable = true;
-      dbus.enable = true;
       blueman.enable = true;
     };
 
