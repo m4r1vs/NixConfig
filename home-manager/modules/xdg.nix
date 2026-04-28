@@ -40,6 +40,25 @@ in {
         defaultApplications = {
           "application/pdf" = ["org.pwmt.zathura-pdf-mupdf.desktop"];
           "inode/directory" = ["yazi.desktop"];
+          "text/html" = ["brave-browser.desktop"];
+          "text/plain" = ["nvim.desktop"];
+          "text/x-markdown" = ["org.gnome.gitlab.somas.Apostrophe.desktop"];
+          "image/svg+xml" = ["org.gnome.Loupe.desktop"];
+          "image/jpeg" = ["org.gnome.Loupe.desktop"];
+          "image/png" = ["org.gnome.Loupe.desktop"];
+          "image/gif" = ["org.gnome.Loupe.desktop"];
+          "image/heic" = ["org.gnome.Loupe.desktop"];
+          "video/mp4" = ["mpv.desktop"];
+          "video/webm" = ["mpv.desktop"];
+          "video/quicktime" = ["mpv.desktop"];
+          "video/mpeg" = ["mpv.desktop"];
+          "audio/mpeg" = ["io.bassi.Amberol.desktop"];
+          "audio/wav" = ["io.bassi.Amberol.desktop"];
+          "audio/ogg" = ["io.bassi.Amberol.desktop"];
+          "audio/flac" = ["io.bassi.Amberol.desktop"];
+          "audio/aac" = ["io.bassi.Amberol.desktop"];
+          "audio/webm" = ["io.bassi.Amberol.desktop"];
+          "audio/mp4" = ["io.bassi.Amberol.desktop"];
         };
       };
       desktopEntries = {
@@ -191,8 +210,6 @@ in {
             "text/x-rust"
             "text/x-lua"
 
-            "text/markdown"
-            "text/x-markdown"
             "text/x-rst"
             "text/x-tex"
           ];
