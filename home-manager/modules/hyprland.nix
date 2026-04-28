@@ -134,7 +134,7 @@ in {
             special = true;
             enabled = true;
             size = 2;
-            vibrancy = 0.55;
+            vibrancy = 0.25;
             passes = 3;
             new_optimizations = true;
             ignore_opacity = true;
