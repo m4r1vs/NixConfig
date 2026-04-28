@@ -17,6 +17,7 @@ in {
       $DRY_RUN_CMD mkdir -p $HOME/Pictures/Wallpapers
       $DRY_RUN_CMD cp -rn ${../wallpaper}/* $HOME/Pictures/Wallpapers/ 2>/dev/null || true
       $DRY_RUN_CMD chmod u+w -R $HOME/Pictures/Wallpapers 2>/dev/null || true
+      $DRY_RUN_CMD [ ! -L "$HOME/.active_wallpaper.jpg" ] && ln -s ${../wallpaper/Birch_Trunks.jpg} $HOME/.active_wallpaper.jpg
     '';
     services.configured = {
       cliphist.enable = true;

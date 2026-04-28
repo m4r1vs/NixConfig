@@ -41,6 +41,8 @@
     WALLPAPER="$WALLPAPER_DIR/$CHOICE"
     if [ -f "$WALLPAPER" ]; then
         ${scripts.nixos-notify} -u low -e -i "$WALLPAPER" -h string:synchronous:wallpaper-change -t 1800 "New Wallpaper:" "$CHOICE"
+        rm $HOME/.active_wallpaper.jpg > /home/mn/rmlog
+        ln -s $WALLPAPER $HOME/.active_wallpaper.jpg > /home/mn/lnlog
         ${pkgs.swww}/bin/swww img "$WALLPAPER" --transition-type any --transition-fps 60 --transition-step 20 --transition-duration 1
     fi
   '';
