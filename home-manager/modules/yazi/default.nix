@@ -2,13 +2,11 @@
   lib,
   config,
   pkgs,
-  osConfig,
   systemArgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.yazi;
-  isDesktop = osConfig.configured ? desktop && osConfig.configured.desktop.enable;
   isDarwin = systemArgs.system == "aarch64-darwin";
 in {
   options.programs.configured.yazi = {
@@ -50,6 +48,16 @@ in {
               on = "<C-z>";
               run = "plugin zoxide";
               desc = "Open Zoxide";
+            }
+            {
+              on = "<C-g>";
+              run = "plugin vcs-files";
+              desc = "Show Git file changes";
+            }
+            {
+              on = "M";
+              run = "plugin mount";
+              desc = "Show mounted drives";
             }
           ]
           ++ (optionals isDarwin [
@@ -157,6 +165,8 @@ in {
           jump-to-char = pkgs.yaziPlugins.jump-to-char;
           smart-enter = pkgs.yaziPlugins.smart-enter;
           toggle-pane = pkgs.yaziPlugins.toggle-pane;
+          mount = pkgs.yaziPlugins.mount;
+          vcs-files = pkgs.yaziPlugins.vcs-files;
         }
         // (optionalAttrs isDarwin {
           clippy = pkgs.stdenv.mkDerivation {
