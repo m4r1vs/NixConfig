@@ -23,6 +23,6 @@
       fi
       ${pkgs.polybar}/bin/polybar-msg cmd restart
       ${pkgs.swaynotificationcenter}/bin/swaync-client -rs
-      ${scripts.nixos-notify} -e -t 4000 -h string:synchronous:startup-script "$NOTIFY_STRING"
+      ${scripts.nixos-notify} -u low -e -t 4000 -h string:synchronous:startup-script "$NOTIFY_STRING"
     '';
 }

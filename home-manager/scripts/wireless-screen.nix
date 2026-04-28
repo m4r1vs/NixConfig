@@ -12,7 +12,7 @@
 
       if [[ $? -eq 0 ]]; then
         ${pkgs.hyprland}/bin/hyprctl output destroy $MON_NAME
-        ${scripts.nixos-notify} -e -t 2000 "Destroyed $MON_NAME screen" "and enabling Firewall..."
+        ${scripts.nixos-notify} -u low -e -t 2000 "Destroyed $MON_NAME screen" "and enabling Firewall..."
         systemctl start firewall
         exit 0
       fi
@@ -24,7 +24,7 @@
         exit 0
       fi
 
-      RESPONSE="$(${scripts.nixos-notify} -e -t 3000 --action="FHD=1080p" --action="WQHD=1440p" --action="UHD=2160p" "Created Screen: $MON_NAME in 1080p@60hz (Scale 2x)" "Pick a different resolution at 1x scale:")"
+      RESPONSE="$(${scripts.nixos-notify} -u low -e -t 3000 --action="FHD=1080p" --action="WQHD=1440p" --action="UHD=2160p" "Created Screen: $MON_NAME in 1080p@60hz (Scale 2x)" "Pick a different resolution at 1x scale:")"
 
       if [[ "$RESPONSE" == *"FHD"* ]]; then
         ${pkgs.hyprland}/bin/hyprctl keyword monitor $MON_NAME,1920x1080@60,auto,1
@@ -34,7 +34,7 @@
         ${pkgs.hyprland}/bin/hyprctl keyword monitor $MON_NAME,3840x2160@60,auto,1
       fi
 
-      ${scripts.nixos-notify} -e -t 2000 "Disabling Firewall for now..."
+      ${scripts.nixos-notify} -u low -e -t 2000 "Disabling Firewall for now..."
       systemctl stop firewall
 
       ${pkgs.gnome-network-displays}/bin/gnome-network-displays &

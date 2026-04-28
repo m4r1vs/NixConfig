@@ -22,10 +22,10 @@
         GOODBYE_STRING="Goodbye, Time-traveller  "
       fi
 
-      ${scripts.nixos-notify} -e -t 10000 -h string:synchronous:startup-script "$GOODBYE_STRING" "I'm gracefully closing everything..."
+      ${scripts.nixos-notify} -u low -e -t 10000 -h string:synchronous:startup-script "$GOODBYE_STRING" "I'm gracefully closing everything..."
 
       ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.shutdown.enable) ''
-        ${pkgs.mpv}/bin/mpv --no-video --no-config --volume=80 --no-terminal ${config.configured.system-sounds.shutdown.soundFile}
+        ${pkgs.mpv}/bin/mpv --no-video --no-config --volume=80 --no-terminal ${config.configured.system-sounds.shutdown.soundFile} &
       ''}
 
       ${pkgs.psmisc}/bin/killall -q -w brave

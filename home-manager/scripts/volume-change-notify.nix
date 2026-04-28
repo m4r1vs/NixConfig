@@ -17,10 +17,10 @@
             muted=$new_muted
             device_name="$(${pkgs.wireplumber}/bin/wpctl inspect @DEFAULT_SINK@ | grep "node.description" | awk -F'"' '{ for (i=2; i<=NF; i+=2) printf "%s\n", $i }')"
             if [[ -n "$muted" ]]; then
-              ${pkgs.libnotify}/bin/notify-send -e -t 1600 -h int:value:0 -h string:synchronous:volume-change-notify "$device_name" "Muted  "
+              ${pkgs.libnotify}/bin/notify-send -u low -e -t 1600 -h int:value:0 -h string:synchronous:volume-change-notify "$device_name" "Muted  "
             else
               volume_percentage=$(echo "$volume * 100" | ${pkgs.bc}/bin/bc | awk -F '.' '{ print $1 }')
-              ${pkgs.libnotify}/bin/notify-send -e -t 1600 -h int:value:$volume_percentage -h string:synchronous:volume-change-notify "$device_name" "$volume_percentage%"
+              ${pkgs.libnotify}/bin/notify-send -u low -e -t 1600 -h int:value:$volume_percentage -h string:synchronous:volume-change-notify "$device_name" "$volume_percentage%"
             fi
           fi
         fi

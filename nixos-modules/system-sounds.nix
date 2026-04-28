@@ -33,6 +33,18 @@ in {
         description = "Sound file for shutdown";
       };
     };
+    notification = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable notification sound";
+      };
+      soundFile = mkOption {
+        type = types.path;
+        default = ../assets/sounds/note.wav;
+        description = "Sound file for notification";
+      };
+    };
     screenshot = {
       enable = mkOption {
         type = types.bool;

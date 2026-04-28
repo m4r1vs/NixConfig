@@ -23,7 +23,7 @@
 
           if [ "$first_word" == "󰆏" ]; then
             echo -n $input | sed 's/󰆏 //' | wl-copy > /dev/null
-            ${scripts.nixos-notify} -e -t 2000 "Copied Result"
+            ${scripts.nixos-notify} -u low -e -t 2000 "Copied Result"
             exit 0
           fi
 
@@ -55,12 +55,12 @@
         fi
 
         if [ "$RESPONSE" == '"No short answer available"' ]; then
-          ${scripts.nixos-notify} -e -t 2000 "There is no short answer. I'm opening the website for you..."
+          ${scripts.nixos-notify} -u low -e -t 2000 "There is no short answer. I'm opening the website for you..."
           coproc (xdg-open "https://wolframalpha.com/input?i=$*" > /dev/null 2>&1)
           ${pkgs.psmisc}/bin/killall rofi
           exit 0
         elif [ "$RESPONSE" == '"Wolfram|Alpha did not understand your input"' ]; then
-          ${scripts.nixos-notify} -e -t 2000 "Wait, let me query OpenAI..."
+          ${scripts.nixos-notify} -u low -e -t 2000 "Wait, let me query OpenAI..."
           ${pkgs.psmisc}/bin/killall rofi
           # GPT_RESPONSE=$(/home/mn/.local/share/mise/installs/bun/latest/bin/bun run /home/mn/code/personal-stuff/totoro/index.ts "$*")
           # dunstify -h string:x-dunst-stack-tag:totoro-assistant -a Totoro -t 0 "$GPT_RESPONSE"

@@ -53,6 +53,7 @@
           nerd_icon="󰃠"
         fi
         notify-send -e \
+                    -u low \
                     -h "int:value:$percent" \
                     -h string:synchronous:brightness-change-notify \
                     -t 1600 \

@@ -58,7 +58,7 @@
             imdx=$(awk -F '\t' '{print $1}' <<<$line)
             temprev="/tmp/pastebin-preview_''${imdx}"
             ${pkgs.wl-clipboard}/bin/wl-paste >"''${temprev}"
-            ${scripts.nixos-notify} -e -a "Pastebin:" "File Copied" -i "''${temprev}" -t 2000
+            ${scripts.nixos-notify} -u low -e -a "Pastebin:" "File Copied" -i "''${temprev}" -t 2000
             return 1
         fi
       }

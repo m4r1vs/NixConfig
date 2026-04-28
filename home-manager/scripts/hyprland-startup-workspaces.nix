@@ -28,11 +28,11 @@
         org.freedesktop.DBus.Properties.Get \
         string:org.freedesktop.Secret.Collection \
         string:Locked 2>/dev/null | grep -q "boolean false"; do
-        ${scripts.nixos-notify} -e -t 12000 -h string:synchronous:startup-script "$WELCOME_STRING" "Please unlock the keyring so I can get everything running."
+        ${scripts.nixos-notify} -u low -e -t 12000 -h string:synchronous:startup-script "$WELCOME_STRING" "Please unlock the keyring so I can get everything running."
         sleep 0.5
       done
 
-      ${scripts.nixos-notify} -e -t 12000 -h string:synchronous:startup-script "$WELCOME_STRING" "Let me get everything running for you..."
+      ${scripts.nixos-notify} -u low -e -t 12000 -h string:synchronous:startup-script "$WELCOME_STRING" "Let me get everything running for you..."
 
       hyprctl dispatch exec "${lib.getExe pkgs.signal-desktop} --ozone-platform-hint=auto"
       hyprctl dispatch exec "${lib.getExe pkgs.whatsapp-electron} --ozone-platform-hint=auto"
@@ -51,7 +51,7 @@
       sleep 2
 
       hyprctl dispatch workspace 1
-      ${scripts.nixos-notify} -e -t 3000 -h string:synchronous:startup-script "You're ready to go 󱓟 "
+      ${scripts.nixos-notify} -u low -e -t 3000 -h string:synchronous:startup-script "You're ready to go 󱓟 "
 
       exit 0
     '';

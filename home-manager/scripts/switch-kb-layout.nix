@@ -49,6 +49,6 @@
         ''
     }
 
-    ${scripts.nixos-notify} -e -h string:synchronous:switch-kb-layout -t 1000 -i "${pkgs.papirus-icon-theme}/share/icons/Papirus/128x128/devices/input-keyboard.svg" "Switched Keyboard Layout to:" "$layMain"
+    ${scripts.nixos-notify} -u low -e -h string:synchronous:switch-kb-layout -t 1000 -i "${pkgs.papirus-icon-theme}/share/icons/Papirus/128x128/devices/input-keyboard.svg" "Switched Keyboard Layout to:" "$layMain"
   '';
 }
