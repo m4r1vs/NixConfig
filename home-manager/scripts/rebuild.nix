@@ -1,5 +1,6 @@
 {
   pkgs,
+  scripts,
   systemArgs,
   ...
 }: let
@@ -24,6 +25,7 @@ in {
             echo -e "Rebuilding and switching to \e[32mdefault specialisation\e[0m."
             sudo nixos-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}
           fi
+          ${scripts.nixos-notify} -e -h string:synchronous:rebuild "System has been rebuilt" "and I've applied the latest configuration"
         ''
     );
 }
