@@ -24,14 +24,12 @@ in {
         theme = "${pkgs.dconf}/bin/dconf write\ /org/gnome/desktop/interface/gtk-theme \"'Adwaita-dark'\"";
         icons = "${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/icon-theme \"'Papirus-Dark'\" && pkill blueman-applet && blueman-applet &";
         customs = "${scripts.custom-theme} dark";
-        notification = "${scripts.nixos-notify} -e -t 4000 -h string:synchronous:startup-script \"I'm switching to dark mode 󰏒 \"";
       };
       lightModeScripts = {
         mode = "${pkgs.dconf}/bin/dconf write\ /org/gnome/desktop/interface/color-scheme \"'prefer-light'\"";
         theme = "${pkgs.dconf}/bin/dconf write\ /org/gnome/desktop/interface/gtk-theme \"'Adwaita'\"";
         icons = "${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/icon-theme \"'Papirus-Light'\" && pkill blueman-applet && blueman-applet &";
         customs = "${scripts.custom-theme} light";
-        notification = "${scripts.nixos-notify} -e -t 4000 -h string:synchronous:startup-script \"Let there be light 󰓠 \"";
       };
     };
   };
