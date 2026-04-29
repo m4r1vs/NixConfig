@@ -37,6 +37,7 @@ in {
           "${scripts.hyprland-startup-workspaces}"
           "${scripts.volume-change-notify}"
           "${scripts.brightness-change-notify}"
+          "hyprctl setcursor Bibata-Modern-Ice 20"
         ];
         cursor = {
           inactive_timeout = 3;
