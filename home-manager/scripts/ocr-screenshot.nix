@@ -1,6 +1,7 @@
 {
   pkgs,
   scripts,
+  lib,
   config,
   ...
 }: {
@@ -49,6 +50,7 @@
       fi
 
       echo -n "$TEXT" | eval "$COPY_CMD"
+      ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.clipboard.enable) "${pkgs.mpv}/bin/mpv --no-video --volume=80 ${config.configured.system-sounds.clipboard.soundFile} &"}
 
       # Prepare a short preview
       PREVIEW=$(echo "$TEXT" | head -n 3)

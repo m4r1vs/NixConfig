@@ -1,6 +1,8 @@
 {
   pkgs,
   scripts,
+  lib,
+  config,
   ...
 }: {
   rofi-cliphist =
@@ -58,6 +60,7 @@
             imdx=$(awk -F '\t' '{print $1}' <<<$line)
             temprev="/tmp/pastebin-preview_''${imdx}"
             ${pkgs.wl-clipboard}/bin/wl-paste >"''${temprev}"
+            ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.clipboard.enable) "${pkgs.mpv}/bin/mpv --no-video --volume=80 ${config.configured.system-sounds.clipboard.soundFile} &"}
             ${scripts.nixos-notify} -u low -e -a "Pastebin:" "File Copied" -i "''${temprev}" -t 2000
             return 1
         fi

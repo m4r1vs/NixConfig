@@ -17,7 +17,7 @@ in {
       };
       soundFile = mkOption {
         type = types.path;
-        default = ../assets/sounds/windows_95_startup.mp3;
+        default = ../assets/sounds/windows_98_startup.mp3;
         description = "Sound file for startup";
       };
     };
@@ -41,8 +41,20 @@ in {
       };
       soundFile = mkOption {
         type = types.path;
-        default = ../assets/sounds/note.wav;
+        default = ../assets/sounds/notification.wav;
         description = "Sound file for notification";
+      };
+    };
+    clipboard = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable clipboard sound";
+      };
+      soundFile = mkOption {
+        type = types.path;
+        default = ../assets/sounds/clipboard.mp3;
+        description = "Sound file for clipboard";
       };
     };
     screenshot = {

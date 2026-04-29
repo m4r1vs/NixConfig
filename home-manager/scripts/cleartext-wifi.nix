@@ -1,5 +1,7 @@
 {
   pkgs,
+  lib,
+  config,
   scripts,
   ...
 }: {
@@ -23,6 +25,7 @@
         else
           ${scripts.nixos-notify} -u low -e -t 20000 "󱛍  Name: $CON_NAME" "  PW: $PASSWORD"
           echo "$PASSWORD" | ${pkgs.wl-clipboard}/bin/wl-copy
+          ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.clipboard.enable) "${pkgs.mpv}/bin/mpv --no-video --volume=80 ${config.configured.system-sounds.clipboard.soundFile} &"}
         fi
       fi
     '';

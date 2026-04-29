@@ -1,5 +1,7 @@
 {
   pkgs,
+  lib,
+  config,
   scripts,
   ...
 }: {
@@ -24,6 +26,7 @@
           if [ "$first_word" == "󰆏" ]; then
             echo -n $input | sed 's/󰆏 //' | wl-copy > /dev/null
             ${scripts.nixos-notify} -u low -e -t 2000 "Copied Result"
+            ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.clipboard.enable) "${pkgs.mpv}/bin/mpv --no-video --volume=80 ${config.configured.system-sounds.clipboard.soundFile} &"}
             exit 0
           fi
 

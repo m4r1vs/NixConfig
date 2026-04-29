@@ -2,6 +2,7 @@
   pkgs,
   scripts,
   config,
+  lib,
   ...
 }: {
   rofi-translate = pkgs.writeShellScript "rofi-translate" ''
@@ -65,6 +66,7 @@
       fi
 
       echo -n "$translation" | eval "$COPY_CMD"
+      ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.clipboard.enable) "${pkgs.mpv}/bin/mpv --no-video --volume=80 ${config.configured.system-sounds.clipboard.soundFile} &"}
       ${scripts.nixos-notify} -u low -e -t 2000 -h string:synchronous:translation " Copied Translation:" "$translation"
     fi
   '';

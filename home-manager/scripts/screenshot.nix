@@ -41,6 +41,7 @@
 
       if [[ "$RESPONSE" == *"path"* ]]; then
         echo "$OUTPUT" | ${pkgs.wl-clipboard}/bin/wl-copy
+        ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.clipboard.enable) "${pkgs.mpv}/bin/mpv --no-video --volume=80 ${config.configured.system-sounds.clipboard.soundFile} &"}
       fi
     '';
 }
