@@ -30,7 +30,7 @@ in {
       ollama.enable = false;
       auto-power-management.enable = hasPowerProfiles;
     };
-    blueman-applet.enable = isDesktop;
+    blueman-applet.enable = isDesktop && osConfig.services.blueman.enable;
     mpris-proxy.enable = isDesktop;
     network-manager-applet.enable = isDesktop;
     polkit-gnome.enable = isDesktop;

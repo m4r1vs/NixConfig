@@ -282,7 +282,6 @@ in {
             "SUPER+Shift, g, Toggle workspace floating, workspaceopt, allfloat"
             "SUPER+Shift, P, Color picker, exec, ${pkgs.hyprpicker}/bin/hyprpicker -a"
             "SUPER+Shift, q, Power Menu, exec, ${scripts.rofi-launch} power"
-            "SUPER+Shift, b, Rofi Bluetooth, exec, ${scripts.rofi-launch} bluetooth"
             "SUPER+Shift, i, 1Password quick access, exec, ${pkgs._1password-gui}/bin/1password --quick-access"
             "SUPER+Shift, v, Rofi Clipboard History, exec, ${scripts.rofi-launch} cliphist"
             "SUPER+Shift, o, Obsidian Search, exec, ${scripts.rofi-launch} obsidian"
@@ -304,7 +303,10 @@ in {
                 ]
               )
               9)
-          );
+          )
+          ++ lib.optionals config.services.blueman-applet.enable [
+            "SUPER+Shift, b, Rofi Bluetooth, exec, ${scripts.rofi-launch} bluetooth"
+          ];
         binddle = [
           # Allow on lockscreen (l flag) and allow repeat (e flag)
           "SUPER, bracketright, Increase volume, exec, ${pkgs.pamixer}/bin/pamixer -i 5"

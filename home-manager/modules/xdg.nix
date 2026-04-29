@@ -222,7 +222,7 @@ in {
             "text/x-tex"
           ];
         };
-        blueman = {
+        blueman = lib.mkIf config.services.blueman-applet.enable {
           name = "Bluetooth";
           genericName = "Blueman";
           icon = "blueman";
@@ -356,7 +356,7 @@ in {
           type = "Application";
           categories = ["System"];
         };
-        rofi-bluetooth = {
+        rofi-bluetooth = lib.mkIf config.services.blueman-applet.enable {
           name = "Bluetooth Manager";
           genericName = "SUPER+Shift+B";
           comment = "Manage bluetooth connections";

@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   systemArgs,
   ...
 }: {
@@ -35,6 +36,9 @@
     };
     system-sounds.enable = true;
   };
+
+  hardware.bluetooth.enable = lib.mkForce false;
+  services.blueman.enable = lib.mkForce false;
 
   /*
   We use the TPM to auto-unlock the LUKS encrypted drive on boot.
