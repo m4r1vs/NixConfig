@@ -76,10 +76,24 @@ in {
           force_default_wallpaper = 0;
         };
         layerrule = [
-          "unset,waybar"
-          "blur,rofi"
-          "dimaround,swaync-control-center"
+          "order 1,hyprpicker" # Top Layer
           "noanim,hyprpicker"
+
+          "order 2,swaync-notification-window"
+          "blur,swaync-notification-window"
+          "ignorealpha 0.75,swaync-notification-window"
+          "abovelock,swaync-notification-window"
+
+          "order 3,rofi"
+          "blur,rofi"
+
+          "order 4,waybar"
+          "unset,waybar"
+
+          "order 5,swaync-control-center" # Bottom Layer
+          "blur,swaync-control-center"
+          "ignorealpha 0.75,swaync-control-center"
+          "dimaround,swaync-control-center"
         ];
         gesture = [
           "3, horizontal, workspace"
