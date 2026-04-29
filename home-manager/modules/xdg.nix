@@ -123,6 +123,14 @@ in {
           type = "Application";
           categories = ["Utility"];
         };
+        ocr_screenshot = {
+          name = "Extract Text (OCR)";
+          genericName = "SUPER+Ctrl+S";
+          icon = "gimagereader";
+          exec = "${scripts.ocr-screenshot} sleep-because-rofi";
+          type = "Application";
+          categories = ["Utility"];
+        };
         asciiquarium = {
           name = "Asciiquarium";
           genericName = "Fish.. and more!";
@@ -383,6 +391,24 @@ in {
           exec = "${scripts.rofi-launch} powermode";
           type = "Application";
           categories = ["Settings" "System"];
+        };
+        rofi-wifi = {
+          name = "Wi-Fi Manager";
+          genericName = "SUPER+Shift+W";
+          comment = "Manage Wi-Fi connections";
+          icon = "fern-wifi-cracker";
+          exec = "${scripts.rofi-launch} wifi";
+          type = "Application";
+          categories = ["Settings" "Network"];
+        };
+        rofi-translate = {
+          name = "Translator";
+          genericName = "SUPER+Shift+T";
+          comment = "Translate clipboard or manual text on the fly";
+          icon = "gnome-translate";
+          exec = "${scripts.rofi-launch} translate";
+          type = "Application";
+          categories = ["Utility"];
         };
       };
       portal = {

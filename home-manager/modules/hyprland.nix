@@ -259,6 +259,7 @@ in {
             "Shift, F11, Toggle Obsidian Workspace, togglespecialworkspace, obsidian"
 
             "SUPER+Shift, s, Take Screenshot and then edit it, exec, ${scripts.screenshot} edit"
+            "SUPER+Shift, t, Open Rofi Translation Menu, exec, ${scripts.rofi-launch} translate"
             "SUPER+Shift, c, Toggle Notification Center, exec, ${pkgs.swaynotificationcenter}/bin/swaync-client -t"
             "SUPER+Shift, d, Toggle Dark Mode, exec, ${pkgs.darkman}/bin/darkman toggle"
             "SUPER+Shift, w, Change Wallpaper, exec, ${scripts.rofi-launch} wallpaper"
@@ -271,6 +272,8 @@ in {
             "SUPER+Shift, i, 1Password quick access, exec, ${pkgs._1password-gui}/bin/1password --quick-access"
             "SUPER+Shift, v, Rofi Clipboard History, exec, ${scripts.rofi-launch} cliphist"
             "SUPER+Shift, o, Obsidian Search, exec, ${scripts.rofi-launch} obsidian"
+
+            "SUPER+Ctrl, s, Copy text from screen using OCR, exec, ${scripts.ocr-screenshot}"
 
             # bound to mousewheel left/right
             "Ctrl+Shift, Left, Previous workspace, workspace, m-1"
