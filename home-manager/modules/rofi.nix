@@ -45,7 +45,7 @@ in {
           background-color: transparent;
         }
         window {
-          background-color: rgba(245, 230, 204, 0.38);
+          background-color: rgba(245, 230, 204, 0.45);
         }
         entry {
           text-color: #000000;
