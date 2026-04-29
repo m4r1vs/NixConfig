@@ -40,8 +40,8 @@ in {
   backgroundColor = "#15130F";
   backgroundColorRGB = "21,19,15";
 
-  backgroundColorLight = "#F5E6CC";
-  backgroundColorLightRGB = "245,230,204";
+  backgroundColorLight = "#FFF0D6";
+  backgroundColorLightRGB = "255,240,214";
 
   primaryColor = colors."${primary}";
   secondaryColor = colors."${secondary}";

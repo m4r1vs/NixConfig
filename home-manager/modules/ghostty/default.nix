@@ -95,7 +95,7 @@ in {
           cursor-color = "#cecdc3";
           cursor-text = "#100f0f";
           selection-background = "#403e3c";
-          selection-foreground = "#cecdc3";
+          selection-foreground = "${theme.secondaryColor.hex}";
           background-opacity = 0.92;
         };
         flexoki-light = {
@@ -122,7 +122,7 @@ in {
           cursor-color = "#100f0f";
           cursor-text = "#fffcf0";
           selection-background = "#cecdc3";
-          selection-foreground = "#100f0f";
+          selection-foreground = "${theme.secondaryColor.hex}";
           background-opacity = 0.92;
         };
       };
