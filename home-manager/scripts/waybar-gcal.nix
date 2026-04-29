@@ -30,6 +30,7 @@
       fi
 
       now_ts=$(${pkgs.coreutils}/bin/date +%s)
+      today_date=$(${pkgs.coreutils}/bin/date +%Y-%m-%d)
       tomorrow_date=$(${pkgs.coreutils}/bin/date -d "tomorrow" +%Y-%m-%d)
 
       # Parse the output
@@ -82,9 +83,25 @@
           exit 0
       fi
 
-      # 2. More than 2 days away (already filtered by agenda range, but good to double check)
-      if [[ "$diff" -gt 172800 ]]; then
-          output_json "󰃮"
+      # 2. Today
+      if [[ "$s_date" == "$today_date" ]]; then
+          # In 5 hours or less
+          if [[ "$diff" -gt 0 && "$diff" -le 18000 ]]; then
+              if [[ "$diff" -le 3600 ]]; then
+                  minutes=$((diff / 60))
+                  output_json "󰨱 In $minutes minutes: <i>$title</i>"
+              else
+                  # Use awk for one decimal place
+                  hours=$(${pkgs.gawk}/bin/awk -v d="$diff" 'BEGIN { printf "%.1f", d / 3600 }')
+                  output_json "󰨱 In $hours hours: <i>$title</i>"
+              fi
+          else
+              if [[ -n "$s_time" ]]; then
+                  output_json "󰃭 Today, $s_time: <i>$title</i>"
+              else
+                  output_json "󰃭 Today: <i>$title</i>"
+              fi
+          fi
           exit 0
       fi
 
@@ -99,23 +116,20 @@
           exit 0
       fi
 
-      # 4. Today, in 5 hours or less
-      if [[ "$diff" -gt 0 && "$diff" -le 18000 ]]; then
-          # Use awk for one decimal place
-          hours=$(${pkgs.gawk}/bin/awk -v d="$diff" 'BEGIN { printf "%.1f", d / 3600 }')
-          output_json "󰨱 In $hours hours: <i>$title</i>"
+      # 4. More than 2 days away (already filtered by agenda range, but good to double check)
+      if [[ "$diff" -gt 172800 ]]; then
+          output_json "󰃮"
           exit 0
       fi
 
-      # 5. Fallback (Today, more than 5 hours away)
-      if [[ "$diff" -gt 0 ]]; then
-          if [[ -n "$s_time" ]]; then
-              output_json "󰃭 Today, $s_time: <i>$title</i>"
-          else
-              output_json "󰃭 Today: <i>$title</i>"
-          fi
-          exit 0
+      # 5. Future (within 2 days, but not today or tomorrow)
+      day_name=$(${pkgs.coreutils}/bin/date -d "$s_date" "+%A")
+      if [[ -n "$s_time" ]]; then
+          output_json "󰃭 $day_name, $s_time: <i>$title</i>"
+      else
+          output_json "󰃭 $day_name: <i>$title</i>"
       fi
+      exit 0
 
       output_json "No upcoming events"
     '';
