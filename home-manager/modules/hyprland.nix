@@ -171,7 +171,7 @@ in {
           "size 1400 700, initialClass:^(ghostty.yazi)$"
 
           "float,initialClass:^(ghostty.fastfetch)$"
-          "size 1000 600, initialClass:^(ghostty.fastfetch)$"
+          "size 1220 740, initialClass:^(ghostty.fastfetch)$"
 
           "float,initialClass:^(ghostty.weather)$"
           "size 1200 800, initialClass:^(ghostty.weather)$"

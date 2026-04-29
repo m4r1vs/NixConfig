@@ -78,7 +78,7 @@ in {
           genericName = "Systeminfo";
           comment = "Fastfetch Information about this Computer";
           icon = "glxinfo";
-          exec = "${lib.getExe pkgs.ghostty} --class=ghostty.fastfetch --wait-after-command=true -e ${pkgs.fastfetch}/bin/fastfetch";
+          exec = "${lib.getExe pkgs.ghostty} --class=ghostty.fastfetch --font-size=12 --wait-after-command=true -e ${pkgs.fastfetch}/bin/fastfetch";
           type = "Application";
           categories = ["Utility" "System" "Settings"];
         };
