@@ -43,11 +43,11 @@ in {
           "text/html" = ["brave-browser.desktop"];
           "text/plain" = ["nvim.desktop"];
           "text/x-markdown" = ["org.gnome.gitlab.somas.Apostrophe.desktop"];
-          "image/svg+xml" = ["org.gnome.Loupe.desktop"];
-          "image/jpeg" = ["org.gnome.Loupe.desktop"];
-          "image/png" = ["org.gnome.Loupe.desktop"];
-          "image/gif" = ["org.gnome.Loupe.desktop"];
-          "image/heic" = ["org.gnome.Loupe.desktop"];
+          "image/svg+xml" = ["swayimg.desktop"];
+          "image/jpeg" = ["swayimg.desktop"];
+          "image/png" = ["swayimg.desktop"];
+          "image/gif" = ["swayimg.desktop"];
+          "image/heic" = ["swayimg.desktop"];
           "video/mp4" = ["mpv.desktop"];
           "video/webm" = ["mpv.desktop"];
           "video/quicktime" = ["mpv.desktop"];
