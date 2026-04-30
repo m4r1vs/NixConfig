@@ -71,8 +71,12 @@ in {
           numlock_by_default = true;
         };
         misc = {
-          vrr = 2;
+          vrr = 1;
           disable_hyprland_logo = true;
+          animate_manual_resizes = true;
+          enable_swallow = true;
+          swallow_regex = "^ghostty\.(.+)$";
+          new_window_takes_over_fullscreen = 2;
           disable_splash_rendering = true;
           force_default_wallpaper = 0;
         };
@@ -177,7 +181,7 @@ in {
           "noblur,class:^()$,title:^()$"
 
           "workspace 1, initialClass:^(brave-browser)$"
-          "workspace 2, initialClass:^(ghostty.startup_workspace_2)$"
+          "workspace 2, initialClass:^(ghostty.default)$"
           "workspace 3, initialTitle:^(.*)( - Obsidian)(.*)$"
           "workspace 9, initialClass:^(signal)$"
           "workspace 9, initialTitle:^(WhatsApp Electron)(.*)$"

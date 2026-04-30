@@ -46,6 +46,7 @@ in {
           else false;
         macos-titlebar-style = mkIf isDarwin "hidden";
         macos-icon = "official";
+        class = "ghostty.default";
         mouse-hide-while-typing = true;
         window-padding-balance = true;
         background-blur = mkIf isDarwin 35;
