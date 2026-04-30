@@ -86,7 +86,7 @@ in {
 
           "order 2,swaync-notification-window"
           "blur,swaync-notification-window"
-          "ignorealpha 0.75,swaync-notification-window"
+          "ignorealpha 0.65,swaync-notification-window"
           "abovelock,swaync-notification-window"
 
           "order 3,rofi"
@@ -97,7 +97,7 @@ in {
 
           "order 5,swaync-control-center" # Bottom Layer
           "blur,swaync-control-center"
-          "ignorealpha 0.75,swaync-control-center"
+          "ignorealpha 0.65,swaync-control-center"
           "dimaround,swaync-control-center"
         ];
         gesture = [
