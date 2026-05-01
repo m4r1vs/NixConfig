@@ -28,7 +28,7 @@
         org.freedesktop.DBus.Properties.Get \
         string:org.freedesktop.Secret.Collection \
         string:Locked 2>/dev/null | grep -q "boolean false"; do
-        ${scripts.nixos-notify} -u low -i "${../../assets/locked.svg}" -e -t 12000 -h string:synchronous:startup-script "$WELCOME_STRING" "Please unlock the keyring so I can get everything running..."
+        ${scripts.nixos-notify} -u low -i "${../../assets/nix-flake/at-door.svg}" -e -t 12000 -h string:synchronous:startup-script "$WELCOME_STRING" "Please unlock the keyring so I can get everything running..."
         sleep 0.5
       done
 

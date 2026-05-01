@@ -233,7 +233,7 @@ in {
         "${systemArgs.hostname}" = {
           name = "Marius' ${systemArgs.hostname}";
           genericName = "${osConfig.system.nixos.distroName} on ${systemArgs.hostname}";
-          icon = ../../assets/nix-flake.svg;
+          icon = ../../assets/nix-flake/default.svg;
           type = "Application";
           categories = ["Settings"];
           noDisplay = true;

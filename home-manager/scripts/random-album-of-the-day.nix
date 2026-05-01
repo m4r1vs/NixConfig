@@ -11,7 +11,7 @@ in {
     ''
       set -o pipefail
 
-      ${scripts.nixos-notify} -u low -e -h string:synchronous:random-album "Connecting to Bandcamp..."
+      ${scripts.nixos-notify} -i ${../../assets/nix-flake/with-headphones.svg} -u low -e -h string:synchronous:random-album "Connecting to Bandcamp..."
 
       HTML=$(${pkgs.curl}/bin/curl -s "https://daily.bandcamp.com/album-of-the-day")
       RANDOM_ALBUM_LINE=$(echo "$HTML" | grep '<a class="title" href="/album-of-the-day/' | ${pkgs.coreutils}/bin/shuf -n 1)
@@ -20,7 +20,7 @@ in {
       exit_code="$?"
 
       if [ -z "$RANDOM_ALBUM" ] || [ "$exit_code" -ne 0 ]; then
-        ${scripts.nixos-notify} -e "Failed to query Bandcamp's" "Album of the Day (got \"$RANDOM_ALBUM\")"
+        ${scripts.nixos-notify} -i ${../../assets/nix-flake/with-headphones.svg} -e "Failed to query Bandcamp" "(Unexpected return: \"$RANDOM_ALBUM\")"
         exit 0
       fi
 
@@ -28,7 +28,7 @@ in {
       exit_code="$?"
 
       if [ -z "$id" ] || [ "$exit_code" -ne 0 ]; then
-        ${scripts.nixos-notify} -e "Failed to search Spotify for" "\"$RANDOM_ALBUM\""
+        ${scripts.nixos-notify} -i ${../../assets/nix-flake/with-headphones.svg} -e "Failed to search Spotify for" "\"$RANDOM_ALBUM\""
         exit 0
       fi
 
@@ -36,7 +36,7 @@ in {
       exit_code="$?"
 
       if [[ "$exit_code" -ne 0 ]]; then
-        ${scripts.nixos-notify} -e "Failed to start Playback of" "\"$RANDOM_ALBUM\""
+        ${scripts.nixos-notify} -i ${../../assets/nix-flake/with-headphones.svg} -e "Failed to start Playback of" "\"$RANDOM_ALBUM\""
         exit 0
       fi
 
@@ -47,10 +47,10 @@ in {
           bash
           */
           ''
-            RESPONSE=$(${scripts.nixos-notify} -u low -h string:synchronous:random-album --action="open=Open on Bandcamp" "Playing a random Album of the Day: \"$RANDOM_ALBUM\"")
+            RESPONSE=$(${scripts.nixos-notify} -i ${../../assets/nix-flake/with-headphones.svg} -u low -h string:synchronous:random-album --action="open=Open on Bandcamp" "Playing a random Album of the Day:" "$RANDOM_ALBUM")
 
             if [[ "$RESPONSE" == *"open"* ]]; then
-              ${scripts.nixos-notify} -u low -e -t 2000 "$(${pkgs.xdg-utils}/bin/xdg-open "https://daily.bandcamp.com$ALBUM_PATH")"
+              ${scripts.nixos-notify} -i ${../../assets/nix-flake/with-headphones.svg} -u low -e -t 2000 "$(${pkgs.xdg-utils}/bin/xdg-open "https://daily.bandcamp.com$ALBUM_PATH")"
             fi
 
             exit 0''

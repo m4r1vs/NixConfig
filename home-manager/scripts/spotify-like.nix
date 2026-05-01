@@ -4,6 +4,18 @@
   ...
 }: {
   spotify-like = pkgs.writeShellScript "spotify-like" ''
-    ${pkgs.spotify-player}/bin/spotify_player like && ${scripts.nixos-notify} -u low -e -h string:synchronous:spotify-like -t 1800 "Liked currently playing Track on Spotify"
+    ${pkgs.spotify-player}/bin/spotify_player like
+    NAME="$(${pkgs.spotify-player}/bin/spotify_player get key playback | jq -r '.item.name')"
+    if [ -z "''${NAME:-}" ]; then
+      NAME="FAILED TO GET NAME OF TRACK"
+    fi
+    ${scripts.nixos-notify} \
+      -i ${../../assets/nix-flake/with-headphones.svg} \
+      -u low \
+      -e \
+      -h string:synchronous:spotify-like \
+      -t 3200 \
+      "Liked on  Spotify:" \
+      "$NAME"
   '';
 }

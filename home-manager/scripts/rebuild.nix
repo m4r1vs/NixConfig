@@ -27,7 +27,7 @@ in {
           fi
 
           if [ $? -eq 0 ]; then
-            ${scripts.nixos-notify} -e -h string:synchronous:rebuild "System has been rebuilt" "and I've applied the latest configuration"
+            ${scripts.nixos-notify} -i ${../../assets/nix-flake/with-packages.svg} -e -h string:synchronous:rebuild "System has been rebuilt" "and I've applied the latest configuration"
           else
             echo -e "\a"
           fi
