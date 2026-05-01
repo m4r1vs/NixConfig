@@ -24,7 +24,7 @@ slider {
   box-shadow:
     0 2px 14px rgba(0, 0, 0, 0.16),
     0 3px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 5px 0 0 5px;
+  border-radius: 6px 0 0 6px;
   margin: 18px 0 18px 18px;
   background-color: @background-clr;
   color: @foreground-clr;
@@ -36,7 +36,7 @@ slider {
   .notification-background
   .notification {
   padding: 7px;
-  border-radius: 5px;
+  border-radius: 6px;
 }
 
 .floating-notifications.background
@@ -61,6 +61,7 @@ slider {
   .notification-content
   .summary {
   color: @foreground-clr;
+  font-size: 16px;
 }
 
 .floating-notifications.background
@@ -79,6 +80,8 @@ slider {
   .notification-content
   .body {
   color: @foreground-clr;
+  font-size: 14px;
+  opacity: 0.65;
 }
 
 .floating-notifications.background
@@ -171,7 +174,7 @@ slider {
     0 3px 6px rgba(0, 0, 0, 0.23);
   margin: 18px;
   padding: 14px;
-  border-radius: 5px;
+  border-radius: 6px;
   background-color: @background-clr;
 }
 
@@ -200,7 +203,7 @@ slider {
     0 3px 6px rgba(0, 0, 0, 0.26),
     0 3px 6px rgba(0, 0, 0, 0.23);
   padding: 14px;
-  border-radius: 5px;
+  border-radius: 6px;
   background-color: @background-clr;
   margin: 0 18px 18px 18px;
   font-size: 1.1rem;
@@ -229,7 +232,7 @@ slider {
   background: @background-clr;
   margin: 5px 18px;
   padding: 7px 18px 7px 12px;
-  border-radius: 5px;
+  border-radius: 6px;
 }
 
 .notification-group-buttons {
@@ -239,7 +242,7 @@ slider {
   background: @background-clr;
   margin: 5px 18px;
   padding: 7px 18px;
-  border-radius: 5px;
+  border-radius: 6px;
 }
 
 .notification-group-close-all-button {
@@ -264,7 +267,7 @@ slider {
   box-shadow:
     0 3px 6px rgba(0, 0, 0, 0.26),
     0 3px 6px rgba(0, 0, 0, 0.23);
-  border-radius: 5px 0 0 5px;
+  border-radius: 6px 0 0 6px;
   color: @foreground-clr;
   background-color: @background-clr;
   margin: 5px 0px 5px 0;
@@ -412,7 +415,7 @@ slider {
 
 .control-center-dnd {
   margin-top: 5px;
-  border-radius: 5px;
+  border-radius: 6px;
   background: @background-clr;
 }
 
