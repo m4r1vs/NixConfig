@@ -80,13 +80,13 @@ in {
           */
 
           colima = pkgsUnstable.colima;
-          hyprlock = pkgsUnstable.hyprlock;
           direnv = pkgsUnstable.direnv;
           gemini-cli = pkgsUnstable.gemini-cli;
           ghostty =
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
+          hyprlock = pkgsUnstable.hyprlock;
           mise = pkgsUnstable.mise;
           neovim = pkgsUnstable.neovim;
           neovim-unwrapped = pkgsUnstable.neovim-unwrapped;
@@ -101,14 +101,49 @@ in {
           Temporary Fixes / Updates
           */
 
-          # https://github.com/NixOS/nixpkgs/pull/463023
-          eb-garamond = eb-garamond.overrideAttrs {
-            nativeBuildInputs = [
-              fontforge
-              python3
-              ttfautohint-nox
+          # Until v5 is in nixpkgs (add lua config and hyprland devour/overlay mode)
+          # Depends on https://github.com/NixOS/nixpkgs/pull/502834
+          swayimg = pkgsUnstable.swayimg.overrideAttrs (finalAttrs: {
+            version = "v5.2";
+            buildInputs = [
+              bash-completion
+              wayland
+              wayland-protocols
+              json_c
+              libxkbcommon
+              fontconfig
+              giflib
+              libheif
+              libjpeg
+              libwebp
+              libtiff
+              librsvg
+              libpng
+              libjxl
+              libexif
+              libavif
+              libsixel
+              libraw
+              libdrm
+              exiv2
+              pkgsUnstable.luajit
+              (pkgsUnstable.openexr.overrideAttrs {
+                version = "3.4.10"; # TODO: update to 3.4.11
+                src = fetchFromGitHub {
+                  owner = "AcademySoftwareFoundation";
+                  repo = "openexr";
+                  rev = "v3.4.10";
+                  hash = "sha256-jXio+PvagKTR8NjcYIQ/j8LOMNc/0sQBuaixKk/0V3k=";
+                };
+              })
             ];
-          };
+            src = fetchFromGitHub {
+              owner = "artemsen";
+              repo = "swayimg";
+              tag = "v5.2";
+              hash = "sha256-aDZ7Ka8uKVLzEwxS2CT5fRFNDf9z/LO3bB0dCMz1Mf0=";
+            };
+          });
 
           /*
           Own Forks

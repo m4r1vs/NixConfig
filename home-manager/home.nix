@@ -5,6 +5,7 @@
   ...
 }: let
   isDesktop = osConfig.configured ? desktop && osConfig.configured.desktop.enable;
+  isWayland = osConfig.configured ? desktop && !osConfig.configured.i3.enable;
   isWSL = osConfig ? wsl && osConfig.wsl.enable;
   isDarwin = systemArgs.system == "aarch64-darwin";
   hasPowerProfiles = osConfig.services.power-profiles-daemon.enable or false;
@@ -63,6 +64,7 @@ in {
       rofi.enable = isDesktop;
       spotify-player.enable = isDesktop || isWSL || isDarwin;
       ssh.enable = true;
+      swayimg.enable = isWayland;
       swappy.enable = isDesktop;
       tmux.enable = true;
       yazi.enable = true;

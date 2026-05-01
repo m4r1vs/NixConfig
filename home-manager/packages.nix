@@ -77,7 +77,6 @@ in {
           hyprshot # screenshot tool
           hyprutils # hyprland stuff
           nwg-displays # monitor manager
-          swayimg # image viewer
         ]
         else [
           # Install on X11 only
