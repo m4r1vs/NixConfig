@@ -95,9 +95,9 @@ in {
     ];
   };
 
-  fonts =
+  fonts = with pkgs;
     {
-      packages = with pkgs;
+      packages =
         [
           eb-garamond
           nerd-fonts.jetbrains-mono
@@ -106,49 +106,19 @@ in {
           open-sans
           public-sans
           ubuntu-classic
+          reforma-fonts
         ]
-        ++ (
-          if (!isDarwin)
-          then [
-            (stdenv.mkDerivation {
-              name = "Apple Color Emoji Font";
-              src = fetchurl {
-                url = "https://github.com/samuelngs/apple-emoji-ttf/releases/download/macos-26-20260219-2aa12422/AppleColorEmoji-Linux.ttf";
-                hash = "sha256-U1oEOvBHBtJEcQWeZHRb/IDWYXraLuo0NdxWINwPUxg=";
-              };
-              dontUnpack = true;
-              installPhase = ''
-                runHook preInstall
-
-                mkdir -p $out/share/fonts/truetype
-                cp $src $out/share/fonts/truetype/AppleColorEmoji.ttf
-
-                runHook postInstall
-              '';
-            })
-            (stdenv.mkDerivation {
-              name = "Samsung Classic Clock Font";
-              src = ../assets/fonts/samsung/samsung-clock-classic.ttf;
-              dontUnpack = true;
-              installPhase = ''
-                runHook preInstall
-
-                mkdir -p $out/share/fonts/truetype
-                cp $src $out/share/fonts/truetype/SamsungClockClassic.ttf
-
-                runHook postInstall
-              '';
-            })
-          ]
-          else []
-        );
+        ++ optionals (!isDarwin) [
+          apple-color-emoji
+          samsung-clock-font
+        ];
     }
     // optionalAttrs (!isDarwin) {
       enableDefaultPackages = true;
       fontconfig = {
         defaultFonts = {
-          serif = ["EB Garamond 08"];
-          sansSerif = ["Ubuntu"];
+          serif = ["Reforma 1969"];
+          sansSerif = ["Reforma 2018"];
           monospace = ["JetBrainsMono Nerd Font Propo"];
           emoji = ["Apple Color Emoji"];
         };

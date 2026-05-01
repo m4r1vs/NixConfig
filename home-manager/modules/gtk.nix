@@ -38,8 +38,8 @@ in {
         name = "Bibata-Modern-Ice";
       };
       font = {
-        package = pkgs.ubuntu-classic;
-        name = "Ubuntu";
+        package = pkgs.reforma-fonts;
+        name = "Reforma 2018";
         size = 10;
       };
     };

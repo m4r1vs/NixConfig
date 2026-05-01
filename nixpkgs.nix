@@ -27,6 +27,55 @@ in {
           golazo = inputs.golazo.packages.${stdenv.hostPlatform.system}.default;
           hyprland-which-key = inputs.hyprland-which-key.packages.${stdenv.hostPlatform.system}.default;
 
+          reforma-fonts = stdenv.mkDerivation {
+            name = "Reforma Fonts";
+            src = ./assets/fonts/reforma;
+            dontUnpack = true;
+            installPhase = ''
+              runHook preInstall
+
+              mkdir -p "$out/share/fonts/opentype/Reforma 1918"
+              cp $src/1918/*.otf "$out/share/fonts/opentype/Reforma 1918"
+              mkdir -p "$out/share/fonts/opentype/Reforma 1969"
+              cp $src/1969/*.otf "$out/share/fonts/opentype/Reforma 1969"
+              mkdir -p "$out/share/fonts/opentype/Reforma 2018"
+              cp $src/2018/*.otf "$out/share/fonts/opentype/Reforma 2018"
+
+              runHook postInstall
+            '';
+          };
+
+          apple-color-emoji = stdenv.mkDerivation {
+            name = "Apple Color Emoji Font";
+            src = fetchurl {
+              url = "https://github.com/samuelngs/apple-emoji-ttf/releases/download/macos-26-20260219-2aa12422/AppleColorEmoji-Linux.ttf";
+              hash = "sha256-U1oEOvBHBtJEcQWeZHRb/IDWYXraLuo0NdxWINwPUxg=";
+            };
+            dontUnpack = true;
+            installPhase = ''
+              runHook preInstall
+
+              mkdir -p $out/share/fonts/truetype
+              cp $src $out/share/fonts/truetype/AppleColorEmoji.ttf
+
+              runHook postInstall
+            '';
+          };
+
+          samsung-clock-font = stdenv.mkDerivation {
+            name = "Samsung Classic Clock Font";
+            src = ./assets/fonts/samsung/samsung-clock-classic.ttf;
+            dontUnpack = true;
+            installPhase = ''
+              runHook preInstall
+
+              mkdir -p $out/share/fonts/truetype
+              cp $src $out/share/fonts/truetype/SamsungClockClassic.ttf
+
+              runHook postInstall
+            '';
+          };
+
           # TODO: add PR to add to nixpkgs
           clippy-darwin = pkgsUnstable.buildGoModule {
             pname = "clippy-darwin";
