@@ -7,6 +7,7 @@ return {
     "hrsh7th/cmp-path",
     "hrsh7th/cmp-cmdline",
     "hrsh7th/nvim-cmp",
+    "b0o/schemastore.nvim",
     {
       "towolf/vim-helm",
       ft = { "yaml" }
@@ -17,8 +18,6 @@ return {
     vim.api.nvim_create_autocmd("LspAttach", {
       desc = "LSP actions",
       callback = function(args)
-        local opts = { buffer = args.buf }
-
         local client = vim.lsp.get_client_by_id(args.data.client_id)
 
         if client ~= nil then
@@ -90,6 +89,34 @@ return {
       }
     })
 
+    -- Json
+    vim.lsp.enable("jsonls")
+    vim.lsp.config("jsonls", {
+      settings = {
+        json = {
+          format = {
+            enable = true,
+          },
+          schemas = require("schemastore").json.schemas(),
+          validate = { enable = true },
+        }
+      }
+    })
+
+    -- Yaml
+    vim.lsp.enable("yamlls")
+    vim.lsp.config("yamlls", {
+      settings = {
+        yaml = {
+          schemaStore = {
+            enable = false,
+            url = "",
+          },
+          schemas = require('schemastore').yaml.schemas(),
+        },
+      },
+    })
+
     -- Other ones without config
 
     vim.lsp.enable("clangd")
@@ -103,7 +130,6 @@ return {
     vim.lsp.enable("helm_ls")
     vim.lsp.enable("html")
     vim.lsp.enable("jdtls")
-    vim.lsp.enable("jsonls")
     vim.lsp.enable("lua_ls")
     vim.lsp.enable("nil_ls")
     vim.lsp.enable("nixd")
@@ -118,7 +144,6 @@ return {
     vim.lsp.enable("texlab")
     vim.lsp.enable("tinymist")
     vim.lsp.enable("ty")
-    vim.lsp.enable("yamlls")
     vim.lsp.enable("zls")
 
     -- Make sure each server knows what can and cannot be done using nvim-cmp
@@ -140,4 +165,3 @@ return {
     end
   end,
 }
-
