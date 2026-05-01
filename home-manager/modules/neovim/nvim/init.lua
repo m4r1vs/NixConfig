@@ -56,6 +56,7 @@ vim.opt.hlsearch = true
 vim.opt.inccommand = "split" -- live preview of substitutions
 vim.wo.signcolumn = "yes:1"
 vim.opt.linebreak = true
+vim.o.exrc = true
 
 -- Folds (use za to toggle the fold, zR to unfold all and zM to fold all)
 vim.opt.foldlevel = 99
