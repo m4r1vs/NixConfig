@@ -314,6 +314,16 @@ in {
           ];
         binddle = [
           # Allow on lockscreen (l flag) and allow repeat (e flag)
+          ", XF86AudioRaiseVolume, Increase volume, exec, ${pkgs.pamixer}/bin/pamixer -i 5"
+          ", XF86AudioLowerVolume, Decrease volume, exec, ${pkgs.pamixer}/bin/pamixer -d 5"
+          ", XF86AudioMute, Mute audio, exec, ${pkgs.pamixer}/bin/pamixer -t"
+          ", XF86AudioMicMute, Mute microphone, exec, ${pkgs.pamixer}/bin/pamixer --default-source -t"
+          ", XF86AudioPlay, Toggle media playback, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"
+          ", XF86AudioPause, Toggle media playback, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"
+          ", XF86AudioNext, Next track, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send player-next"
+          ", XF86AudioPrev, Previous track, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send player-prev"
+          ", XF86MonBrightnessUp, Increase brightness, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%+"
+          ", XF86MonBrightnessDown, Decrease brightness, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%-"
           "SUPER, bracketright, Increase volume, exec, ${pkgs.pamixer}/bin/pamixer -i 5"
           "SUPER, slash, Decrease volume, exec, ${pkgs.pamixer}/bin/pamixer -d 5"
           "SUPER, p, Toggle media playback (play/pause), exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"
