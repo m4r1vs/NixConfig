@@ -43,7 +43,6 @@ in {
     shellIconMap = mkOption {
       type = types.attrsOf types.str;
       default = {
-        ".opencode-wrapp" = "󱚣"; # Name so long, it gets truncated
         bash = "";
         bun = "";
         caffeinate = "";
@@ -60,11 +59,12 @@ in {
         nix = "󱄅";
         node = "";
         nvim = "";
+        opencode = "󱚣";
         rustc = "";
         rustup = "";
+        scp = "󰡰";
         spotify_player = "";
         ssh = "󰒍";
-        scp = "󰡰";
         sudo =
           if isDarwin
           then "  root"
