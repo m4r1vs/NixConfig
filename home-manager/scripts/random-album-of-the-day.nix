@@ -11,7 +11,7 @@ in {
     ''
       set -o pipefail
 
-      ${scripts.nixos-notify} -i ${../../assets/nix-flake/with-headphones.svg} -u low -e -h string:synchronous:random-album "Connecting to Bandcamp..."
+      ${scripts.nixos-notify} -i ${../../assets/nix-flake/with-headphones.svg} -u low -h string:synchronous:random-album -e "Connecting to Bandcamp..."
 
       HTML=$(${pkgs.curl}/bin/curl -s "https://daily.bandcamp.com/album-of-the-day")
       RANDOM_ALBUM_LINE=$(echo "$HTML" | grep '<a class="title" href="/album-of-the-day/' | ${pkgs.coreutils}/bin/shuf -n 1)
@@ -28,7 +28,7 @@ in {
       exit_code="$?"
 
       if [ -z "$id" ] || [ "$exit_code" -ne 0 ]; then
-        ${scripts.nixos-notify} -i ${../../assets/nix-flake/with-headphones.svg} -e "Failed to search Spotify for" "\"$RANDOM_ALBUM\""
+        ${scripts.nixos-notify} -i ${../../assets/nix-flake/with-headphones.svg} -e "Could not find \"$RANDOM_ALBUM\" on Spotify"
         exit 0
       fi
 

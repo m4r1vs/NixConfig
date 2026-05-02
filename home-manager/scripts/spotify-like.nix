@@ -12,9 +12,9 @@
     ${scripts.nixos-notify} \
       -i ${../../assets/nix-flake/with-headphones.svg} \
       -u low \
-      -e \
       -h string:synchronous:spotify-like \
       -t 3200 \
+      -e \
       "Liked on  Spotify:" \
       "$NAME"
   '';

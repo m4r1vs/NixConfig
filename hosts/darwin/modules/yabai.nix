@@ -129,7 +129,8 @@ in {
         f2 | brightness_up
 
         f8 : @toggle_scratchpad("spotify", "${pkgs.ghostty}/bin/ghostty --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=14 --background-opacity=0.85 --title=scratchpad_spotify -e spotify_player")
-        lcmd - f8 : random-album-of-the-day
+        lcmd - f8 : spotify-like
+        shift - f8 : random-album-of-the-day
 
         f10 | mute
         f11 | sound_down
