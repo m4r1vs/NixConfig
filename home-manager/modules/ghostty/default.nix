@@ -54,7 +54,12 @@ in {
         link-url = true;
         keybind =
           [
+            # ctrl+i == tab ASCII escape.
+            # Fix: bind it to another key in emulator (pagedown for us).
+            # Now we can bind ctrl+i and tab to different stuff in neovim.
+            # See https://github.com/tmux/tmux/issues/2705
             "ctrl+i=csi:6~"
+
             "ctrl+minus=decrease_font_size:1"
             "ctrl+equal=increase_font_size:1"
             "ctrl+plus=increase_font_size:1"
