@@ -14,8 +14,8 @@ return {
   opts = {
     auto_save = true,
     auto_create = function()
-      local cmd = '[ -d .git ] && echo true || echo false'
-      return vim.fn.system(cmd) == 'true\n'
+      local cmd = '[ -d .git ] && echo -e true || echo -e false'
+      return vim.fn.system(cmd) == 'true'
     end,
     suppressed_dirs = { "~/", "/run/*" },
     auto_restore = true,
