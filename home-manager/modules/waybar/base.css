@@ -7,10 +7,10 @@
 * {
   border: none;
   border-radius: 0px;
-  font-family: "JetBrainsMono Nerd Font Propo";
-  font-weight: bold;
-  font-size: 11px;
-  min-height: 11px;
+  font-family: "SFProText Nerd Font";
+  font-feature-settings: "tnum";
+  font-size: 12px;
+  min-height: 12px;
   color: @main-fg;
   text-shadow: none;
 }
@@ -27,6 +27,16 @@ tooltip {
   color: @main-fg;
   border-radius: 6px;
   border-width: 0px;
+}
+
+tooltip label {
+  font-family: "JetBrainsMono Nerd Font Propo";
+  font-weight: 500;
+}
+
+#workspaces * {
+  font-family: "JetBrainsMono Nerd Font Propo";
+  font-weight: bold;
 }
 
 #workspaces button {
@@ -75,9 +85,6 @@ tooltip {
   background-color: rgba(0, 0, 0, 0);
   background-color: @main-bg;
   padding: 0px;
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.35),
-    0 1px 1px rgba(0, 0, 0, 0.52);
 }
 
 #tray * {
@@ -93,55 +100,56 @@ tooltip {
   min-height: 10px;
 }
 
-#backlight,
-#battery,
-#bluetooth,
-#custom-cava,
-#custom-cliphist,
-#clock,
-#custom-cpuinfo,
-#cpu,
-#custom-gpuinfo,
-#idle_inhibitor,
-#custom-keybindhint,
-#language,
-#memory,
-#disk,
-#mpris,
-#network,
-#custom-notifications,
 #custom-gcal,
-#custom-caffeinate,
-#custom-power,
 #privacy,
-#pulseaudio,
 #custom-media,
 #custom-webcam,
-#custom-fprint,
+#tray {
+  font-weight: 500;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#custom-media,
+#custom-gcal {
+  font-family: "SFProDisplay Nerd Font";
+  font-size: 13px;
+}
+
 #custom-weather,
-#taskbar,
-#custom-theme,
-#tray,
-#custom-updates,
-#custom-wallchange,
-#custom-wbar {
+#pulseaudio {
+  font-family: "SFProDisplay Nerd Font";
+}
+
+#backlight,
+#battery,
+#window,
+#clock,
+#pulseaudio,
+#memory,
+#disk,
+#custom-notifications,
+#network,
+#custom-caffeinate,
+#cpu,
+#pulseaudio,
+#custom-weather {
+  font-weight: 600;
   padding-left: 4px;
   padding-right: 4px;
 }
 
 #window {
+  font-size: 13px;
   padding: 0px;
 }
 
 #os-logo {
   margin: 0px 4px 4px 8px;
-  font-size: 13px;
-  min-height: 13px;
 }
 
 #media-and-volume,
 #workspaces-and-privacy,
-#sysinfo,
 #misc {
   margin: 0px 4px 4px 4px;
 }
@@ -151,7 +159,6 @@ tooltip {
 }
 
 #media-and-volume,
-#sysinfo,
 #os-logo,
 #media-and-volume,
 #workspaces-and-privacy,

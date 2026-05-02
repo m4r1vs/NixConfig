@@ -76,6 +76,34 @@ in {
             '';
           };
 
+          sf-pro-nerd-font = stdenv.mkDerivation {
+            name = "San Francisco Pro Nerd Font";
+            src = fetchFromGitHub {
+              owner = "sahibjotsaggu";
+              repo = "San-Francisco-Pro-Fonts";
+              rev = "8bfea09aa6f1139479f80358b2e1e5c6dc991a58";
+              hash = "sha256-mAXExj8n8gFHq19HfGy4UOJYKVGPYgarGd/04kUIqX4=";
+            };
+            nativeBuildInputs = [
+              nerd-font-patcher
+              lsd
+            ];
+            installPhase = ''
+              runHook preInstall
+
+              rm SF-Pro-Rounded*.otf
+
+              find \( -name \*.otf \) -execdir nerd-font-patcher --no-progressbars -c {} \;
+
+              mkdir -p "$out/share/fonts/opentype/SFProText Nerd Font"
+              cp ./SFProTextNerdFont*.otf "$out/share/fonts/opentype/SFProText Nerd Font"
+              mkdir -p "$out/share/fonts/opentype/SFProDisplay Nerd Font"
+              cp ./SFProDisplayNerdFont*.otf "$out/share/fonts/opentype/SFProDisplay Nerd Font"
+
+              runHook postInstall
+            '';
+          };
+
           # TODO: add PR to add to nixpkgs
           clippy-darwin = pkgsUnstable.buildGoModule {
             pname = "clippy-darwin";

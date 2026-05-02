@@ -139,7 +139,7 @@ in {
           ''}";
 
           "${mod}+d" = "exec --no-startup-id ${pkgs.writeShellScript "rofi-launcher" ''
-            ${pkgs.rofi}/bin/rofi -theme-str "entry {placeholder: \"Launch a Program...\";}entry{padding: 10 10 0 12;}" -combi-modi search:${scripts.rofi-search},drun -show combi
+            ${pkgs.rofi}/bin/rofi -theme-str "entry {placeholder: \"Launch a Program...\";padding: 10 10 0 4;}" -combi-modi search:${scripts.rofi-search},drun -show combi -drun-display-format "{name} [<span weight='regular' size='small'> {generic}</span>]"
           ''}";
 
           "${mod}+m" = "exec --no-startup-id ${pkgs.writeShellScript "rofi-emoji" ''

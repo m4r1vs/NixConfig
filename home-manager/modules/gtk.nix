@@ -38,8 +38,8 @@ in {
         name = "Bibata-Modern-Ice";
       };
       font = {
-        package = pkgs.reforma-fonts;
-        name = "Reforma 2018";
+        package = pkgs.sf-pro-nerd-font;
+        name = "SFProDisplay Nerd Font";
         size = 10;
       };
     };
