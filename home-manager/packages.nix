@@ -51,6 +51,7 @@ in {
         gnome-chess # chess
         gnome-clocks # alarms, timers, etc.
         gnome-decoder # qr code generator
+        gnome-font-viewer # View Fonts
         gnome-network-displays # airplay, chromecast, miracast
         gnome-weather # weather forecast
         gradia # Screenshot annotation tool
