@@ -107,6 +107,7 @@ in {
           public-sans
           reforma-fonts
           ubuntu-classic
+          inter-nerdfont
         ]
         ++ optionals (!isDarwin) [
           apple-color-emoji
