@@ -17,7 +17,7 @@ in {
     home.file.".theme/swaync/style-light.css".text =
       # css
       ''
-        @define-color background-clr rgba(${theme.backgroundColorLightRGB}, 0.66);
+        @define-color background-clr rgba(${theme.backgroundColorLightRGB}, 0.70);
         @define-color foreground-clr #000000;
         @define-color primary-clr ${theme.primaryColor.hex};
         @define-color secondary-clr ${theme.secondaryColor.hex};
@@ -27,7 +27,7 @@ in {
     home.file.".theme/swaync/style-dark.css".text =
       # css
       ''
-        @define-color background-clr rgba(${theme.backgroundColorRGB}, 0.66);
+        @define-color background-clr rgba(${theme.backgroundColorRGB}, 0.70);
         @define-color foreground-clr #ffffff;
         @define-color primary-clr ${theme.primaryColor.hex};
         @define-color secondary-clr ${theme.secondaryColor.hex};
