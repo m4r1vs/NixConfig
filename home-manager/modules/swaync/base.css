@@ -410,13 +410,17 @@ slider {
   color: @foreground-clr;
 }
 
+.notification.low progress,
+.notification.normal progress,
 .notification.critical progress {
-  background-color: @primary-clr;
+  background-color: @secondary-clr;
 }
 
-.notification.low progress,
-.notification.normal progress {
-  background-color: @primary-clr;
+.notification progress,
+.notification trough,
+.notification progressbar {
+  border-radius: 3px;
+  padding: 3px 0;
 }
 
 .control-center-dnd {
