@@ -154,16 +154,31 @@ in {
           bind-key l swap-window -t +1 \; next
           bind-key h swap-window -t -1 \; prev
 
-          # Pane bindings
+          # Pane splits
           bind-key -n M-v split-window -h -c "#{pane_current_path}"
           bind-key -n M-s split-window -v -c "#{pane_current_path}"
 
-          # Resize pane bindings
+          # Navigation
+          bind-key -n C-h if -F "#{@pane-is-vim}" 'send-keys C-h'  'select-pane -L'
+          bind-key -n C-j if -F "#{@pane-is-vim}" 'send-keys C-j'  'select-pane -D'
+          bind-key -n C-k if -F "#{@pane-is-vim}" 'send-keys C-k'  'select-pane -U'
+          bind-key -n C-l if -F "#{@pane-is-vim}" 'send-keys C-l'  'select-pane -R'
+
+          # Smart pane resizing with awareness of Neovim splits.
+          bind-key -n C-M-h if -F "#{@pane-is-vim}" 'send-keys C-M-h' 'resize-pane -L 6'
+          bind-key -n C-M-j if -F "#{@pane-is-vim}" 'send-keys C-M-j' 'resize-pane -D 6'
+          bind-key -n C-M-k if -F "#{@pane-is-vim}" 'send-keys C-M-k' 'resize-pane -U 6'
+          bind-key -n C-M-l if -F "#{@pane-is-vim}" 'send-keys C-M-l' 'resize-pane -R 6'
+
+          # Navigation in Copy mode
+          bind-key -T copy-mode-vi 'C-h' select-pane -L
+          bind-key -T copy-mode-vi 'C-j' select-pane -D
+          bind-key -T copy-mode-vi 'C-k' select-pane -U
+          bind-key -T copy-mode-vi 'C-l' select-pane -R
+          bind-key -T copy-mode-vi 'C-\' select-pane -l
+
+          # Maximize Pane
           bind-key -n M-f resize-pane -Z \;
-          bind-key -n M-Left resize-pane -L 5
-          bind-key -n M-Down resize-pane -D 5
-          bind-key -n M-Up resize-pane -U 5
-          bind-key -n M-Right resize-pane -R 5
 
           # dont ask for confirmation closing panes
           bind-key x kill-pane
@@ -185,7 +200,6 @@ in {
           set-hook -g session-closed         'refresh-client -S'
         '';
       plugins = with pkgs.tmuxPlugins; [
-        vim-tmux-navigator
         jump
         yank
         {

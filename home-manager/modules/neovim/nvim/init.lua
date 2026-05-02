@@ -56,7 +56,7 @@ vim.opt.hlsearch = true
 vim.opt.inccommand = "split" -- live preview of substitutions
 vim.wo.signcolumn = "yes:1"
 vim.opt.linebreak = true
-vim.o.exrc = true
+vim.opt.exrc = true -- Read .nvim.lua file
 
 -- Folds (use za to toggle the fold, zR to unfold all and zM to fold all)
 vim.opt.foldlevel = 99
@@ -333,7 +333,7 @@ end, { desc = "Toggle Virtual Edit" })
 vim.keymap.set("n", "<leader>uU", ":silent Lazy update<CR>", { desc = "Update Lazy Plugins" })
 
 -- Toggle colorcolumn at 80 (highlights line length limit)
-vim.keymap.set("n", "<leader>uc", function()
+vim.keymap.set("n", "<leader>uC", function()
   if vim.wo.colorcolumn == "" then
     vim.wo.colorcolumn = "80"
   else
@@ -347,11 +347,11 @@ vim.keymap.set("n", "<leader>u+", function()
 end, { desc = "Toggle Cursor Crosshair" })
 
 -- Toggle conceal level (useful in markdown/JSON to see raw text)
-vim.keymap.set("n", "<leader>uC", function()
+vim.keymap.set("n", "<leader>uc", function()
   if vim.wo.conceallevel > 0 then
     vim.wo.conceallevel = 0
   else
-    vim.wo.conceallevel = 2
+    vim.wo.conceallevel = 1
   end
 end, { desc = "Toggle Conceal" })
 
@@ -409,12 +409,6 @@ vim.keymap.set("n", "<F3>", vim.cmd.cnext, { desc = "Next Quickfix" })
 
 vim.keymap.set("n", "<F7>", vim.cmd.cprevious, { desc = "Previous Quickfix" })
 vim.keymap.set("n", "<F9>", vim.cmd.cnext, { desc = "Next Quickfix" })
-
--- Resize splits with Ctrl+Alt+h/j/k/l
-vim.keymap.set("n", "<C-M-h>", ":vertical resize -2<CR>", { noremap = true, silent = true, desc = "Resize split left" })
-vim.keymap.set("n", "<C-M-l>", ":vertical resize +2<CR>", { noremap = true, silent = true, desc = "Resize split right" })
-vim.keymap.set("n", "<C-M-k>", ":resize -2<CR>", { noremap = true, silent = true, desc = "Resize split up" })
-vim.keymap.set("n", "<C-M-j>", ":resize +2<CR>", { noremap = true, silent = true, desc = "Resize split down" })
 
 -- Close window with leader+q
 vim.keymap.set("n", "<leader>q", "<C-w>q", { noremap = true, silent = true, desc = "Close Window/Split/Tab" })
