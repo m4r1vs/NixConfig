@@ -96,7 +96,7 @@
           height=$(echo "$dimensions" | cut -d ' ' -f 2)
           is_widescreen=$(echo "scale=2; $width / $height > 1.4" | ${pkgs.bc}/bin/bc)
           if [[ "$is_widescreen" -eq 1 ]]; then
-            SPACING="       "
+            SPACING="                     "
           fi
         fi
       fi

@@ -66,7 +66,7 @@ in {
       extraConfig = {
         display-drun = "";
         display-dmenu = "";
-        font = "JetBrainsMono NF SemiBold 12";
+        font = "SFProDisplay Nerd Font Medium 13";
         location = 0;
         icon-theme = "Papirus";
         show-icons = true;
@@ -120,6 +120,7 @@ in {
           element-text {
             background-color: transparent;
             text-color: inherit;
+            highlight: none;
           }
 
           element-icon {

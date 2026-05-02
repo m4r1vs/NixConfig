@@ -100,25 +100,26 @@ in {
       packages =
         [
           eb-garamond
-          nerd-fonts.jetbrains-mono
           nerd-fonts.departure-mono
           nerd-fonts.go-mono
+          nerd-fonts.jetbrains-mono
           open-sans
           public-sans
-          ubuntu-classic
           reforma-fonts
+          ubuntu-classic
         ]
         ++ optionals (!isDarwin) [
           apple-color-emoji
           samsung-clock-font
+          sf-pro-nerd-font
         ];
     }
     // optionalAttrs (!isDarwin) {
       enableDefaultPackages = true;
       fontconfig = {
         defaultFonts = {
-          serif = ["Reforma 1969"];
-          sansSerif = ["Reforma 2018"];
+          serif = ["Reforma 2018"];
+          sansSerif = ["SFProDisplay Nerd Font"];
           monospace = ["JetBrainsMono Nerd Font Propo"];
           emoji = ["Apple Color Emoji"];
         };

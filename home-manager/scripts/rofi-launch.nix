@@ -12,7 +12,7 @@
           ${pkgs.rofi}/bin/rofi -show ssh -theme-str "entry{placeholder:\"SSH into a Remote...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}window{padding: 38% 42%;}"
           ;;
         search)
-          ${pkgs.rofi}/bin/rofi -theme-str "entry {placeholder: \"Launch a Program...\";}entry{padding: 10 10 0 12;}" -combi-modi search:${scripts.rofi-search},drun -show combi
+          ${pkgs.rofi}/bin/rofi -theme-str "entry {placeholder: \"Launch a Program...\";padding: 10 10 0 4;}" -combi-modi search:${scripts.rofi-search},drun -show combi -drun-display-format "{name} [<span weight='regular' size='small'> {generic}</span>]"
           ;;
         emoji)
           ${pkgs.rofimoji}/bin/rofimoji --selector-args="-theme-str \"listview{dynamic:true;columns:12;layout:vertical;flow:horizontal;reverse:false;lines:8;}element-text{enabled:false;}element-icon{size:50px;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 24;}\"" --use-icons --typer wtype --clipboarder wl-copy --skin-tone neutral --selector rofi --max-recent 0 --action clipboard

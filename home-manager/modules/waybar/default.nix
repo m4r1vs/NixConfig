@@ -114,7 +114,8 @@ in {
           };
 
           clock = {
-            format = "{:%H:%M %p}";
+            format = "{:%b %d %H:%M}";
+            interval = 60;
             rotate = 0;
             tooltip-format = "<span>{calendar}</span>";
             calendar = {
@@ -168,16 +169,6 @@ in {
             on-click = "${scripts.rofi-launch} search";
             on-click-right = "${scripts.rofi-launch} power";
           };
-
-          # "custom/cpuinfo" = {
-          #   exec = "${scripts.cpu-info}";
-          #   return-type = "json";
-          #   format = "{}";
-          #   rotate = 0;
-          #   interval = 10;
-          #   tooltip = true;
-          #   max-length = 1000;
-          # };
 
           "custom/media" = {
             exec = "${scripts.mediaplayer-wrapper}";
@@ -352,7 +343,7 @@ in {
           };
 
           pulseaudio = {
-            format = "{icon} {volume}";
+            format = "{icon}  {volume}";
             rotate = 0;
             format-muted = "";
             on-click = "${pkgs.pavucontrol}/bin/pavucontrol -t 3";

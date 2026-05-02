@@ -78,7 +78,7 @@ in {
             text = "cmd[update:2000] ${scripts.battery-status}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             font_size = scale 12;
-            font_family = "JetBrainsMono NF SemiBold";
+            font_family = "SFProDisplay Nerd Font SemiBold";
             position = scaleStr "-24, -24";
             text_align = "right";
             halign = "right";
@@ -92,7 +92,7 @@ in {
             text = "cmd[update:4000] ${scripts.mpris-hyprlock} --title";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             font_size = scale 12;
-            font_family = "JetBrainsMono NF SemiBold";
+            font_family = "SFProDisplay Nerd Font Bold";
             position = scaleStr "118, -24";
             text_align = "left";
             halign = "left";
@@ -106,7 +106,7 @@ in {
             text = "cmd[update:4000] ${scripts.mpris-hyprlock} --length";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
             font_size = scale 12;
-            font_family = "JetBrainsMono NF SemiBold";
+            font_family = "SFProDisplay Nerd Font SemiBold";
             position = scaleStr "118, -80";
             text_align = "left";
             halign = "left";
@@ -120,8 +120,8 @@ in {
             text = "cmd[update:4000] ${scripts.mpris-hyprlock} --source";
             color = "rgba(${theme.secondaryColor.rgb}, 0.32)";
             font_size = scale 64;
-            font_family = "JetBrainsMono Nerd Font";
-            position = scaleStr "-24, -6";
+            font_family = "SFProDisplay Nerd Font SemiBold";
+            position = scaleStr "0, -10";
             text_align = "left";
             zindex = 1;
             halign = "left";
@@ -134,7 +134,7 @@ in {
           {
             text = "cmd[update:4000] ${scripts.mpris-hyprlock} --artist";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
-            font_family = "JetBrainsMono Nerd Font";
+            font_family = "SFProDisplay Nerd Font SemiBold";
             font_size = scale 12;
             position = scaleStr "118, -46";
             text_align = "left";
@@ -147,7 +147,7 @@ in {
           }
           {
             text = "cmd[update:60000] echo \"$(date +\"%a, %b %d\")  $(${pkgs.wttrbar}/bin/wttrbar --nerd --custom-indicator \"{ICON} {temp_C}°\" | ${pkgs.jq}/bin/jq .text -r)\"";
-            font_family = "JetBrainsMono NF Light";
+            font_family = "SFProDisplay Nerd Font SemiBold";
             color = "rgba(${theme.backgroundColorLightRGB},0.72)";
             font_size = scale 15;
             text_align = "center";
@@ -163,7 +163,7 @@ in {
             text = " ${systemArgs.username}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             font_size = scale 12;
-            font_family = "JetBrainsMono NF SemiBold";
+            font_family = "SFProDisplay Nerd Font SemiBold";
             position = scaleStr "24, 24";
             text_align = "left";
             halign = "left";
@@ -190,7 +190,7 @@ in {
             inner_color = "rgba(0,0,0,0)";
             fail_color = "rgba(175,48,41,0.76)";
             outline_thickness = 0;
-            font_family = "JetBrainsMono Nerd Font Propo";
+            font_family = "SFProDisplay Nerd Font SemiBold";
             fail_text = " 󰌾 ";
             placeholder_text = " 󰌾 ";
             swap_font_color = true;

@@ -79,7 +79,7 @@
 
       # 1. Ongoing
       if [[ "$now_ts" -ge "$start_ts" && "$now_ts" -lt "$end_ts" ]]; then
-          output_json "󰨱 Right now: <i>$title</i>"
+          output_json "󰨱 <b>Now: $title</b>"
           exit 0
       fi
 
@@ -89,17 +89,17 @@
           if [[ "$diff" -gt 0 && "$diff" -le 18000 ]]; then
               if [[ "$diff" -le 3600 ]]; then
                   minutes=$((diff / 60))
-                  output_json "󰨱 In $minutes minutes: <i>$title</i>"
+                  output_json "󰨱 <b>In $minutes minutes: $title</b>"
               else
                   # Use awk for one decimal place
                   hours=$(${pkgs.gawk}/bin/awk -v d="$diff" 'BEGIN { printf "%.1f", d / 3600 }')
-                  output_json "󰨱 In $hours hours: <i>$title</i>"
+                  output_json "󰨱 In $hours hours: $title"
               fi
           else
               if [[ -n "$s_time" ]]; then
-                  output_json "󰃭 Today, $s_time: <i>$title</i>"
+                  output_json "󰃭 Today, $s_time: $title"
               else
-                  output_json "󰃭 Today: <i>$title</i>"
+                  output_json "󰃭 Today: $title"
               fi
           fi
           exit 0
@@ -109,9 +109,9 @@
       if [[ "$s_date" == "$tomorrow_date" ]]; then
           # Format time if not an all-day event
           if [[ -n "$s_time" ]]; then
-              output_json "󰃭 Tomorrow, $s_time: <i>$title</i>"
+              output_json "󰃭 Tomorrow, $s_time: $title"
           else
-              output_json "󰃭 Tomorrow: <i>$title</i>"
+              output_json "󰃭 Tomorrow: $title"
           fi
           exit 0
       fi
@@ -125,9 +125,9 @@
       # 5. Future (within 2 days, but not today or tomorrow)
       day_name=$(${pkgs.coreutils}/bin/date -d "$s_date" "+%A")
       if [[ -n "$s_time" ]]; then
-          output_json "󰃭 $day_name, $s_time: <i>$title</i>"
+          output_json "󰃭 $day_name, $s_time: $title"
       else
-          output_json "󰃭 $day_name: <i>$title</i>"
+          output_json "󰃭 $day_name: $title"
       fi
       exit 0
 
