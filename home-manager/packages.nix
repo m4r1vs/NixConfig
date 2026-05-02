@@ -17,11 +17,12 @@ in {
       (writeShellScriptBin "rebuild" scripts.rebuild)
       astroterm # show stars in terminal
       fastfetch # new neofetch
+      gh # GitHub CLI
       golazo # show soccer scores in terminal
       kubectl # kubernetes CLI
       pastel # manipulate colors and palettes
+      tlrc # Simplified manpages
       xdg-utils # xdg-open, etc.
-      gh # GitHub CLI
     ]
     ++ lib.optionals isDarwin [
       # Install on MacOS only:
