@@ -169,6 +169,7 @@ in {
           neovim-unwrapped = pkgsUnstable.neovim-unwrapped;
           opencode = pkgsUnstable.opencode;
           swaynotificationcenter = pkgsUnstable.swaynotificationcenter;
+          tlrc = pkgsUnstable.tlrc;
           ty = pkgsUnstable.ty;
           waybar = pkgsUnstable.waybar;
           yazi = pkgsUnstable.yazi;
