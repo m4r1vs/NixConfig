@@ -216,7 +216,7 @@
             // {
               system = "x86_64-linux";
               theme = makeTheme {
-                primary = "teal";
+                primary = "green";
                 secondary = "orange";
               };
               hostname = "desknix";
