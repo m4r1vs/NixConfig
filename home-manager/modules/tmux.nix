@@ -60,6 +60,7 @@ in {
         node = "";
         nvim = "";
         opencode = "󱚣";
+        postgres = "";
         rustc = "";
         rustup = "";
         scp = "󰡰";
