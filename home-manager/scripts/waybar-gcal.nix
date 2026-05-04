@@ -79,7 +79,7 @@
 
       # 1. Ongoing
       if [[ "$now_ts" -ge "$start_ts" && "$now_ts" -lt "$end_ts" ]]; then
-          output_json "󰨱 <b>Now: $title</b>"
+          output_json "󰨱 <span weight='600'>Now: $title</span>"
           exit 0
       fi
 
@@ -89,7 +89,7 @@
           if [[ "$diff" -gt 0 && "$diff" -le 18000 ]]; then
               if [[ "$diff" -le 3600 ]]; then
                   minutes=$((diff / 60))
-                  output_json "󰨱 <b>In $minutes minutes: $title</b>"
+                  output_json "󰨱 <span weight='600'>In $minutes minutes: $title</span>"
               else
                   # Use awk for one decimal place
                   hours=$(${pkgs.gawk}/bin/awk -v d="$diff" 'BEGIN { printf "%.1f", d / 3600 }')
