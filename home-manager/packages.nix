@@ -15,6 +15,7 @@ in {
     [
       # Install on every system:
       (writeShellScriptBin "rebuild" scripts.rebuild)
+      (writeShellScriptBin "date-trivia" scripts.date-trivia)
       astroterm # show stars in terminal
       fastfetch # new neofetch
       gh # GitHub CLI
