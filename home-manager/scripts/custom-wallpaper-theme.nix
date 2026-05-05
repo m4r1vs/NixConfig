@@ -82,6 +82,46 @@ in {
           PRIMARY_COLOR_HEX="#DB9C00";
           SECONDARY_COLOR_HEX="#597492";
           ;;
+        Dandelion.jpg)
+          PRIMARY_COLOR_HEX="#C38C05";
+          SECONDARY_COLOR_HEX="#6B7533";
+          ;;
+        Alsterschwan.jpg)
+          PRIMARY_COLOR_HEX="#7D7D00";
+          SECONDARY_COLOR_HEX="#987243";
+          ;;
+        Auringonlasku_Mökillä.jpg)
+          PRIMARY_COLOR_HEX="#E35203";
+          SECONDARY_COLOR_HEX="#FF9605";
+          ;;
+        Ghibli_Puddle_on_Train_Tracks.jpg)
+          PRIMARY_COLOR_HEX="#376C96";
+          SECONDARY_COLOR_HEX="#E4C200";
+          ;;
+        Graffiti_Bird.jpg)
+          PRIMARY_COLOR_HEX="#027180";
+          SECONDARY_COLOR_HEX="#A56326";
+          ;;
+        Hamburger_Hafen.jpg)
+          PRIMARY_COLOR_HEX="#ECA245";
+          SECONDARY_COLOR_HEX="#67666C";
+          ;;
+        Scooter_in_Bangkok.jpg)
+          PRIMARY_COLOR_HEX="#69A89D";
+          SECONDARY_COLOR_HEX="#0997C9";
+          ;;
+        Sunset_Tree.jpg)
+          PRIMARY_COLOR_HEX="#D65D19";
+          SECONDARY_COLOR_HEX="#53674D";
+          ;;
+        Washington_Square_Skater.jpg)
+          PRIMARY_COLOR_HEX="#D8D8D8";
+          SECONDARY_COLOR_HEX="#7E7E7E";
+          ;;
+        Weißdorn_Blüte.jpg)
+          PRIMARY_COLOR_HEX="#547602";
+          SECONDARY_COLOR_HEX="#DFC540";
+          ;;
         *)
           PRIMARY_COLOR_HEX="#81913F"
           SECONDARY_COLOR_HEX="#DB8C4B"
