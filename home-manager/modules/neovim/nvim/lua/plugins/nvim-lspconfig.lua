@@ -112,9 +112,15 @@ return {
             enable = false,
             url = "",
           },
-          schemas = require('schemastore').yaml.schemas(),
+          schemas = require("schemastore").yaml.schemas(),
         },
       },
+    })
+
+    -- Haskell
+    vim.lsp.enable("hls")
+    vim.lsp.config("hls", {
+      filetypes = { "haskell", "lhaskell", "cabal" },
     })
 
     -- Other ones without config

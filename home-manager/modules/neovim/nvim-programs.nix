@@ -18,6 +18,7 @@ with pkgs; [
   golangci-lint-langserver
   gopls
   gotools
+  haskell-language-server
   helm-ls
   hyprls
   jdt-language-server
