@@ -21,10 +21,9 @@ in {
       ''
         @define-color module-background ${theme.backgroundColorLight};
         @define-color main-foreground #000000;
-        @define-color ws-active-background ${theme.primaryColor.hex};
-        @define-color ws-urgent-background ${theme.secondaryColor.hex};
         @define-color ws-active-foreground #000000;
 
+        @import url("/home/${systemArgs.username}/.theme/waybar/colors.css");
         @import url("${builtins.path {path = ./base.css;}}");
       '';
     home.file.".config/waybar/style-dark.css".text =
@@ -34,10 +33,9 @@ in {
       ''
         @define-color module-background ${theme.backgroundColor};
         @define-color main-foreground rgba(214,214,214,1);
-        @define-color ws-active-background ${theme.primaryColor.hex};
-        @define-color ws-urgent-background ${theme.secondaryColor.hex};
         @define-color ws-active-foreground #000000;
 
+        @import url("/home/${systemArgs.username}/.theme/waybar/colors.css");
         @import url("${builtins.path {path = ./base.css;}}");
       '';
 
@@ -87,7 +85,6 @@ in {
             orientation = "horizontal";
             modules = [
               "backlight"
-              "network"
               "cpu"
               "memory"
               "disk"
@@ -317,16 +314,6 @@ in {
             on-scroll-up = "${pkgs.brightnessctl}/bin/brightnessctl set 1%+";
             on-scroll-down = "${pkgs.brightnessctl}/bin/brightnessctl set 1%-";
             min-length = 6;
-          };
-
-          network = {
-            tooltip = true;
-            rotate = 0;
-            tooltip-format = "Network: <big><b>{essid}</b></big>\nSignal strength: <b>{signaldBm}dBm ({signalStrength}%)</b>\nFrequency: <b>{frequency}MHz</b>\nInterface: <b>{ifname}</b>\nIP: <b>{ipaddr}/{cidr}</b>\nGateway: <b>{gwaddr}</b>\nNetmask: <b>{netmask}</b>";
-            format-linked = "󰈀 {ifname} (No IP)";
-            tooltip-format-disconnected = "Disconnected";
-            format = "<span foreground='${theme.primaryColor.hex}'> {bandwidthDownBytes}</span> <span foreground='${theme.secondaryColor.hex}'> {bandwidthUpBytes}</span>";
-            interval = 2;
           };
 
           disk = {

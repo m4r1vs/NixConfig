@@ -28,6 +28,7 @@ in {
     ++ lib.optionals isDarwin [
       # Install on MacOS only:
       (writeShellScriptBin "random-album-of-the-day" scripts.random-album-of-the-day)
+      (writeShellScriptBin "random-wallpaper" (scripts.random-wallpaper ./wallpaper))
       (writeShellScriptBin "spotify-like" scripts.spotify-like)
       clippy-darwin # cli to copy/paste files (used by yazi plugin)
       comma # run programs not installed but in nixpkgs

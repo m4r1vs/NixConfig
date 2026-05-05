@@ -465,20 +465,20 @@ slider {
 
 .widget-volume label {
   font-size: 1.5rem;
-  color: #ff00ff;
+  color: @primary-clr;
 }
 
 .widget-volume trough highlight {
-  background: #ff00ff;
+  background: @primary-clr;
 }
 
 .widget-backlight trough highlight {
-  background: #00ffff;
+  background: @secondary-clr;
 }
 
 .widget-backlight label {
   font-size: 1.5rem;
-  color: #00ffff;
+  color: @secondary-clr;
 }
 
 .widget-backlight .KB {

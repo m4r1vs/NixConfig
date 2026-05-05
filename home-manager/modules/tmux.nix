@@ -207,11 +207,12 @@ in {
           plugin = minimal-tmux-status;
           extraConfig = ''
             set -g @minimal-tmux-fg "#000000"
-            set -g @minimal-tmux-bg "${theme.primaryColor.hex}"
             set -g @minimal-tmux-justify "centre"
             set -g @minimal-tmux-indicator-str ""
             set -g @minimal-tmux-indicator true
             set -g @minimal-tmux-status "bottom"
+
+            source-file ~/.theme/tmux/colors.conf
 
             # Enables or disables the left and right status bar
             set -g @minimal-tmux-right true
@@ -238,7 +239,7 @@ in {
 
             # Not recommended to change these values
             set -g @minimal-tmux-status-right "                                             %d.%m. 󰥔 %H:%M"
-            set -g @minimal-tmux-status-left "#(tmux ls -F '##{?session_attached,#[fg=${theme.secondaryColor.hex}],#[fg=#826F62]} ${lib.replaceStrings ["#"] ["##"] (mkTmuxWindowStatusFormat {
+            set -g @minimal-tmux-status-left "#(tmux ls -F '##{?session_attached,#[fg=#{@secondary-color}],#[fg=#826F62]} ${lib.replaceStrings ["#"] ["##"] (mkTmuxWindowStatusFormat {
               shellIconMap = cfg.shellIconMap;
               showPaneCount = false;
             })} (##{session_windows}) #[fg=default]' | tr -d '\n'; printf '%%60s' \"\")"

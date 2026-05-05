@@ -85,7 +85,7 @@ in {
         hyprland-which-key = lib.mkIf osConfig.programs.hyprland.enable {
           name = "Keyboard Shortcuts and Commands";
           icon = "preferences-desktop-keyboard-shortcuts";
-          exec = "${lib.getExe pkgs.hyprland-which-key} --accent-color \"${theme.secondaryColor.hex}\" --accent-color-light \"${theme.primaryColor.hex}\" --background-color \"${theme.backgroundColor}\" --background-color-light \"${theme.backgroundColorLight}\"";
+          exec = lib.getExe pkgs.hyprland-which-key;
           type = "Application";
           categories = ["Utility" "System"];
         };

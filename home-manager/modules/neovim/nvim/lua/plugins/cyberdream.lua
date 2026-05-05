@@ -11,13 +11,6 @@ return {
     saturation = 1, -- Value below 1 raises error on light/dark mode switch
     cache = false,  -- Enabling this breaks dark/light mode switch
     variant = "auto",
-    highlights = {
-      TabLineSel = { fg = "#000000", bg = os.getenv("PRIMARY_COLOR") },
-      IblScope = { fg = os.getenv("PRIMARY_COLOR"), bg = "NONE" },
-      LeapLabelPrimary = { fg = "#000000", bg = os.getenv("PRIMARY_COLOR"), bold = true },
-      AlphaHeader = { fg = os.getenv("PRIMARY_COLOR"), bg = "NONE" },
-      YankHighlight = { bg = os.getenv("PRIMARY_COLOR") }
-    },
     colors = { -- Flexoki color palette
       dark = {
         bg = "#15120a",

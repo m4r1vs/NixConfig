@@ -26,8 +26,6 @@
         esac
     done
 
-    # Show rofi with icon support and a grid layout matching the emoji picker style
-    # Lets Hyprland's "blur,rofi" layer rule work through the themed background
     CHOICE_INDEX=$(echo -e "$OPTIONS" | ${pkgs.rofi}/bin/rofi -dmenu -i -p "Wallpaper" \
         -format i \
         -show-icons \
@@ -40,10 +38,11 @@
     CHOICE="''${FILES[$CHOICE_INDEX]}"
     WALLPAPER="$WALLPAPER_DIR/$CHOICE"
     if [ -f "$WALLPAPER" ]; then
+        ${scripts.custom-wallpaper-theme} "$CHOICE"
         ${scripts.nixos-notify} -u low -e -i "$WALLPAPER" -h string:synchronous:wallpaper-change -t 1800 "New Wallpaper:" "$CHOICE"
-        rm $HOME/.active_wallpaper.jpg > /home/mn/rmlog
-        ln -s $WALLPAPER $HOME/.active_wallpaper.jpg > /home/mn/lnlog
-        ${pkgs.swww}/bin/swww img "$WALLPAPER" --transition-type any --transition-fps 60 --transition-step 20 --transition-duration 1
+        rm $HOME/.active_wallpaper.jpg
+        ln -s $WALLPAPER $HOME/.active_wallpaper.jpg
+        ${pkgs.swww}/bin/swww img "$WALLPAPER" --transition-type none
     fi
   '';
 }

@@ -118,7 +118,7 @@ in {
           }
           {
             text = "cmd[update:4000] ${scripts.mpris-hyprlock} --source";
-            color = "rgba(${theme.secondaryColor.rgb}, 0.32)";
+            color = "rgba(${theme.backgroundColorLightRGB}, 0.32)";
             font_size = scale 64;
             font_family = "SFProDisplay Nerd Font SemiBold";
             position = scaleStr "0, -10";
@@ -200,12 +200,12 @@ in {
             fade_on_empty = false;
             font_color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             rounding = 0;
-            check_color = "rgba(${theme.primaryColor.rgb},0.67)";
+            check_color = "rgba(${theme.backgroundColorLightRGB}, 0.46)";
             inner_color = "rgba(0,0,0,0)";
-            fail_color = "rgba(175,48,41,0.76)";
+            fail_color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             outline_thickness = 0;
             font_family = "SFProDisplay Nerd Font SemiBold";
-            fail_text = " 󰌾 ";
+            fail_text = "Try Again";
             placeholder_text = " 󰌾 ";
             swap_font_color = true;
           }

@@ -27,12 +27,6 @@ in {
       coc.enable = false;
       extraPackages = import ./nvim-programs.nix {inherit pkgs osConfig systemArgs lib;};
       withNodeJs = true;
-      extraWrapperArgs = [
-        "--suffix"
-        "PRIMARY_COLOR"
-        ":"
-        "${theme.secondaryColor.hex}"
-      ];
     };
   };
 }

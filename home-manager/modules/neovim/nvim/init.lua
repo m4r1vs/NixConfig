@@ -2,6 +2,57 @@
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
+-- Load theme palette
+local palette_path = vim.fn.expand("~/.theme/palette.json")
+_G.palette = {
+  primary_hex = "#ff0000",   -- Fallback
+  secondary_hex = "#ff0000", -- Fallback
+}
+
+local function load_palette()
+  local f = io.open(palette_path, "r")
+  if f then
+    local content = f:read("*a")
+    f:close()
+    if content and content ~= "" then
+      local ok, decoded = pcall(vim.fn.json_decode, content)
+      if ok and decoded then
+        _G.palette = decoded
+      end
+    end
+  end
+end
+
+load_palette()
+
+-- Watch for changes in palette.json
+if vim.fn.filereadable(palette_path) == 1 then
+  _G.theme_watcher = vim.loop.new_fs_event()
+  if _G.theme_watcher then
+    _G.theme_watcher:start(palette_path, {}, vim.schedule_wrap(function()
+      load_palette()
+      vim.cmd("colorscheme cyberdream")
+    end))
+  end
+end
+
+-- Apply highlights dynamically
+vim.api.nvim_create_autocmd("ColorScheme", {
+  pattern = "cyberdream",
+  callback = function()
+    if _G.palette then
+      local primary = _G.palette.primary_hex or "#33aaee"
+      local secondary = _G.palette.secondary_hex or "#ff9e64"
+
+      vim.api.nvim_set_hl(0, "TabLineSel", { fg = "#000000", bg = secondary })
+      vim.api.nvim_set_hl(0, "IblScope", { fg = primary, bg = "NONE" })
+      vim.api.nvim_set_hl(0, "LeapLabelPrimary", { fg = "#000000", bg = secondary, bold = true })
+      vim.api.nvim_set_hl(0, "AlphaHeader", { fg = secondary, bg = "NONE" })
+      vim.api.nvim_set_hl(0, "YankHighlight", { bg = secondary })
+    end
+  end,
+})
+
 -- Init LazyVim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then

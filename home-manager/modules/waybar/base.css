@@ -51,17 +51,16 @@ tooltip label {
 }
 
 #workspaces button.active {
-  background: @ws-active-background;
+  background: @primary-color;
   color: @ws-active-foreground;
   padding: 0px 5px;
   transition: all 0.2s cubic-bezier(0.55, -0.68, 0.48, 1.682);
 }
 
 #workspaces button.urgent {
-  background: @ws-urgent-background;
+  background: @secondary-color;
+  margin: 3px 2px;
   color: @ws-active-foreground;
-  margin: 0px 2px;
-  padding: 0px 3px;
   animation: blink 0.6s infinite alternate;
   transition: all 0.2s cubic-bezier(0.55, -0.68, 0.48, 1.682);
 }
@@ -79,7 +78,7 @@ tooltip label {
 }
 
 #tray menu menuitem:hover {
-  background-color: @ws-active-background;
+  background-color: @primary-color;
 }
 
 #tray menu separator {
@@ -147,7 +146,6 @@ tooltip label {
 #memory,
 #disk,
 #custom-notifications,
-#network,
 #custom-caffeinate,
 #cpu,
 #custom-weather {

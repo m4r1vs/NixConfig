@@ -32,7 +32,7 @@ in {
           text-color: #EFE7DD;
         }
         element selected {
-          background-color: rgba(${theme.secondaryColor.rgb}, 0.78);
+          background-color: @secondary;
           border-radius: 5px;
         }
       '';
@@ -55,7 +55,7 @@ in {
           text-color: #000000;
         }
         element selected {
-          background-color: rgba(${theme.primaryColor.rgb}, 0.78);
+          background-color: @primary;
           border-radius: 5px;
         }
       '';
@@ -87,6 +87,8 @@ in {
         rasi
         */
         ''
+          @import "${config.home.homeDirectory}/.theme/rofi/colors.rasi"
+
           * {
             separatorcolor:     transparent;
             border-color:       transparent;

@@ -2,6 +2,7 @@
   systemArgs,
   lib,
   osConfig,
+  scripts,
   ...
 }: let
   isDesktop = osConfig.configured ? desktop && osConfig.configured.desktop.enable;
@@ -17,6 +18,11 @@ in {
 
   home = {
     username = systemArgs.username;
+    activation.initTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
+      if [ ! -f "$HOME/.theme/palette.json" ]; then
+        $DRY_RUN_CMD ${scripts.custom-wallpaper-theme} "default"
+      fi
+    '';
     sessionVariables = lib.mkIf isDesktop {
       ELECTRON_OZONE_PLATFORM_HINT = "auto";
       NIXOS_OZONE_WL = "1";

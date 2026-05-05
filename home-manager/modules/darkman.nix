@@ -23,13 +23,13 @@ in {
         mode = "${pkgs.dconf}/bin/dconf write\ /org/gnome/desktop/interface/color-scheme \"'prefer-dark'\"";
         theme = "${pkgs.dconf}/bin/dconf write\ /org/gnome/desktop/interface/gtk-theme \"'Adwaita-dark'\"";
         icons = "${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/icon-theme \"'Papirus-Dark'\" && pkill blueman-applet && blueman-applet &";
-        customs = "${scripts.custom-theme} dark";
+        customs = "${scripts.custom-dark-light-theme} dark";
       };
       lightModeScripts = {
         mode = "${pkgs.dconf}/bin/dconf write\ /org/gnome/desktop/interface/color-scheme \"'prefer-light'\"";
         theme = "${pkgs.dconf}/bin/dconf write\ /org/gnome/desktop/interface/gtk-theme \"'Adwaita'\"";
         icons = "${pkgs.dconf}/bin/dconf write /org/gnome/desktop/interface/icon-theme \"'Papirus-Light'\" && pkill blueman-applet && blueman-applet &";
-        customs = "${scripts.custom-theme} light";
+        customs = "${scripts.custom-dark-light-theme} light";
       };
     };
   };
