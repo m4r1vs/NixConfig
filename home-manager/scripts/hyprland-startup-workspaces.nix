@@ -38,7 +38,6 @@
       hyprctl dispatch exec "${lib.getExe pkgs.whatsapp-electron} --ozone-platform-hint=auto"
       hyprctl dispatch exec "${lib.getExe pkgs.obsidian} --ozone-platform-hint=auto"
       hyprctl dispatch exec "${lib.getExe pkgs.ghostty}"
-      hyprctl dispatch exec "${lib.getExe pkgs.ghostty} --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
       hyprctl dispatch exec "${lib.getExe pkgs.brave} --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation"
 
       sleep 2
