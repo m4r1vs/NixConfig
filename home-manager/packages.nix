@@ -32,6 +32,7 @@ in {
       (writeShellScriptBin "spotify-like" scripts.spotify-like)
       clippy-darwin # cli to copy/paste files (used by yazi plugin)
       comma # run programs not installed but in nixpkgs
+      tesseract # Enable OCR
     ]
     ++ lib.optionals isGraphical [
       # Install on MacOS and NixOS Desktop
