@@ -19,14 +19,11 @@ in {
       css
       */
       ''
-        @define-color bar-bg rgba(0,0,0,0);
-        @define-color main-bg ${theme.backgroundColorLight};
-        @define-color main-fg #000000;
-        @define-color wb-act-bg ${theme.primaryColor.hex};
-        @define-color wb-urg-bg ${theme.secondaryColor.hex};
-        @define-color wb-act-fg rgba(252,252,252,1);
-        @define-color wb-hvr-bg rgba(0,0,0,0.1);
-        @define-color wb-hvr-fg #000000;
+        @define-color module-background ${theme.backgroundColorLight};
+        @define-color main-foreground #000000;
+        @define-color ws-active-background ${theme.primaryColor.hex};
+        @define-color ws-urgent-background ${theme.secondaryColor.hex};
+        @define-color ws-active-foreground #000000;
 
         @import url("${builtins.path {path = ./base.css;}}");
       '';
@@ -35,14 +32,11 @@ in {
       css
       */
       ''
-        @define-color bar-bg rgba(0,0,0,0);
-        @define-color main-bg ${theme.backgroundColor};
-        @define-color main-fg rgba(214,214,214,1);
-        @define-color wb-act-bg ${theme.primaryColor.hex};
-        @define-color wb-urg-bg ${theme.secondaryColor.hex};
-        @define-color wb-act-fg rgba(252,252,252,1);
-        @define-color wb-hvr-bg rgba(61,61,61,0.4);
-        @define-color wb-hvr-fg rgba(214,214,214,0.8);
+        @define-color module-background ${theme.backgroundColor};
+        @define-color main-foreground rgba(214,214,214,1);
+        @define-color ws-active-background ${theme.primaryColor.hex};
+        @define-color ws-urgent-background ${theme.secondaryColor.hex};
+        @define-color ws-active-foreground #000000;
 
         @import url("${builtins.path {path = ./base.css;}}");
       '';
