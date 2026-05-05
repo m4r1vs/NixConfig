@@ -50,6 +50,7 @@ in {
         showMemoryUsage = true;
         showCitations = true;
         showModelInfoInChat = true;
+        terminalBuffer = true;
         loadingPhrases = "all";
         useAlternateBuffer = true;
         showCompatibilityWarnings = false;
@@ -73,7 +74,7 @@ in {
         fileFiltering = {
           respectGeminiIgnore = true;
           enableRecursiveFileSearch = true;
-          respectGitIgnore = false;
+          respectGitIgnore = true;
         };
       };
       output = {
@@ -86,10 +87,13 @@ in {
         disableLLMCorrection = false;
       };
       experimental = {
-        modelSteering = true;
         directWebFetch = true;
         memoryManager = true;
+        modelSteering = true;
         topicUpdateNarration = true;
+        worktrees = true;
+        generalistProfile = true;
+        contextManagement = true;
       };
       ide = {
         enabled = false;
