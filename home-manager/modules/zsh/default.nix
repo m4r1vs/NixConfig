@@ -39,6 +39,7 @@ in {
         la = "${lib.getExe pkgs.lsd} -la";
         tree = "${lib.getExe pkgs.lsd} --tree";
         g3 = "${lib.getExe pkgs.gemini-cli} -m gemini-3.1-pro-preview";
+        clear = "clear && ls";
         shac = "git clone --depth=1";
         present = "${lib.getExe pkgs.zathura} --mode=presentation";
         vi = "nvim";
