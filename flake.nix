@@ -16,6 +16,11 @@
       url = "github:m4r1vs/comin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    keypress-visualizer = {
+      # GitOps
+      url = "github:m4r1vs/keypress-visualizer-rust";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     slidecontrol = {
       # Google Slides remote
       url = "github:m4r1vs/slidecontrol?ref=master";
@@ -116,6 +121,7 @@
               inputs.disko.nixosModules.disko
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
+              inputs.keypress-visualizer.nixosModules.default
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]
@@ -145,6 +151,7 @@
               inputs.disko.nixosModules.disko
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
+              inputs.keypress-visualizer.nixosModules.default
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]
@@ -171,6 +178,7 @@
               inputs.disko.nixosModules.disko
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
+              inputs.keypress-visualizer.nixosModules.default
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]
@@ -230,6 +238,7 @@
               inputs.disko.nixosModules.disko
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
+              inputs.keypress-visualizer.nixosModules.default
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]

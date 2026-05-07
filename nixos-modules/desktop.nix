@@ -66,6 +66,21 @@ in {
 
     environment.pathsToLink = ["/share/xdg-desktop-portal" "/share/applications"];
 
+    programs.keypress-visualizer = {
+      enable = true;
+      settings = {
+        mappings = {
+          LEFTCTRL = "CTRL";
+          RIGHTCTRL = "CTRL";
+        };
+        appearance = {
+          font_size = 52;
+          anchor = "top";
+          max_keys = 2;
+        };
+      };
+    };
+
     configured = {
       limine.enable = true;
       system-sounds.enable = true;

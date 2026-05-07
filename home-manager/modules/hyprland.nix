@@ -81,21 +81,25 @@ in {
           force_default_wallpaper = 0;
         };
         layerrule = [
-          "order 1,hyprpicker" # Top Layer
+          "order 1,keypress-visualizer"
+          "blur,keypress-visualizer"
+          "ignorealpha 0.69,keypress-visualizer"
+
+          "order 2,hyprpicker" # Top Layer
           "noanim,hyprpicker"
 
-          "order 2,swaync-notification-window"
+          "order 3,swaync-notification-window"
           "blur,swaync-notification-window"
           "ignorealpha 0.65,swaync-notification-window"
           "abovelock,swaync-notification-window"
 
-          "order 3,rofi"
+          "order 4,rofi"
           "blur,rofi"
 
-          "order 4,waybar"
+          "order 5,waybar"
           "unset,waybar"
 
-          "order 5,swaync-control-center" # Bottom Layer
+          "order 6,swaync-control-center" # Bottom Layer
           "blur,swaync-control-center"
           "ignorealpha 0.65,swaync-control-center"
           "dimaround,swaync-control-center"
