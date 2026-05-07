@@ -38,13 +38,10 @@ in {
         ls = "${lib.getExe pkgs.lsd}";
         la = "${lib.getExe pkgs.lsd} -la";
         tree = "${lib.getExe pkgs.lsd} --tree";
-        g3 = "${lib.getExe pkgs.gemini-cli} -m gemini-3.1-pro-preview";
-        clear = "clear && ls";
-        shac = "git clone --depth=1";
         present = "${lib.getExe pkgs.zathura} --mode=presentation";
         vi = "nvim";
         vim = "nvim";
-        stty = mkIf isDarwin "/bin/stty";
+        stty = mkIf isDarwin "/bin/stty"; # Fix for prompt error on macos
         bat = "bat --theme auto:system --theme-dark default --theme-light GitHub";
       };
       initContent = import ./init.nix {
