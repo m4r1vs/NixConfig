@@ -157,6 +157,16 @@ in {
         ${lib.getExe pkgs.tmux} refresh-client -S
       fi
 
+      OBSIDIAN_APPEARANCE_JSON="$HOME/Documents/Marius' Remote Vault/.obsidian/appearance.json"
+      if [ -f "$OBSIDIAN_APPEARANCE_JSON" ]; then
+        ${lib.getExe pkgs.jq} --arg accent "$PRIMARY_COLOR_HEX" '.accentColor = $accent' "$OBSIDIAN_APPEARANCE_JSON" > "$OBSIDIAN_APPEARANCE_JSON.tmp" && mv "$OBSIDIAN_APPEARANCE_JSON.tmp" "$OBSIDIAN_APPEARANCE_JSON"
+      fi
+
+      OBSIDIAN_THEME_CSS="$HOME/Documents/Marius' Remote Vault/.obsidian/snippets/theme.css"
+      if [ -f "$OBSIDIAN_THEME_CSS" ]; then
+        echo "body {--inline-title-color: rgba($SECONDARY_COLOR_RGB,1);--h1-color: rgba($SECONDARY_COLOR_RGB,1);--h2-color:rgba($SECONDARY_COLOR_RGB,0.85);--h2-color:rgba($SECONDARY_COLOR_RGB,0.78);--h3-color:rgba($SECONDARY_COLOR_RGB,0.74);--h4-color:rgba($SECONDARY_COLOR_RGB,0.69);--h5-color:rgba($SECONDARY_COLOR_RGB,0.55);}" > "$OBSIDIAN_THEME_CSS"
+      fi
+
       ${lib.optionalString isWayland
         /*
         bash
