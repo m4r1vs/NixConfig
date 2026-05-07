@@ -7,7 +7,6 @@
 }:
 with lib; let
   cfg = config.programs.configured.tmux;
-  theme = systemArgs.theme;
   isDarwin = systemArgs.system == "aarch64-darwin";
   mkTmuxWindowStatusFormat = {
     shellIconMap,
@@ -51,6 +50,7 @@ in {
         ghostty = "󰊠";
         golazo = "󰒸";
         htop = "";
+        hunk = "";
         journalctl = "";
         k9s = "󰠳";
         lazygit = "";

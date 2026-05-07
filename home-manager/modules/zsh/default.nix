@@ -34,15 +34,16 @@ in {
         size = 50000;
       };
       shellAliases = {
+        bat = "bat --theme auto:system --theme-dark default --theme-light GitHub";
+        hud = "hunk diff --watch";
+        la = "${lib.getExe pkgs.lsd} -la";
         lg = "${lib.getExe pkgs.lazygit}";
         ls = "${lib.getExe pkgs.lsd}";
-        la = "${lib.getExe pkgs.lsd} -la";
-        tree = "${lib.getExe pkgs.lsd} --tree";
         present = "${lib.getExe pkgs.zathura} --mode=presentation";
+        stty = mkIf isDarwin "/bin/stty"; # Fix for prompt error on macos
+        tree = "${lib.getExe pkgs.lsd} --tree";
         vi = "nvim";
         vim = "nvim";
-        stty = mkIf isDarwin "/bin/stty"; # Fix for prompt error on macos
-        bat = "bat --theme auto:system --theme-dark default --theme-light GitHub";
       };
       initContent = import ./init.nix {
         inherit isDarwin lib pkgs;

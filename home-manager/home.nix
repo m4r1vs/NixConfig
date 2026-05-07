@@ -61,6 +61,7 @@ in {
       gemini-cli.enable = true;
       ghostty.enable = isDesktop || isWSL || isDarwin;
       git.enable = true;
+      hunk.enable = true;
       lazygit.enable = true;
       mpv.enable = isDesktop || isDarwin;
       neovim.enable = true;
@@ -70,8 +71,8 @@ in {
       rofi.enable = isDesktop;
       spotify-player.enable = isDesktop || isWSL || isDarwin;
       ssh.enable = true;
-      swayimg.enable = isWayland;
       swappy.enable = isDesktop;
+      swayimg.enable = isWayland;
       tmux.enable = true;
       yazi.enable = true;
       zsh.enable = true;

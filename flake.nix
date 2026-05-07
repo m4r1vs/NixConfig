@@ -17,8 +17,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     keypress-visualizer = {
-      # GitOps
+      # Show keypresses
       url = "github:m4r1vs/keypress-visualizer-rust";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    hunk = {
+      # Diff Viewer in Terminal
+      url = "github:m4r1vs/hunk?ref=live";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     slidecontrol = {

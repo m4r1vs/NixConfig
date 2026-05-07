@@ -14,8 +14,8 @@ in {
   home.packages = with pkgs;
     [
       # Install on every system:
-      (writeShellScriptBin "rebuild" scripts.rebuild)
       (writeShellScriptBin "date-trivia" scripts.date-trivia)
+      (writeShellScriptBin "rebuild" scripts.rebuild)
       astroterm # show stars in terminal
       fastfetch # new neofetch
       gh # GitHub CLI
