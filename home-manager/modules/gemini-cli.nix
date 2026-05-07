@@ -35,7 +35,7 @@ in {
         autoAddToPolicyByDefault = true;
       };
       ui = {
-        theme = "Default Light";
+        theme = "Default";
         autoThemeSwitching = true;
         terminalBackgroundPollingInterval = 4;
         hideBanner = true;
