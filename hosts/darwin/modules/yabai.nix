@@ -120,6 +120,16 @@ in {
         lcmd + shift - 0x2C | brightness_down
         lcmd + shift - 0x1E | brightness_up
 
+        # German characters
+        lcmd - 0x29 : skhd -t "ö"
+        lcmd - 0x27 : skhd -t "ä"
+        lcmd - 0x21 : skhd -t "ü"
+        lcmd - 0x1B : skhd -t "ß"
+
+        lcmd + shift - 0x29 : skhd -t "Ö"
+        lcmd + shift - 0x27 : skhd -t "Ä"
+        lcmd + shift - 0x21 : skhd -t "Ü"
+
         fn - h : skhd -k "left"
         fn - k : skhd -k "up"
         fn - j : skhd -k "down"
