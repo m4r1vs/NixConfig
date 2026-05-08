@@ -71,6 +71,12 @@ in {
         };
       };
       context = {
+        fileName = [
+          "AGENTS.md"
+          "CLAUDE.md"
+          "CONTEXT.md"
+          "GEMINI.md"
+        ];
         fileFiltering = {
           respectGeminiIgnore = true;
           enableRecursiveFileSearch = true;
