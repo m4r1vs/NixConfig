@@ -100,6 +100,8 @@ in {
       packages =
         [
           eb-garamond
+          fcsp-fonts
+          inter-nerdfont
           nerd-fonts.departure-mono
           nerd-fonts.go-mono
           nerd-fonts.jetbrains-mono
@@ -107,7 +109,6 @@ in {
           public-sans
           reforma-fonts
           ubuntu-classic
-          inter-nerdfont
         ]
         ++ optionals (!isDarwin) [
           apple-color-emoji

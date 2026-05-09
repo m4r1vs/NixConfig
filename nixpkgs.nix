@@ -45,6 +45,20 @@ in {
             '';
           };
 
+          fcsp-fonts = stdenv.mkDerivation {
+            name = "FC Sans Pauli Font";
+            src = ./assets/fonts/fcsp;
+            dontUnpack = true;
+            installPhase = ''
+              runHook preInstall
+
+              mkdir -p $out/share/fonts/truetype
+              cp $src/*.ttf "$out/share/fonts/truetype"
+
+              runHook postInstall
+            '';
+          };
+
           apple-color-emoji = stdenv.mkDerivation {
             name = "Apple Color Emoji Font";
             src = fetchurl {
