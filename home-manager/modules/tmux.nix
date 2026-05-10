@@ -42,12 +42,14 @@ in {
     shellIconMap = mkOption {
       type = types.attrsOf types.str;
       default = {
+        "\," = "󰸣";
         bash = "";
         bun = "";
         caffeinate = "";
         cargo = "";
         docker = "󰡨";
         ghostty = "󰊠";
+        git = "";
         golazo = "󰒸";
         htop = "";
         hunk = "";
@@ -73,7 +75,6 @@ in {
         terraform = "";
         tmux = ""; # on macos zsh is not always immediately loaded
         yazi = "󰇥";
-        "\," = "󰸣";
       };
       description = "Map program-names to their icons";
     };
