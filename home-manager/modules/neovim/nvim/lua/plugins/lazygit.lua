@@ -1,7 +1,7 @@
 -- Quickly launch LazyGit from within NeoVim
 
 vim.g.lazygit_floating_window_scaling_factor = 1
-vim.g.lazygit_floating_window_use_plenary = 1
+-- vim.g.lazygit_floating_window_use_plenary = 1
 
 return {
   "kdheepak/lazygit.nvim",
