@@ -533,6 +533,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_clippy": {
+      "locked": {
+        "lastModified": 1778442971,
+        "narHash": "sha256-MGycy2XBnd3MUhxIqw0agYCyMn9MT0VsZvXwfiR/mnA=",
+        "owner": "m4r1vs",
+        "repo": "nixpkgs",
+        "rev": "75293a4de30a672f64eb661ccbbde8df23b5335b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "m4r1vs",
+        "ref": "clippy-copy-init",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_unstable": {
       "locked": {
         "lastModified": 1777954456,
@@ -565,6 +581,7 @@
         "nixos-generators": "nixos-generators",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_3",
+        "nixpkgs_clippy": "nixpkgs_clippy",
         "nixpkgs_unstable": "nixpkgs_unstable",
         "slidecontrol": "slidecontrol",
         "stummumschalterung": "stummumschalterung"
