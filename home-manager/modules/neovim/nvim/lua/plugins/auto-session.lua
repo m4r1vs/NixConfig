@@ -3,6 +3,7 @@
 return {
   "rmagatti/auto-session",
   lazy = false,
+  version = false,
   keys = {
     { "<leader>ss", "<cmd>AutoSession search<CR>", desc = "Session search" },
     { "<leader>S",  "<cmd>AutoSession save<CR>",   desc = "Session save" },
@@ -28,7 +29,7 @@ return {
         delete_session = { "n", "<C-d>" },
         alternate_session = { "n", "<C-s>" },
       },
-      theme_conf = {
+      picker_opts = {
         border = true,
       },
     },
