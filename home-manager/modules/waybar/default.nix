@@ -96,6 +96,7 @@ in {
             orientation = "horizontal";
             modules = [
               "custom/weather"
+              "custom/github"
               "custom/gcal"
               "tray"
               "battery"
@@ -159,6 +160,16 @@ in {
             tooltip = false;
             on-click = "${scripts.rofi-launch} search";
             on-click-right = "${scripts.rofi-launch} power";
+          };
+
+          "custom/github" = {
+            exec = "${scripts.waybar-github}";
+            on-click = "${pkgs.xdg-utils}/bin/xdg-open https://github.com/notifications";
+            interval = 60;
+            format = "{}";
+            rotate = 0;
+            tooltip = true;
+            return-type = "json";
           };
 
           "custom/media" = {
