@@ -44,6 +44,7 @@ in {
             yabai -m rule --add app="^System Settings$" manage=off
             yabai -m rule --add app="^League of Legends$" manage=off
             yabai -m rule --add app="^Raycast$" manage=off
+            yabai -m rule --add app="^Raycast Beta$" manage=off
             yabai -m rule --add app="^mpv$" manage=off
 
             yabai -m rule --add app="^TV$" title="^.{3,}$" manage=off # match any Apple TV Window with more than 2 letters (should apply to the popout player)

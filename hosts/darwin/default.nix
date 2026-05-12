@@ -59,7 +59,7 @@ in {
         "macs-fan-control" # View and control fan speeds
         "mediamate" # Better volume UI
         "obs" # Screen recording and streaming
-        "raycast" # Spotlight replacement
+        # "raycast" # TODO: add back in when v2 is out of beta and in homebrew
         "signal" # Encrypted messaging
         "spotify" # Music streaming
         "steam" # Game Library
