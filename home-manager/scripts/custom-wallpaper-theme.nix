@@ -122,6 +122,30 @@ in {
           PRIMARY_COLOR_HEX="#547602";
           SECONDARY_COLOR_HEX="#DFC540";
           ;;
+        Boat_and_Windfarm.jpg)
+          PRIMARY_COLOR_HEX="#C39E71";
+          SECONDARY_COLOR_HEX="#8591A0";
+          ;;
+        Coney_Island_Apartments.jpg)
+          PRIMARY_COLOR_HEX="#4E8E9A";
+          SECONDARY_COLOR_HEX="#FE8F1E";
+          ;;
+        Dreamy_Sailing.jpg)
+          PRIMARY_COLOR_HEX="#B98E7E";
+          SECONDARY_COLOR_HEX="#937678";
+          ;;
+        Frozen_Stream_Macro.jpg)
+          PRIMARY_COLOR_HEX="#99ADCD";
+          SECONDARY_COLOR_HEX="#87A7CC";
+          ;;
+        Neon_Pepsi_from_Uber.jpg)
+          PRIMARY_COLOR_HEX="#4A8AE4";
+          SECONDARY_COLOR_HEX="#A7371B";
+          ;;
+        New_York_Homes_Birdseyeview.jpg)
+          PRIMARY_COLOR_HEX="#CE5D97";
+          SECONDARY_COLOR_HEX="#A02F6F";
+          ;;
         *)
           PRIMARY_COLOR_HEX="#81913F"
           SECONDARY_COLOR_HEX="#DB8C4B"
