@@ -43,6 +43,7 @@ in {
       type = types.attrsOf types.str;
       default = {
         "\," = "󰸣";
+        "python.*" = "󰌠";
         bash = "";
         bun = "";
         caffeinate = "";
