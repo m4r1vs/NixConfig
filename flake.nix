@@ -4,14 +4,17 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     nixpkgs_unstable.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixpkgs_clippy.url = "github:m4r1vs/nixpkgs?ref=clippy-copy-init";
+    nixpkgs_clippy.url = "github:m4r1vs/nixpkgs?ref=clippy-copy-init"; # Until #518816 is merged
     nixos-wsl = {
       # Run NixOS on Windows Subsystem for Linux
       url = "github:nix-community/NixOS-WSL/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-darwin.url = "github:nix-darwin/nix-darwin?ref=nix-darwin-25.11";
-    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    nix-darwin = {
+      # Use this config to configure MacOS hosts
+      url = "github:nix-darwin/nix-darwin?ref=nix-darwin-25.11";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     comin = {
       # GitOps
       url = "github:m4r1vs/comin";
@@ -38,12 +41,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hyprland-which-key = {
-      # Cycle mute state of chrome tabs remotely
+      # Show Hyprland keyboard shortcuts
       url = "gitlab:m4r1vs/hyprland-which-key?ref=master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     golazo = {
-      # Cycle mute state of chrome tabs remotely
+      # Soccer score viewer
       url = "github:m4r1vs/golazo?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -317,6 +320,7 @@
           ++ commonModules;
       });
     };
+    # TODO: Migrate to generators in nixpkgs (https://nixos.org/manual/nixos/stable/#sec-image-nixos-rebuild-build-image)
     packages.x86_64-linux = {
       bootstrap_local_x86_64 = inputs.nixos-generators.nixosGenerate (let
         systemArgs =
