@@ -72,6 +72,7 @@ vim.opt.guicursor = ""
 
 require("lazy").setup("plugins", {
   rocks = { enabled = false },
+  lockfile = "~/NixConfig/home-manager/modules/neovim/nvim/lazy-lock.json",
 })
 
 -- Set default colorscheme
