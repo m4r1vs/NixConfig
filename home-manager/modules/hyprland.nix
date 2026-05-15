@@ -250,15 +250,6 @@ in {
             "SUPER, SPACE, Switch keyboard layout, exec, ${scripts.switch-kb-layout}"
             "SUPER, c, Query Wolfram|Alpha with ChatGPT fallback, exec, ${scripts.rofi-launch} calc"
 
-            "SUPER, semicolon, Type ö, exec, ${pkgs.wtype}/bin/wtype ö"
-            "SUPER, apostrophe, Type ä, exec, ${pkgs.wtype}/bin/wtype ä"
-            "SUPER, bracketleft, Type ü, exec, ${pkgs.wtype}/bin/wtype ü"
-            "SUPER, minus, Type ß, exec, ${pkgs.wtype}/bin/wtype ß"
-
-            "SUPER+Shift, semicolon, Type Ö, exec, ${pkgs.wtype}/bin/wtype Ö"
-            "SUPER+Shift, apostrophe, Type Ä, exec, ${pkgs.wtype}/bin/wtype Ä"
-            "SUPER+Shift, bracketleft, Type Ü, exec, ${pkgs.wtype}/bin/wtype Ü"
-
             ",F8, Toggle Spotify Workspace, togglespecialworkspace, spotify_player"
             ",F8, Launch Spotify if not running, exec, pgrep spotify_player || ${lib.getExe pkgs.ghostty} --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
 
@@ -361,6 +352,15 @@ in {
           "SUPER+alt, h, Resize window left, resizeactive, -30 0"
           "SUPER+alt, k, Resize window up, resizeactive, 0 -30"
           "SUPER+alt, j, Resize window down, resizeactive, 0 30"
+
+          "SUPER, semicolon, Type ö, exec, ${pkgs.wtype}/bin/wtype ö"
+          "SUPER, apostrophe, Type ä, exec, ${pkgs.wtype}/bin/wtype ä"
+          "SUPER, bracketleft, Type ü, exec, ${pkgs.wtype}/bin/wtype ü"
+          "SUPER, minus, Type ß, exec, ${pkgs.wtype}/bin/wtype ß"
+
+          "SUPER+Shift, semicolon, Type Ö, exec, ${pkgs.wtype}/bin/wtype Ö"
+          "SUPER+Shift, apostrophe, Type Ä, exec, ${pkgs.wtype}/bin/wtype Ä"
+          "SUPER+Shift, bracketleft, Type Ü, exec, ${pkgs.wtype}/bin/wtype Ü"
         ];
         "$moveactivewindow" = "grep -q \"true\" <<< $(${pkgs.hyprland}/bin/hyprctl activewindow -j | jq -r .floating) && ${pkgs.hyprland}/bin/hyprctl dispatch moveactive";
       };
