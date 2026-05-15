@@ -32,7 +32,6 @@ in {
       settings = {
         exec-once = [
           "${lib.getExe pkgs.hyprlock} || hyprctl dispatch exit"
-          "${pkgs.waybar}/bin/waybar"
           "${pkgs._1password-gui}/bin/1password --silent"
           "${scripts.hyprland-startup-workspaces}"
           "${scripts.volume-change-notify}"

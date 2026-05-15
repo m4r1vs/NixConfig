@@ -22,7 +22,7 @@
         WELCOME_STRING="Hello, Time-traveller  "
       fi
 
-      # Wait until keyring is unlocked
+      # Wait until keyring is unlocked to avoid gnome-keyring popup
       until ${pkgs.dbus}/bin/dbus-send --print-reply --dest=org.freedesktop.secrets \
         /org/freedesktop/secrets/aliases/default \
         org.freedesktop.DBus.Properties.Get \
@@ -34,6 +34,7 @@
 
       ${scripts.nixos-notify} -u low -e -t 12000 -h string:synchronous:startup-script "$WELCOME_STRING" "Let me get everything running for you..."
 
+      hyprctl dispatch exec "${lib.getExe pkgs.waybar}"
       hyprctl dispatch exec "${lib.getExe pkgs.signal-desktop} --ozone-platform-hint=auto"
       hyprctl dispatch exec "${lib.getExe pkgs.whatsapp-electron} --ozone-platform-hint=auto"
       hyprctl dispatch exec "${lib.getExe pkgs.obsidian} --ozone-platform-hint=auto"
