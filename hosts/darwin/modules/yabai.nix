@@ -28,7 +28,7 @@ in {
           focus_follows_mouse = "autofocus";
           mouse_modifier = "fn";
           layout = "bsp";
-          mouse_follows_focus = "on";
+          mouse_follows_focus = "off";
           window_placement = "second_child";
           window_opacity = "on";
           top_padding = 4;
@@ -109,6 +109,7 @@ in {
         .define toggle_scratchpad : yabai -m window --toggle {{1}} || {{2}}
 
         lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --keybind='global:super+enter=unbind' --font-size=14 --title=scratchpad_yazi -e yazi")
+        lcmd + shift - e : open ~/Desktop
 
         lcmd - q : yabai -m window --close
         lcmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')
