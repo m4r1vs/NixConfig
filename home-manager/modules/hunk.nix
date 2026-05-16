@@ -20,9 +20,6 @@ in {
       settings = {
         theme = "auto";
         mode = "auto";
-        theme_light = "paper";
-        theme_dark = "graphite";
-        transparent_bg = true;
         line_numbers = true;
       };
       enableGitIntegration = true;

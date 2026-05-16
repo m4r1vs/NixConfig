@@ -27,7 +27,7 @@
     };
     hunk = {
       # Diff Viewer in Terminal
-      url = "github:m4r1vs/hunk?ref=live";
+      url = "github:modem-dev/hunk";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     slidecontrol = {
