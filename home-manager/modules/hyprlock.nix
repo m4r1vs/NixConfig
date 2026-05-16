@@ -164,20 +164,6 @@ in {
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             font_size = scale 12;
             font_family = "SFProDisplay Nerd Font SemiBold";
-            position = scaleStr "-24, 24";
-            text_align = "right";
-            halign = "right";
-            valign = "bottom";
-            shadow_size = 2;
-            shadow_passes = 3;
-            shadow_color = "rgb(0,0,0)";
-            shadow_boost = 0.9;
-          }
-          {
-            text = "cmd[update:3600000] echo -n \" $(${scripts.date-trivia})\"";
-            color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
-            font_size = scale 12;
-            font_family = "SFProDisplay Nerd Font Medium";
             position = scaleStr "24, 24";
             text_align = "left";
             halign = "left";
