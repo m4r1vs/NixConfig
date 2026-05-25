@@ -189,6 +189,10 @@ in {
           "workspace 9, initialClass:^(signal)$"
           "workspace 9, initialTitle:^(WhatsApp Electron)(.*)$"
 
+          "float,initialClass:^(brave-gemini.google.com__-Default)$"
+          "size 1790 1144, initialClass:^(brave-gemini.google.com__-Default)$"
+          "center, initialClass:^(brave-gemini.google.com__-Default)$"
+
           "float,initialClass:^(ghostty.yazi)$"
           "size 1400 700, initialClass:^(ghostty.yazi)$"
 
@@ -245,9 +249,20 @@ in {
             "SUPER, g, Toggle Hyprland zoomed out mode, exec, ${scripts.toggle-hypr-zoomed-out}"
             "SUPER, d, Rofi search, exec, ${scripts.rofi-launch} search"
             "SUPER, s, Simple Screenshot, exec, ${scripts.screenshot}"
-            "SUPER, E, Open file manager, exec, ${lib.getExe pkgs.ghostty} --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi ~/Downloads/"
+            "SUPER, E, Open file manager, exec, ${scripts.launch-once {
+              command = "${lib.getExe pkgs.ghostty} --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi ~/Downloads/";
+              grep = "ghostty.yazi";
+              useHypr = true;
+              toggle = true;
+            }}"
             "SUPER, m, Emoji Picker, exec, ${scripts.rofi-launch} emoji"
             "SUPER, SPACE, Switch keyboard layout, exec, ${scripts.switch-kb-layout}"
+            "ALT, d, Open Google Gemini, exec, ${scripts.launch-once {
+              command = "${pkgs.brave}/bin/brave --app=https://gemini.google.com";
+              grep = "brave-gemini.google.com__-Default";
+              useHypr = true;
+              toggle = true;
+            }}"
             "SUPER, c, Query Wolfram|Alpha with ChatGPT fallback, exec, ${scripts.rofi-launch} calc"
 
             ",F8, Toggle Spotify Workspace, togglespecialworkspace, spotify_player"
