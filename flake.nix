@@ -4,7 +4,6 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     nixpkgs_unstable.url = "github:nixos/nixpkgs?ref=nixos-unstable";
-    nixpkgs_clippy.url = "github:m4r1vs/nixpkgs?ref=clippy-copy-init"; # Until #518816 is merged
     nixos-wsl = {
       # Run NixOS on Windows Subsystem for Linux
       url = "github:nix-community/NixOS-WSL/main";

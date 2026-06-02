@@ -13,10 +13,6 @@ with lib; let
     system = systemArgs.system;
     config.allowUnfree = true;
   };
-  pkgsClippy = import inputs.nixpkgs_clippy {
-    system = systemArgs.system;
-    config.allowUnfree = true;
-  };
 in {
   nixpkgs = {
     config.allowUnfree = true;
@@ -123,9 +119,6 @@ in {
           };
 
           # TODO: add PR to add to nixpkgs
-          clippy-darwin = pkgsClippy.clippy-copy;
-
-          # TODO: add PR to add to nixpkgs
           skhd-zig = with pkgs;
             stdenv.mkDerivation {
               pname = "skhd-zig";
@@ -149,6 +142,7 @@ in {
           From unstable/master Nixpkgs
           */
 
+          clippy-darwin = pkgsUnstable.clippy-copy;
           colima = pkgsUnstable.colima;
           direnv = pkgsUnstable.direnv;
           gemini-cli = pkgsUnstable.gemini-cli;
