@@ -146,6 +146,10 @@ in {
           PRIMARY_COLOR_HEX="#CE5D97";
           SECONDARY_COLOR_HEX="#A02F6F";
           ;;
+        Greg_Girad_Looking_towards_Pudong.jpg)
+          PRIMARY_COLOR_HEX="#EC94D3";
+          SECONDARY_COLOR_HEX="#346BD3";
+          ;;
         *)
           PRIMARY_COLOR_HEX="#81913F"
           SECONDARY_COLOR_HEX="#DB8C4B"
