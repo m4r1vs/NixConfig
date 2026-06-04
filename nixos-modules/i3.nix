@@ -16,7 +16,7 @@ in {
       pathsToLink = ["/libexec"];
       systemPackages = with pkgs; [
         lxappearance
-        xorg.xrandr
+        xrandr
         xclip
       ];
       variables = {

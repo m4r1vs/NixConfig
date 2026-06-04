@@ -143,31 +143,22 @@ in {
           */
 
           clippy-darwin = pkgsUnstable.clippy-copy;
-          colima = pkgsUnstable.colima;
-          direnv = pkgsUnstable.direnv;
           gemini-cli = pkgsUnstable.gemini-cli;
           ghostty =
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
-          hyprlock = pkgsUnstable.hyprlock;
-          mise = pkgsUnstable.mise;
           neovim = pkgsUnstable.neovim;
           neovim-unwrapped = pkgsUnstable.neovim-unwrapped;
           opencode = pkgsUnstable.opencode;
-          swaynotificationcenter = pkgsUnstable.swaynotificationcenter;
           tlrc = pkgsUnstable.tlrc;
-          ty = pkgsUnstable.ty;
-          waybar = pkgsUnstable.waybar;
-          yazi = pkgsUnstable.yazi;
-          yaziPlugins = pkgsUnstable.yaziPlugins;
 
           /*
           Temporary Fixes / Updates
           */
 
           # Until v5 is in nixpkgs (add lua config and hyprland devour/overlay mode)
-          # Depends on https://github.com/NixOS/nixpkgs/pull/502834
+          # PR: https://github.com/NixOS/nixpkgs/pull/502408
           swayimg = pkgsUnstable.swayimg.overrideAttrs (finalAttrs: {
             version = "v5.2";
             buildInputs = [
@@ -191,16 +182,8 @@ in {
               libraw
               libdrm
               exiv2
-              pkgsUnstable.luajit
-              (pkgsUnstable.openexr.overrideAttrs {
-                version = "3.4.10"; # TODO: update to 3.4.11
-                src = fetchFromGitHub {
-                  owner = "AcademySoftwareFoundation";
-                  repo = "openexr";
-                  rev = "v3.4.10";
-                  hash = "sha256-jXio+PvagKTR8NjcYIQ/j8LOMNc/0sQBuaixKk/0V3k=";
-                };
-              })
+              openexr
+              luajit
             ];
             src = fetchFromGitHub {
               owner = "artemsen";
@@ -262,14 +245,14 @@ in {
           });
 
           # Make border between panes invisible
-          tmux = tmux.overrideAttrs {
-            src = pkgs.fetchFromGitHub {
-              owner = "m4r1vs";
-              repo = "tmux";
-              rev = "4e4c003a27e4872e080f5c5f5ade5ba86dc68ae9";
-              hash = "sha256-H2SXYD2IGQLSOkiyPW2yFnlv905Aw8J4NbPWuTqKt60=";
-            };
-          };
+          # tmux = tmux.overrideAttrs {
+          #   src = pkgs.fetchFromGitHub {
+          #     owner = "m4r1vs";
+          #     repo = "tmux";
+          #     rev = "4e4c003a27e4872e080f5c5f5ade5ba86dc68ae9";
+          #     hash = "sha256-H2SXYD2IGQLSOkiyPW2yFnlv905Aw8J4NbPWuTqKt60=";
+          #   };
+          # };
 
           # Add title, add playing animation and fix podcasts not loading
           spotify-player = rustPlatform.buildRustPackage {

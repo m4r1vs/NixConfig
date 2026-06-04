@@ -2,7 +2,7 @@
   description = "Marius' Nixos Configuration Flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-26.05";
     nixpkgs_unstable.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixos-wsl = {
       # Run NixOS on Windows Subsystem for Linux
@@ -11,7 +11,7 @@
     };
     nix-darwin = {
       # Use this config to configure MacOS hosts
-      url = "github:nix-darwin/nix-darwin?ref=nix-darwin-25.11";
+      url = "github:nix-darwin/nix-darwin?ref=nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     comin = {
@@ -61,7 +61,7 @@
     };
     home-manager = {
       # Configure programs using nix
-      url = "github:nix-community/home-manager?ref=release-25.11";
+      url = "github:nix-community/home-manager?ref=release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     disko = {

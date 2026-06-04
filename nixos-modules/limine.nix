@@ -44,7 +44,7 @@ in {
         systemd-boot.enable = mkForce false;
         timeout = 5;
         limine = {
-          #TODO: add resolution on update to NixOS 26.05
+          resolution = cfg.resolution;
           enable = true;
           efiSupport = true;
           secureBoot.enable = cfg.secureboot;
@@ -71,7 +71,7 @@ in {
             wallpaperStyle = "stretched";
             interface = {
               branding = "Moin, ${systemArgs.username}@${systemArgs.hostname} :)";
-              brandingColor = 2;
+              brandingColor = "#DB8C4B";
               helpHidden = true;
               resolution = cfg.resolution;
             };

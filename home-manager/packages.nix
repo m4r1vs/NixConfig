@@ -43,7 +43,6 @@ in {
       obsidian # notes
       prismlauncher # minecraft mod launcher
       yt-dlp # youtube downloader
-      zathura # pdf viewer
     ]
     ++ lib.optionals isDesktop ([
         # Install on NixOS Desktop only
@@ -70,9 +69,10 @@ in {
         shortwave # Web Radio
         signal-desktop # Signal messenger
         stockfish # chess engine to play against computer
-        superTuxKart # Mario Kart Linux
+        supertuxkart # Mario Kart Linux
         whatsapp-electron # whatsapp
         wireplumber # pipewire manager
+        zathura # pdf viewer
       ]
       ++ (
         if isWayland

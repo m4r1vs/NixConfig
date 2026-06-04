@@ -31,8 +31,9 @@ in {
       userDirs = {
         enable = true;
         createDirectories = true;
+        setSessionVariables = false;
         extraConfig = {
-          XDG_PROJECTS_DIR = "${config.home.homeDirectory}/Projects";
+          PROJECTS = "${config.home.homeDirectory}/Projects";
         };
       };
       mimeApps = {
