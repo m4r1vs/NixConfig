@@ -20,7 +20,7 @@ with lib;
           waybar.enable = true;
         };
         services = {
-          swww.enable = true;
+          awww.enable = true;
         };
       }
       else {}

@@ -30,12 +30,12 @@
         bash
         */
         ''
-          currentLayout=$(${pkgs.xorg.setxkbmap}/bin/setxkbmap -query | awk '/layout:/ {print $2}')
+          currentLayout=$(${pkgs.setxkbmap}/bin/setxkbmap -query | awk '/layout:/ {print $2}')
           if [[ $currentLayout == "us" ]]; then
-            ${pkgs.xorg.setxkbmap}/bin/setxkbmap de
+            ${pkgs.setxkbmap}/bin/setxkbmap de
             layMain="de"
           else
-            ${pkgs.xorg.setxkbmap}/bin/setxkbmap us
+            ${pkgs.setxkbmap}/bin/setxkbmap us
             layMain="us"
           fi
         ''

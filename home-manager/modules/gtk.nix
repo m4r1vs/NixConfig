@@ -13,6 +13,7 @@ in {
   config = mkIf cfg.enable {
     gtk = {
       enable = true;
+      gtk4.theme = null;
       gtk3 = {
         bookmarks = [
           "file://${config.home.homeDirectory}/Desktop"

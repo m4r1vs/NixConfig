@@ -46,7 +46,7 @@ in {
         enable = true;
         settings = rec {
           default_session = {
-            command = "${pkgs.hyprland}/bin/Hyprland > ~/.hyprland.log 2>&1";
+            command = "${pkgs.hyprland}/bin/start-hyprland > ~/.hyprland.log 2>&1";
             user = systemArgs.username;
           };
           initial_session = default_session;

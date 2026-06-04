@@ -25,6 +25,7 @@ in {
       swaync.enable = true;
     };
     wayland.windowManager.hyprland = {
+      configType = "hyprlang";
       enable = true;
       plugins = with pkgs; [
         hyprlandPlugins.hypr-dynamic-cursors
@@ -75,33 +76,31 @@ in {
           animate_manual_resizes = true;
           enable_swallow = true;
           swallow_regex = "^ghostty\.(.+)$";
-          new_window_takes_over_fullscreen = 2;
           disable_splash_rendering = true;
           force_default_wallpaper = 0;
         };
         layerrule = [
-          "order 1,keypress-visualizer"
-          "blur,keypress-visualizer"
-          "ignorealpha 0.69,keypress-visualizer"
+          "order 1,match:namespace keypress-visualizer"
+          "blur on,match:namespace keypress-visualizer"
+          "ignore_alpha 0.69,match:namespace keypress-visualizer"
 
-          "order 2,hyprpicker" # Top Layer
-          "noanim,hyprpicker"
+          "order 2,match:namespace hyprpicker" # Top Layer
+          "no_anim on,match:namespace hyprpicker"
 
-          "order 3,swaync-notification-window"
-          "blur,swaync-notification-window"
-          "ignorealpha 0.65,swaync-notification-window"
-          "abovelock,swaync-notification-window"
+          "order 3,match:namespace swaync-notification-window"
+          "blur on,match:namespace swaync-notification-window"
+          "ignore_alpha 0.65,match:namespace swaync-notification-window"
+          "above_lock 1,match:namespace swaync-notification-window"
 
-          "order 4,rofi"
-          "blur,rofi"
+          "order 4,match:namespace rofi"
+          "blur on,match:namespace rofi"
 
-          "order 5,waybar"
-          "unset,waybar"
+          "order 5,match:namespace waybar"
 
-          "order 6,swaync-control-center" # Bottom Layer
-          "blur,swaync-control-center"
-          "ignorealpha 0.65,swaync-control-center"
-          "dimaround,swaync-control-center"
+          "order 6,match:namespace swaync-control-center" # Bottom Layer
+          "blur on,match:namespace swaync-control-center"
+          "ignore_alpha 0.65,match:namespace swaync-control-center"
+          "dim_around on,match:namespace swaync-control-center"
         ];
         gesture = [
           "3, horizontal, workspace"
@@ -133,7 +132,6 @@ in {
           };
         };
         dwindle = {
-          pseudotile = true;
           preserve_split = true;
         };
         decoration = {
@@ -180,41 +178,41 @@ in {
             "specialWorkspace, 1, 2.5, smooth, slidefadevert 6%"
           ];
         };
-        windowrulev2 = [
-          "noblur,class:^()$,title:^()$"
+        windowrule = [
+          "no_blur on, match:class ^()$, match:title ^()$"
 
-          "workspace 1, initialClass:^(brave-browser)$"
-          "workspace 2, initialClass:^(ghostty.default)$"
-          "workspace 3, initialTitle:^(.*)( - Obsidian)(.*)$"
-          "workspace 9, initialClass:^(signal)$"
-          "workspace 9, initialTitle:^(WhatsApp Electron)(.*)$"
+          "workspace 1, match:initial_class ^(brave-browser)$"
+          "workspace 2, match:initial_class ^(ghostty.default)$"
+          "workspace 3, match:initial_title ^(.*)( - Obsidian)(.*)$"
+          "workspace 9, match:initial_class ^(signal)$"
+          "workspace 9, match:initial_title ^(WhatsApp Electron)(.*)$"
 
-          "float,initialClass:^(brave-gemini.google.com__-Default)$"
-          "size 1790 1144, initialClass:^(brave-gemini.google.com__-Default)$"
-          "center, initialClass:^(brave-gemini.google.com__-Default)$"
+          "float on,match:initial_class ^(brave-gemini.google.com__-Default)$"
+          "size 1790 1144, match:initial_class ^(brave-gemini.google.com__-Default)$"
+          "center on, match:initial_class ^(brave-gemini.google.com__-Default)$"
 
-          "float,initialClass:^(ghostty.yazi)$"
-          "size 1400 700, initialClass:^(ghostty.yazi)$"
+          "float on,match:initial_class ^(ghostty.yazi)$"
+          "size 1400 700, match:initial_class ^(ghostty.yazi)$"
 
-          "float,initialClass:^(ghostty.fastfetch)$"
-          "size 1220 740, initialClass:^(ghostty.fastfetch)$"
+          "float on,match:initial_class ^(ghostty.fastfetch)$"
+          "size 1220 740, match:initial_class ^(ghostty.fastfetch)$"
 
-          "float,initialClass:^(ghostty.weather)$"
-          "size 1200 800, initialClass:^(ghostty.weather)$"
+          "float on,match:initial_class ^(ghostty.weather)$"
+          "size 1200 800, match:initial_class ^(ghostty.weather)$"
 
-          "float,initialClass:^(ghostty.asciiquarium)$"
-          "size 1200 800, initialClass:^(ghostty.asciiquarium)$"
+          "float on,match:initial_class ^(ghostty.asciiquarium)$"
+          "size 1200 800, match:initial_class ^(ghostty.asciiquarium)$"
 
-          "float,initialClass:^(ghostty.astroterm)$"
-          "size 1200 800, initialClass:^(ghostty.astroterm)$"
+          "float on,match:initial_class ^(ghostty.astroterm)$"
+          "size 1200 800, match:initial_class ^(ghostty.astroterm)$"
 
-          "float,initialClass:^(ghostty.spotify_player)$"
-          "size 1600 900, initialClass:^(ghostty.spotify_player)$"
-          "workspace special:spotify_player silent,initialClass:^(ghostty.spotify_player)$"
+          "float on,match:initial_class ^(ghostty.spotify_player)$"
+          "size 1600 900, match:initial_class ^(ghostty.spotify_player)$"
+          "workspace special:spotify_player silent,match:initial_class ^(ghostty.spotify_player)$"
 
-          "float,initialClass:^(ghostty.obsidian)$"
-          "size 1600 900, initialClass:^(ghostty.obsidian)$"
-          "workspace special:obsidian_nvim silent,initialClass:^(ghostty.obsidian)$"
+          "float on,match:initial_class ^(ghostty.obsidian)$"
+          "size 1600 900, match:initial_class ^(ghostty.obsidian)$"
+          "workspace special:obsidian_nvim silent,match:initial_class ^(ghostty.obsidian)$"
         ];
         monitor = [
           "eDP-1,1920x1080@60.01,0x0, 1" # Internal
@@ -242,7 +240,7 @@ in {
             "SUPER, k, Bring active to top up, bringactivetotop, u"
             "SUPER, j, Bring active to top down, bringactivetotop, d"
 
-            "SUPER, t, Toggle split vertical/horizontal, togglesplit"
+            "SUPER, t, Toggle split vertical/horizontal, layoutmsg, togglesplit"
 
             "SUPER, Return, Open Ghostty Terminal Emulator, exec, ${lib.getExe pkgs.ghostty}"
             "SUPER, F, Toggle fullscreen, fullscreen,"

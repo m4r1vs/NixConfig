@@ -1,6 +1,7 @@
 {
   pkgs,
   scripts,
+  lib,
   ...
 }: {
   rofi-wallpaper = pkgs.writeShellScript "rofi-wallpaper" ''
@@ -42,7 +43,7 @@
         ${scripts.nixos-notify} -u low -e -i "$WALLPAPER" -h string:synchronous:wallpaper-change -t 1800 "New Wallpaper:" "$CHOICE"
         rm $HOME/.active_wallpaper.jpg
         ln -s $WALLPAPER $HOME/.active_wallpaper.jpg
-        ${pkgs.swww}/bin/swww img "$WALLPAPER" --transition-type none
+        ${lib.getExe pkgs.awww} img "$WALLPAPER" --transition-type none
     fi
   '';
 }

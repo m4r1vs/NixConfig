@@ -39,7 +39,10 @@ in {
         la = "${lib.getExe pkgs.lsd} -la";
         lg = "${lib.getExe pkgs.lazygit}";
         ls = "${lib.getExe pkgs.lsd}";
-        present = "${lib.getExe pkgs.zathura} --mode=presentation";
+        present =
+          if isDarwin
+          then "zathura --mode=presentation"
+          else "${lib.getExe pkgs.zathura} --mode=presentation";
         stty = mkIf isDarwin "/bin/stty"; # Fix for prompt error on macos
         tree = "${lib.getExe pkgs.lsd} --tree";
         vi = "nvim";

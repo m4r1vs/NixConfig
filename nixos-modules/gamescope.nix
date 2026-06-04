@@ -20,7 +20,7 @@ in {
           enable = true;
           user = systemArgs.username;
         };
-        defaultSession = "steam-gamescope";
+        defaultSession = "steam";
       };
 
       greetd = {
