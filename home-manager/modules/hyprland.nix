@@ -77,6 +77,7 @@ in {
           enable_swallow = true;
           swallow_regex = "^ghostty\.(.+)$";
           disable_splash_rendering = true;
+          initial_workspace_tracking = 0;
           force_default_wallpaper = 0;
         };
         layerrule = [
