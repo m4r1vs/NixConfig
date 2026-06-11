@@ -4,7 +4,6 @@
   configured.darwin.enable = true;
 
   homebrew = {
-    enable = true;
     casks = [
       "middleclick"
     ];

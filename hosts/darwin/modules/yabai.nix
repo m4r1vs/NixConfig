@@ -94,7 +94,7 @@ in {
               sleep 60
             done
           '';
-        enableScriptingAddition = true;
+        enableScriptingAddition = false;
       };
     };
 
@@ -205,16 +205,16 @@ in {
         shift + fn - right | lcmd - right
         shift + fn - left | lcmd - left
 
-        lcmd - 1 : yabai -m space --focus 1 && ${focusUnderCursor}
-        lcmd - 2 : yabai -m space --focus 2 && ${focusUnderCursor}
-        lcmd - 3 : yabai -m space --focus 3 && ${focusUnderCursor}
-        lcmd - 4 : yabai -m space --focus 4 && ${focusUnderCursor}
-        lcmd - 5 : yabai -m space --focus 5 && ${focusUnderCursor}
-        lcmd - 6 : yabai -m space --focus 6 && ${focusUnderCursor}
-        lcmd - 7 : yabai -m space --focus 7 && ${focusUnderCursor}
-        lcmd - 8 : yabai -m space --focus 8 && ${focusUnderCursor}
-        lcmd - 9 : yabai -m space --focus 9 && ${focusUnderCursor}
-        lcmd - 0 : yabai -m space --focus recent && ${focusUnderCursor}
+        # lcmd - 1 : yabai -m space --focus 1 && ${focusUnderCursor}
+        # lcmd - 2 : yabai -m space --focus 2 && ${focusUnderCursor}
+        # lcmd - 3 : yabai -m space --focus 3 && ${focusUnderCursor}
+        # lcmd - 4 : yabai -m space --focus 4 && ${focusUnderCursor}
+        # lcmd - 5 : yabai -m space --focus 5 && ${focusUnderCursor}
+        # lcmd - 6 : yabai -m space --focus 6 && ${focusUnderCursor}
+        # lcmd - 7 : yabai -m space --focus 7 && ${focusUnderCursor}
+        # lcmd - 8 : yabai -m space --focus 8 && ${focusUnderCursor}
+        # lcmd - 9 : yabai -m space --focus 9 && ${focusUnderCursor}
+        # lcmd - 0 : yabai -m space --focus recent && ${focusUnderCursor}
 
         lcmd + shift - 1 : yabai -m window --space 1 && yabai -m space --focus 1 && ${focusUnderCursor}
         lcmd + shift - 2 : yabai -m window --space 2 && yabai -m space --focus 2 && ${focusUnderCursor}
