@@ -12,7 +12,7 @@ in {
       if isDarwin
       then # bash
         ''
-          sudo darwin-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname} && sudo yabai --load-sa
+          sudo darwin-rebuild switch --flake ~/NixConfig/#${systemArgs.hostname}
         ''
       else #bash
         ''

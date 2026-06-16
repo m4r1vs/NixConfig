@@ -81,7 +81,7 @@ in {
         Remarkable = 1276493162; # reMarkable tablet companion app
         WhatsApp = 310633997; # WhatsApp
         Word = 462054704; # Word processor
-        Xcode = 497799835; # Apple IDE
+        # Xcode = 497799835; # Apple IDE
       };
       taps = [
         "homebrew-zathura/zathura"
@@ -158,7 +158,6 @@ in {
           ShowStatusBar = true; # Show status bar at bottom of finder windows with item/disk space stats
         };
         NSGlobalDomain = {
-          _HIHideMenuBar = false;
           "com.apple.keyboard.fnState" = true;
           "com.apple.mouse.tapBehavior" = null;
           "com.apple.swipescrolldirection" = true;
@@ -182,6 +181,7 @@ in {
           NSWindowShouldDragOnGesture = true;
           PMPrintingExpandedStateForPrint = true;
           PMPrintingExpandedStateForPrint2 = true;
+          _HIHideMenuBar = false;
         };
         universalaccess.closeViewScrollWheelToggle = true; # Scroll while holding ctrl to zoom
         screencapture = {
@@ -203,6 +203,9 @@ in {
         CustomUserPreferences = {
           "com.apple.dock" = {
             "workspaces-auto-swoosh" = true; # Force automatic space switching when cmd-tabbing
+          };
+          "com.apple.WindowManager" = {
+            "AnimationSpeed" = 2.0;
           };
           # Disable press-and-hold action in these apps
           "md.obsidian" = {
