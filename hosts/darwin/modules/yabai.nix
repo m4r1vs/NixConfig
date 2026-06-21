@@ -134,6 +134,8 @@ in {
         # Other Shortcuts
         fn - f : skhd -t "\`\`\`"
         fn - m : skhd -t "marius.niveri@gmail.com"
+        fn - 0x2C : skhd -t "–"
+        fn + shift - 0x2C : skhd -t "—"
 
         fn - h : skhd -k "left"
         fn - k : skhd -k "up"
