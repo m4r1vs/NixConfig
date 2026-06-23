@@ -94,7 +94,7 @@ in {
               sleep 60
             done
           '';
-        enableScriptingAddition = false;
+        enableScriptingAddition = true;
       };
     };
 
