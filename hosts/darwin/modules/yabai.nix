@@ -131,6 +131,14 @@ in {
         fn + shift - 0x27 : skhd -t "Ä"
         fn + shift - 0x21 : skhd -t "Ü"
 
+        lcmd - 0x29 : skhd -t "ö"
+        lcmd - 0x27 : skhd -t "ä"
+        lcmd - 0x21 : skhd -t "ü"
+        lcmd - 0x1B : skhd -t "ß"
+        lcmd + shift - 0x29 : skhd -t "Ö"
+        lcmd + shift - 0x27 : skhd -t "Ä"
+        lcmd + shift - 0x21 : skhd -t "Ü"
+
         # Other Shortcuts
         fn - f : skhd -t "\`\`\`"
         fn - m : skhd -t "marius.niveri@gmail.com"
