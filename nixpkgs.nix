@@ -301,8 +301,8 @@ in {
             src = fetchFromGitHub {
               owner = "m4r1vs";
               repo = "yabai";
-              rev = "827d9f949846a0d071f5e0ca30408f4abcdd172f";
-              hash = "sha256-41xVNlKIk6zt/7fF2biy4ywXgWiDFiHmbxhKzlxdMWw=";
+              rev = "9d6724b6f8c090d526d2a01150cc6910d339b1f3";
+              hash = "sha256-6VI5NvE66nvSPHJWMF5QtXaZ5pP3MGAR0kNNk+J/v3g=";
             };
           };
 
