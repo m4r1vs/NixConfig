@@ -61,7 +61,7 @@ in {
       gemini-cli.enable = true;
       ghostty.enable = isDesktop || isWSL || isDarwin;
       git.enable = true;
-      hunk.enable = true;
+      hunk.enable = false;
       lazygit.enable = true;
       mpv.enable = isDesktop || isDarwin;
       neovim.enable = true;

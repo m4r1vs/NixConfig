@@ -23,7 +23,7 @@
   };
 
   services = {
-    # TODO: Add fingerpint support either by installing a different sensor or packaging https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=libfprint-goodixtls-55x4
+    fprintd.enable = true;
 
     /*
     Dynamic CPU/Power modes
