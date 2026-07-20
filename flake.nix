@@ -108,6 +108,36 @@
   in {
     nixosConfigurations =
       {
+        worknix = inputs.nixpkgs.lib.nixosSystem (let
+          systemArgs = {
+            username = "mn";
+            git = {
+              name = "Marius Niveri";
+              email = "marius@meetovo.de";
+            };
+            system = "x86_64-linux";
+            theme = makeTheme {
+              primary = "purple";
+              secondary = "magenta";
+            };
+            hostname = "worknix";
+          };
+        in {
+          inherit (systemArgs) system;
+          modules =
+            [
+              ./hosts/nixpad
+              ./hosts/nixos.nix
+
+              inputs.disko.nixosModules.disko
+              inputs.nix-index-database.nixosModules.nix-index
+              inputs.home-manager.nixosModules.home-manager
+              inputs.keypress-visualizer.nixosModules.default
+
+              {config._module.args = {inherit systemArgs self inputs;};}
+            ]
+            ++ commonModules;
+        });
         nixpad = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
             globalArgs
