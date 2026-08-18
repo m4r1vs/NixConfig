@@ -49,7 +49,7 @@ in {
         bun = "";
         caffeinate = "";
         cargo = "";
-        claude = "󱜙";
+        claude = "";
         docker = "󰡨";
         ghostty = "󰊠";
         git = "";
