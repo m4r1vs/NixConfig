@@ -149,8 +149,11 @@ in {
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
+          inter-nerdfont = pkgsUnstable.inter-nerdfont;
           neovim = pkgsUnstable.neovim;
           neovim-unwrapped = pkgsUnstable.neovim-unwrapped;
+          nerd-font-patcher = pkgsUnstable.nerd-font-patcher;
+          nerd-fonts = pkgsUnstable.nerd-fonts;
           opencode = pkgsUnstable.opencode;
           swayimg = pkgsUnstable.swayimg;
           tlrc = pkgsUnstable.tlrc;
