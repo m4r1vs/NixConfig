@@ -39,8 +39,6 @@
   hardware.bluetooth.enable = lib.mkForce false;
   services.blueman.enable = lib.mkForce false;
 
-
-
   services = {
     /*
     B-Tree FS
@@ -60,7 +58,7 @@
   hardware = {
     nvidia = {
       open = true;
-      package = config.boot.kernelPackages.nvidiaPackages.beta;
+      package = config.boot.kernelPackages.nvidiaPackages.latest;
     };
   };
 
