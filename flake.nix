@@ -99,6 +99,7 @@
         name = "Marius Niveri";
         email = "marius.niveri@gmail.com";
       };
+      useWorkProfileByDefault = false;
     };
     makeTheme = import ./makeTheme.nix;
     commonModules = [
@@ -115,6 +116,7 @@
               name = "Marius Niveri";
               email = "marius@meetovo.de";
             };
+            useWorkProfileByDefault = true;
             system = "x86_64-linux";
             theme = makeTheme {
               primary = "purple";

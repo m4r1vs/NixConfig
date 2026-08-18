@@ -264,9 +264,45 @@ in {
           categories = ["Utility" "Settings"];
         };
         brave-browser = {
-          name = "Personal Browser";
+          name =
+            if systemArgs.useWorkProfileByDefault
+            then "Work Browser"
+            else "Personal Browser";
           exec = ''${pkgs.brave}/bin/brave --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation --password-store=gnome-libsecret %U'';
-          icon = "brave-browser-nightly";
+          icon =
+            if systemArgs.useWorkProfileByDefault
+            then "brave-browser-dev"
+            else "brave-browser-nightly";
+          terminal = false;
+          type = "Application";
+          categories = ["WebBrowser" "Network"];
+          mimeType = [
+            "application/pdf"
+            "application/rdf+xml"
+            "application/rss+xml"
+            "application/xhtml+xml"
+            "application/xhtml_xml"
+            "application/xml"
+            "image/gif"
+            "image/jpeg"
+            "image/png"
+            "image/webp"
+            "text/html"
+            "text/xml"
+            "x-scheme-handler/http"
+            "x-scheme-handler/https"
+          ];
+        };
+        brave-secondary = {
+          name =
+            if systemArgs.useWorkProfileByDefault
+            then "Personal Browser"
+            else "Work Browser";
+          exec = ''${pkgs.brave}/bin/brave --profile-directory=Secondary --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation --password-store=gnome-libsecret %U'';
+          icon =
+            if systemArgs.useWorkProfileByDefault
+            then "brave-browser-nightly"
+            else "brave-browser-dev";
           terminal = false;
           type = "Application";
           categories = ["WebBrowser" "Network"];
