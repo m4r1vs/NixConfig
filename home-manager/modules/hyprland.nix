@@ -218,8 +218,9 @@ in {
           "workspace special:obsidian_nvim silent,match:initial_class ^(ghostty.obsidian)$"
         ];
         monitor = [
-          "eDP-1,1920x1080@60.01,0x0, 1" # Internal
+          "eDP-1,1920x1200@60.01,0x0, 1" # Internal
           "Virtual-1,3024x1890@60.00,0x0, 1.5" # Internal
+          "HDMI-A-1, 3840x2160@60.00, auto-up, 1.5" # External Office Meetovo
           # "DP-1,3440x1440@99.98,-760x-1440, 1" # Ultrawide WQHD
           # "DP-1,2560x1440@144,-320x-1440, 1" # 16:9 WQHD
           # "HDMI-A-1, 2560x1440@99.95,-320x-1440, 1" # 16:9 WQHD
