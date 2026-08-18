@@ -370,6 +370,15 @@ in {
           "SUPER+alt, k, Resize window up, resizeactive, 0 -30"
           "SUPER+alt, j, Resize window down, resizeactive, 0 30"
 
+          "CTRL, semicolon, Type ö, exec, ${pkgs.wtype}/bin/wtype ö"
+          "CTRL, apostrophe, Type ä, exec, ${pkgs.wtype}/bin/wtype ä"
+          "CTRL, bracketleft, Type ü, exec, ${pkgs.wtype}/bin/wtype ü"
+          "CTRL, minus, Type ß, exec, ${pkgs.wtype}/bin/wtype ß"
+
+          "CTRL+Shift, semicolon, Type Ö, exec, ${pkgs.wtype}/bin/wtype Ö"
+          "CTRL+Shift, apostrophe, Type Ä, exec, ${pkgs.wtype}/bin/wtype Ä"
+          "CTRL+Shift, bracketleft, Type Ü, exec, ${pkgs.wtype}/bin/wtype Ü"
+
           "SUPER, semicolon, Type ö, exec, ${pkgs.wtype}/bin/wtype ö"
           "SUPER, apostrophe, Type ä, exec, ${pkgs.wtype}/bin/wtype ä"
           "SUPER, bracketleft, Type ü, exec, ${pkgs.wtype}/bin/wtype ü"
