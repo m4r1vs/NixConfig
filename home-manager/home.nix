@@ -64,6 +64,7 @@ in {
       git.enable = true;
       hunk.enable = true;
       lazygit.enable = true;
+      mcp.enable = true;
       mpv.enable = isDesktop || isDarwin;
       neovim.enable = true;
       newsboat.enable = isDesktop || isDarwin;
