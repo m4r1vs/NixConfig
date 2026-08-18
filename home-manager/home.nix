@@ -55,6 +55,7 @@ in {
       antigravity-cli.enable = true;
       bat.enable = true;
       brave.enable = isDesktop;
+      claude-code.enable = true;
       direnv.enable = true;
       docker-darwin.enable = isDarwin;
       fastfetch.enable = true;

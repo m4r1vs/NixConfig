@@ -142,6 +142,7 @@ in {
           From unstable/master Nixpkgs
           */
 
+          claude-code = pkgsUnstable.claude-code;
           clippy-darwin = pkgsUnstable.clippy-copy;
           antigravity-cli = pkgsUnstable.antigravity-cli;
           ghostty =
