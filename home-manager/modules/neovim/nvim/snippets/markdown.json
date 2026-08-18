@@ -1,0 +1,16 @@
+{
+  "graphql query with vars": {
+    "body": [
+      "## ${1:}",
+      "",
+      "```graphql",
+      "${2:}",
+      "```",
+      "",
+      "```json",
+      "${3:}",
+      "```"
+    ],
+    "prefix": "graphql query with vars"
+  }
+}

@@ -20,7 +20,7 @@ return {
     )
 
     require("luasnip.loaders.from_vscode").lazy_load({
-      paths = { "~/NixConfig/modules/home-manager/modules/neovim/nvim/snippets" }
+      paths = { "~/NixConfig/home-manager/modules/neovim/nvim/snippets" }
     })
 
     local ls = require("luasnip")
