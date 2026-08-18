@@ -185,6 +185,7 @@ in {
           "workspace 1, match:initial_class ^(brave-browser)$"
           "workspace 2, match:initial_class ^(ghostty.default)$"
           "workspace 3, match:initial_title ^(.*)( - Obsidian)(.*)$"
+          "workspace 4, match:initial_class ^(slack)$"
           "workspace 6, match:initial_class ^(spotify)$"
           "workspace 9, match:initial_class ^(signal)$"
           "workspace 9, match:initial_title ^(WhatsApp Electron)(.*)$"
