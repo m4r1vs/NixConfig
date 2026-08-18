@@ -143,7 +143,7 @@ in {
           */
 
           clippy-darwin = pkgsUnstable.clippy-copy;
-          gemini-cli = pkgsUnstable.gemini-cli;
+          antigravity-cli = pkgsUnstable.antigravity-cli;
           ghostty =
             if isDarwin
             then pkgsUnstable.ghostty-bin

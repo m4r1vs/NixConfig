@@ -44,6 +44,7 @@ in {
       default = {
         "\," = "󰸣";
         "python.*" = "󰌠";
+        agy = "󱜙";
         bash = "";
         bun = "";
         caffeinate = "";

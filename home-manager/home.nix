@@ -52,13 +52,13 @@ in {
 
   programs = {
     configured = {
+      antigravity-cli.enable = true;
       bat.enable = true;
       brave.enable = isDesktop;
       direnv.enable = true;
       docker-darwin.enable = isDarwin;
       fastfetch.enable = true;
       fzf.enable = true;
-      gemini-cli.enable = true;
       ghostty.enable = isDesktop || isWSL || isDarwin;
       git.enable = true;
       hunk.enable = true;
