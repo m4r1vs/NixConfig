@@ -152,47 +152,12 @@ in {
           neovim = pkgsUnstable.neovim;
           neovim-unwrapped = pkgsUnstable.neovim-unwrapped;
           opencode = pkgsUnstable.opencode;
+          swayimg = pkgsUnstable.swayimg;
           tlrc = pkgsUnstable.tlrc;
 
           /*
           Temporary Fixes / Updates
           */
-
-          # Until v5 is in nixpkgs (add lua config and hyprland devour/overlay mode)
-          # PR: https://github.com/NixOS/nixpkgs/pull/502408
-          swayimg = pkgsUnstable.swayimg.overrideAttrs (finalAttrs: {
-            version = "v5.2";
-            buildInputs = [
-              bash-completion
-              wayland
-              wayland-protocols
-              json_c
-              libxkbcommon
-              fontconfig
-              giflib
-              libheif
-              libjpeg
-              libwebp
-              libtiff
-              librsvg
-              libpng
-              libjxl
-              libexif
-              libavif
-              libsixel
-              libraw
-              libdrm
-              exiv2
-              openexr
-              luajit
-            ];
-            src = fetchFromGitHub {
-              owner = "artemsen";
-              repo = "swayimg";
-              tag = "v5.2";
-              hash = "sha256-aDZ7Ka8uKVLzEwxS2CT5fRFNDf9z/LO3bB0dCMz1Mf0=";
-            };
-          });
 
           /*
           Own Forks
