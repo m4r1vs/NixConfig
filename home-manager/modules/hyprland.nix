@@ -104,10 +104,10 @@ in {
           "dim_around on,match:namespace swaync-control-center"
         ];
         gesture = [
+          "5, swipe, move"
+          "4, swipe, resize"
           "3, horizontal, workspace"
-          "4, horizontal, move"
-          "4, down, close"
-          "3, up, fullscreen"
+          "3, pinch, fullscreen"
         ];
         opengl = {
           nvidia_anti_flicker = false;
