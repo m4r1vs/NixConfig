@@ -90,7 +90,6 @@ return {
       "helm",
       "hjson",
       "hlsl",
-      "hlsplaylist",
       "hocon",
       "hoon",
       "html",
@@ -213,7 +212,6 @@ return {
       "thrift",
       "tiger",
       "tlaplus",
-      "tmux",
       "toml",
       "tsv",
       "tsx",
@@ -241,7 +239,6 @@ return {
       "yaml",
       "yang",
       "yuck",
-      "zathurarc",
       "zig",
     }
     require("nvim-treesitter").setup {}
