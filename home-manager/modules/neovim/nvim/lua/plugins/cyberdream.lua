@@ -3,6 +3,7 @@ return {
   "scottmckendry/cyberdream.nvim",
   lazy = false,
   priority = 1000,
+  commit = "c0e998d3bfba3d7c01a3711a1d7e699d7d92bd22",
   opts = {
     transparent = true,
     italic_comments = true,
@@ -11,7 +12,7 @@ return {
     saturation = 1, -- Value below 1 raises error on light/dark mode switch
     cache = false,  -- Enabling this breaks dark/light mode switch
     variant = "auto",
-    colors = { -- Flexoki color palette
+    colors = {      -- Flexoki color palette
       dark = {
         bg = "#15120a",
         bg_alt = "#251b0e",
