@@ -2,6 +2,7 @@
   pkgs,
   scripts,
   lib,
+  systemArgs,
   ...
 }: {
   hyprland-startup-workspaces =
@@ -37,6 +38,11 @@
       hyprctl dispatch exec "${lib.getExe pkgs.waybar}"
       hyprctl dispatch exec "${lib.getExe pkgs.signal-desktop} --ozone-platform-hint=auto"
       hyprctl dispatch exec "${lib.getExe pkgs.whatsapp-electron} --ozone-platform-hint=auto"
+      ${lib.optionalString (systemArgs.useWorkProfileByDefault)
+        # bash
+        ''
+          hyprctl dispatch exec "${lib.getExe pkgs.slack}"
+        ''}
       hyprctl dispatch exec "${lib.getExe pkgs.obsidian} --ozone-platform-hint=auto"
       hyprctl dispatch exec "${lib.getExe pkgs.spotify} --ozone-platform-hint=auto"
       hyprctl dispatch exec "${lib.getExe pkgs.ghostty}"
@@ -47,6 +53,12 @@
       sleep 2
       hyprctl dispatch workspace 3
       sleep 1
+      ${lib.optionalString (systemArgs.useWorkProfileByDefault)
+        # bash
+        ''
+          hyprctl dispatch workspace 4
+          sleep 1
+        ''}
       hyprctl dispatch workspace 6
       sleep 1
       hyprctl dispatch workspace 9
