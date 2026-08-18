@@ -62,8 +62,8 @@ in {
           apple-color-emoji = stdenv.mkDerivation {
             name = "Apple Color Emoji Font";
             src = fetchurl {
-              url = "https://github.com/samuelngs/apple-emoji-ttf/releases/download/macos-26-20260219-2aa12422/AppleColorEmoji-Linux.ttf";
-              hash = "sha256-U1oEOvBHBtJEcQWeZHRb/IDWYXraLuo0NdxWINwPUxg=";
+              url = "https://github.com/samuelngs/apple-emoji-ttf/releases/download/macos-26-20260722-484daf4e/AppleColorEmoji-Linux.ttf";
+              hash = "sha256-43x69iZaxKCvbVe8ZehhCad22ZZug0MzRVf2PaSCUW8=";
             };
             dontUnpack = true;
             installPhase = ''
