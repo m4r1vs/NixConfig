@@ -8,7 +8,7 @@
     pkgs.writeShellScript "hyprland-startup-workspaces"
     # bash
     ''
-      hour=$(${pkgs.coreutils}/bin/date +%H)
+      hour=$((10#$(${pkgs.coreutils}/bin/date +%H)))
 
       if (( hour >= 5 && hour < 12 )); then
         WELCOME_STRING="Good Morning  "
