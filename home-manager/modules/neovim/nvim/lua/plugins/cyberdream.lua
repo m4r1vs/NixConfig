@@ -3,7 +3,6 @@ return {
   "scottmckendry/cyberdream.nvim",
   lazy = false,
   priority = 1000,
-  commit = "c0e998d3bfba3d7c01a3711a1d7e699d7d92bd22",
   opts = {
     transparent = true,
     italic_comments = true,
