@@ -167,6 +167,17 @@ in {
         alsa.support32Bit = true;
         wireplumber = {
           enable = true;
+          # Local bluetooth roles: a2dp_source = send audio to speakers,
+          # hfp_ag = use headset microphones. Deliberately omits a2dp_sink
+          # (receive audio from devices) — speakers that also advertise an
+          # Audio Source UUID (e.g. Anker Soundcore Boost) otherwise grab
+          # the AVDTP transport in the wrong direction and A2DP playback
+          # fails with "Device or resource busy".
+          extraConfig."51-bluez-roles" = {
+            "monitor.bluez.properties" = {
+              "bluez5.roles" = ["a2dp_source" "hfp_ag"];
+            };
+          };
         };
         extraConfig.pipewire = {
           "10-airplay" = {
