@@ -7,14 +7,14 @@ description: Use this skill to install a program on the user's computer.
 
 ## Query Nixpkgs
 
-First, use the nixos MCP server's `search` capability to search for the package in nixpkgs.
+First, use the nixos MCP server to search for the package in nixpkgs (e.g. `nix {"action":"search","query":"[package]"}`).
 If the package has multiple versions, query the information for each package and get back to the user so they can decide which package to use.
 
-Some programs can be configured through home-manager. Use the MCP server to find out if the given package is supported by home-manager.
+Some programs can be configured through home-manager. Use the MCP server to find out if the given package is supported by home-manager (`nix {"action":"search","source":"home-manager","query":"[package]"}`).
 
 ### Supported by home-manager
 
-1. Create a new module in @home-manager/modules called `[pacakge-name].nix`. Use this template:
+1. Create a new module in `home-manager/modules/` called `[package-name].nix`. Use this template:
 
 ```nix
 {
@@ -41,13 +41,13 @@ in {
 
 ### Not supported by home-manager
 
-1. Add the pacakge to @home-manager/packages.nix - if the package has GUI elements, it should be in graphical or nixos desktop only. Otherwise, every system.
+1. Add the package to `home-manager/packages.nix` — if the package has GUI elements, it should be in graphical or nixos desktop only. Otherwise, every system.
 
 ## Not in nixpkgs
 
-If the package does not exist in nixpkgs, query Google for "[Package Name] nixos". Some bleeding edge packages can be added through flake inputs.
-Educate the user on the risks and ask if they want to continue. If yes, add the flake input to @flake.nix and run `nix flake update`.
-Then edit @nixpkgs.nix to add the package in the "Own Packages/Not in nixpkgs" category.
+If the package does not exist in nixpkgs, search the web for "[Package Name] nixos". Some bleeding edge packages can be added through flake inputs.
+Educate the user on the risks and ask if they want to continue. If yes, add the flake input to `flake.nix` and run `nix flake update`.
+Then edit `nixpkgs.nix` to add the package in the "Own Packages/Not in nixpkgs" category.
 
 ## Rebuilding
 
