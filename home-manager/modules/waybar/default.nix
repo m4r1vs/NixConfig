@@ -260,6 +260,7 @@ in {
               "^$" = "";
               "(.*) - YouTube - Brave" = " $1";
               "(.*)YouTube - Brave" = " YouTube";
+              " (.*)" = "  $1";
               "Reddit - (.*) - Brave" = " $1";
               "(.*) - Reddit - Brave" = " $1";
               "(.+) : r/(.+) - Brave" = " r/$2";
