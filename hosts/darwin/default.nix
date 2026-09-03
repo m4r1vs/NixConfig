@@ -51,7 +51,9 @@ in {
         "1password" # Password manager
         "affinity" # Photoshot alternative
         "android-studio" # Android IDE
+        "blender" # 3D Modelling
         "brave-browser" # Web browser
+        "calibre" # EBook Management
         "discord" # Team chat
         "finetune" # Music Mixer
         "google-drive" # Cloud storage
@@ -61,9 +63,13 @@ in {
         "lm-studio" # Run LLMs locally
         "macs-fan-control" # View and control fan speeds
         "mediamate" # Better volume UI
+        "notion" # Knowledge base
         "obs" # Screen recording and streaming
+        "postman" # API Explorer
         # "raycast" # TODO: add back in when v2 is out of beta and in homebrew
+        "remanager" # reMarkable Modding Frontend
         "signal" # Encrypted messaging
+        "slack" # Work Messages
         "spotify" # Music streaming
         "steam" # Game Library
         "utm" # VMs
