@@ -262,6 +262,7 @@ in {
               "(.*)YouTube - Brave" = " YouTube";
               " (.*)" = "  $1";
               "Reddit - (.*) - Brave" = " $1";
+              "(.*) - MEETOVO(.*) - Slack" = " $1";
               "(.*) - Reddit - Brave" = " $1";
               "(.+) : r/(.+) - Brave" = " r/$2";
               "(.*) / X - Brave" = "󰕄 $1";
