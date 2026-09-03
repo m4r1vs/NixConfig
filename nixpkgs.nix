@@ -157,6 +157,7 @@ in {
           opencode = pkgsUnstable.opencode;
           swayimg = pkgsUnstable.swayimg;
           tlrc = pkgsUnstable.tlrc;
+          zathura = pkgsUnstable.zathura;
 
           /*
           Temporary Fixes / Updates

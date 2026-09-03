@@ -42,7 +42,6 @@ in {
         */
         "ghidra" # Disassembler and reverse engineering tool
         "mole" # CLI to free up disk space
-        "zathura" # PDF Viewer
         "zig" # zig programming language
       ];
       casks = [
@@ -83,9 +82,6 @@ in {
         Word = 462054704; # Word processor
         # Xcode = 497799835; # Apple IDE
       };
-      taps = [
-        "homebrew-zathura/zathura"
-      ];
     };
 
     power = {
