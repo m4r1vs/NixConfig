@@ -40,7 +40,8 @@ with lib; {
   };
 
   time.timeZone = "Europe/Berlin";
-  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.defaultLocale = "en_DK.UTF-8";
+  i18n.extraLocaleSettings.LC_MONETARY = "de_DE.UTF-8";
 
   users = {
     users.${systemArgs.username} = {

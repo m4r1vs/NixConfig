@@ -5,8 +5,9 @@
 }:
 # bash
 ''
-  export LANG=en_US.UTF-8
-  export LANGUAGE=en_US.UTF-8
+  export LANG=en_DK.UTF-8
+  export LANGUAGE=en_DK.UTF-8
+  export LC_MONETARY=de_DE.UTF-8
   export NIXPKGS_ALLOW_UNFREE=1
 
   export MANPAGER="${lib.getExe pkgs.bat} -plman --theme auto:system --theme-dark default --theme-light GitHub"
