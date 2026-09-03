@@ -38,6 +38,7 @@ in {
       # Install on MacOS and NixOS Desktop
       android-tools # android studio and emulator
       atai # openai wrapper to write in the terminal for me
+      d2 # dot alternative (create beautiful graphs)
       dbeaver-bin # database explorer (postgres, mysql, etc.)
       gcalcli # Google Calendar CLI
       obsidian # notes
