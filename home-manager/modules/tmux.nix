@@ -108,6 +108,9 @@ in {
         */
         ''
           set -g allow-passthrough all
+          set -g focus-events on
+          set -s extended-keys on
+          set -as terminal-features 'xterm*:extkeys'
           set -ga update-environment TERM
           set -ga update-environment TERM_PROGRAM
 
