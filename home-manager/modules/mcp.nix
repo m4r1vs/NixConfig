@@ -22,6 +22,9 @@ in {
             "--"
           ];
         };
+        linear = {
+          url = "https://mcp.linear.app/mcp";
+        };
       };
     };
   };
