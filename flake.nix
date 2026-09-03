@@ -29,6 +29,11 @@
       url = "github:modem-dev/hunk";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    gitlab-mcp = {
+      # GitLab MCP server
+      url = "github:m4r1vs/gitlab-mcp";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     slidecontrol = {
       # Google Slides remote
       url = "github:m4r1vs/slidecontrol?ref=master";

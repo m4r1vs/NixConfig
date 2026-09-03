@@ -184,6 +184,26 @@
         "type": "github"
       }
     },
+    "gitlab-mcp": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788432913,
+        "narHash": "sha256-MiwgJa2s8d43rVUdlUR3V6o7vMTkovglWK8hs4SnRCs=",
+        "owner": "m4r1vs",
+        "repo": "gitlab-mcp",
+        "rev": "983e8b5fb66048e57e04ca76651058aa66cec875",
+        "type": "github"
+      },
+      "original": {
+        "owner": "m4r1vs",
+        "repo": "gitlab-mcp",
+        "type": "github"
+      }
+    },
     "golazo": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -557,6 +577,7 @@
         "atai": "atai",
         "comin": "comin",
         "disko": "disko",
+        "gitlab-mcp": "gitlab-mcp",
         "golazo": "golazo",
         "home-manager": "home-manager",
         "homepage": "homepage",

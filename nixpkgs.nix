@@ -24,6 +24,7 @@ in {
           */
 
           atai = inputs.atai.packages.${stdenv.hostPlatform.system}.atai;
+          gitlab-mcp = inputs.gitlab-mcp.packages.${stdenv.hostPlatform.system}.default;
           golazo = inputs.golazo.packages.${stdenv.hostPlatform.system}.default;
           hyprland-which-key = inputs.hyprland-which-key.packages.${stdenv.hostPlatform.system}.default;
 
