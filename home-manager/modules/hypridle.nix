@@ -9,6 +9,7 @@ with lib; let
   cfg = config.services.configured.hypridle;
   DIM_SCREEN_SECS = 5 * 60; # Dim Screen after 5 Minutes
   LOCK_SCREEN_SECS = 10 * 60; # Lock after 10
+  SCREEN_OFF_SECS = 14 * 60; # Screen off after 14
 in {
   options.services.configured.hypridle = {
     enable = mkEnableOption "Idle Daemon (start lockscreen automatically, etc..)";
@@ -32,13 +33,18 @@ in {
           [
             {
               timeout = DIM_SCREEN_SECS;
-              on-timeout = "${pkgs.brightnessctl}/bin/brightnessctl -s set 10";
+              on-timeout = "${pkgs.brightnessctl}/bin/brightnessctl -s set 20%";
               on-resume = "${pkgs.brightnessctl}/bin/brightnessctl -r";
             }
             {
               timeout = LOCK_SCREEN_SECS - 60;
               on-timeout = "${scripts.nixos-notify} -e -t 50000 -h string:synchronous:hypridle \"Locking the Screen in a Minute\"";
               on-resume = "${scripts.nixos-notify} -u low -e -t 10 -h string:synchronous:hypridle \"Locking the Screen in a Minute\"";
+            }
+            {
+              timeout = SCREEN_OFF_SECS;
+              on-timeout = "${pkgs.brightnessctl}/bin/brightnessctl -s set 0";
+              on-resume = "${pkgs.brightnessctl}/bin/brightnessctl -s set 100%";
             }
           ]
           ++ (
