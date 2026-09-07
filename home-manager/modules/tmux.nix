@@ -124,9 +124,17 @@ in {
           }}"
 
           bind-key -n M-L switch-client -n
+          bind-key -n M-S-l switch-client -n
+          bind-key -n M-S-L switch-client -n
           bind-key -n M-H switch-client -p
+          bind-key -n M-S-h switch-client -p
+          bind-key -n M-S-H switch-client -p
           bind-key -n M-N new-session
+          bind-key -n M-S-n new-session
+          bind-key -n M-S-N new-session
           bind-key -n M-X run-shell 'if [ "$(tmux list-sessions | wc -l)" -eq 1 ]; then tmux new-session -d; fi; tmux switch-client -n; tmux kill-session -t "#S"'
+          bind-key -n M-S-x run-shell 'if [ "$(tmux list-sessions | wc -l)" -eq 1 ]; then tmux new-session -d; fi; tmux switch-client -n; tmux kill-session -t "#S"'
+          bind-key -n M-S-X run-shell 'if [ "$(tmux list-sessions | wc -l)" -eq 1 ]; then tmux new-session -d; fi; tmux switch-client -n; tmux kill-session -t "#S"'
 
           bind-key C-e copy-mode \; if-shell -F "#{pane_in_mode}" "send-keys C-e" "copy-mode \; send-keys C-e"
           bind-key C-y copy-mode \; if-shell -F "#{pane_in_mode}" "send-keys C-y" "copy-mode \; send-keys C-y"
