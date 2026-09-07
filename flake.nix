@@ -79,11 +79,6 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixos-generators = {
-      # Create ISO and other images from config
-      url = "github:nix-community/nixos-generators";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   nixConfig = {
@@ -315,6 +310,65 @@
             ]
             ++ commonModules;
         });
+        bootstrap_local_x86_64 = inputs.nixpkgs.lib.nixosSystem (let
+          systemArgs =
+            globalArgs
+            // {
+              username = "nixos";
+              system = "x86_64-linux";
+              theme = makeTheme {
+                primary = "green";
+                secondary = "orange";
+              };
+              hostname = "nixiso";
+            };
+        in {
+          inherit (systemArgs) system;
+          modules =
+            [
+              ./bootstrap/local.nix
+              ./hosts/nixos.nix
+
+              inputs.home-manager.nixosModules.home-manager
+              inputs.nix-index-database.nixosModules.nix-index
+              inputs.keypress-visualizer.nixosModules.default
+
+              {config._module.args = {inherit systemArgs self inputs;};}
+              {
+                services.configured.kmscon.autologin = inputs.nixpkgs.lib.mkForce false;
+                services.getty.autologinUser = systemArgs.username;
+              }
+            ]
+            ++ commonModules;
+        });
+        bootstrap_local = self.nixosConfigurations.bootstrap_local_x86_64;
+        bootstrap_remote_arm64 = inputs.nixpkgs.lib.nixosSystem (let
+          systemArgs =
+            globalArgs
+            // {
+              username = "nixos";
+              system = "aarch64-linux";
+              theme = makeTheme {
+                primary = "green";
+                secondary = "orange";
+              };
+              hostname = "nixiso_remote_arm";
+            };
+        in {
+          inherit (systemArgs) system;
+          modules =
+            [
+              ./bootstrap/remote.nix
+              ./hosts/nixos.nix
+
+              inputs.home-manager.nixosModules.home-manager
+              inputs.nix-index-database.nixosModules.nix-index
+              inputs.keypress-visualizer.nixosModules.default
+
+              {config._module.args = {inherit systemArgs self inputs;};}
+            ]
+            ++ commonModules;
+        });
       }
       // (import ./hosts/kubenix) {
         inherit inputs globalArgs self makeTheme;
@@ -356,61 +410,10 @@
           ++ commonModules;
       });
     };
-    # TODO: Migrate to generators in nixpkgs (https://nixos.org/manual/nixos/stable/#sec-image-nixos-rebuild-build-image)
     packages.x86_64-linux = {
-      bootstrap_local_x86_64 = inputs.nixos-generators.nixosGenerate (let
-        systemArgs =
-          globalArgs
-          // {
-            username = "nixos";
-            system = "x86_64-linux";
-            theme = makeTheme {
-              primary = "green";
-              secondary = "orange";
-            };
-            hostname = "nixiso";
-            format = "install-iso";
-          };
-      in {
-        inherit (systemArgs) format system;
-        modules =
-          [
-            ./bootstrap/local.nix
-            ./hosts/nixos.nix
-
-            inputs.home-manager.nixosModules.home-manager
-            inputs.nix-index-database.nixosModules.nix-index
-
-            {config._module.args = {inherit systemArgs self inputs;};}
-          ]
-          ++ commonModules;
-      });
-      bootstrap_remote_arm64 = inputs.nixos-generators.nixosGenerate (let
-        systemArgs =
-          globalArgs
-          // {
-            username = "nixos";
-            system = "aarch64-linux";
-            theme = makeTheme {
-              primary = "green";
-              secondary = "orange";
-            };
-            hostname = "nixiso_remote_arm";
-            format = "install-iso";
-          };
-      in {
-        inherit (systemArgs) format system;
-        modules =
-          [
-            ./bootstrap/remote.nix
-            ./hosts/nixos.nix
-
-            inputs.home-manager.nixosModules.home-manager
-            inputs.nix-index-database.nixosModules.nix-index
-            {config._module.args = {inherit systemArgs self inputs;};}
-          ]
-          ++ commonModules;
-      });
+      bootstrap_local = self.nixosConfigurations.bootstrap_local_x86_64.config.system.build.images.iso;
+      bootstrap_local_x86_64 = self.nixosConfigurations.bootstrap_local_x86_64.config.system.build.images.iso;
+      bootstrap_remote_arm64 = self.nixosConfigurations.bootstrap_remote_arm64.config.system.build.images.iso;
     };
   };
 }

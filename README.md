@@ -5,7 +5,7 @@ My multiplatform configuration focused on software development.
 ## Bootstrapping
 
 Two definitions in `./bootstrap/`: One for graphical environments (Laptop, Desktop, etc.) and one for headless setups.
-The ISO can be built using `nixos-rebuild build-image`. Use tab completion to specify whether to build for an arm64 or x86 CPU.
+The ISO can be built using `nix build .\#bootstrap_local_x86_64` or `nix build. #bootstrap_remote_arm64`.
 SSH should work out of the box for both setups with my SSH key already marked as trusted.
 
 Use the `help` script in PATH for a refresher on the installation commands.
