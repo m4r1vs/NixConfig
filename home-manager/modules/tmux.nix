@@ -42,6 +42,8 @@ in {
     shellIconMap = mkOption {
       type = types.attrsOf types.str;
       default = {
+        ".claude-wrapped" = "";
+        ".-wrapped" = "";
         "\," = "󰸣";
         "python.*" = "󰌠";
         agy = "󱜙";
