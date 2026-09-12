@@ -21,6 +21,7 @@ in {
         theme = "auto";
         mode = "auto";
         line_numbers = true;
+        transparent_background = true;
       };
       enableGitIntegration = true;
     };
