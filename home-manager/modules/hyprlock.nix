@@ -32,7 +32,7 @@ in {
       enable = true;
       settings = {
         general = {
-          grace = 5;
+          grace = 0;
           text_trim = false;
           hide_cursor = true;
         };
