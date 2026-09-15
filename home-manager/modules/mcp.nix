@@ -20,7 +20,7 @@ in {
 
       apiUrl = mkOption {
         type = types.str;
-        default = "https://gitlab.com/api/v4";
+        default = "https://gitlab.meetovo.dev/api/v4";
         example = "https://gitlab.example.com/api/v4";
         description = ''
           GitLab API v4 endpoint. The OAuth endpoints are derived from it by
@@ -36,7 +36,7 @@ in {
 
       clientId = mkOption {
         type = types.str;
-        default = "f6f9928e1c336f8c2b57e83fd033ff2213e6d3f4414d3648c8456ed9bb7cfaf5";
+        default = "4fa10a200cd268c5ef6be43a16f28a46c3dac7b0048b36930152a4b3e16c7cdf";
         description = ''
           Application ID of the GitLab OAuth application. Public
           (non-confidential) OAuth clients use PKCE, so this ID is not a secret.
