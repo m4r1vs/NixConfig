@@ -228,16 +228,16 @@ in {
           # Add title, add playing animation and fix podcasts not loading
           spotify-player = rustPlatform.buildRustPackage {
             pname = "spotify-player";
-            version = "0.23.0";
+            version = "0.25.1";
 
             src = fetchFromGitHub {
               owner = "m4r1vs";
               repo = "spotify-player";
-              rev = "e5f8b31c829cea9c356d539ffc87e05842b382bd";
-              hash = "sha256-kBuqRlop8abuNn4Q7y+ljXKyVE/gx1Of/ynUhMkvKuM=";
+              rev = "46bf86bae412a3a372c701e2e48148818063d4e7";
+              hash = "sha256-MvYPqEQeZ3X22ARZHHhvK+z1/bZZm2R5ovnqWEICV0c=";
             };
 
-            cargoHash = "sha256-mD1UJn3LjX88Ht6QUpPO9lu9WiCec5+qUphtLoCjiXg=";
+            cargoHash = "sha256-RsUuPkX4oVG6mDM16mM7VGW22mvKZPjShqs8BO36hbY=";
 
             nativeBuildInputs = [
               pkg-config
