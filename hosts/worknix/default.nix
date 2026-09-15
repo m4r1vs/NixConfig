@@ -104,6 +104,10 @@
     };
   };
 
+  home-manager.users.${systemArgs.username} = {
+    programs.configured.hyprlock.scaling = 1.25;
+  };
+
   system = {
     nixos.label = systemArgs.hostname + ".meetovo.de";
   };
