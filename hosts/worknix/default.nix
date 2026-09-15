@@ -20,6 +20,14 @@
       resolution = "2880x1800";
     };
     system-sounds.enable = true;
+    /*
+    Ryzen AI 9 HX 370 NPU. The server runs whisper-large-v3-turbo, which is
+    what npu-dictate (SUPER+ALT+V, hold to talk) transcribes against.
+    */
+    npu = {
+      enable = true;
+      server.enable = true;
+    };
   };
 
   hardware = {

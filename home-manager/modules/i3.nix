@@ -9,6 +9,7 @@ with lib; let
   cfg = config.programs.configured.i3;
   mod = "Mod4";
   terminal = "${pkgs.ghostty}/bin/ghostty";
+  npuDictate = getExe config.programs.npu-dictate.package;
 in {
   options.programs.configured.i3 = {
     enable = mkEnableOption "Tiling X11 Window Manager";
@@ -203,6 +204,15 @@ in {
           "${mod}+r" = "mode resize";
         };
       };
+
+      /*
+      Push-to-talk dictation. Both halves live here rather than in
+      `keybindings`, because that attrset cannot express `--release`.
+      */
+      extraConfig = optionalString config.programs.configured.npu-dictate.enable ''
+        bindsym ${mod}+Mod1+v exec --no-startup-id ${npuDictate} start
+        bindsym --release ${mod}+Mod1+v exec --no-startup-id ${npuDictate} stop
+      '';
     };
   };
 }

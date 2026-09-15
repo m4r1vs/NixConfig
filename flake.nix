@@ -79,6 +79,18 @@
       url = "github:nix-community/nix-index-database";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-amd-ai = {
+      # XRT + amdxdna shim + FastFlowLM for the Ryzen AI NPU (worknix).
+      # Deliberately NOT following our nixpkgs: the packages are built against
+      # its own pin and served from nix-amd-ai.cachix.org; following would
+      # rebuild XRT and friends from source.
+      url = "github:noamsto/nix-amd-ai";
+    };
+    npu-dictate = {
+      # Push-to-talk dictation on the NPU; needs configured.npu.server.enable
+      url = "gitlab:m4r1vs/npu-dictate?ref=master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixConfig = {
@@ -135,6 +147,7 @@
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
               inputs.keypress-visualizer.nixosModules.default
+              inputs.nix-amd-ai.nixosModules.default
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]

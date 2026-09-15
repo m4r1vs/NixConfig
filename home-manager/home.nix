@@ -10,6 +10,8 @@
   isWSL = osConfig ? wsl && osConfig.wsl.enable;
   isDarwin = systemArgs.system == "aarch64-darwin";
   hasPowerProfiles = osConfig.services.power-profiles-daemon.enable or false;
+  # Dictation is pointless without the NPU backend to transcribe against
+  hasNpuServer = osConfig.configured.npu.server.enable or false;
 in {
   imports = [
     ./modules
@@ -68,6 +70,7 @@ in {
       mpv.enable = isDesktop || isDarwin;
       neovim.enable = true;
       newsboat.enable = isDesktop || isDarwin;
+      npu-dictate.enable = isDesktop && hasNpuServer;
       oh-my-posh.enable = true;
       opencode.enable = true;
       rofi.enable = isDesktop;

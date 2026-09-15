@@ -14,6 +14,7 @@ with lib; let
     then "Secondary"
     else "Default";
   geminiClass = "brave-gemini.google.com__-${personalBraveProfile}";
+  npuDictate = lib.getExe config.programs.npu-dictate.package;
 in {
   options.programs.configured.hyprland = {
     enable = mkEnableOption "Tiling Wayland Window Manager";
@@ -335,7 +336,14 @@ in {
           )
           ++ lib.optionals config.services.blueman-applet.enable [
             "SUPER+Shift, b, Rofi Bluetooth, exec, ${scripts.rofi-launch} bluetooth"
+          ]
+          ++ lib.optionals config.programs.configured.npu-dictate.enable [
+            "SUPER, v, Dictate (hold to talk), exec, ${npuDictate} start"
           ];
+        binddrin = lib.optionals config.programs.configured.npu-dictate.enable [
+          # On key release (r flag), ignore mods (i) and bubble through (n)
+          "v, Dictate (transcribe), exec, ${npuDictate} stop" # No-op when start wasn't run
+        ];
         binddle = [
           # Allow on lockscreen (l flag) and allow repeat (e flag)
           ", XF86AudioRaiseVolume, Increase volume, exec, ${pkgs.pamixer}/bin/pamixer -i 5"
