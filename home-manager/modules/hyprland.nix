@@ -4,10 +4,16 @@
   scripts,
   pkgs,
   osConfig,
+  systemArgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.hyprland;
+  personalBraveProfile =
+    if systemArgs.useWorkProfileByDefault
+    then "Secondary"
+    else "Default";
+  geminiClass = "brave-gemini.google.com__-${personalBraveProfile}";
 in {
   options.programs.configured.hyprland = {
     enable = mkEnableOption "Tiling Wayland Window Manager";
@@ -190,9 +196,9 @@ in {
           "workspace 9, match:initial_class ^(signal)$"
           "workspace 9, match:initial_title ^(WhatsApp Electron)(.*)$"
 
-          "float on,match:initial_class ^(brave-gemini.google.com__-Default)$"
-          "size 1790 1144, match:initial_class ^(brave-gemini.google.com__-Default)$"
-          "center on, match:initial_class ^(brave-gemini.google.com__-Default)$"
+          "float on,match:initial_class ^(${geminiClass})$"
+          "size 1790 1144, match:initial_class ^(${geminiClass})$"
+          "center on, match:initial_class ^(${geminiClass})$"
 
           "float on,match:initial_class ^(ghostty.yazi)$"
           "size 1400 700, match:initial_class ^(ghostty.yazi)$"
@@ -258,8 +264,8 @@ in {
             "SUPER, m, Emoji Picker, exec, ${scripts.rofi-launch} emoji"
             "SUPER, SPACE, Switch keyboard layout, exec, ${scripts.switch-kb-layout}"
             "ALT, d, Open Google Gemini, exec, ${scripts.launch-once {
-              command = "${pkgs.brave}/bin/brave --app=https://gemini.google.com";
-              grep = "brave-gemini.google.com__-Default";
+              command = "${pkgs.brave}/bin/brave --app=https://gemini.google.com --profile-directory=${personalBraveProfile}";
+              grep = geminiClass;
               useHypr = true;
               toggle = true;
             }}"
