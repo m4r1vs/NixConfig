@@ -64,6 +64,7 @@ in {
       fzf.enable = true;
       ghostty.enable = isDesktop || isWSL || isDarwin;
       git.enable = true;
+      helium.enable = isDesktop;
       hunk.enable = true;
       lazygit.enable = true;
       mcp.enable = true;

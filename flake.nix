@@ -54,6 +54,11 @@
       url = "github:m4r1vs/golazo?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    helium = {
+      # Helium web browser
+      url = "github:oxcl/nix-flake-helium-browser";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     stummumschalterung = {
       # Cycle mute state of chrome tabs remotely
       url = "gitlab:m4r1vs/stummumschalterung?ref=trunk";

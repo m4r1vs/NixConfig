@@ -15,6 +15,7 @@ with lib; let
     else "Default";
   geminiClass = "brave-gemini.google.com__-${personalBraveProfile}";
   npuDictate = lib.getExe config.programs.npu-dictate.package;
+  helium = lib.getExe (config.programs.helium.package.override {inherit (config.programs.helium) flags;});
 in {
   options.programs.configured.hyprland = {
     enable = mkEnableOption "Tiling Wayland Window Manager";
@@ -225,6 +226,8 @@ in {
           "float on,match:initial_class ^(ghostty.obsidian)$"
           "size 1600 900, match:initial_class ^(ghostty.obsidian)$"
           "workspace special:obsidian_nvim silent,match:initial_class ^(ghostty.obsidian)$"
+
+          "workspace special:helium silent,match:initial_class ^(helium)$"
         ];
         monitor = [
           "eDP-1,2880x1800@120.00,0x0, 1.25" # Internal
@@ -299,6 +302,13 @@ in {
               useHypr = true;
             }}"
             "Shift, F11, Toggle Obsidian Workspace, togglespecialworkspace, obsidian"
+
+            ",F12, Toggle Helium Workspace, togglespecialworkspace, helium"
+            ",F12, Launch Helium if not running, exec, ${scripts.launch-once {
+              command = "${helium}";
+              grep = "helium";
+              useHypr = true;
+            }}"
 
             "SUPER+Shift, Return, SSH Session Selection, exec, ${scripts.rofi-launch} ssh"
             "SUPER+Shift, Space, Toggle active window floating, togglefloating"
