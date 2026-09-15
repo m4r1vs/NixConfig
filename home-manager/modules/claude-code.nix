@@ -18,6 +18,18 @@ in {
       skills = {
         hunk = "${inputs.hunk.packages.${pkgs.stdenv.hostPlatform.system}.hunk}/skills/hunk-review/SKILL.md";
       };
+      settings = {
+        advisorModel = "fable";
+        editorMode = "vim";
+        enableArtifact = false;
+        model = "opus[1m]";
+        permissions.defaultMode = "auto";
+        preferredNotifChannel = "terminal_bell";
+        skipWorkflowUsageWarning = true;
+        terminalProgressBarEnabled = true;
+        theme = "auto";
+        useAutoModeDuringPlan = true;
+      };
     };
   };
 }
