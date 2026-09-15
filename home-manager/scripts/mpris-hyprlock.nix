@@ -80,7 +80,8 @@
           url_hash=$(echo -n "$url" | sha256sum | cut -d ' ' -f 1)
           ART_PATH="/tmp/hyprlock_art_''${url_hash}.jpeg"
           if [ ! -f "$ART_PATH" ]; then
-            ${pkgs.wget}/bin/wget -q -O "$ART_PATH" "$url"
+            # hyprlock waits for this script to finish before it can exit
+            ${pkgs.wget}/bin/wget -q --timeout=2 --tries=1 -O "$ART_PATH" "$url"
             if [ $? -ne 0 ]; then
               rm -f "$ART_PATH"
               ART_PATH=""

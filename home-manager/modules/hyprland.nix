@@ -353,7 +353,7 @@ in {
           ];
         binddrin = lib.optionals config.programs.configured.npu-dictate.enable [
           # On key release (r flag), ignore mods (i) and bubble through (n)
-          "v, Dictate (transcribe), exec, ${npuDictate} stop" # No-op when start wasn't run
+          ",v, Dictate (transcribe), exec, ${npuDictate} stop" # No-op when start wasn't run
         ];
         binddle = [
           # Allow on lockscreen (l flag) and allow repeat (e flag)

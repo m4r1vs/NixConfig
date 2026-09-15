@@ -12,6 +12,11 @@ with lib; let
   theme = systemArgs.theme;
 
   scale = val: builtins.floor (val * cfg.scaling);
+
+  # hyprlock runs every cmd[] child synchronously and blocks its own exit until
+  # they all finish - a hanging command keeps the dismissed lock screen alive.
+  capped = cmd: "${pkgs.coreutils}/bin/timeout -k 1 4 ${cmd}";
+
   scaleStr = valStr: let
     parts = lib.splitString "," (toString valStr);
     scaled = map (p: toString (scale (lib.toInt (lib.trim p)))) parts;
@@ -75,7 +80,7 @@ in {
             shadow_boost = 0.5;
           }
           {
-            text = "cmd[update:2000] ${scripts.battery-status}";
+            text = "cmd[update:2000] ${capped scripts.battery-status}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             font_size = scale 12;
             font_family = "SFProDisplay Nerd Font SemiBold";
@@ -89,7 +94,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:4000] ${scripts.mpris-hyprlock} --title";
+            text = "cmd[update:4000] ${capped "${scripts.mpris-hyprlock} --title"}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             font_size = scale 12;
             font_family = "SFProDisplay Nerd Font Bold";
@@ -103,7 +108,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:4000] ${scripts.mpris-hyprlock} --length";
+            text = "cmd[update:4000] ${capped "${scripts.mpris-hyprlock} --length"}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
             font_size = scale 12;
             font_family = "SFProDisplay Nerd Font SemiBold";
@@ -117,7 +122,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:4000] ${scripts.mpris-hyprlock} --source";
+            text = "cmd[update:4000] ${capped "${scripts.mpris-hyprlock} --source"}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.32)";
             font_size = scale 64;
             font_family = "SFProDisplay Nerd Font SemiBold";
@@ -132,7 +137,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:4000] ${scripts.mpris-hyprlock} --artist";
+            text = "cmd[update:4000] ${capped "${scripts.mpris-hyprlock} --artist"}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
             font_family = "SFProDisplay Nerd Font SemiBold";
             font_size = scale 12;
@@ -146,7 +151,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:3600000] echo \"$(date +\"%a, %b %d\")  $(${pkgs.wttrbar}/bin/wttrbar --nerd --custom-indicator \"{ICON} {temp_C}°\" | ${pkgs.jq}/bin/jq .text -r)\"";
+            text = "cmd[update:3600000] ${capped scripts.weather-status}";
             font_family = "SFProDisplay Nerd Font SemiBold";
             color = "rgba(${theme.backgroundColorLightRGB},0.72)";
             font_size = scale 15;
@@ -203,7 +208,7 @@ in {
             border_size = 0;
             rotate = 0;
             reload_time = 4;
-            reload_cmd = "${scripts.mpris-hyprlock} --arturl";
+            reload_cmd = capped "${scripts.mpris-hyprlock} --arturl";
             position = scaleStr "24, -21";
             halign = "left";
             valign = "top";

@@ -281,6 +281,22 @@ in {
           Mods to packages
           */
 
+          # wttr.in's TLS certificate expired (seen 2026-09-15), and wttrbar reacts
+          # to any request error with a 20-step backoff loop that burns ~95s before
+          # giving up. hyprlock blocks its own exit on that, so the lock screen stuck
+          # around for ~2min after being dismissed. Accept the stale cert, give the
+          # client a real timeout and drop the retry budget to one attempt.
+          # Once wttr.in fixes its cert, danger_accept_invalid_certs can be dropped.
+          wttrbar = wttrbar.overrideAttrs (oldAttrs: {
+            postPatch =
+              (oldAttrs.postPatch or "")
+              + ''
+                substituteInPlace src/main.rs \
+                  --replace-fail 'let client = Client::new();' 'let client = Client::builder().danger_accept_invalid_certs(true).timeout(Duration::from_secs(2)).build().unwrap();' \
+                  --replace-fail 'let threshold = 20;' 'let threshold = 1;'
+              '';
+          });
+
           rofi-unwrapped = rofi-unwrapped.overrideAttrs (oldAttrs: {
             patchPhase = ''
               echo "NoDisplay=true" >> ./data/rofi-theme-selector.desktop
