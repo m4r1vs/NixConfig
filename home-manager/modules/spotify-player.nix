@@ -21,20 +21,20 @@ in {
           key_sequence = "q";
         }
         {
-          command = "None";
+          command = "FocusNextWindow";
           key_sequence = "l";
         }
         {
-          command = "PreviousPage";
+          command = "FocusPreviousWindow";
           key_sequence = "h";
-        }
-        {
-          command = "ChooseSelected";
-          key_sequence = "l";
         }
         {
           command = "PreviousPage";
           key_sequence = "C-o";
+        }
+        {
+          command = "LyricsPage";
+          key_sequence = "C-l";
         }
       ];
       settings = {

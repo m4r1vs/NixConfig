@@ -233,11 +233,11 @@ in {
             src = fetchFromGitHub {
               owner = "m4r1vs";
               repo = "spotify-player";
-              rev = "46bf86bae412a3a372c701e2e48148818063d4e7";
-              hash = "sha256-MvYPqEQeZ3X22ARZHHhvK+z1/bZZm2R5ovnqWEICV0c=";
+              rev = "ce3382d2eb7a418f6f0e8620a0d35f9a4616d344";
+              hash = "sha256-ir6049VqsDOJx/J9j4A1r9dHXtNxxmhf18VDVB3NGt0=";
             };
 
-            cargoHash = "sha256-RsUuPkX4oVG6mDM16mM7VGW22mvKZPjShqs8BO36hbY=";
+            cargoHash = "sha256-inmkO+BfYlpLq+ogHCEnqbDRbR4MMSKpTd47oRcjuqI=";
 
             nativeBuildInputs = [
               pkg-config
