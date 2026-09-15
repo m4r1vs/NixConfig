@@ -46,3 +46,11 @@ There is also a concept of primary and secondary color. These are defined per-wa
 
 Server modules (Kubernetes, Minecraft Server, GitLab, GitLab Runners, Bind DNS, etc.) are defined in `./nixos-modules/server/`.
 There are also slim Kubernetes-focused hosts `kubenix` that are synced to my ArgoCD App of Apps in [argo-apps](https://github.com/m4r1vs/argo-apps).
+
+## Secure Boot
+
+Run to enable auto-unlock of the LUKS encrypted partition when secure-boot is enabled:
+
+```text
+sudo systemd-cryptenroll --wipe-slot=tpm2 --tpm2-device=auto --tpm2-pcrs=0,7 /dev/sda2
+```
