@@ -58,6 +58,11 @@
     };
 
     /*
+    BIOS/EC updates via LVFS; limine signs fwupd.efi with our sbctl keys
+    */
+    fwupd.enable = true;
+
+    /*
     B-Tree FS
     */
     btrfs = {

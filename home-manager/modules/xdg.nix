@@ -9,8 +9,8 @@
 }:
 with lib; let
   cfg = config.configured.xdg;
-  theme = systemArgs.theme;
   hasPowerProfiles = osConfig.services.power-profiles-daemon.enable or false;
+  hasFwupd = osConfig.services.fwupd.enable or false;
 in {
   options.configured.xdg = {
     enable = mkEnableOption "Cross-Desktop-Group";
@@ -254,6 +254,15 @@ in {
           exec = "${lib.getExe pkgs.ghostty} --wait-after-command=true -e ${scripts.rebuild}";
           type = "Application";
           categories = ["Utility"];
+        };
+        firmware-update-check = mkIf hasFwupd {
+          name = "Check for Firmware Updates";
+          genericName = "Queries fwupd for LVFS updates";
+          comment = "Check whether any device firmware has an update available";
+          icon = "fwupd";
+          exec = "${scripts.firmware-update-check} verbose";
+          type = "Application";
+          categories = ["Settings" "System"];
         };
         settings = {
           name = "Open and Edit System Configuration";

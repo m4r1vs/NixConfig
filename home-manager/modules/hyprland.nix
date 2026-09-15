@@ -41,6 +41,7 @@ in {
           "${lib.getExe pkgs.hyprlock} || hyprctl dispatch exit"
           "${pkgs._1password-gui}/bin/1password --silent"
           "${scripts.hyprland-startup-workspaces}"
+          "${scripts.firmware-update-check}"
           "${scripts.volume-change-notify}"
           "${scripts.brightness-change-notify}"
           "hyprctl setcursor Bibata-Modern-Ice 20"
