@@ -51,6 +51,10 @@
     ];
   };
 
+  systemd = {
+    sleep.settings.Sleep.HibernateMode = "shutdown";
+  };
+
   services = {
     /*
     Dynamic CPU/Power modes
