@@ -71,9 +71,10 @@ in {
           kb_options = "caps:escape";
           touchpad = {
             natural_scroll = true;
+            scroll_factor = 0.06;
           };
           follow_mouse = 1;
-          sensitivity = 0.6;
+          sensitivity = 0.7;
           force_no_accel = false;
           accel_profile = "flat";
           numlock_by_default = true;
