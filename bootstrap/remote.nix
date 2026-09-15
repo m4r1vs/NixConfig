@@ -27,8 +27,6 @@
     };
   };
 
-  boot.initrd.systemd.emergencyAccess = lib.mkForce false;
-
   environment = {
     systemPackages = [
       (pkgs.writeShellScriptBin "help" ''

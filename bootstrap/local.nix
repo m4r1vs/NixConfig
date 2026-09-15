@@ -1,7 +1,6 @@
 {
   systemArgs,
   pkgs,
-  lib,
   ...
 }: {
   services.configured = {
@@ -11,12 +10,7 @@
     };
   };
 
-  /*
-  Use networkmanager instead of install-iso default wpa_supplicant
-  */
-  networking.wireless.enable = lib.mkForce false;
-
-  boot.initrd.systemd.emergencyAccess = lib.mkForce false;
+  hardware.enableAllFirmware = true;
 
   environment = {
     systemPackages = [
