@@ -17,6 +17,7 @@ in {
   config = mkIf cfg.enable {
     users.users.mn.home = "/Users/mn";
     nix.enable = true;
+    nix.settings.accept-flake-config = true;
 
     configured = {
       home-manager.enable = true;

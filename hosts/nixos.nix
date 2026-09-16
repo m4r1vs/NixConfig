@@ -83,6 +83,7 @@ with lib; {
     };
   };
 
+  nix.settings.accept-flake-config = true;
   nix.gc.automatic = lib.mkForce false;
 
   environment = {
