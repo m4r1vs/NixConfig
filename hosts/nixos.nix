@@ -17,6 +17,10 @@ with lib; {
       dockerCompat = true;
       defaultNetwork.settings.dns_enabled = true;
     };
+    containers.containersConf.settings.containers.dns_servers = [
+      "8.8.8.8"
+      "1.1.1.1"
+    ];
   };
 
   boot = {
