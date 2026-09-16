@@ -332,6 +332,45 @@ in {
             "x-scheme-handler/https"
           ];
         };
+        meetovo-os = mkIf systemArgs.useWorkProfileByDefault {
+          name = "Meetovo OS";
+          genericName = "os.meetovo.de";
+          comment = "Open Meetovo OS";
+          icon = "applications-system";
+          exec = "${pkgs.brave}/bin/brave --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation --password-store=gnome-libsecret https://os.meetovo.de";
+          terminal = false;
+          type = "Application";
+          categories = ["Network" "Office"];
+          settings = {
+            Keywords = "meetovo;os";
+          };
+        };
+        gitlab = mkIf systemArgs.useWorkProfileByDefault {
+          name = "GitLab";
+          genericName = "gitlab.meetovo.dev";
+          comment = "Open Meetovo GitLab";
+          icon = "gitlab";
+          exec = "${pkgs.brave}/bin/brave --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation --password-store=gnome-libsecret https://gitlab.meetovo.dev";
+          terminal = false;
+          type = "Application";
+          categories = ["Development" "Network"];
+          settings = {
+            Keywords = "git;gitlab;meetovo";
+          };
+        };
+        linear = mkIf systemArgs.useWorkProfileByDefault {
+          name = "Linear";
+          genericName = "linear.app";
+          comment = "Open Linear";
+          icon = "linear";
+          exec = "${pkgs.brave}/bin/brave --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation --password-store=gnome-libsecret https://linear.app";
+          terminal = false;
+          type = "Application";
+          categories = ["Office" "Development"];
+          settings = {
+            Keywords = "linear;issues;tasks;projects";
+          };
+        };
         caffeinate = {
           name = "Toggle Caffeination";
           genericName = "Cannot sleep on coffee";
