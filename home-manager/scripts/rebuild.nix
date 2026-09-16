@@ -24,10 +24,10 @@ in {
 
           if [ -f /etc/nixos_active_specialisation ]; then
             SPEC=$(cat /etc/nixos_active_specialisation)
-            echo -e "Rebuilding and switching to \e[32mspecialisation\e[0m: \e[33m$SPEC\e[0m"
+            echo -e "Rebuilding and switching to \e[32mspecialisation\e[0m: \e[33m$SPEC\e[0m\n"
             ${pkgs.nh}/bin/nh os switch -a ~/NixConfig -H ${systemArgs.hostname} -- --specialisation "$SPEC"
           else
-            echo -e "Rebuilding and switching to \e[32mdefault specialisation\e[0m."
+            echo -e "Rebuilding and switching to \e[32mdefault specialisation\e[0m.\n"
             ${pkgs.nh}/bin/nh os switch -a ~/NixConfig -H ${systemArgs.hostname}
           fi
 
