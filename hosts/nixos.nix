@@ -75,7 +75,15 @@ with lib; {
 
   programs = {
     nix-index-database.comma.enable = true;
+    nh = {
+      enable = true;
+      clean.enable = true;
+      clean.extraArgs = "--keep-since 4d --keep 3";
+      flake = "/home/mn/NixConfig";
+    };
   };
+
+  nix.gc.automatic = lib.mkForce false;
 
   environment = {
     systemPackages = with pkgs; [
