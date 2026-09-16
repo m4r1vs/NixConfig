@@ -38,7 +38,7 @@
       hyprctl dispatch exec "${lib.getExe pkgs.waybar}"
       hyprctl dispatch exec "${lib.getExe pkgs.signal-desktop} --ozone-platform-hint=auto"
       hyprctl dispatch exec "${lib.getExe pkgs.whatsapp-electron} --ozone-platform-hint=auto"
-      ${lib.optionalString (systemArgs.useWorkProfileByDefault)
+      ${lib.optionalString systemArgs.useWorkProfileByDefault
         # bash
         ''
           hyprctl dispatch exec "${lib.getExe pkgs.slack}"
@@ -53,7 +53,7 @@
       sleep 2
       hyprctl dispatch workspace 3
       sleep 1
-      ${lib.optionalString (systemArgs.useWorkProfileByDefault)
+      ${lib.optionalString systemArgs.useWorkProfileByDefault
         # bash
         ''
           hyprctl dispatch workspace 4

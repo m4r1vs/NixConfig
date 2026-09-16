@@ -7,7 +7,7 @@
 }:
 with lib; let
   cfg = config.services.configured.flameshot;
-  theme = systemArgs.theme;
+  inherit (systemArgs) theme;
 in {
   options.services.configured.flameshot = {
     enable = mkEnableOption "Enable Flameshot daemon for X11 screenshots.";

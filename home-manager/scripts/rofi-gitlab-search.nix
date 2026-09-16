@@ -1,9 +1,4 @@
-{
-  pkgs,
-  scripts,
-  config,
-  ...
-}: let
+{pkgs, ...}: let
   # Python script to handle token refresh and OAuth PKCE flow natively
   authScript =
     pkgs.writeScript "rofi-gitlab-auth.py"

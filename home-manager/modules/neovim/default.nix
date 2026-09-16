@@ -8,7 +8,6 @@
 }:
 with lib; let
   cfg = config.programs.configured.neovim;
-  theme = systemArgs.theme;
 in {
   options.programs.configured.neovim = {
     enable = mkEnableOption "Neo VIM";

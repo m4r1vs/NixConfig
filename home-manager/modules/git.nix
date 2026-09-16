@@ -6,7 +6,7 @@
 }:
 with lib; let
   cfg = config.programs.configured.git;
-  git = systemArgs.git;
+  inherit (systemArgs) git;
 in {
   options.programs.configured.git = {
     enable = mkEnableOption "The version controlling software.";
@@ -16,8 +16,8 @@ in {
       enable = true;
       settings = {
         user = {
-          name = git.name;
-          email = git.email;
+          inherit (git) name;
+          inherit (git) email;
         };
         pull.rebase = true;
       };

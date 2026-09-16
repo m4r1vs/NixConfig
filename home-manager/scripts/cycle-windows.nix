@@ -10,7 +10,11 @@
         exit 0
       fi
 
-      ${if direction == "prev" then "windows=$(echo \"$windows\" | ${pkgs.coreutils}/bin/tac)" else ""}
+      ${
+        if direction == "prev"
+        then "windows=$(echo \"$windows\" | ${pkgs.coreutils}/bin/tac)"
+        else ""
+      }
 
       if [ -z "$active" ]; then
         # If no window is active, focus the first one

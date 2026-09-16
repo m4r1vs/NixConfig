@@ -40,11 +40,11 @@ in {
       enableIPv6 = true;
       defaultGateway = {
         address = cfg.ipv4gateway;
-        interface = cfg.interface;
+        inherit (cfg) interface;
       };
       defaultGateway6 = {
         address = cfg.ipv6gateway;
-        interface = cfg.interface;
+        inherit (cfg) interface;
       };
       interfaces = {
         "${cfg.interface}" = {

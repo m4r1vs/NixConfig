@@ -121,8 +121,8 @@ in {
 
           set-option -g set-titles on
           set-option -g set-titles-string "${mkTmuxWindowStatusFormat {
-            shellIconMap = cfg.shellIconMap;
-            showPaneCount = cfg.showPaneCount;
+            inherit (cfg) shellIconMap;
+            inherit (cfg) showPaneCount;
           }}"
 
           bind-key -n M-L switch-client -n
@@ -250,14 +250,14 @@ in {
             set -g @minimal-tmux-use-arrow false
 
             set -g @minimal-tmux-window-status-format " ${mkTmuxWindowStatusFormat {
-              shellIconMap = cfg.shellIconMap;
-              showPaneCount = cfg.showPaneCount;
+              inherit (cfg) shellIconMap;
+              inherit (cfg) showPaneCount;
             }} "
 
             # Not recommended to change these values
             set -g @minimal-tmux-status-right "                                             %d.%m. 󰥔 %H:%M"
             set -g @minimal-tmux-status-left "#(tmux ls -F '##{?session_attached,#[fg=#{@secondary-color}],#[fg=#826F62]} ${lib.replaceStrings ["#"] ["##"] (mkTmuxWindowStatusFormat {
-              shellIconMap = cfg.shellIconMap;
+              inherit (cfg) shellIconMap;
               showPaneCount = false;
             })} (##{session_windows}) #[fg=default]' | tr -d '\n'; printf '%%60s' \"\")"
           '';

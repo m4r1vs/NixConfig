@@ -6,7 +6,7 @@
 }:
 with lib; let
   cfg = config.programs.configured.mcp;
-  gitlab = cfg.gitlab;
+  inherit (cfg) gitlab;
 in {
   options.programs.configured.mcp = {
     enable = mkEnableOption "Configuration of Model Context Protocol servers";

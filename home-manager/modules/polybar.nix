@@ -7,7 +7,7 @@
 }:
 with lib; let
   cfg = config.services.configured.polybar;
-  theme = systemArgs.theme;
+  inherit (systemArgs) theme;
 in {
   options.services.configured.polybar = {
     enable = mkEnableOption "Enable Polybar Statusbar";

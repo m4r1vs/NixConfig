@@ -10,7 +10,7 @@ let
     scriptModule {
       inherit pkgs systemArgs config;
       scripts = makeScripts {inherit pkgs systemArgs config;};
-      lib = pkgs.lib;
+      inherit (pkgs) lib;
     };
 
   makeScripts = {
@@ -18,7 +18,7 @@ let
     systemArgs,
     config,
   }: (pkgs.lib.foldl pkgs.lib.mergeAttrs {} (
-    pkgs.lib.mapAttrsToList (fileName: fileType:
+    pkgs.lib.mapAttrsToList (fileName: _fileType:
       importScript {
         inherit fileName pkgs systemArgs config;
       }) (builtins.readDir ./scripts)

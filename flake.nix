@@ -96,6 +96,10 @@
       url = "gitlab:m4r1vs/npu-dictate?ref=master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    pre-commit-hooks = {
+      url = "github:cachix/pre-commit-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixConfig = {
@@ -110,6 +114,8 @@
   };
 
   outputs = {self, ...} @ inputs: let
+    systems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin"];
+    forAllSystems = inputs.nixpkgs.lib.genAttrs systems;
     globalArgs = {
       username = "mn";
       git = {
@@ -433,5 +439,39 @@
       bootstrap_local_x86_64 = self.nixosConfigurations.bootstrap_local_x86_64.config.system.build.images.iso-installer;
       bootstrap_remote_arm64 = self.nixosConfigurations.bootstrap_remote_arm64.config.system.build.images.iso-installer;
     };
+    checks = forAllSystems (system: {
+      pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
+        src = ./.;
+        hooks = {
+          alejandra.enable = true;
+          statix = {
+            enable = true;
+            excludes = [
+              ".*hardware-configuration\\.nix"
+              ".*desktop\\.nix"
+              ".*kubernetes\\.nix"
+              ".*nginx\\.nix"
+              ".*xdg\\.nix"
+              ".*slidecontrol\\.nix"
+              ".*stummumschalterung\\.nix"
+            ];
+          };
+          deadnix = {
+            enable = true;
+            excludes = [
+              ".*hardware-configuration\\.nix"
+              ".*rofi\\.nix"
+              ".*yannix-configuration\\.nix"
+            ];
+          };
+        };
+      };
+    });
+    devShells = forAllSystems (system: {
+      default = inputs.nixpkgs.legacyPackages.${system}.mkShell {
+        inherit (self.checks.${system}.pre-commit-check) shellHook;
+        buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
+      };
+    });
   };
 }

@@ -105,7 +105,7 @@ in {
             notification = false;
           }
         ];
-        terminal = terminal;
+        inherit terminal;
         defaultWorkspace = "workspace number 1";
         window = {
           titlebar = false;

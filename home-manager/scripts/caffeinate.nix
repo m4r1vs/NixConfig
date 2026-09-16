@@ -19,7 +19,7 @@
         fi
     else
         INHIBITORS_JSON=$(GET_INHIBITORS)
-        
+
         IS_CAFFEINATED=$(echo "$INHIBITORS_JSON" | ${pkgs.jq}/bin/jq -r 'any(.[]; .[1] == "Nixos-Caffeinate")')
 
         # Format inhibitors for tooltip

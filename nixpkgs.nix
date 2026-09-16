@@ -10,14 +10,14 @@ with lib; let
   isDesktop = config.configured ? desktop && config.configured.desktop.enable;
   isDarwin = systemArgs.system == "aarch64-darwin";
   pkgsUnstable = import inputs.nixpkgs_unstable {
-    system = systemArgs.system;
+    inherit (systemArgs) system;
     config.allowUnfree = true;
   };
 in {
   nixpkgs = {
     config.allowUnfree = true;
     overlays = [
-      (final: prev:
+      (_final: prev:
         with prev; {
           /*
           Own packages / not in nixpkgs
@@ -143,22 +143,22 @@ in {
           From unstable/master Nixpkgs
           */
 
-          claude-code = pkgsUnstable.claude-code;
+          inherit (pkgsUnstable) claude-code;
           clippy-darwin = pkgsUnstable.clippy-copy;
-          antigravity-cli = pkgsUnstable.antigravity-cli;
+          inherit (pkgsUnstable) antigravity-cli;
           ghostty =
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
-          inter-nerdfont = pkgsUnstable.inter-nerdfont;
-          neovim = pkgsUnstable.neovim;
-          neovim-unwrapped = pkgsUnstable.neovim-unwrapped;
-          nerd-font-patcher = pkgsUnstable.nerd-font-patcher;
-          nerd-fonts = pkgsUnstable.nerd-fonts;
-          opencode = pkgsUnstable.opencode;
-          swayimg = pkgsUnstable.swayimg;
-          tlrc = pkgsUnstable.tlrc;
-          zathura = pkgsUnstable.zathura;
+          inherit (pkgsUnstable) inter-nerdfont;
+          inherit (pkgsUnstable) neovim;
+          inherit (pkgsUnstable) neovim-unwrapped;
+          inherit (pkgsUnstable) nerd-font-patcher;
+          inherit (pkgsUnstable) nerd-fonts;
+          inherit (pkgsUnstable) opencode;
+          inherit (pkgsUnstable) swayimg;
+          inherit (pkgsUnstable) tlrc;
+          inherit (pkgsUnstable) zathura;
 
           /*
           Temporary Fixes / Updates
@@ -297,7 +297,7 @@ in {
               '';
           });
 
-          rofi-unwrapped = rofi-unwrapped.overrideAttrs (oldAttrs: {
+          rofi-unwrapped = rofi-unwrapped.overrideAttrs (_oldAttrs: {
             patchPhase = ''
               echo "NoDisplay=true" >> ./data/rofi-theme-selector.desktop
               echo "NoDisplay=true" >> ./data/rofi.desktop

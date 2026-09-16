@@ -7,7 +7,7 @@
 }:
 with lib; let
   cfg = config.services.configured.dunst;
-  theme = systemArgs.theme;
+  inherit (systemArgs) theme;
 in {
   options.services.configured.dunst = {
     enable = mkEnableOption "Simple X11 notification daemon.";

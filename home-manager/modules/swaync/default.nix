@@ -8,7 +8,7 @@
 }:
 with lib; let
   cfg = config.services.configured.swaync;
-  theme = systemArgs.theme;
+  inherit (systemArgs) theme;
 in {
   options.services.configured.swaync = {
     enable = mkEnableOption "Sway Notification-Center";

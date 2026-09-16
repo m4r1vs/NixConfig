@@ -8,7 +8,7 @@
 }:
 with lib; let
   cfg = config.programs.configured.waybar;
-  theme = systemArgs.theme;
+  inherit (systemArgs) theme;
 in {
   options.programs.configured.waybar = {
     enable = mkEnableOption "Wayland Statusbar";

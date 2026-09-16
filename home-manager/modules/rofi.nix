@@ -7,7 +7,6 @@
 }:
 with lib; let
   cfg = config.programs.configured.rofi;
-  theme = systemArgs.theme;
 in {
   options.programs.configured.rofi = {
     enable = mkEnableOption "DMENU and DRUN replacement";

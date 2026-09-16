@@ -44,7 +44,7 @@ in {
         systemd-boot.enable = mkForce false;
         timeout = 5;
         limine = {
-          resolution = cfg.resolution;
+          inherit (cfg) resolution;
           enable = true;
           efiSupport = true;
           secureBoot.enable = cfg.secureboot;
@@ -67,13 +67,13 @@ in {
                   comment: Find out if memory is broken (just like mine on April 21st)
             '');
           style = {
-            wallpapers = cfg.wallpapers;
+            inherit (cfg) wallpapers;
             wallpaperStyle = "stretched";
             interface = {
               branding = "Moin, ${systemArgs.username}@${systemArgs.hostname} :)";
               brandingColor = "#DB8C4B";
               helpHidden = true;
-              resolution = cfg.resolution;
+              inherit (cfg) resolution;
             };
             graphicalTerminal = {
               background = "8A15130F";

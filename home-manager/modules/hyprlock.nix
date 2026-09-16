@@ -9,7 +9,7 @@
 }:
 with lib; let
   cfg = config.programs.configured.hyprlock;
-  theme = systemArgs.theme;
+  inherit (systemArgs) theme;
 
   scale = val: builtins.floor (val * cfg.scaling);
 

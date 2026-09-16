@@ -8,7 +8,7 @@
 with lib; let
   cfg = config.programs.configured.ghostty;
   isDarwin = systemArgs.system == "aarch64-darwin";
-  theme = systemArgs.theme;
+  inherit (systemArgs) theme;
 in {
   options.programs.configured.ghostty = {
     enable = mkEnableOption "Cross-platform terminal emulator.";
