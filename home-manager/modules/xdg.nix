@@ -366,6 +366,15 @@ in {
           type = "Application";
           categories = ["Utility"];
         };
+        rofi-gitlab = mkIf systemArgs.useWorkProfileByDefault {
+          name = "Search GitLab MRs";
+          genericName = "SUPER+Shift+G";
+          comment = "Search GitLab Merge Requests using rofi";
+          icon = "gitlab";
+          exec = "${scripts.rofi-launch} gitlab";
+          type = "Application";
+          categories = ["Utility"];
+        };
         rofi-emoji = {
           name = "Emoji Picker";
           genericName = "SUPER+M";

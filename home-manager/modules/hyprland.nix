@@ -311,6 +311,7 @@ in {
             }}"
 
             "SUPER+Shift, Return, SSH Session Selection, exec, ${scripts.rofi-launch} ssh"
+            "SUPER+Shift, G, GitLab MR search, exec, ${scripts.rofi-launch} gitlab"
             "SUPER+Shift, Space, Toggle active window floating, togglefloating"
             "SUPER+Shift, s, Take Screenshot and then edit it, exec, ${scripts.screenshot} edit"
             "SUPER+Shift, F, Toggle fake fullscreen, fullscreenstate, 2,"

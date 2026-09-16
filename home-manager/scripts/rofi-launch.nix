@@ -38,6 +38,9 @@
         obsidian)
           ${pkgs.rofi}/bin/rofi -modi obsidian:${scripts.rofi-obsidian} -show obsidian -theme-str "entry {placeholder:\"Open Obsidian Note...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}"
           ;;
+        gitlab)
+          ${pkgs.rofi}/bin/rofi -modi gitlab:${scripts.rofi-gitlab-search} -show gitlab -theme-str "entry {placeholder:\"Search GitLab MRs...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}"
+          ;;
         ocr)
           ${scripts.ocr-screenshot}
           ;;
@@ -48,7 +51,7 @@
           ${scripts.rofi-translate}
           ;;
         *)
-          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|cliphist|powermode|obsidian|ocr|wifi|translate}"
+          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|cliphist|powermode|obsidian|gitlab|ocr|wifi|translate}"
           exit 1
           ;;
       esac
