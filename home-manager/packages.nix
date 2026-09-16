@@ -14,6 +14,7 @@ in {
   home.packages = with pkgs;
     [
       # Install on every system:
+      (writeShellScriptBin "auto-upgrade" scripts.auto-upgrade)
       (writeShellScriptBin "date-trivia" scripts.date-trivia)
       (writeShellScriptBin "ls-git" scripts.ls-git)
       (writeShellScriptBin "rebuild" scripts.rebuild)
