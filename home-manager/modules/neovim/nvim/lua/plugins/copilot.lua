@@ -2,7 +2,6 @@ return {
   "zbirenbaum/copilot.lua",
   version = false,
   event = "InsertEnter",
-  cmd = { "Copilot" },
   keys = {
     { "<M-j>",      mode = "i", desc = "Next Copilot suggestion" },
     { "<M-k>",      mode = "i", desc = "Previous Copilot suggestion" },
@@ -27,6 +26,9 @@ return {
       },
       nes = {
         enabled = false,
+      },
+      server = {
+        type = "nodejs",
       },
     })
 
