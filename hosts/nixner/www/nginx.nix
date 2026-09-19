@@ -34,45 +34,47 @@ in {
       recommendedProxySettings = true;
       recommendedTlsSettings = true;
 
-      virtualHosts."${cfg.domain}" = {
-        forceSSL = true;
-        useACMEHost = cfg.domain;
-        globalRedirect = "marius.${cfg.domain}";
-      };
+      virtualHosts = {
+        "${cfg.domain}" = {
+          forceSSL = true;
+          useACMEHost = cfg.domain;
+          globalRedirect = "marius.${cfg.domain}";
+        };
 
-      virtualHosts."nixner.${cfg.domain}" = {
-        forceSSL = true;
-        useACMEHost = cfg.domain;
-        globalRedirect = "github.com/m4r1vs/NixConfig/tree/main/hosts/nixner";
-      };
+        "nixner.${cfg.domain}" = {
+          forceSSL = true;
+          useACMEHost = cfg.domain;
+          globalRedirect = "github.com/m4r1vs/NixConfig/tree/main/hosts/nixner";
+        };
 
-      virtualHosts."old.${cfg.domain}" = {
-        forceSSL = true;
-        useACMEHost = cfg.domain;
-        locations."/" = {
-          root = ./old.niveri.dev;
-          index = "index.html";
+        "old.${cfg.domain}" = {
+          forceSSL = true;
+          useACMEHost = cfg.domain;
+          locations."/" = {
+            root = ./old.niveri.dev;
+            index = "index.html";
+            extraConfig = ''
+              default_type text/html;
+              limit_except GET HEAD {
+                deny all;
+              }
+            '';
+          };
+        };
+
+        "dns-admin.${cfg.domain}" = {
+          forceSSL = true;
+          useACMEHost = cfg.domain;
+          globalRedirect = "marius.niveri.dev";
+        };
+
+        "*.${cfg.domain}" = {
+          forceSSL = true;
+          useACMEHost = cfg.domain;
           extraConfig = ''
-            default_type text/html;
-            limit_except GET HEAD {
-              deny all;
-            }
+            return 404;
           '';
         };
-      };
-
-      virtualHosts."dns-admin.${cfg.domain}" = {
-        forceSSL = true;
-        useACMEHost = cfg.domain;
-        globalRedirect = "marius.niveri.dev";
-      };
-
-      virtualHosts."*.${cfg.domain}" = {
-        forceSSL = true;
-        useACMEHost = cfg.domain;
-        extraConfig = ''
-          return 404;
-        '';
       };
     };
   };

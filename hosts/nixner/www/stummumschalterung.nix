@@ -25,7 +25,7 @@ in {
     services = {
       stummumschalterung-server = {
         enable = true;
-        port = cfg.port;
+        inherit (cfg) port;
         dataDir = "/var/data/stummumschalterung";
       };
 

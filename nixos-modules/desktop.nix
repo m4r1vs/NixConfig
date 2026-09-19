@@ -64,8 +64,6 @@ in {
       }
     ];
 
-    environment.pathsToLink = ["/share/xdg-desktop-portal" "/share/applications"];
-
     programs.keypress-visualizer = {
       enable = true;
       settings = {
@@ -89,36 +87,33 @@ in {
     specialisation = {
       "Hyprland (Wayland)".configuration = mkIf cfg.windowManagers.hyprland.enable {
         environment.etc."nixos_active_specialisation".text = "Hyprland (Wayland)";
-        configured.hyprland.enable = lib.mkForce true;
-        configured.i3.enable = lib.mkForce false;
-        configured.gamescope.enable = lib.mkForce false;
+        configured = {
+          hyprland.enable = lib.mkForce true;
+          i3.enable = lib.mkForce false;
+          gamescope.enable = lib.mkForce false;
+        };
       };
       "i3 (X Window System)".configuration = mkIf cfg.windowManagers.i3.enable {
         environment.etc."nixos_active_specialisation".text = "i3 (X Window System)";
-        configured.hyprland.enable = lib.mkForce false;
-        configured.i3.enable = lib.mkForce true;
-        configured.gamescope.enable = lib.mkForce false;
+        configured = {
+          hyprland.enable = lib.mkForce false;
+          i3.enable = lib.mkForce true;
+          gamescope.enable = lib.mkForce false;
+        };
       };
       "Steam Gamescope (Wayland)".configuration = mkIf cfg.windowManagers.gamescope.enable {
         environment.etc."nixos_active_specialisation".text = "Steam Gamescope (Wayland)";
-        configured.hyprland.enable = lib.mkForce false;
-        configured.i3.enable = lib.mkForce false;
-        configured.gamescope.enable = lib.mkForce true;
+        configured = {
+          hyprland.enable = lib.mkForce false;
+          i3.enable = lib.mkForce false;
+          gamescope.enable = lib.mkForce true;
+        };
       };
     };
 
     configured.hyprland.enable = cfg.windowManagers.hyprland.enable && cfg.windowManagers.hyprland.default;
     configured.i3.enable = cfg.windowManagers.i3.enable && cfg.windowManagers.i3.default;
     configured.gamescope.enable = cfg.windowManagers.gamescope.enable && cfg.windowManagers.gamescope.default;
-
-    # Fix libstrongswan not working due to missing config file
-    environment.etc."strongswan.conf" = {
-      enable = true;
-      user = "root";
-      group = "root";
-      mode = "0644";
-      text = "";
-    };
 
     services = {
       configured.kmscon.enable = true;
@@ -310,6 +305,14 @@ in {
     };
 
     environment = {
+      pathsToLink = ["/share/xdg-desktop-portal" "/share/applications"];
+      etc."strongswan.conf" = {
+        enable = true;
+        user = "root";
+        group = "root";
+        mode = "0644";
+        text = "";
+      };
       systemPackages = with pkgs; [
         bibata-cursors
         (runCommandLocal "bibata-cursor-default-theme" {} ''

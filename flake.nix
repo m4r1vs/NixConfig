@@ -444,26 +444,8 @@
         src = ./.;
         hooks = {
           alejandra.enable = true;
-          statix = {
-            enable = true;
-            excludes = [
-              ".*hardware-configuration\\.nix"
-              ".*desktop\\.nix"
-              ".*kubernetes\\.nix"
-              ".*nginx\\.nix"
-              ".*xdg\\.nix"
-              ".*slidecontrol\\.nix"
-              ".*stummumschalterung\\.nix"
-            ];
-          };
-          deadnix = {
-            enable = true;
-            excludes = [
-              ".*hardware-configuration\\.nix"
-              ".*rofi\\.nix"
-              ".*yannix-configuration\\.nix"
-            ];
-          };
+          statix.enable = true;
+          deadnix.enable = true;
         };
       };
     });

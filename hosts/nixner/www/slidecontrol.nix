@@ -26,7 +26,7 @@ in {
     services = {
       slidecontrol-server = {
         enable = true;
-        port = cfg.port;
+        inherit (cfg) port;
         dataDir = "/var/data/slidecontrol";
       };
 

@@ -35,13 +35,12 @@
             parsedValue = builtins.fromJSON jsonContent;
           in {
             name = hash;
-            value = (
+            value =
               lib.recursiveUpdate
               parsedValue
               {
                 metadata.namespace = ns;
-              }
-            );
+              };
           }
           else null
       )
@@ -76,23 +75,6 @@ in {
     '';
   };
 
-  services.openssh = {
-    ports = lib.mkForce [422];
-  };
-
-  services.comin = {
-    enable = true;
-    debug = true;
-    allowForcePushMain = true;
-    remotes = [
-      {
-        name = "origin";
-        url = "https://github.com/m4r1vs/NixConfig.git";
-        branches.main.name = "main";
-      }
-    ];
-  };
-
   virtualisation.containerd = {
     settings = lib.mkForce {
       version = 2;
@@ -120,109 +102,127 @@ in {
     };
   };
 
-  services.kubernetes = let
-    masterAddr = "https://${masterFqdn}:${toString k8sPort}";
-    isMaster = builtins.elem "master" clusterRoles;
-  in {
-    roles = clusterRoles;
-    apiserverAddress = masterAddr;
-    masterAddress = masterFqdn;
-    easyCerts = true;
-    addonManager = lib.mkIf isMaster {
+  services = {
+    openssh = {
+      ports = lib.mkForce [422];
+    };
+
+    comin = {
       enable = true;
-      bootstrapAddons =
-        (resourceFromYAML {
-          path = builtins.fetchurl {
-            url = "https://raw.githubusercontent.com/argoproj/argo-cd/v3.2.0/manifests/install.yaml";
-            sha256 = "sha256:191q5rxlamfm7hh7b9604l3pzhavhx200v5vj95rm130yw7rlaai";
+      debug = true;
+      allowForcePushMain = true;
+      remotes = [
+        {
+          name = "origin";
+          url = "https://github.com/m4r1vs/NixConfig.git";
+          branches.main.name = "main";
+        }
+      ];
+    };
+
+    kubernetes = let
+      masterAddr = "https://${masterFqdn}:${toString k8sPort}";
+      isMaster = builtins.elem "master" clusterRoles;
+    in {
+      roles = clusterRoles;
+      apiserverAddress = masterAddr;
+      masterAddress = masterFqdn;
+      easyCerts = true;
+      addonManager = lib.mkIf isMaster {
+        enable = true;
+        bootstrapAddons =
+          (resourceFromYAML {
+            path = builtins.fetchurl {
+              url = "https://raw.githubusercontent.com/argoproj/argo-cd/v3.2.0/manifests/install.yaml";
+              sha256 = "sha256:191q5rxlamfm7hh7b9604l3pzhavhx200v5vj95rm130yw7rlaai";
+            };
+            ns = "argocd";
+          })
+          // {
+            argo-namespace = {
+              apiVersion = "v1";
+              kind = "Namespace";
+              metadata = {
+                name = "argocd";
+              };
+            };
+            cluster-bootstrap = {
+              apiVersion = "argoproj.io/v1alpha1";
+              kind = "Application";
+              metadata = {
+                name = "cluster-bootstrap";
+                namespace = "argocd";
+              };
+              spec = {
+                project = "default";
+                source = {
+                  repoURL = "https://github.com/m4r1vs/argo-apps";
+                  targetRevision = "HEAD";
+                  path = "bootstrap";
+                  directory = {
+                    recurse = true;
+                  };
+                };
+                destination = {
+                  server = "https://kubernetes.default.svc";
+                  namespace = "bootstrap";
+                };
+                syncPolicy = {
+                  syncOptions = [
+                    "CreateNamespace=true"
+                  ];
+                  automated = {
+                    prune = true;
+                    allowEmpty = true;
+                    selfHeal = true;
+                  };
+                };
+              };
+            };
           };
-          ns = "argocd";
-        })
+      };
+      addons.dns = {
+        enable = true;
+        clusterDomain = domain;
+        # TODO: test if this has been fixed, if not, open PR
+        coredns = {
+          imageName = "mariusniveri/my-coredns";
+          imageDigest = "sha256:dd3d70eaa614e7228af8124ef37c7d8ccd92e9dd0cbdd823f727428d7b8191f3";
+          finalImageTag = "latest";
+          sha256 = "sha256-ID+qV6/knQDQ8leyq4r08uexPdDiu739Qeh/cBP0GfE=";
+        };
+      };
+      flannel = {
+        enable = true;
+        openFirewallPorts = true;
+      };
+      proxy.enable = true;
+      kubelet =
+        (
+          if isMaster
+          then {
+            enable = true;
+            hostname = masterFqdn;
+          }
+          else {
+            enable = true;
+            kubeconfig.server = masterAddr;
+          }
+        )
         // {
-          argo-namespace = {
-            apiVersion = "v1";
-            kind = "Namespace";
-            metadata = {
-              name = "argocd";
-            };
-          };
-          cluster-bootstrap = {
-            apiVersion = "argoproj.io/v1alpha1";
-            kind = "Application";
-            metadata = {
-              name = "cluster-bootstrap";
-              namespace = "argocd";
-            };
-            spec = {
-              project = "default";
-              source = {
-                repoURL = "https://github.com/m4r1vs/argo-apps";
-                targetRevision = "HEAD";
-                path = "bootstrap";
-                directory = {
-                  recurse = true;
-                };
-              };
-              destination = {
-                server = "https://kubernetes.default.svc";
-                namespace = "bootstrap";
-              };
-              syncPolicy = {
-                syncOptions = [
-                  "CreateNamespace=true"
-                ];
-                automated = {
-                  prune = true;
-                  allowEmpty = true;
-                  selfHeal = true;
-                };
-              };
+          extraConfig = {
+            evictionHard = {
+              "imagefs.available" = "5%";
+              "nodefs.available" = "5%";
+              "memory.available" = "100Mi";
             };
           };
         };
-    };
-    addons.dns = {
-      enable = true;
-      clusterDomain = domain;
-      # TODO: test if this has been fixed, if not, open PR
-      coredns = {
-        imageName = "mariusniveri/my-coredns";
-        imageDigest = "sha256:dd3d70eaa614e7228af8124ef37c7d8ccd92e9dd0cbdd823f727428d7b8191f3";
-        finalImageTag = "latest";
-        sha256 = "sha256-ID+qV6/knQDQ8leyq4r08uexPdDiu739Qeh/cBP0GfE=";
+      apiserver = lib.mkIf isMaster {
+        enable = true;
+        securePort = k8sPort;
+        advertiseAddress = masterIpv4;
       };
-    };
-    flannel = {
-      enable = true;
-      openFirewallPorts = true;
-    };
-    proxy.enable = true;
-    kubelet =
-      (
-        if isMaster
-        then {
-          enable = true;
-          hostname = masterFqdn;
-        }
-        else {
-          enable = true;
-          kubeconfig.server = masterAddr;
-        }
-      )
-      // {
-        extraConfig = {
-          evictionHard = {
-            "imagefs.available" = "5%";
-            "nodefs.available" = "5%";
-            "memory.available" = "100Mi";
-          };
-        };
-      };
-    apiserver = lib.mkIf isMaster {
-      enable = true;
-      securePort = k8sPort;
-      advertiseAddress = masterIpv4;
-      allowPrivileged = true;
     };
   };
 }

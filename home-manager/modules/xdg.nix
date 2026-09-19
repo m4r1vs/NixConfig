@@ -16,17 +16,19 @@ in {
     enable = mkEnableOption "Cross-Desktop-Group";
   };
   config = mkIf cfg.enable {
-    home.file."./.config/xdg-desktop-portal-termfilechooser/config".text = ''
-      [filechooser]
-      cmd=${scripts.term-file-chooser}
-      default_dir=$HOME
-      env=TERMCMD=${pkgs.ghostty}/bin/ghostty
-    '';
-    home.file."./.config/xdg-desktop-portal/portals.conf".text = ''
-      [preferred]
-      org.freedesktop.impl.portal.FileChooser=termfilechooser
-    '';
-    home.file.".icons/default".source = "${pkgs.bibata-cursors}/share/icons/Bibata-Modern-Ice";
+    home.file = {
+      "./.config/xdg-desktop-portal-termfilechooser/config".text = ''
+        [filechooser]
+        cmd=${scripts.term-file-chooser}
+        default_dir=$HOME
+        env=TERMCMD=${pkgs.ghostty}/bin/ghostty
+      '';
+      "./.config/xdg-desktop-portal/portals.conf".text = ''
+        [preferred]
+        org.freedesktop.impl.portal.FileChooser=termfilechooser
+      '';
+      ".icons/default".source = "${pkgs.bibata-cursors}/share/icons/Bibata-Modern-Ice";
+    };
     xdg = {
       userDirs = {
         enable = true;
