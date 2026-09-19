@@ -149,6 +149,9 @@ in {
           bind-key v copy-mode
           bind-key k copy-mode
 
+          bind-key n run-shell 'current_session=$(tmux display-message -p "#S"); sessions=$(tmux list-sessions -F "#S"); num_sessions=$(echo "$sessions" | wc -l); if [ "$num_sessions" -eq 1 ]; then new_session=$(tmux new-session -d -P -F "#S"); tmux move-window -t "$new_session:"; tmux switch-client -t "$new_session"; else next_session=$(echo "$sessions" | awk -v curr="$current_session" "{ s[NR] = \$1; if (\$1 == curr) idx = NR } END { next_idx = (idx % NR) + 1; print s[next_idx] }"); tmux move-window -t "$next_session:"; tmux switch-client -t "$next_session"; fi'
+          bind-key p run-shell 'current_session=$(tmux display-message -p "#S"); sessions=$(tmux list-sessions -F "#S"); num_sessions=$(echo "$sessions" | wc -l); if [ "$num_sessions" -eq 1 ]; then new_session=$(tmux new-session -d -P -F "#S"); tmux move-window -t "$new_session:"; tmux switch-client -t "$new_session"; else prev_session=$(echo "$sessions" | awk -v curr="$current_session" "{ s[NR] = \$1; if (\$1 == curr) idx = NR } END { prev_idx = (idx - 2 + NR) % NR + 1; print s[prev_idx] }"); tmux move-window -t "$prev_session:"; tmux switch-client -t "$prev_session"; fi'
+
           # Window bindings
           bind-key -n M-l next
           bind-key -n M-h prev
