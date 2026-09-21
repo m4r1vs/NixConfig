@@ -233,8 +233,8 @@ in {
             src = fetchFromGitHub {
               owner = "m4r1vs";
               repo = "spotify-player";
-              rev = "ce3382d2eb7a418f6f0e8620a0d35f9a4616d344";
-              hash = "sha256-ir6049VqsDOJx/J9j4A1r9dHXtNxxmhf18VDVB3NGt0=";
+              rev = "f1f0ae6a188a106ce932e006ba21234c54bd668d";
+              hash = "sha256-NoGOrGZQAEXcMPrNAujq/Avx+cilKybHqIFCjgxCiJU=";
             };
 
             cargoHash = "sha256-inmkO+BfYlpLq+ogHCEnqbDRbR4MMSKpTd47oRcjuqI=";
