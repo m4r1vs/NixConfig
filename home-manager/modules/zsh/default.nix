@@ -26,7 +26,11 @@ in {
           "tmux"
         ];
         extraConfig = ''
-          ZSH_TMUX_AUTOSTART=true
+          if [ -n "$SSH_CONNECTION" ] || [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+            ZSH_TMUX_AUTOSTART=false
+          else
+            ZSH_TMUX_AUTOSTART=true
+          fi
         '';
       };
       history = {
