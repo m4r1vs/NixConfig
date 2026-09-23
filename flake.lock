@@ -679,6 +679,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_master": {
+      "locked": {
+        "lastModified": 1790150407,
+        "narHash": "sha256-szcBGUnZw6eLcR0YQH9NJUoNb3pIguwnP+zNJLMdtTk=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "2dfdbdc87c23506f518ab29f65fce0386ec2ed11",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "master",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_unstable": {
       "locked": {
         "lastModified": 1789921291,
@@ -756,6 +772,7 @@
         "nix-index-database": "nix-index-database",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_4",
+        "nixpkgs_master": "nixpkgs_master",
         "nixpkgs_unstable": "nixpkgs_unstable",
         "npu-dictate": "npu-dictate",
         "pre-commit-hooks": "pre-commit-hooks",

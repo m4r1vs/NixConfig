@@ -13,6 +13,10 @@ with lib; let
     inherit (systemArgs) system;
     config.allowUnfree = true;
   };
+  pkgsMaster = import inputs.nixpkgs_master {
+    inherit (systemArgs) system;
+    config.allowUnfree = true;
+  };
 in {
   nixpkgs = {
     config.allowUnfree = true;
@@ -143,7 +147,7 @@ in {
           From unstable/master Nixpkgs
           */
 
-          inherit (pkgsUnstable) claude-code;
+          inherit (pkgsMaster) claude-code;
           clippy-darwin = pkgsUnstable.clippy-copy;
           inherit (pkgsUnstable) antigravity-cli;
           ghostty =
