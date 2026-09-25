@@ -55,6 +55,11 @@
       url = "github:m4r1vs/golazo?ref=main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    spotify-player = {
+      # Fork: custom title, playlist page, podcasts in library
+      url = "github:m4r1vs/spotify-player?ref=master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     helium = {
       # Helium web browser
       url = "github:oxcl/nix-flake-helium-browser";

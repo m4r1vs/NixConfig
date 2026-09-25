@@ -230,45 +230,20 @@ in {
           # };
 
           # Add title, add playing animation and fix podcasts not loading
-          spotify-player = rustPlatform.buildRustPackage {
-            pname = "spotify-player";
-            version = "0.25.1";
-
-            src = fetchFromGitHub {
-              owner = "m4r1vs";
-              repo = "spotify-player";
-              rev = "d65ac6f251a52dabf098948a434865e9e22eaa7a";
-              hash = "sha256-F5Ghen2n7LEB3AlFvOyDulL42b2cUUQ2I6rODHo5Yu0=";
-            };
-
-            cargoHash = "sha256-Yqa/svtM8kRvzVJv17L/f8DWdCZrwCPUKLik5/NJeZ0=";
-
-            nativeBuildInputs = [
-              pkg-config
-              cmake
-              rustPlatform.bindgenHook
-            ];
-
-            buildInputs =
-              [
-                openssl
-                dbus
-                fontconfig
-              ]
-              ++ lib.optionals isDesktop [libpulseaudio];
-
-            buildNoDefaultFeatures = true;
-
-            buildFeatures =
-              ["fzf" "image"]
-              ++ lib.optionals isDesktop [
-                "pulseaudio-backend"
-                "media-control"
-                "daemon"
-                "notify"
-                "streaming"
-              ];
-          };
+          spotify-player = inputs.spotify-player.packages.${stdenv.hostPlatform.system}.default.override (
+            {withSixel = false;}
+            // (
+              if isDesktop
+              then {withAudioBackend = "pulseaudio";}
+              else {
+                withAudioBackend = "";
+                withStreaming = false;
+                withDaemon = false;
+                withMediaControl = false;
+                withNotify = false;
+              }
+            )
+          );
 
           # # Add fn-X and fn-Y shortcuts to resize/move windows
           yabai = pkgsUnstable.yabai.overrideAttrs {
