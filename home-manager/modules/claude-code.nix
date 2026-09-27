@@ -2,7 +2,6 @@
   lib,
   config,
   inputs,
-  pkgs,
   ...
 }:
 with lib; let
@@ -16,7 +15,9 @@ in {
       enable = true;
       enableMcpIntegration = true;
       skills = {
-        hunk = "${inputs.hunk.packages.${pkgs.stdenv.hostPlatform.system}.hunk}/skills/hunk-review/SKILL.md";
+        # Read from the source tree: referencing the built package forces a
+        # bun2nix IFD, which breaks evaluating Linux hosts from darwin.
+        hunk = "${inputs.hunk}/packages/hunk/skills/hunk-review/SKILL.md";
       };
       settings = {
         advisorModel = "fable";
