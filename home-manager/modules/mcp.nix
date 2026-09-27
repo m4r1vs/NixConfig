@@ -76,13 +76,10 @@ in {
       servers =
         {
           nixos = {
-            command = "nix";
+            # Pinned via the unstable overlay instead of `nix run github:...`,
+            # which fetched and built it on every agent start
+            command = getExe pkgs.mcp-nixos;
             enabled = true;
-            args = [
-              "run"
-              "github:utensils/mcp-nixos"
-              "--"
-            ];
           };
           linear = {
             url = "https://mcp.linear.app/mcp";

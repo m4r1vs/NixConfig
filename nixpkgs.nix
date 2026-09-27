@@ -159,6 +159,7 @@ in {
           inherit (pkgsUnstable) neovim-unwrapped;
           inherit (pkgsUnstable) nerd-font-patcher;
           inherit (pkgsUnstable) nerd-fonts;
+          inherit (pkgsUnstable) mcp-nixos;
           inherit (pkgsUnstable) opencode;
           inherit (pkgsUnstable) swayimg;
           inherit (pkgsUnstable) tlrc;
