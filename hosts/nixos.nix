@@ -47,6 +47,14 @@ in {
     };
   };
 
+  services.openssh.settings = {
+    PasswordAuthentication = lib.mkDefault false;
+    KbdInteractiveAuthentication = lib.mkDefault false;
+    # Plain priority on purpose: the installer profile sets mkDefault "yes",
+    # and two mkDefaults with different values would conflict in the ISO.
+    PermitRootLogin = "no";
+  };
+
   time.timeZone = "Europe/Berlin";
   i18n.defaultLocale = "en_DK.UTF-8";
   i18n.extraLocaleSettings.LC_MONETARY = "de_DE.UTF-8";

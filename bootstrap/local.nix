@@ -19,6 +19,13 @@
     };
   };
 
+  # Installer: allow password SSH after running `passwd`
+  # (empty passwords are still rejected); key login works too.
+  services.openssh.settings = {
+    PasswordAuthentication = true;
+    KbdInteractiveAuthentication = true;
+  };
+
   hardware.enableAllFirmware = true;
 
   environment = {
