@@ -23,11 +23,7 @@ in {
   config = mkIf cfg.enable {
     programs.helium = {
       enable = true;
-      flags = [
-        "--ozone-platform-hint=auto"
-        "--enable-features=TouchpadOverscrollHistoryNavigation"
-        "--password-store=gnome-libsecret"
-      ];
+      inherit (config.programs.configured.brave) flags;
     };
   };
 }
