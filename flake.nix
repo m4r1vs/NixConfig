@@ -135,6 +135,13 @@
       ./hosts
       ./nixpkgs.nix
     ];
+    # keypress-visualizer must be imported on every NixOS host (exactly once),
+    # since nixos-modules/desktop.nix defines its option.
+    nixosModules =
+      [
+        inputs.keypress-visualizer.nixosModules.default
+      ]
+      ++ commonModules;
   in {
     nixosConfigurations =
       {
@@ -163,12 +170,11 @@
               inputs.disko.nixosModules.disko
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
-              inputs.keypress-visualizer.nixosModules.default
               inputs.nix-amd-ai.nixosModules.default
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]
-            ++ commonModules;
+            ++ nixosModules;
         });
         nixpad = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
@@ -191,11 +197,10 @@
               inputs.disko.nixosModules.disko
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
-              inputs.keypress-visualizer.nixosModules.default
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]
-            ++ commonModules;
+            ++ nixosModules;
         });
         yannix = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs = {
@@ -221,11 +226,10 @@
               inputs.disko.nixosModules.disko
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
-              inputs.keypress-visualizer.nixosModules.default
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]
-            ++ commonModules;
+            ++ nixosModules;
         });
         virtnix = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
@@ -248,11 +252,10 @@
               inputs.disko.nixosModules.disko
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
-              inputs.keypress-visualizer.nixosModules.default
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]
-            ++ commonModules;
+            ++ nixosModules;
         });
         nixner = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
@@ -285,7 +288,7 @@
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]
-            ++ commonModules;
+            ++ nixosModules;
         });
         desknix = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
@@ -308,11 +311,10 @@
               inputs.disko.nixosModules.disko
               inputs.nix-index-database.nixosModules.nix-index
               inputs.home-manager.nixosModules.home-manager
-              inputs.keypress-visualizer.nixosModules.default
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]
-            ++ commonModules;
+            ++ nixosModules;
         });
         winix = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
@@ -338,7 +340,7 @@
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]
-            ++ commonModules;
+            ++ nixosModules;
         });
         bootstrap_local_x86_64 = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
@@ -361,7 +363,6 @@
 
               inputs.home-manager.nixosModules.home-manager
               inputs.nix-index-database.nixosModules.nix-index
-              inputs.keypress-visualizer.nixosModules.default
 
               {config._module.args = {inherit systemArgs self inputs;};}
               {
@@ -369,7 +370,7 @@
                 services.getty.autologinUser = systemArgs.username;
               }
             ]
-            ++ commonModules;
+            ++ nixosModules;
         });
         bootstrap_local = self.nixosConfigurations.bootstrap_local_x86_64;
         bootstrap_remote_arm64 = inputs.nixpkgs.lib.nixosSystem (let
@@ -393,11 +394,10 @@
 
               inputs.home-manager.nixosModules.home-manager
               inputs.nix-index-database.nixosModules.nix-index
-              inputs.keypress-visualizer.nixosModules.default
 
               {config._module.args = {inherit systemArgs self inputs;};}
             ]
-            ++ commonModules;
+            ++ nixosModules;
         });
       }
       // (import ./hosts/kubenix) {
@@ -411,7 +411,7 @@
             inputs.nix-index-database.nixosModules.nix-index
             inputs.home-manager.nixosModules.home-manager
           ]
-          ++ commonModules;
+          ++ nixosModules;
       };
     darwinConfigurations = {
       nixbook = inputs.nix-darwin.lib.darwinSystem (let
