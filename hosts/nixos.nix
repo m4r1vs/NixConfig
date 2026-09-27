@@ -5,12 +5,15 @@
   config,
   ...
 }:
-with lib; {
+with lib; let
+  inherit (config.configured) host;
+in {
   imports = [
     ../nixos-modules
   ];
 
-  virtualisation = {
+  # Servers run containerd (kubenix) or docker (gitlab-runner) instead
+  virtualisation = mkIf host.isDev {
     oci-containers.backend = "podman";
     podman = {
       enable = true;
@@ -87,13 +90,15 @@ with lib; {
   nix.gc.automatic = lib.mkForce false;
 
   environment = {
-    systemPackages = with pkgs; [
-      coreutils-full
-      libsecret
-      podman-tui
-      psmisc
-      sbctl
-    ];
+    systemPackages = with pkgs;
+      [
+        coreutils-full
+        psmisc
+      ]
+      ++ optionals config.virtualisation.podman.enable [podman-tui]
+      # sbctl enrolls secure boot keys, also from the installer
+      ++ optionals (host.isDesktop || host.isISO) [sbctl]
+      ++ optionals host.isDesktop [libsecret];
     pathsToLink = ["/share/zsh"];
   };
 
