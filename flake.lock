@@ -94,6 +94,22 @@
         "type": "github"
       }
     },
+    "dark-yazi": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1763120533,
+        "narHash": "sha256-82yH6PGOHEmtRSAb/xIsb904jrLuUTlMTMSJe5O0vEI=",
+        "owner": "m4r1vs",
+        "repo": "dark.yazi",
+        "rev": "018517cbfb5e2437f801b23e1b72b880fa1f344c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "m4r1vs",
+        "repo": "dark.yazi",
+        "type": "github"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -452,6 +468,22 @@
         "type": "github"
       }
     },
+    "light-yazi": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1763120546,
+        "narHash": "sha256-p+aymwObO2Q6q4uOvz1H3HUyogkksh+3xJpz3fX23hI=",
+        "owner": "m4r1vs",
+        "repo": "light.yazi",
+        "rev": "48a86c228bf03c981abf0a692ce7318397f74e8b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "m4r1vs",
+        "repo": "light.yazi",
+        "type": "github"
+      }
+    },
     "nix-amd-ai": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -776,6 +808,7 @@
       "inputs": {
         "atai": "atai",
         "comin": "comin",
+        "dark-yazi": "dark-yazi",
         "disko": "disko",
         "gitlab-mcp": "gitlab-mcp",
         "golazo": "golazo",
@@ -785,6 +818,7 @@
         "hunk": "hunk",
         "hyprland-which-key": "hyprland-which-key",
         "keypress-visualizer": "keypress-visualizer",
+        "light-yazi": "light-yazi",
         "nix-amd-ai": "nix-amd-ai",
         "nix-darwin": "nix-darwin_2",
         "nix-index-database": "nix-index-database",

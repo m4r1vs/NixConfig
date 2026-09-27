@@ -102,6 +102,16 @@
       url = "gitlab:m4r1vs/npu-dictate?ref=master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    dark-yazi = {
+      # Yazi flavor (dark)
+      url = "github:m4r1vs/dark.yazi";
+      flake = false;
+    };
+    light-yazi = {
+      # Yazi flavor (light)
+      url = "github:m4r1vs/light.yazi";
+      flake = false;
+    };
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";

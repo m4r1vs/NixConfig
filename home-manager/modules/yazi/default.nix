@@ -2,6 +2,7 @@
   host,
   lib,
   config,
+  inputs,
   pkgs,
   ...
 }:
@@ -106,7 +107,7 @@ in {
         open.prepend_rules = [
           {
             mime = "image/*";
-            use = ["open" "gimp"];
+            use = ["open"];
           }
           {
             mime = "audio/*";
@@ -138,18 +139,8 @@ in {
       };
       initLua = ./init.lua;
       flavors = {
-        dark = pkgs.fetchFromGitHub {
-          owner = "m4r1vs";
-          repo = "dark.yazi";
-          rev = "main";
-          sha256 = "sha256-82yH6PGOHEmtRSAb/xIsb904jrLuUTlMTMSJe5O0vEI=";
-        };
-        light = pkgs.fetchFromGitHub {
-          owner = "m4r1vs";
-          repo = "light.yazi";
-          rev = "main";
-          sha256 = "sha256-p+aymwObO2Q6q4uOvz1H3HUyogkksh+3xJpz3fX23hI=";
-        };
+        dark = inputs.dark-yazi;
+        light = inputs.light-yazi;
       };
       theme = {
         flavor = {
