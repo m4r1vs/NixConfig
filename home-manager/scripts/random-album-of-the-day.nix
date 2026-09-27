@@ -1,10 +1,10 @@
 {
+  host,
   pkgs,
   scripts,
-  systemArgs,
   ...
 }: let
-  isDarwin = systemArgs.system == "aarch64-darwin";
+  inherit (host) isDarwin;
 in {
   random-album-of-the-day =
     pkgs.writeShellScript "random-album-of-the-day"

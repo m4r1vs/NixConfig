@@ -1,4 +1,5 @@
 {
+  host,
   lib,
   config,
   pkgs,
@@ -9,7 +10,7 @@
 }:
 with lib; let
   cfg = config.configured.xdg;
-  hasPowerProfiles = osConfig.services.power-profiles-daemon.enable or false;
+  inherit (host) hasPowerProfiles;
   hasFwupd = osConfig.services.fwupd.enable or false;
 in {
   options.configured.xdg = {

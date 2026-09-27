@@ -4,6 +4,8 @@
   lib,
   ...
 }: {
+  configured.host.kind = "iso";
+
   networking = {
     networkmanager.enable = lib.mkForce false;
     firewall = {

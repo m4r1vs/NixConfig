@@ -4,7 +4,7 @@
   ...
 }:
 with lib; let
-  isDesktop = config.configured.desktop.enable;
+  inherit (config.configured.host) isDesktop;
   cfg = config.configured.nvidia;
 in {
   options.configured.nvidia = {

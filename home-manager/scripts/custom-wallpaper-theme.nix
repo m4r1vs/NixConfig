@@ -1,10 +1,10 @@
 {
+  host,
   pkgs,
   lib,
-  config,
   ...
 }: let
-  isWayland = config.configured ? hyprland && config.configured.hyprland.enable;
+  isWayland = host.windowManager == "hyprland";
 in {
   custom-wallpaper-theme =
     pkgs.writeShellScript "custom-wallpaper-theme"

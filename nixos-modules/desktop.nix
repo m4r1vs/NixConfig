@@ -7,7 +7,7 @@
 }:
 with lib; let
   cfg = config.configured.desktop;
-  isX86 = systemArgs.system == "x86_64-linux";
+  inherit (config.configured.host) isX86;
 in {
   options.configured.desktop = {
     enable = mkEnableOption "Enable a Desktop Environment";

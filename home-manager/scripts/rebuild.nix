@@ -1,10 +1,11 @@
 {
+  host,
   pkgs,
   scripts,
   systemArgs,
   ...
 }: let
-  isDarwin = systemArgs.system == "aarch64-darwin";
+  inherit (host) isDarwin;
 in {
   rebuild =
     pkgs.writeShellScript "rebuild"

@@ -2,12 +2,11 @@
   lib,
   config,
   pkgs,
-  systemArgs,
   ...
 }:
 with lib; let
   cfg = config.configured.gamescope;
-  isX86 = systemArgs.system == "x86_64-linux";
+  inherit (config.configured.host) isX86;
 in {
   options.configured.gamescope = {
     enable = mkEnableOption "Enable gamescope session";

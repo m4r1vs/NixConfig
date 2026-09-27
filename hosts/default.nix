@@ -2,12 +2,15 @@
   pkgs,
   systemArgs,
   lib,
+  config,
   ...
 }:
 with lib; let
   isDarwin = systemArgs.system == "aarch64-darwin";
+  inherit (config.configured) host;
 in {
   imports = [
+    ./host.nix
     ../home-manager
   ];
 
@@ -86,51 +89,55 @@ in {
   };
 
   environment = {
-    systemPackages = with pkgs; [
-      curl
-      exiftool
-      ffmpeg
-      fzf
-      htop-vim
-      imagemagick
-      jq
-      ripgrep
-      unzip
-      wget
-    ];
+    systemPackages = with pkgs;
+      [
+        curl
+        fzf
+        htop-vim
+        jq
+        ripgrep
+        unzip
+        wget
+      ]
+      ++ optionals host.isGraphical [
+        exiftool
+        ffmpeg
+        imagemagick
+      ];
   };
 
+  # Headless hosts (servers, ISOs, WSL) have no use for fonts
   fonts = with pkgs;
-    {
-      packages =
-        [
-          eb-garamond
-          fcsp-fonts
-          inter-nerdfont
-          nerd-fonts.departure-mono
-          nerd-fonts.go-mono
-          nerd-fonts.jetbrains-mono
-          open-sans
-          public-sans
-          reforma-fonts
-          ubuntu-classic
-        ]
-        ++ optionals (!isDarwin) [
-          apple-color-emoji
-          samsung-clock-font
-          sf-pro-nerd-font
-        ];
-    }
-    // optionalAttrs (!isDarwin) {
-      enableDefaultPackages = true;
-      fontconfig = {
-        defaultFonts = {
-          serif = ["Reforma 2018"];
-          sansSerif = ["SFProDisplay Nerd Font"];
-          monospace = ["JetBrainsMono Nerd Font Propo"];
-          emoji = ["Apple Color Emoji"];
+    mkIf host.isGraphical ({
+        packages =
+          [
+            eb-garamond
+            fcsp-fonts
+            inter-nerdfont
+            nerd-fonts.departure-mono
+            nerd-fonts.go-mono
+            nerd-fonts.jetbrains-mono
+            open-sans
+            public-sans
+            reforma-fonts
+            ubuntu-classic
+          ]
+          ++ optionals (!isDarwin) [
+            apple-color-emoji
+            samsung-clock-font
+            sf-pro-nerd-font
+          ];
+      }
+      // optionalAttrs (!isDarwin) {
+        enableDefaultPackages = true;
+        fontconfig = {
+          defaultFonts = {
+            serif = ["Reforma 2018"];
+            sansSerif = ["SFProDisplay Nerd Font"];
+            monospace = ["JetBrainsMono Nerd Font Propo"];
+            emoji = ["Apple Color Emoji"];
+          };
         };
-      };
-      fontDir.enable = true;
-    };
+        fontDir.enable = true;
+      });
 }

@@ -1,4 +1,5 @@
 {
+  host,
   pkgs,
   systemArgs,
   ...
@@ -6,7 +7,7 @@
   nixos-notify =
     pkgs.writeShellScript "nixos-notify"
     (
-      if systemArgs.system == "aarch64-darwin"
+      if host.isDarwin
       then
         # bash
         ''

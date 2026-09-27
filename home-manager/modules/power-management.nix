@@ -1,14 +1,14 @@
 {
+  host,
   config,
   lib,
   pkgs,
-  osConfig,
   scripts,
   ...
 }:
 with lib; let
   cfg = config.services.configured.auto-power-management;
-  hasPowerProfiles = osConfig.services.power-profiles-daemon.enable or false;
+  inherit (host) hasPowerProfiles;
 in {
   options.services.configured.auto-power-management = {
     enable = mkEnableOption "Automatically switch power profile based on AC status";

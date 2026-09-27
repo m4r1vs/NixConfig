@@ -1,13 +1,13 @@
 {
+  host,
   lib,
   config,
   inputs,
-  systemArgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.npu-dictate;
-  isDarwin = systemArgs.system == "aarch64-darwin";
+  inherit (host) isDarwin;
 in {
   /*
   The upstream flake only builds for x86_64-linux and aarch64-linux, so on

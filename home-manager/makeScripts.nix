@@ -9,6 +9,7 @@ let
   in
     scriptModule {
       inherit pkgs systemArgs config;
+      inherit (config.configured) host;
       scripts = makeScripts {inherit pkgs systemArgs config;};
       inherit (pkgs) lib;
     };

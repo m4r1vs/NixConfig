@@ -7,8 +7,8 @@
   ...
 }:
 with lib; let
-  isDesktop = config.configured ? desktop && config.configured.desktop.enable;
-  isDarwin = systemArgs.system == "aarch64-darwin";
+  # Safe inside the overlay: configured.host never depends on pkgs
+  inherit (config.configured.host) isDesktop isDarwin;
   pkgsUnstable = import inputs.nixpkgs_unstable {
     inherit (systemArgs) system;
     config.allowUnfree = true;

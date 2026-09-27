@@ -3,6 +3,8 @@
   pkgs,
   ...
 }: {
+  configured.host.kind = "iso";
+
   services.configured = {
     kmscon = {
       autologin = true;

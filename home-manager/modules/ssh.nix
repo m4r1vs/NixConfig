@@ -1,12 +1,12 @@
 {
+  host,
   lib,
   config,
-  systemArgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.ssh;
-  isDarwin = systemArgs.system == "aarch64-darwin";
+  inherit (host) isDarwin;
 in {
   options.programs.configured.ssh = {
     enable = mkEnableOption "Secure Shell";

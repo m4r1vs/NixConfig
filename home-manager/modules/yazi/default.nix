@@ -1,13 +1,13 @@
 {
+  host,
   lib,
   config,
   pkgs,
-  systemArgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.yazi;
-  isDarwin = systemArgs.system == "aarch64-darwin";
+  inherit (host) isDarwin;
 in {
   options.programs.configured.yazi = {
     enable = mkEnableOption "Terminal File Manager";

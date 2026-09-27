@@ -1,12 +1,12 @@
 {
+  host,
   lib,
   config,
   pkgs,
-  osConfig,
   ...
 }:
 with lib; let
-  isDesktop = osConfig.configured ? desktop && osConfig.configured.desktop.enable;
+  inherit (host) isDesktop;
   cfg = config.programs.configured.mpv;
 in {
   options.programs.configured.mpv = {

@@ -1,4 +1,5 @@
 {
+  host,
   lib,
   config,
   systemArgs,
@@ -7,7 +8,7 @@
 }:
 with lib; let
   cfg = config.programs.configured.ghostty;
-  isDarwin = systemArgs.system == "aarch64-darwin";
+  inherit (host) isDarwin;
   inherit (systemArgs) theme;
 in {
   options.programs.configured.ghostty = {

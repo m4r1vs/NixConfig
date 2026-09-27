@@ -1,12 +1,12 @@
 {
+  host,
   lib,
   config,
-  osConfig,
   systemArgs,
   ...
 }:
 with lib; let
-  isDesktop = osConfig.configured ? desktop && osConfig.configured.desktop.enable;
+  inherit (host) isDesktop;
   cfg = config.programs.configured.spotify-player;
 in {
   options.programs.configured.spotify-player = {
