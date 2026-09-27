@@ -33,6 +33,40 @@ in {
   };
 
   config = mkIf cfg.enable {
+    # Recomputes the media labels only when a player changes (instead of every
+    # label running playerctl, identify and bc every 4s) and pokes hyprlock
+    # with SIGUSR2 so the force-updatable (:1) labels refresh immediately.
+    systemd.user.services.hyprlock-mpris-cache = {
+      Unit = {
+        Description = "Cache MPRIS metadata for the hyprlock media labels";
+        PartOf = ["graphical-session.target"];
+        After = ["graphical-session.target"];
+      };
+      Service = {
+        ExecStart = pkgs.writeShellScript "hyprlock-mpris-cache" ''
+          DIR="''${XDG_RUNTIME_DIR:-/tmp}/hyprlock-mpris"
+          mkdir -p -m 700 "$DIR"
+
+          update() {
+            ${scripts.mpris-hyprlock} --write-cache "$DIR"
+            # SIGUSR2 = refresh labels (SIGUSR1 would unlock!)
+            ${pkgs.procps}/bin/pkill -USR2 -x hyprlock || true
+          }
+
+          update
+          while read -r _; do
+            # Players emit bursts of changes; update once per burst
+            while read -r -t 0.15 _; do :; done
+            update
+          done < <(${pkgs.playerctl}/bin/playerctl -a --follow metadata --format '{{playerName}} {{status}} {{title}} {{mpris:artUrl}}')
+          exit 1 # playerctl died, let systemd restart us
+        '';
+        Restart = "on-failure";
+        RestartSec = 5;
+      };
+      Install.WantedBy = ["graphical-session.target"];
+    };
+
     programs.hyprlock = {
       enable = true;
       settings = {
@@ -94,7 +128,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:4000] ${capped "${scripts.mpris-hyprlock} --title"}";
+            text = "cmd[update:4000:1] ${capped "${scripts.mpris-hyprlock} --read title"}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             font_size = scale 12;
             font_family = "SFProDisplay Nerd Font Bold";
@@ -108,7 +142,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:4000] ${capped "${scripts.mpris-hyprlock} --length"}";
+            text = "cmd[update:4000:1] ${capped "${scripts.mpris-hyprlock} --read length"}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
             font_size = scale 12;
             font_family = "SFProDisplay Nerd Font SemiBold";
@@ -122,7 +156,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:4000] ${capped "${scripts.mpris-hyprlock} --source"}";
+            text = "cmd[update:4000:1] ${capped "${scripts.mpris-hyprlock} --read source"}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.32)";
             font_size = scale 64;
             font_family = "SFProDisplay Nerd Font SemiBold";
@@ -137,7 +171,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:4000] ${capped "${scripts.mpris-hyprlock} --artist"}";
+            text = "cmd[update:4000:1] ${capped "${scripts.mpris-hyprlock} --read artist"}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
             font_family = "SFProDisplay Nerd Font SemiBold";
             font_size = scale 12;
@@ -208,7 +242,7 @@ in {
             border_size = 0;
             rotate = 0;
             reload_time = 4;
-            reload_cmd = capped "${scripts.mpris-hyprlock} --arturl";
+            reload_cmd = capped "${scripts.mpris-hyprlock} --read arturl";
             position = scaleStr "24, -21";
             halign = "left";
             valign = "top";

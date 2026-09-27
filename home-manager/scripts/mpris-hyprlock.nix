@@ -1,11 +1,24 @@
 {pkgs, ...}: {
+  # `mpris-hyprlock --title|--artist|...` prints one field. `--write-cache DIR`
+  # computes everything once and writes one file per field, which is what the
+  # hyprlock-mpris-cache service does on every player change.
   mpris-hyprlock =
     pkgs.writeShellScript "mpris-hyprlock"
     ''
+      # Cheap path for hyprlock labels: just print what the cache service wrote
+      if [ "''${1-}" = "--read" ]; then
+        exec ${pkgs.coreutils}/bin/cat "''${XDG_RUNTIME_DIR:-/tmp}/hyprlock-mpris/$2" 2>/dev/null
+      fi
 
-      players=$(${pkgs.playerctl}/bin/playerctl -l)
+      players=$(${pkgs.playerctl}/bin/playerctl -l 2>/dev/null)
 
       if [ -z "$players" ]; then
+        if [ "''${1-}" = "--write-cache" ]; then
+          for field in title artist length source arturl; do
+            : > "$2/$field"
+          done
+          exit 0
+        fi
         exit 1
       fi
 
@@ -78,12 +91,15 @@
           ART_PATH=''${url#file://}
         elif [[ "$url" == http* ]]; then
           url_hash=$(echo -n "$url" | sha256sum | cut -d ' ' -f 1)
-          ART_PATH="/tmp/hyprlock_art_''${url_hash}.jpeg"
+          ART_DIR="''${XDG_CACHE_HOME:-$HOME/.cache}/hyprlock-art"
+          mkdir -p "$ART_DIR"
+          ART_PATH="$ART_DIR/''${url_hash}.jpeg"
           if [ ! -f "$ART_PATH" ]; then
-            # hyprlock waits for this script to finish before it can exit
-            ${pkgs.wget}/bin/wget -q --timeout=2 --tries=1 -O "$ART_PATH" "$url"
-            if [ $? -ne 0 ]; then
-              rm -f "$ART_PATH"
+            tmp=$(mktemp "$ART_DIR/.dl.XXXXXX")
+            if ${pkgs.wget}/bin/wget -q --timeout=2 --tries=1 -O "$tmp" "$url"; then
+              mv "$tmp" "$ART_PATH"
+            else
+              rm -f "$tmp"
               ART_PATH=""
             fi
           fi
@@ -102,7 +118,7 @@
         fi
       fi
 
-      # Parse the argument
+      field() {
       case "$1" in
       --title)
       	title=$(get_metadata "xesam:title")
@@ -153,9 +169,19 @@
       	;;
       *)
       	echo "Invalid option: $1"
-      	echo "Usage: $0 --title | --url | --artist | --length | --album | --source"
+      	echo "Usage: $0 --title | --url | --artist | --length | --album | --source | --write-cache DIR"
       	exit 1
       	;;
       esac
+      }
+
+      if [ "$1" = "--write-cache" ]; then
+        for name in title artist length source arturl; do
+          field "--$name" > "$2/.$name.tmp"
+          mv "$2/.$name.tmp" "$2/$name"
+        done
+      else
+        field "$1"
+      fi
     '';
 }
