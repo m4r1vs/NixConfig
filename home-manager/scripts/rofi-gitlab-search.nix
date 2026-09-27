@@ -14,7 +14,9 @@
       TOKEN_PATH = os.path.expanduser("~/.local/state/gitlab-mcp/token.json")
       GITLAB_URL = "https://gitlab.meetovo.dev"
 
-      os.makedirs(os.path.dirname(TOKEN_PATH), exist_ok=True)
+      os.makedirs(os.path.dirname(TOKEN_PATH), mode=0o700, exist_ok=True)
+      if os.path.exists(TOKEN_PATH):
+          os.chmod(TOKEN_PATH, 0o600)
 
       def read_token():
           if not os.path.exists(TOKEN_PATH): return None
@@ -24,8 +26,12 @@
           except: return None
 
       def write_token(data):
-          with open(TOKEN_PATH, "w") as f:
+          # Written atomically and only readable by the user (the token is shared with gitlab-mcp)
+          tmp = TOKEN_PATH + ".tmp"
+          fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+          with os.fdopen(fd, "w") as f:
               json.dump(data, f)
+          os.replace(tmp, TOKEN_PATH)
 
       def is_valid(token):
           if not token or "expires_in" not in token or "created_at" not in token: return False
@@ -42,7 +48,7 @@
           }).encode("utf-8")
           req = urllib.request.Request(f"{GITLAB_URL}/oauth/token", data=data)
           try:
-              with urllib.request.urlopen(req) as response:
+              with urllib.request.urlopen(req, timeout=10) as response:
                   res = json.loads(response.read().decode())
                   res["created_at"] = int(time.time() * 1000)
                   write_token(res)
@@ -81,7 +87,7 @@
               url = urllib.parse.urlparse(self.path)
               if url.path == "/callback":
                   query = urllib.parse.parse_qs(url.query)
-                  if "code" in query:
+                  if "code" in query and query.get("state", [""])[0] == state:
                       auth_code = query["code"][0]
                       self.send_response(200)
                       self.send_header("Content-type", "text/html")
@@ -93,7 +99,11 @@
 
       server = HTTPServer(("127.0.0.1", 8888), Handler)
       webbrowser.open(auth_url)
-      server.handle_request() # wait for 1 request
+      server.timeout = 5
+      deadline = time.time() + 120
+      # Keep serving until the callback arrives (e.g. a favicon request must not end the flow)
+      while auth_code is None and time.time() < deadline:
+          server.handle_request()
 
       if auth_code:
           data = urllib.parse.urlencode({
@@ -105,7 +115,7 @@
           }).encode("utf-8")
           req = urllib.request.Request(f"{GITLAB_URL}/oauth/token", data=data)
           try:
-              with urllib.request.urlopen(req) as response:
+              with urllib.request.urlopen(req, timeout=10) as response:
                   res = json.loads(response.read().decode())
                   res["created_at"] = int(time.time() * 1000)
                   write_token(res)
@@ -122,7 +132,7 @@
     MRS_JSON="$RUNTIME_DIR/rofi_gitlab_mrs.json"
     SEL_JSON="$RUNTIME_DIR/rofi_gitlab_selected.json"
 
-    if [ -z "$@" ]; then
+    if [ $# -eq 0 ]; then
       # 1. Check authentication
       if ! ${pkgs.python3}/bin/python3 ${authScript}; then
         # If it returns non-zero, it means it opened the browser or failed.
@@ -132,14 +142,15 @@
 
       # 2. Fetch MRs
       TOKEN=$(jq -r .access_token ~/.local/state/gitlab-mcp/token.json)
-      HDR="Authorization: Bearer $TOKEN"
+      # The token is passed to curl via a file descriptor, never on its command line
+      auth_header() { printf 'Authorization: Bearer %s\n' "$TOKEN"; }
       URL="https://gitlab.meetovo.dev/api/v4"
 
       fetch_mrs() {
         local query="$1"
         local label="$2"
-        curl -s -H "$HDR" "$URL/merge_requests?state=opened&scope=all&per_page=50&$query=m4r1vs" | \
-          jq -c ".[] | {id: .iid, title: .title, url: .web_url, ref: .source_branch, label: \"$label\", project: ((.references.full // \"!\(.iid)\") | sub(\"^.*/\"; \"\") | sub(\"^meetovo-\"; \"\"))}"
+        curl -s --connect-timeout 3 --max-time 10 -H @<(auth_header) "$URL/merge_requests?state=opened&scope=all&per_page=50&$query=m4r1vs" | \
+          jq -c --arg label "$label" ".[] | {id: .iid, title: .title, url: .web_url, ref: .source_branch, label: \$label, project: ((.references.full // \"!\(.iid)\") | sub(\"^.*/\"; \"\") | sub(\"^meetovo-\"; \"\"))}"
       }
 
       {
