@@ -18,17 +18,13 @@ in {
     enable = mkEnableOption "Cross-Desktop-Group";
   };
   config = mkIf cfg.enable {
+    xdg.configFile."xdg-desktop-portal-termfilechooser/config".text = ''
+      [filechooser]
+      cmd=${scripts.term-file-chooser}
+      default_dir=$HOME
+      env=TERMCMD=${pkgs.ghostty}/bin/ghostty
+    '';
     home.file = {
-      "./.config/xdg-desktop-portal-termfilechooser/config".text = ''
-        [filechooser]
-        cmd=${scripts.term-file-chooser}
-        default_dir=$HOME
-        env=TERMCMD=${pkgs.ghostty}/bin/ghostty
-      '';
-      "./.config/xdg-desktop-portal/portals.conf".text = ''
-        [preferred]
-        org.freedesktop.impl.portal.FileChooser=termfilechooser
-      '';
       ".icons/default".source = "${pkgs.bibata-cursors}/share/icons/Bibata-Modern-Ice";
     };
     xdg = {
@@ -511,7 +507,10 @@ in {
       };
       portal = {
         enable = true;
-        config.common.default = "*";
+        config.common = {
+          default = "*";
+          "org.freedesktop.impl.portal.FileChooser" = "termfilechooser";
+        };
         extraPortals = [
           pkgs.xdg-desktop-portal-gtk
           pkgs.xdg-desktop-portal-termfilechooser
