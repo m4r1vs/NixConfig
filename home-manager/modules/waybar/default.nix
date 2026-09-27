@@ -166,6 +166,7 @@ in {
             exec = "${scripts.waybar-github}";
             on-click = "${pkgs.xdg-utils}/bin/xdg-open https://github.com/notifications";
             interval = 60;
+            exec-on-event = false;
             format = "{}";
             rotate = 0;
             tooltip = true;
@@ -221,6 +222,7 @@ in {
             exec = "${pkgs.wttrbar}/bin/wttrbar --nerd --location Hamburg --custom-indicator \"{ICON} {temp_C}°C\"";
             on-click = "${lib.getExe pkgs.ghostty} --class=ghostty.weather --wait-after-command=true -e ${pkgs.curl}/bin/curl https://wttr.in";
             on-click-right = "${pkgs.xdg-utils}/bin/xdg-open https://www.wetteronline.de/regenradar/hamburg";
+            exec-on-event = false;
             return-type = "json";
           };
 
