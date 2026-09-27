@@ -9,6 +9,8 @@
     pkgs.writeShellScript "hyprland-startup-workspaces"
     # bash
     ''
+      export PATH=${lib.makeBinPath [pkgs.hyprland pkgs.gnugrep]}:$PATH
+
       hour=$((10#$(${pkgs.coreutils}/bin/date +%H)))
 
       if (( hour >= 5 && hour < 12 )); then
@@ -29,7 +31,10 @@
         org.freedesktop.DBus.Properties.Get \
         string:org.freedesktop.Secret.Collection \
         string:Locked 2>/dev/null | grep -q "boolean false"; do
-        ${scripts.nixos-notify} -u low -i "${../../assets/nix-flake/at-door.svg}" -e -t 12000 -h string:synchronous:startup-script "$WELCOME_STRING" "Please unlock the keyring so I can get everything running..."
+        if [ -z "''${asked_to_unlock-}" ]; then
+          ${scripts.nixos-notify} -u low -i "${../../assets/nix-flake/at-door.svg}" -e -t 12000 -h string:synchronous:startup-script "$WELCOME_STRING" "Please unlock the keyring so I can get everything running..."
+          asked_to_unlock=1
+        fi
         sleep 0.5
       done
 
