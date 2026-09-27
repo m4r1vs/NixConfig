@@ -8,6 +8,12 @@
 }:
 with lib; let
   cfg = config.services.configured.swaync;
+  makeSound =
+    pkgs.writeShellScript "make-sound"
+    # bash
+    ''
+      ${getExe pkgs.mpv} --no-video --volume=70 ${osConfig.configured.system-sounds.notification.soundFile}
+    '';
   inherit (systemArgs) theme;
 in {
   options.services.configured.swaync = {
@@ -71,21 +77,11 @@ in {
         };
         scripts = mkIf (osConfig.configured.system-sounds.enable && osConfig.configured.system-sounds.notification.enable) {
           sounds_normal = {
-            exec =
-              pkgs.writeShellScript "make-sound"
-              # bash
-              ''
-                ${getExe pkgs.mpv} --no-video --volume=70 ${osConfig.configured.system-sounds.notification.soundFile}
-              '';
+            exec = makeSound;
             urgency = "Normal";
           };
           sounds_critical = {
-            exec =
-              pkgs.writeShellScript "make-sound"
-              # bash
-              ''
-                ${getExe pkgs.mpv} --no-video --volume=70 ${osConfig.configured.system-sounds.notification.soundFile}
-              '';
+            exec = makeSound;
             urgency = "Critical";
           };
         };
