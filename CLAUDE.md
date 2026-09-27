@@ -13,14 +13,19 @@ Multi-platform Nix flake configuring NixOS, nix-darwin, and WSL hosts with home-
 - `rebuild` — script in PATH on every host; runs `sudo nixos-rebuild switch` or `sudo darwin-rebuild switch` for the current host and re-applies the active specialisation (read from `/etc/nixos_active_specialisation`).
 - `sudo nixos-rebuild switch --flake ~/NixConfig/#<host>` — manual equivalent.
 - `nixos-rebuild build --flake .#<host>` — build without switching (useful to verify a config change evaluates and compiles).
-- `nix build .#bootstrap_local_x86_64` / `.#bootstrap_remote_arm64` — build install ISOs.
+- `nix build .#packages.x86_64-linux.bootstrap_local_x86_64` / `.#packages.aarch64-linux.bootstrap_remote_arm64` — build install ISOs.
+- `nix flake check` — runs the pre-commit hooks and `eval-hosts`, which evaluates every host of the current system (a host that stops evaluating fails the check).
 - Format Nix files with `alejandra` (the formatter used throughout this repo).
 
 ## Architecture
 
 ### systemArgs threading
 
-Every host in `flake.nix` defines a `systemArgs` attrset (username, git identity, hostname, `theme` from `makeTheme.nix`, platform, and for servers ipv4/domain). It is injected via `config._module.args` and is available as the `systemArgs` argument in **every** NixOS, darwin, and home-manager module. Platform checks like `isDarwin = systemArgs.system == "aarch64-darwin"` are the standard pattern.
+Every host in `flake.nix` defines a `systemArgs` attrset (username, git identity, hostname, `theme` from `makeTheme.nix`, platform, and for servers ipv4/domain). It is injected via `config._module.args` and is available as the `systemArgs` argument in **every** NixOS, darwin, and home-manager module.
+
+### Host kind (`configured.host`)
+
+`hosts/host.nix` defines read-only `configured.host.*` flags derived from existing options: `kind` (desktop/server/wsl/iso/darwin; ISOs set it explicitly), `windowManager` (per specialisation), and `isDesktop`, `isServer`, `isWSL`, `isISO`, `isDarwin`, `isGraphical`, `isHeadless`, `isDev`, `isWayland`, `isX86`, `hasPowerProfiles`, plus `flakePath` (the checkout used by nh/rebuild). Use these instead of recomputing platform checks. Home-manager modules and scripts get them as the `host` argument; NixOS/darwin modules read `config.configured.host`. Never derive them from `pkgs` (nixpkgs.nix reads them inside the overlay).
 
 ### Auto-imported modules + `configured.*` enable options
 
@@ -28,11 +33,13 @@ Every host in `flake.nix` defines a `systemArgs` attrset (username, git identity
 
 1. Create the file — **no import registration needed**.
 2. The module **must** gate its config behind a `mkEnableOption` (`options.configured.*`, `options.programs.configured.*`, or `options.services.configured.*`) with `config = mkIf cfg.enable {...}`. Without this it applies unconditionally to all hosts.
-3. Enable it per-host in `hosts/<host>/default.nix` (NixOS options) or in `home-manager/home.nix` (home-manager options, typically keyed off `isDesktop` / `isDarwin` / `isWSL`).
+3. Enable it per-host in `hosts/<host>/default.nix` (NixOS options) or in `home-manager/home.nix` (home-manager options, keyed off `host.isDesktop` / `host.isDev` / `host.isDarwin` etc.).
 
 ### Scripts system
 
-`home-manager/scripts/*.nix` each export an attrset of `pkgs.writeShellScript` derivations. `home-manager/makeScripts.nix` auto-collects all of them and passes the merged set as the `scripts` argument to every home-manager module (via `extraSpecialArgs`). Reference a script as `${scripts.<name>}`; scripts can reference each other through the same `scripts` argument.
+`home-manager/scripts/*.nix` each export an attrset of script derivations. `home-manager/makeScripts.nix` auto-collects them into one fixpoint (duplicate names fail evaluation) and passes it as the `scripts` argument to every home-manager module (via `extraSpecialArgs`). Reference a script as `${scripts.<name>}`; scripts can reference each other through the same `scripts` argument.
+
+Script files also receive `helpers` from `home-manager/scriptLib.nix`: prefer `helpers.mkScript { name; text; runtimeInputs; }` for new scripts (strict bash + build-time shellcheck; `$out` is the script file, so `${scripts.x}` keeps working), `helpers.playSound "clipboard"` for system sounds and `helpers.clipboard.copy`/`.paste` for the session's clipboard. Older scripts still use `pkgs.writeShellScript`; migrate them one at a time.
 
 ### Hosts (`flake.nix` + `hosts/`)
 
