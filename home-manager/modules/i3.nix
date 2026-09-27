@@ -81,7 +81,7 @@ in {
           }
           {
             command = "${pkgs.haskellPackages.greenclip}/bin/greenclip daemon";
-            always = true;
+            always = false;
             notification = false;
           }
           {
@@ -91,17 +91,17 @@ in {
           }
           {
             command = "${scripts.brightness-change-notify}";
-            always = true;
+            always = false;
             notification = false;
           }
           {
             command = "${scripts.volume-change-notify}";
-            always = true;
+            always = false;
             notification = false;
           }
           {
             command = "${pkgs._1password-gui}/bin/1password --silent --ozone-platform-hint=x11";
-            always = true;
+            always = false;
             notification = false;
           }
         ];
