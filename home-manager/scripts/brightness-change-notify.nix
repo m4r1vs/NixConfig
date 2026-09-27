@@ -27,8 +27,7 @@
 
         if [ -z "$current" ] || [ -z "$max" ] || [ "$max" -eq 0 ]; then
           echo "Error reading brightness values" >&2
-          exit 1
-          percent=0
+          return 1
         else
           percent=$(( 100 * current / max ))
         fi
@@ -52,7 +51,7 @@
         else
           nerd_icon="󰃠"
         fi
-        notify-send -e \
+        ${pkgs.libnotify}/bin/notify-send -e \
                     -u low \
                     -h "int:value:$percent" \
                     -h string:synchronous:brightness-change-notify \
@@ -60,9 +59,11 @@
                     "Backlight $nerd_icon" "$percent%"
       }
 
-      while ${pkgs.inotify-tools}/bin/inotifywait -q -e modify "$BRIGHTNESS_FILE"; do
-        current_percent=$(get_brightness_percent)
-        send_notification "$current_percent"
+      # One long-running watcher, so no change is missed between restarts
+      ${pkgs.inotify-tools}/bin/inotifywait -m -q -e modify "$BRIGHTNESS_FILE" | while read -r _; do
+        if current_percent=$(get_brightness_percent); then
+          send_notification "$current_percent"
+        fi
       done
 
       echo "inotifywait stopped monitoring $BRIGHTNESS_FILE. Exiting." >&2

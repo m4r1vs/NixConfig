@@ -41,8 +41,7 @@
     if [ -f "$WALLPAPER" ]; then
         ${scripts.custom-wallpaper-theme} "$CHOICE"
         ${scripts.nixos-notify} -u low -e -i "$WALLPAPER" -h string:synchronous:wallpaper-change -t 1800 "New Wallpaper:" "$CHOICE"
-        rm $HOME/.active_wallpaper.jpg
-        ln -s $WALLPAPER $HOME/.active_wallpaper.jpg
+        ln -sfn "$WALLPAPER" "$HOME/.active_wallpaper.jpg"
         ${lib.getExe pkgs.awww} img "$WALLPAPER" --transition-type none
     fi
   '';

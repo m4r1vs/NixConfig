@@ -4,13 +4,13 @@
     ''
       volume_output=$(${pkgs.wireplumber}/bin/wpctl get-volume @DEFAULT_SINK@)
       volume=$(echo "$volume_output" | sed 's/ \[MUTED\]//' | awk -F ': ' '{ print $2 }')
-      muted=$(echo "$volume_output" | grep -o "[MUTED]")
+      muted=$(echo "$volume_output" | grep -oF "[MUTED]")
 
       ${pkgs.pipewire}/bin/pw-mon --hide-params --hide-props | while IFS= read -r line; do
         if [[ "$line" == changed* ]]; then
           new_volume_output=$(${pkgs.wireplumber}/bin/wpctl get-volume @DEFAULT_SINK@)
           new_volume=$(echo "$new_volume_output" | sed 's/ \[MUTED\]//' | awk -F ": " '{ print $2 }')
-          new_muted=$(echo "$new_volume_output" | grep -o "[MUTED]")
+          new_muted=$(echo "$new_volume_output" | grep -oF "[MUTED]")
 
           if [[ "$new_volume" != "$volume" || "$new_muted" != "$muted" ]]; then
             volume=$new_volume
