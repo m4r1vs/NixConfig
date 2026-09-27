@@ -142,6 +142,7 @@
         email = "marius.niveri@gmail.com";
       };
       useWorkProfileByDefault = false;
+      obsidianVault = "Marius' Remote Vault";
     };
     makeTheme = import ./makeTheme.nix;
     commonModules = [
@@ -166,6 +167,11 @@
               email = "marius@meetovo.de";
             };
             useWorkProfileByDefault = true;
+            obsidianVault = "Marius' Remote Vault";
+            gitlab = {
+              url = "https://gitlab.meetovo.dev";
+              username = "m4r1vs";
+            };
             system = "x86_64-linux";
             theme = makeTheme {
               primary = "purple";

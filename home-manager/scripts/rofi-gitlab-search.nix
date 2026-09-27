@@ -1,4 +1,13 @@
-{pkgs, ...}: let
+{
+  pkgs,
+  systemArgs,
+  ...
+}: let
+  gitlab =
+    systemArgs.gitlab or {
+      url = "https://gitlab.com";
+      inherit (systemArgs) username;
+    };
   # Python script to handle token refresh and OAuth PKCE flow natively
   authScript =
     pkgs.writeScript "rofi-gitlab-auth.py"
@@ -12,7 +21,7 @@
       CLIENT_ID = "4fa10a200cd268c5ef6be43a16f28a46c3dac7b0048b36930152a4b3e16c7cdf"
       REDIRECT_URI = "http://127.0.0.1:8888/callback"
       TOKEN_PATH = os.path.expanduser("~/.local/state/gitlab-mcp/token.json")
-      GITLAB_URL = "https://gitlab.meetovo.dev"
+      GITLAB_URL = "${gitlab.url}"
 
       os.makedirs(os.path.dirname(TOKEN_PATH), mode=0o700, exist_ok=True)
       if os.path.exists(TOKEN_PATH):
@@ -144,12 +153,12 @@
       TOKEN=$(jq -r .access_token ~/.local/state/gitlab-mcp/token.json)
       # The token is passed to curl via a file descriptor, never on its command line
       auth_header() { printf 'Authorization: Bearer %s\n' "$TOKEN"; }
-      URL="https://gitlab.meetovo.dev/api/v4"
+      URL="${gitlab.url}/api/v4"
 
       fetch_mrs() {
         local query="$1"
         local label="$2"
-        curl -s --connect-timeout 3 --max-time 10 -H @<(auth_header) "$URL/merge_requests?state=opened&scope=all&per_page=50&$query=m4r1vs" | \
+        curl -s --connect-timeout 3 --max-time 10 -H @<(auth_header) "$URL/merge_requests?state=opened&scope=all&per_page=50&$query=${gitlab.username}" | \
           jq -c --arg label "$label" ".[] | {id: .iid, title: .title, url: .web_url, ref: .source_branch, label: \$label, project: ((.references.full // \"!\(.iid)\") | sub(\"^.*/\"; \"\") | sub(\"^meetovo-\"; \"\"))}"
       }
 

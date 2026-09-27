@@ -1,14 +1,15 @@
 {
   pkgs,
   scripts,
+  systemArgs,
   ...
 }: {
   rofi-obsidian =
     pkgs.writeShellScript "rofi-obsidian"
     # bash
     ''
-      VAULT_PATH="$HOME/Documents/Marius' Remote Vault"
-      VAULT_NAME="Marius' Remote Vault"
+      VAULT_NAME="${systemArgs.obsidianVault or "Obsidian Vault"}"
+      VAULT_PATH="$HOME/Documents/$VAULT_NAME"
 
       if [ $# -eq 0 ]; then
         if [ ! -d "$VAULT_PATH" ]; then
