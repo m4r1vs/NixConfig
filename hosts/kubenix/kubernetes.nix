@@ -75,6 +75,10 @@ in {
     '';
   };
 
+  # The private cluster network (enp7s0, 10.0.0.0/24) has no static config;
+  # NetworkManager gets its address via DHCP from the Hetzner private network.
+  networking.networkmanager.enable = true;
+
   # Cluster admin tools on the control plane (home-manager only installs them on dev hosts)
   environment.systemPackages = lib.optionals (builtins.elem "master" clusterRoles) (with pkgs; [
     k9s

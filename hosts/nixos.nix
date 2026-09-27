@@ -40,7 +40,8 @@ in {
 
   networking = {
     hostName = systemArgs.hostname;
-    networkmanager.enable = true;
+    # Servers use static networking (nixos-modules/server/networking.nix)
+    networkmanager.enable = mkDefault (host.isDesktop || host.isISO);
     firewall = {
       enable = true;
     };
@@ -56,8 +57,10 @@ in {
       extraGroups =
         [
           "audio"
-          "networkmanager"
           "wheel"
+        ]
+        ++ lib.optionals config.networking.networkmanager.enable [
+          "networkmanager"
         ]
         ++ lib.optionals config.virtualisation.podman.enable [
           "podman"
