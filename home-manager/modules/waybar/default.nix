@@ -207,7 +207,8 @@ in {
 
           "custom/webcam" = {
             return-type = "text";
-            interval = 2;
+            # Continuous script (see webcam-privacy); restarted when it exits
+            restart-interval = 2;
             escape = true;
             tooltip = false;
             exec = "${scripts.webcam-privacy}";
