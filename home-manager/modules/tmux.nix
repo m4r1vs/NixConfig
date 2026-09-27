@@ -212,7 +212,8 @@ in {
           set -g status-right-length 60
           set -g status-left-length 60
 
-          set -g status-interval 1
+          # Nothing in the status line forks anymore; hooks below handle changes
+          set -g status-interval 5
 
           # Update status bar immediately on session/window changes
           set-hook -g client-session-changed 'refresh-client -S'
@@ -221,6 +222,11 @@ in {
           set-hook -g after-new-window       'refresh-client -S'
           set-hook -g after-new-session      'refresh-client -S'
           set-hook -g session-closed         'refresh-client -S'
+          set-hook -g client-attached        'refresh-client -S'
+          set-hook -g client-detached        'refresh-client -S'
+          set-hook -g session-renamed        'refresh-client -S'
+          set-hook -g window-linked          'refresh-client -S'
+          set-hook -g window-unlinked        'refresh-client -S'
         '';
       plugins = with pkgs.tmuxPlugins; [
         jump
@@ -261,10 +267,12 @@ in {
 
             # Not recommended to change these values
             set -g @minimal-tmux-status-right "                                             %d.%m. 󰥔 %H:%M"
-            set -g @minimal-tmux-status-left "#(tmux ls -F '##{?session_attached,#[fg=#{@secondary-color}],#[fg=#826F62]} ${lib.replaceStrings ["#"] ["##"] (mkTmuxWindowStatusFormat {
+            # #{S/n:...} loops over sessions (sorted by name, like tmux ls) natively, so the status bar no longer
+            # forks `sh | tmux ls | tr` on every refresh. Trailing spaces pad like the old printf.
+            set -g @minimal-tmux-status-left "#{S/n:#{?session_attached,#[fg=#{@secondary-color}],#[fg=#826F62]} ${mkTmuxWindowStatusFormat {
               inherit (cfg) shellIconMap;
               showPaneCount = false;
-            })} (##{session_windows}) #[fg=default]' | tr -d '\n'; printf '%%60s' \"\")"
+            }} (#{session_windows}) #[fg=default]}${lib.fixedWidthString 60 " " ""}"
           '';
         }
       ];
