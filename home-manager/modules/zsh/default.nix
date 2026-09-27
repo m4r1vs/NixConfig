@@ -13,6 +13,13 @@ in {
     enable = mkEnableOption "Z-Shell";
   };
   config = mkIf cfg.enable {
+    # Not only for interactive zsh, so GUI apps and user services see them too
+    home.sessionVariables = {
+      LANG = "en_DK.UTF-8";
+      LANGUAGE = "en_DK.UTF-8";
+      LC_MONETARY = "de_DE.UTF-8";
+      NIXPKGS_ALLOW_UNFREE = "1";
+    };
     programs.zsh = {
       enable = true;
       package = pkgs.zsh;
@@ -49,9 +56,17 @@ in {
         vi = "nvim";
         vim = "nvim";
       };
-      initContent = import ./init.nix {
-        inherit isDarwin lib pkgs;
-      };
+      initContent = mkMerge [
+        # Static `brew shellenv` output (saves a fork per shell); runs before
+        # compinit so Homebrew completions are picked up too
+        (mkIf isDarwin (mkOrder 550 ''
+          export HOMEBREW_PREFIX=/opt/homebrew HOMEBREW_CELLAR=/opt/homebrew/Cellar HOMEBREW_REPOSITORY=/opt/homebrew
+          path=(/opt/homebrew/bin /opt/homebrew/sbin $path)
+          fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
+          export INFOPATH="/opt/homebrew/share/info:''${INFOPATH:-}"
+        ''))
+        (import ./init.nix {inherit lib pkgs;})
+      ];
       plugins = [
         {
           name = "fzf-tab";
