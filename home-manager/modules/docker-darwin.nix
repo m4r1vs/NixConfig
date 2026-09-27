@@ -17,8 +17,5 @@ in {
       docker-compose
       colima
     ];
-    programs.zsh.initContent = ''
-      eval "$(${getExe pkgs.colima} completion zsh)"
-    '';
   };
 }
