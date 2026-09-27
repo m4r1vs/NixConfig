@@ -29,6 +29,11 @@ in {
           "@wheel"
           "@admin"
         ];
+        # trusted-substituters only allowlists caches; this list is what gets queried.
+        # TODO: add https://nix-cache.niveri.dev once nixner and its DNS are back.
+        substituters = [
+          "https://nix-community.cachix.org"
+        ];
         trusted-substituters = [
           "https://nix-community.cachix.org"
           "https://nix-cache.niveri.dev"

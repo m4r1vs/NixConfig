@@ -109,6 +109,9 @@
   };
 
   nixConfig = {
+    extra-substituters = [
+      "https://nix-community.cachix.org" # Community cache
+    ];
     extra-trusted-substituters = [
       "https://nix-community.cachix.org" # Community cache
       "https://nix-cache.niveri.dev" # Cache hosted by me on Hetzner (.#nixner)
