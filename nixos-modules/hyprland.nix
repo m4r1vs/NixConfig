@@ -41,15 +41,22 @@ in {
       };
     };
     services = {
-      greetd = {
+      greetd = let
+        startHyprland = pkgs.writeShellScript "start-hyprland-session" ''
+          exec ${pkgs.hyprland}/bin/start-hyprland >"$HOME/.hyprland.log" 2>&1
+        '';
+      in {
         useTextGreeter = true;
         enable = true;
-        settings = rec {
-          default_session = {
-            command = "${pkgs.hyprland}/bin/start-hyprland > ~/.hyprland.log 2>&1";
+        settings = {
+          # Every session after the first (logout, crash) has to authenticate.
+          default_session.command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${startHyprland}";
+          # Autologin once per boot (the disk was already unlocked with LUKS).
+          # HYPR_AUTOLOGIN makes Hyprland lock itself with hyprlock on startup.
+          initial_session = {
+            command = "${pkgs.coreutils}/bin/env HYPR_AUTOLOGIN=1 ${startHyprland}";
             user = systemArgs.username;
           };
-          initial_session = default_session;
         };
       };
     };

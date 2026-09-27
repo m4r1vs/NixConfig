@@ -20,7 +20,6 @@ in {
         settings = {
           default_session = {
             command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd steam-gamescope";
-            user = systemArgs.username;
           };
         };
       };

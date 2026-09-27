@@ -40,7 +40,9 @@ in {
       ];
       settings = {
         exec-once = [
-          "${lib.getExe pkgs.hyprlock} || hyprctl dispatch exit"
+          # Only the autologin session needs locking; tuigreet logins already
+          # authenticated (and unlocked the keyring via greetd's PAM).
+          ''[ -n "$HYPR_AUTOLOGIN" ] && { ${lib.getExe pkgs.hyprlock} || hyprctl dispatch exit; }''
           "${pkgs._1password-gui}/bin/1password --silent"
           "${scripts.hyprland-startup-workspaces}"
           "${scripts.firmware-update-check}"

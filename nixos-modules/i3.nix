@@ -2,7 +2,6 @@
   lib,
   config,
   pkgs,
-  systemArgs,
   ...
 }:
 with lib; let
@@ -36,7 +35,6 @@ in {
         settings = {
           default_session = {
             command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd startx";
-            user = systemArgs.username;
           };
         };
       };
