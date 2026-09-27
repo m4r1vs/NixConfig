@@ -1,7 +1,6 @@
 {
   pkgs,
   scripts,
-  systemArgs,
   ...
 }: {
   rofi-power-menu =
@@ -11,7 +10,7 @@
       set -u
 
       # All supported choices
-      all=(shutdown reboot suspend hibernate logout lockscreen)
+      all=(shutdown reboot suspend hibernate lockscreen)
 
       # By default, show all (i.e., just copy the array)
       show=("''${all[@]}")
@@ -19,7 +18,6 @@
       declare -A texts
       texts[lockscreen]="lock screen"
       texts[switchuser]="switch user"
-      texts[logout]="log out"
       texts[suspend]="suspend"
       texts[hibernate]="hibernate"
       texts[reboot]="reboot"
@@ -28,7 +26,6 @@
       declare -A icons
       icons[lockscreen]="\Uf033e"
       icons[switchuser]="\Uf0019"
-      icons[logout]="\Uf0343"
       icons[suspend]="\Uf04b2"
       icons[hibernate]="\Uf02ca"
       icons[reboot]="\Uf0709"
@@ -38,14 +35,13 @@
       declare -A actions
       actions[lockscreen]="loginctl lock-session ''${XDG_SESSION_ID-}"
       #actions[switchuser]="???"
-      actions[logout]="${scripts.gracefull-run "loginctl terminate-user ${systemArgs.username}"}"}
       actions[suspend]="systemctl suspend"
       actions[hibernate]="systemctl hibernate"
       actions[reboot]="${scripts.gracefull-run "systemctl reboot"}"
       actions[shutdown]="${scripts.gracefull-run "systemctl poweroff"}"
 
       # By default, ask for confirmation for actions that are irreversible
-      confirmations=(reboot shutdown logout)
+      confirmations=(reboot shutdown)
 
       # By default, no dry run
       dryrun=false
@@ -66,8 +62,7 @@
       }
 
       # Parse command-line options
-      parsed=$(getopt --options=h --longoptions=help,dry-run,confirm:,choices:,choose:,symbols,no-symbols,text,no-text,symbols-font: --name "$0" -- "$@")
-      if [ $? -ne 0 ]; then
+      if ! parsed=$(getopt --options=h --longoptions=help,dry-run,confirm:,choices:,choose:,symbols,no-symbols,text,no-text,symbols-font: --name "$0" -- "$@"); then
           echo 'Terminating...' >&2
           exit 1
       fi
@@ -89,19 +84,19 @@
                   echo "  --dry-run            Don't perform the selected action but print it to stderr."
                   echo "  --choices CHOICES    Show only the selected choices in the given order. Use /"
                   echo "                       as the separator. Available choices are lockscreen,"
-                  echo "                       logout,suspend, hibernate, reboot and shutdown. By"
+                  echo "                       suspend, hibernate, reboot and shutdown. By"
                   echo "                       default, all available choices are shown."
                   echo "  --confirm CHOICES    Require confirmation for the gives choices only. Use / as"
-                  echo "                       the separator. Available choices are lockscreen, logout,"
+                  echo "                       the separator. Available choices are lockscreen,"
                   echo "                       suspend, hibernate, reboot and shutdown. By default, only"
-                  echo "                       irreversible actions logout, reboot and shutdown require"
+                  echo "                       irreversible actions reboot and shutdown require"
                   echo "                       confirmation."
                   echo "  --choose CHOICE      Preselect the given choice and only ask for a"
                   echo "                       confirmation (if confirmation is set to be requested). It"
                   echo "                       is strongly recommended to combine this option with"
                   echo "                       --confirm=CHOICE if the choice wouldn't require"
                   echo "                       confirmation by default. Available choices are"
-                  echo "                       lockscreen, logout, suspend, hibernate, reboot and"
+                  echo "                       lockscreen, suspend, hibernate, reboot and"
                   echo "                       shutdown."
                   echo "  --[no-]symbols       Show Unicode symbols or not. Requires a font with support"
                   echo "                       for the symbols. Use, for instance, fonts from the"
