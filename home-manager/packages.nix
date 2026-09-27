@@ -1,32 +1,30 @@
 {
   pkgs,
-  osConfig,
   scripts,
-  systemArgs,
+  host,
   ...
 }: let
-  isDesktop = osConfig.configured ? desktop && osConfig.configured.desktop.enable;
-  isWayland = osConfig.configured ? desktop && !osConfig.configured.i3.enable;
-  isDarwin = systemArgs.system == "aarch64-darwin";
-  isX86 = systemArgs.system == "x86_64-linux";
-  isGraphical = isDarwin || isDesktop;
+  inherit (host) isDarwin isDesktop isGraphical isWayland isX86;
 in {
   # Drop packages not built for this platform (e.g. slack/postman on aarch64 virtnix)
   home.packages = with pkgs;
     lib.filter (lib.meta.availableOn stdenv.hostPlatform) ([
         # Install on every system:
-        (writeShellScriptBin "auto-upgrade" scripts.auto-upgrade)
         (writeShellScriptBin "date-trivia" scripts.date-trivia)
         (writeShellScriptBin "ls-git" scripts.ls-git)
         (writeShellScriptBin "rebuild" scripts.rebuild)
+        pastel # manipulate colors and palettes
+        tlrc # Simplified manpages
+      ]
+      ++ lib.optionals host.isDev [
+        # Install on dev machines (desktops, macOS, WSL):
         astroterm # show stars in terminal
-        fastfetch # new neofetch
         gh # GitHub CLI
         golazo # show soccer scores in terminal
         kubectl # kubernetes CLI
-        pastel # manipulate colors and palettes
-        tlrc # Simplified manpages
-        xdg-utils # xdg-open, etc.
+      ]
+      ++ lib.optionals (host.isDesktop || host.isDarwin) [
+        (writeShellScriptBin "auto-upgrade" scripts.auto-upgrade)
       ]
       ++ lib.optionals isDarwin [
         # Install on MacOS only:
@@ -66,6 +64,7 @@ in {
           inkscape-with-extensions # maxxed out inkscape
           jetbrains.idea # intellij idea ultimate
           libnotify # send notifications from terminal
+          xdg-utils # xdg-open, etc.
           loupe # Gnome Image Viewer
           nautilus # file browser
           networkmanagerapplet # show wifi/ethernet in sys. tray

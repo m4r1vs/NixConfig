@@ -1,12 +1,13 @@
 {
+  host,
   lib,
+  pkgs,
   config,
-  systemArgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.fastfetch;
-  isDarwin = systemArgs.system == "aarch64-darwin";
+  inherit (host) isDarwin;
 in {
   options.programs.configured.fastfetch = {
     enable = mkEnableOption "Configure FastFetch system info fetcher";
@@ -14,6 +15,8 @@ in {
   config = mkIf cfg.enable {
     programs.fastfetch = {
       enable = true;
+      # The full build pulls in imagemagick, chafa and vulkan
+      package = mkIf host.isHeadless pkgs.fastfetchMinimal;
       settings = {
         logo = {
           type = "builtin";

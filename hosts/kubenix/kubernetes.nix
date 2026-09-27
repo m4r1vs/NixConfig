@@ -75,6 +75,12 @@ in {
     '';
   };
 
+  # Cluster admin tools on the control plane (home-manager only installs them on dev hosts)
+  environment.systemPackages = lib.optionals (builtins.elem "master" clusterRoles) (with pkgs; [
+    k9s
+    kubectl
+  ]);
+
   virtualisation.containerd = {
     settings = lib.mkForce {
       version = 2;

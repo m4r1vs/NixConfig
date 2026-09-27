@@ -1,12 +1,16 @@
 {
   lib,
-  systemArgs,
+  config,
+  host,
   scripts,
   ...
 }: let
-  isLinux = systemArgs.system != "aarch64-darwin";
+  cfg = config.services.configured.auto-upgrade;
 in {
-  config = lib.mkIf isLinux {
+  options.services.configured.auto-upgrade = {
+    enable = lib.mkEnableOption "Daily flake update and dry-build with a notification";
+  };
+  config = lib.mkIf (cfg.enable && host.isLinux) {
     systemd.user.services.auto-upgrade = {
       Unit = {
         Description = "Automated NixOS Flake Update and Dry-Run";

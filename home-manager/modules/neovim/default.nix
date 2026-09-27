@@ -1,8 +1,6 @@
 {
   lib,
-  osConfig,
   config,
-  systemArgs,
   pkgs,
   ...
 }:
@@ -11,6 +9,11 @@ with lib; let
 in {
   options.programs.configured.neovim = {
     enable = mkEnableOption "Neo VIM";
+    profile = mkOption {
+      type = types.enum ["base" "full"];
+      default = "full";
+      description = "base: minimal toolchain for servers/ISOs, full: every LSP and language provider.";
+    };
   };
   config = mkIf cfg.enable {
     home.file."./.config/nvim/" = {
@@ -24,10 +27,10 @@ in {
       defaultEditor = true;
       viAlias = true;
       coc.enable = false;
-      extraPackages = import ./nvim-programs.nix {inherit pkgs osConfig systemArgs lib;};
-      withNodeJs = true;
-      withRuby = true;
-      withPython3 = true;
+      extraPackages = (import ./nvim-programs.nix {inherit pkgs;}).${cfg.profile};
+      withNodeJs = cfg.profile == "full";
+      withRuby = cfg.profile == "full";
+      withPython3 = cfg.profile == "full";
     };
   };
 }

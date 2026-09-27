@@ -1,13 +1,13 @@
 {
+  host,
   lib,
   config,
   pkgs,
-  systemArgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.zsh;
-  isDarwin = systemArgs.system == "aarch64-darwin";
+  inherit (host) isDarwin;
 in {
   options.programs.configured.zsh = {
     enable = mkEnableOption "Z-Shell";
@@ -39,12 +39,12 @@ in {
       };
       shellAliases = {
         bat = "bat --theme auto:system --theme-dark default --theme-light GitHub";
-        hud = "hunk diff --watch";
+        hud = mkIf config.programs.configured.hunk.enable "hunk diff --watch";
         la = "${lib.getExe pkgs.lsd} -la";
         lg = "${lib.getExe pkgs.lazygit}";
         ls = "${lib.getExe pkgs.lsd}";
         lsg = "ls-git";
-        present = "${lib.getExe pkgs.zathura} --mode=presentation";
+        present = mkIf host.isGraphical "${lib.getExe pkgs.zathura} --mode=presentation";
         stty = mkIf isDarwin "/bin/stty"; # Fix for prompt error on macos
         tree = "${lib.getExe pkgs.lsd} --tree";
         vi = "nvim";

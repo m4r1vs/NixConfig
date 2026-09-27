@@ -3,16 +3,9 @@
   lib,
   osConfig,
   scripts,
+  host,
   ...
-}: let
-  isDesktop = osConfig.configured ? desktop && osConfig.configured.desktop.enable;
-  isWayland = osConfig.configured ? desktop && !osConfig.configured.i3.enable;
-  isWSL = osConfig ? wsl && osConfig.wsl.enable;
-  isDarwin = systemArgs.system == "aarch64-darwin";
-  hasPowerProfiles = osConfig.services.power-profiles-daemon.enable or false;
-  # Dictation is pointless without the NPU backend to transcribe against
-  hasNpuServer = osConfig.configured.npu.server.enable or false;
-in {
+}: {
   imports = [
     ./modules
     ./packages.nix
@@ -25,7 +18,7 @@ in {
         $DRY_RUN_CMD ${scripts.custom-wallpaper-theme} "default"
       fi
     '';
-    sessionVariables = lib.mkIf isDesktop {
+    sessionVariables = lib.mkIf host.isDesktop {
       ELECTRON_OZONE_PLATFORM_HINT = "auto";
       NIXOS_OZONE_WL = "1";
     };
@@ -34,18 +27,19 @@ in {
 
   services = {
     configured = {
-      darkman.enable = isDesktop;
-      kdeconnect.enable = isDesktop;
+      darkman.enable = host.isDesktop;
+      kdeconnect.enable = host.isDesktop;
       ollama.enable = false;
-      auto-power-management.enable = hasPowerProfiles;
+      auto-power-management.enable = host.hasPowerProfiles;
+      auto-upgrade.enable = host.isDesktop;
     };
-    blueman-applet.enable = isDesktop && osConfig.services.blueman.enable;
-    mpris-proxy.enable = isDesktop;
-    network-manager-applet.enable = isDesktop;
-    polkit-gnome.enable = isDesktop;
+    blueman-applet.enable = host.isDesktop && osConfig.services.blueman.enable;
+    mpris-proxy.enable = host.isDesktop;
+    network-manager-applet.enable = host.isDesktop;
+    polkit-gnome.enable = host.isDesktop;
   };
 
-  dconf.settings = lib.mkIf isDesktop {
+  dconf.settings = lib.mkIf host.isDesktop {
     "org/virt-manager/virt-manager/connections" = {
       autoconnect = ["qemu:///system"];
       uris = ["qemu:///system"];
@@ -54,47 +48,53 @@ in {
 
   programs = {
     configured = {
-      antigravity-cli.enable = true;
+      antigravity-cli.enable = host.isDev;
       bat.enable = true;
-      brave.enable = isDesktop;
-      claude-code.enable = true;
+      brave.enable = host.isDesktop;
+      claude-code.enable = host.isDev;
       direnv.enable = true;
-      docker-darwin.enable = isDarwin;
+      docker-darwin.enable = host.isDarwin;
       fastfetch.enable = true;
       fzf.enable = true;
-      ghostty.enable = isDesktop || isWSL || isDarwin;
+      ghostty.enable = host.isGraphical || host.isWSL;
       git.enable = true;
-      helium.enable = isDesktop;
-      hunk.enable = true;
+      helium.enable = host.isDesktop;
+      hunk.enable = host.isDev;
       lazygit.enable = true;
-      mcp.enable = true;
-      mpv.enable = isDesktop || isDarwin;
-      neovim.enable = true;
-      newsboat.enable = isDesktop || isDarwin;
-      npu-dictate.enable = isDesktop && hasNpuServer;
+      mcp.enable = host.isDev;
+      mpv.enable = host.isGraphical;
+      neovim = {
+        enable = true;
+        profile =
+          if host.isDev
+          then "full"
+          else "base";
+      };
+      newsboat.enable = host.isGraphical;
+      npu-dictate.enable = host.isDesktop && host.hasNpuServer;
       oh-my-posh.enable = true;
-      opencode.enable = true;
-      rofi.enable = isDesktop;
-      spotify-player.enable = isDesktop || isWSL || isDarwin;
+      opencode.enable = host.isDev;
+      rofi.enable = host.isDesktop;
+      spotify-player.enable = host.isGraphical || host.isWSL;
       ssh.enable = true;
-      swappy.enable = isDesktop;
-      swayimg.enable = isWayland;
+      swappy.enable = host.isDesktop;
+      swayimg.enable = host.isWayland;
       tmux.enable = true;
-      yazi.enable = true;
+      yazi.enable = host.isDev;
       zsh.enable = true;
     };
     home-manager.enable = true;
-    k9s.enable = true;
-    obs-studio.enable = isDesktop;
+    k9s.enable = host.isDev;
+    obs-studio.enable = host.isDesktop;
     zoxide.enable = true;
   };
 
   configured = {
-    gtk.enable = isDesktop;
-    qt.enable = isDesktop;
-    xdg.enable = isDesktop;
-    hushlogin.enable = isDarwin;
+    gtk.enable = host.isDesktop;
+    qt.enable = host.isDesktop;
+    xdg.enable = host.isDesktop;
+    hushlogin.enable = host.isDarwin;
   };
 
-  fonts.fontconfig.enable = isDesktop;
+  fonts.fontconfig.enable = host.isDesktop;
 }
