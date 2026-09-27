@@ -62,8 +62,9 @@ in {
   networking = {
     inherit domain;
     firewall = {
-      allowedTCPPorts = [22 53 80 443 k8sPort];
-      allowedUDPPorts = [53];
+      # SSH (port 422) is opened by nixos-modules/server; CoreDNS runs as a pod and
+      # node-to-node traffic uses the trusted private interface below.
+      allowedTCPPorts = [80 443] ++ lib.optional (builtins.elem "master" clusterRoles) k8sPort;
       trustedInterfaces = [
         "enp7s0"
       ];
