@@ -1,12 +1,14 @@
 {
   pkgs,
   scripts,
-  lib,
+  helpers,
   config,
   ...
 }: {
   ocr-screenshot = pkgs.writeShellScript "ocr-screenshot" ''
-    TMP_IMG="/tmp/ocr_screenshot.png"
+    WORK=$(mktemp -d "''${XDG_RUNTIME_DIR:-/tmp}/ocr.XXXXXX")
+    trap 'rm -rf "$WORK"' EXIT
+    TMP_IMG="$WORK/ocr.png"
 
     if [ "$1" = "sleep-because-rofi" ]; then
       sleep 0.5
@@ -15,16 +17,13 @@
     ${
       if config.configured.hyprland.enable
       then ''
-        HYPR_STDOUT="$(mktemp)"
-        ${pkgs.hyprshot}/bin/hyprshot -m region -o /tmp -f ocr_screenshot.png --silent --freeze 2> "$HYPR_STDOUT"
+        HYPR_STDOUT="$WORK/hyprshot.err"
+        ${pkgs.hyprshot}/bin/hyprshot -m region -o "$WORK" -f ocr.png --silent --freeze 2> "$HYPR_STDOUT"
 
-        if cat "$HYPR_STDOUT" | grep -q "cancelled"; then
+        if grep -q "cancelled" "$HYPR_STDOUT"; then
           ${scripts.nixos-notify} -u low -e -h string:synchronous:ocr-cancelled "OCR Cancelled"
-          rm -f "$HYPR_STDOUT"
           exit 0
         fi
-        rm -f "$HYPR_STDOUT"
-        COPY_CMD="${pkgs.wl-clipboard}/bin/wl-copy"
       ''
       else if config.configured.i3.enable
       then ''
@@ -32,7 +31,6 @@
            ${scripts.nixos-notify} -u low -e -h string:synchronous:ocr-cancelled "OCR Cancelled"
            exit 0
         fi
-        COPY_CMD="${pkgs.xclip}/bin/xclip -selection clipboard"
       ''
       else ''
         echo "Unsupported Desktop Environment"
@@ -45,18 +43,15 @@
 
       if [ -z "$TEXT" ]; then
         ${scripts.nixos-notify} -u low -t 3000 "OCR Failed" "No text detected in selection."
-        rm -f "$TMP_IMG"
         exit 1
       fi
 
-      echo -n "$TEXT" | eval "$COPY_CMD"
-      ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.clipboard.enable) "${pkgs.mpv}/bin/mpv --no-video --volume=80 ${config.configured.system-sounds.clipboard.soundFile} &"}
+      echo -n "$TEXT" | ${helpers.clipboard.copy}
+      ${helpers.playSound "clipboard"}
 
       # Prepare a short preview
       PREVIEW=$(echo "$TEXT" | head -n 3)
       ${scripts.nixos-notify} -u low -e -t 3000 " Copied:" "$PREVIEW"
-
-      rm -f "$TMP_IMG"
     fi
   '';
 }

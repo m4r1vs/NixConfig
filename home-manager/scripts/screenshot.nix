@@ -1,35 +1,40 @@
 {
   pkgs,
   scripts,
-  config,
-  lib,
+  helpers,
   ...
 }: {
   screenshot =
     pkgs.writeShellScript "screenshot"
     ''
-      HYPR_STDOUT="$(mktemp)"
-      ${pkgs.hyprshot}/bin/hyprshot -m region -o "/tmp" --freeze -f "tmp_screenshot.png" --silent 2> "$HYPR_STDOUT"
+      # Kept after the script exits (GIMP / "Copy Path" actions), so no cleanup trap
+      SHOT_DIR="''${XDG_RUNTIME_DIR:-/tmp}/screenshots"
+      mkdir -p -m 700 "$SHOT_DIR"
+      SHOT_NAME="screenshot_$(date +%Y-%m-%d-%H-%M-%S).png"
+      OUTPUT="$SHOT_DIR/$SHOT_NAME"
 
-      if cat $HYPR_STDOUT | grep -q "cancelled"; then
+      HYPR_STDOUT="$(mktemp)"
+      trap 'rm -f "$HYPR_STDOUT"' EXIT
+      ${pkgs.hyprshot}/bin/hyprshot -m region -o "$SHOT_DIR" --freeze -f "$SHOT_NAME" --silent 2> "$HYPR_STDOUT"
+
+      if grep -q "cancelled" "$HYPR_STDOUT"; then
         ${scripts.nixos-notify} -u low -e -h string:synchronous:screenshot-cancelled "Screenshot Cancelled"
         exit 0
       fi
 
-      ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.screenshot.enable) ''
-        ${pkgs.mpv}/bin/mpv --no-video --volume=80 ${config.configured.system-sounds.screenshot.soundFile} &
-      ''}
+      ${helpers.playSound "screenshot"}
 
-      FINAL_DESTINATION="/tmp"
-      OUTPUT="/tmp/tmp_screenshot.png"
+      FINAL_DESTINATION="$SHOT_DIR"
 
-      if [[ "$1" == *"edit"* ]]; then
-        OUTPUT="$HOME/Pictures/Screenshots/screenshot_$(date +%Y-%m-%d-%H-%M-%S).png"
+      if [[ "''${1-}" == *"edit"* ]]; then
+        mkdir -p "$HOME/Pictures/Screenshots"
+        EDITED="$HOME/Pictures/Screenshots/$SHOT_NAME"
 
-        ${pkgs.swappy}/bin/swappy -f "/tmp/tmp_screenshot.png" -o "$OUTPUT"
-        if [ ! -f "$OUTPUT" ]; then
-          mv /tmp/tmp_screenshot.png "$OUTPUT"
+        ${pkgs.swappy}/bin/swappy -f "$OUTPUT" -o "$EDITED"
+        if [ ! -f "$EDITED" ]; then
+          mv "$OUTPUT" "$EDITED"
         fi
+        OUTPUT="$EDITED"
         FINAL_DESTINATION="~/Pictures/Screenshots"
       fi
 
@@ -40,8 +45,8 @@
       fi
 
       if [[ "$RESPONSE" == *"path"* ]]; then
-        echo "$OUTPUT" | ${pkgs.wl-clipboard}/bin/wl-copy
-        ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.clipboard.enable) "${pkgs.mpv}/bin/mpv --no-video --volume=80 ${config.configured.system-sounds.clipboard.soundFile} &"}
+        echo "$OUTPUT" | ${helpers.clipboard.copy}
+        ${helpers.playSound "clipboard"}
       fi
     '';
 }

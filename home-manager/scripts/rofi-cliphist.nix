@@ -1,8 +1,7 @@
 {
   pkgs,
   scripts,
-  lib,
-  config,
+  helpers,
   ...
 }: {
   rofi-cliphist =
@@ -58,17 +57,17 @@
         if [[ ''${line} == *"[[ binary data"* ]]; then
             ${pkgs.cliphist}/bin/cliphist decode <<<"$line" | ${pkgs.wl-clipboard}/bin/wl-copy
             imdx=$(awk -F '\t' '{print $1}' <<<$line)
-            temprev="/tmp/pastebin-preview_''${imdx}"
+            temprev="$tmp_dir/preview_''${imdx}"
             ${pkgs.wl-clipboard}/bin/wl-paste >"''${temprev}"
-            ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.clipboard.enable) "${pkgs.mpv}/bin/mpv --no-video --volume=80 ${config.configured.system-sounds.clipboard.soundFile} &"}
+            ${helpers.playSound "clipboard"}
             ${scripts.nixos-notify} -u low -e -a "Pastebin:" "File Copied" -i "''${temprev}" -t 2000
             return 1
         fi
       }
 
 
-      tmp_dir="/tmp/cliphist"
-      mkdir -p "$tmp_dir"
+      tmp_dir="''${XDG_RUNTIME_DIR:-/tmp}/cliphist"
+      mkdir -p -m 700 "$tmp_dir"
 
       read -r -d ''' prog <<EOF
       /^[0-9]+\s<meta http-equiv=/ { next }
@@ -81,7 +80,7 @@
       EOF
 
       selected_item=$((
-        ${pkgs.cliphist}/bin/cliphist list | gawk "$prog"
+        ${pkgs.cliphist}/bin/cliphist list | ${pkgs.gawk}/bin/gawk "$prog"
       ) | ${pkgs.rofi}/bin/rofi -dmenu -show-icons -multi-select -i -display-columns 2 -theme-str "entry{placeholder:\"Search your Clipboard...\";}element{children:[element-text,element-icon];}inputbar{padding: 0 0 0 0;}" -ballot-selected-str " " -ballot-unselected-str " ")
       ([ -n "''${selected_item}" ] && echo -e "''${selected_item}" | checkContent) || exit 0
 

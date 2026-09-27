@@ -2,13 +2,14 @@
   toggle-zen =
     pkgs.writeShellScript "toggle-zen"
     ''
-      if [ -e /tmp/zen-mode-active ]; then
+      STATE="''${XDG_RUNTIME_DIR:-/tmp}/zen-mode-active"
+      if [ -e "$STATE" ]; then
         ${pkgs.waybar}/bin/waybar &
-        rm /tmp/zen-mode-active
+        rm -f "$STATE"
         ${pkgs.swaynotificationcenter}/bin/swaync-client --dnd-off
       else
-        touch /tmp/zen-mode-active
-        pkill -f "${pkgs.waybar}/bin/waybar"
+        touch "$STATE"
+        ${pkgs.procps}/bin/pkill -f "${pkgs.waybar}/bin/waybar"
         ${pkgs.swaynotificationcenter}/bin/swaync-client --dnd-on
       fi
     '';
