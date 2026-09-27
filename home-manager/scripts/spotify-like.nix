@@ -5,7 +5,7 @@
 }: {
   spotify-like = pkgs.writeShellScript "spotify-like" ''
     ${pkgs.spotify-player}/bin/spotify_player like
-    NAME="$(${pkgs.spotify-player}/bin/spotify_player get key playback | jq -r '.item.name')"
+    NAME="$(${pkgs.spotify-player}/bin/spotify_player get key playback | ${pkgs.jq}/bin/jq -r '.item.name // empty')"
     if [ -z "''${NAME:-}" ]; then
       NAME="FAILED TO GET NAME OF TRACK"
     fi

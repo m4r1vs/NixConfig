@@ -2,7 +2,7 @@
   date-trivia =
     pkgs.writeShellScript "date-trivia"
     ''
-      CURL_OUTPUT=$(${pkgs.curl}/bin/curl -s -w "%{http_code}" "http://number-trivia.com/$(date +%m/%d)/date")
+      CURL_OUTPUT=$(${pkgs.curl}/bin/curl -s --connect-timeout 3 --max-time 5 -w "%{http_code}" "http://number-trivia.com/$(date +%m/%d)/date")
       STATUS="''${CURL_OUTPUT: -3}"
       DATA="''${CURL_OUTPUT::-3}"
 

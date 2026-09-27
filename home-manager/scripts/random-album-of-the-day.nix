@@ -13,7 +13,10 @@ in {
 
       ${scripts.nixos-notify} -i ${../../assets/nix-flake/with-headphones.svg} -u low -h string:synchronous:random-album -e "Connecting to Bandcamp..."
 
-      HTML=$(${pkgs.curl}/bin/curl -s "https://daily.bandcamp.com/album-of-the-day")
+      if ! HTML=$(${pkgs.curl}/bin/curl -fsS --connect-timeout 3 --max-time 10 "https://daily.bandcamp.com/album-of-the-day"); then
+        ${scripts.nixos-notify} -i ${../../assets/nix-flake/with-headphones.svg} -e "Failed to reach Bandcamp"
+        exit 0
+      fi
       RANDOM_ALBUM_LINE=$(echo "$HTML" | grep '<a class="title" href="/album-of-the-day/' | ${pkgs.coreutils}/bin/shuf -n 1)
       RANDOM_ALBUM=$(echo "$RANDOM_ALBUM_LINE" | awk -F '">|</' '{print $3}' | sed -e 's/“//g ; s/”//g')
       ALBUM_PATH=$(echo "$RANDOM_ALBUM_LINE" | sed -n 's/.*href="\([^"]*\)".*/\1/p')
@@ -24,7 +27,7 @@ in {
         exit 0
       fi
 
-      id=$(${pkgs.spotify-player}/bin/spotify_player search "$RANDOM_ALBUM" | ${pkgs.jq}/bin/jq -r '.albums.[0].id')
+      id=$(${pkgs.spotify-player}/bin/spotify_player search "$RANDOM_ALBUM" | ${pkgs.jq}/bin/jq -r '.albums.[0].id // empty')
       exit_code="$?"
 
       if [ -z "$id" ] || [ "$exit_code" -ne 0 ]; then
@@ -32,7 +35,7 @@ in {
         exit 0
       fi
 
-      ${pkgs.spotify-player}/bin/spotify_player playback start context --id $id album >/dev/null
+      ${pkgs.spotify-player}/bin/spotify_player playback start context --id "$id" album >/dev/null
       exit_code="$?"
 
       if [[ "$exit_code" -ne 0 ]]; then
@@ -59,7 +62,7 @@ in {
           bash
           */
           ''
-            xdg-open "https://daily.bandcamp.com$ALBUM_PATH"
+            /usr/bin/open "https://daily.bandcamp.com$ALBUM_PATH"
           ''
       }
     '';
