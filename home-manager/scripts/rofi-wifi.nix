@@ -1,17 +1,11 @@
 {
   pkgs,
+  lib,
   scripts,
   ...
 }: {
   rofi-wifi = pkgs.writeShellScript "rofi-wifi" ''
-    export PATH=''${pkgs.lib.makeBinPath [
-      pkgs.networkmanager
-      pkgs.rofi
-      pkgs.coreutils
-      pkgs.gnugrep
-      pkgs.gawk
-      pkgs.gnused
-    ]}:$PATH
+    export PATH=${lib.makeBinPath (with pkgs; [networkmanager rofi coreutils gnugrep gawk gnused])}:$PATH
 
     notify="${scripts.nixos-notify} -e -u low -t 3500 -h string:synchronous:rofi-wifi"
 

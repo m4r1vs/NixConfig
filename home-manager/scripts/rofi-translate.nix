@@ -1,36 +1,21 @@
 {
   pkgs,
   scripts,
-  config,
+  helpers,
   lib,
   ...
 }: {
   rofi-translate = pkgs.writeShellScript "rofi-translate" ''
-    export PATH=''${pkgs.lib.makeBinPath [ pkgs.translate-shell pkgs.rofi pkgs.coreutils pkgs.gnugrep pkgs.gawk ]}:$PATH
+    export PATH=${lib.makeBinPath (with pkgs; [translate-shell rofi coreutils gnugrep gawk])}:$PATH
 
-    ${
-      if config.configured.hyprland.enable
-      then ''
-        PASTE_CMD="${pkgs.wl-clipboard}/bin/wl-paste -n"
-        COPY_CMD="${pkgs.wl-clipboard}/bin/wl-copy"
-      ''
-      else if config.configured.i3.enable
-      then ''
-        PASTE_CMD="${pkgs.xclip}/bin/xclip -selection clipboard -o"
-        COPY_CMD="${pkgs.xclip}/bin/xclip -selection clipboard -i"
-      ''
-      else ''
-        PASTE_CMD="echo"
-        COPY_CMD="cat"
-      ''
-    }
+    CLIP_LABEL="󰆏 Translate Clipboard: "
 
     # Try to safely get clipboard content, limiting the size and removing newlines for a one-line preview
-    clipboard_raw=$(eval "$PASTE_CMD" 2>/dev/null)
+    clipboard_raw=$(${helpers.clipboard.paste} 2>/dev/null)
     clipboard_preview=$(echo "$clipboard_raw" | tr '\n' ' ' | cut -c 1-50)
 
     if [ -n "$clipboard_preview" ]; then
-      options="󰆏 Translate Clipboard: $clipboard_preview\n󰈆 Exit"
+      options="$CLIP_LABEL$clipboard_preview\n󰈆 Exit"
     else
       options="󰈆 Exit"
     fi
@@ -42,7 +27,7 @@
       exit 0
     fi
 
-    if [[ "$chosen" == " "* ]]; then
+    if [[ "$chosen" == "$CLIP_LABEL"* ]]; then
       text_to_translate="$clipboard_raw"
     else
       text_to_translate="$chosen"
@@ -65,8 +50,8 @@
         exit 1
       fi
 
-      echo -n "$translation" | eval "$COPY_CMD"
-      ${lib.optionalString (config.configured.system-sounds.enable && config.configured.system-sounds.clipboard.enable) "${pkgs.mpv}/bin/mpv --no-video --volume=80 ${config.configured.system-sounds.clipboard.soundFile} &"}
+      echo -n "$translation" | ${helpers.clipboard.copy}
+      ${helpers.playSound "clipboard"}
       ${scripts.nixos-notify} -u low -e -t 2000 -h string:synchronous:translation " Copied Translation:" "$translation"
     fi
   '';
