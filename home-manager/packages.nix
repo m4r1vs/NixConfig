@@ -10,9 +10,9 @@ in {
   home.packages = with pkgs;
     lib.filter (lib.meta.availableOn stdenv.hostPlatform) ([
         # Install on every system:
-        (writeShellScriptBin "date-trivia" scripts.date-trivia)
-        (writeShellScriptBin "ls-git" scripts.ls-git)
-        (writeShellScriptBin "rebuild" scripts.rebuild)
+        (writeShellScriptBin "date-trivia" ''exec ${scripts.date-trivia} "$@"'')
+        (writeShellScriptBin "ls-git" ''exec ${scripts.ls-git} "$@"'')
+        (writeShellScriptBin "rebuild" ''exec ${scripts.rebuild} "$@"'')
         pastel # manipulate colors and palettes
         tlrc # Simplified manpages
       ]
@@ -24,13 +24,13 @@ in {
         kubectl # kubernetes CLI
       ]
       ++ lib.optionals (host.isDesktop || host.isDarwin) [
-        (writeShellScriptBin "auto-upgrade" scripts.auto-upgrade)
+        (writeShellScriptBin "auto-upgrade" ''exec ${scripts.auto-upgrade} "$@"'')
       ]
       ++ lib.optionals isDarwin [
         # Install on MacOS only:
-        (writeShellScriptBin "random-album-of-the-day" scripts.random-album-of-the-day)
-        (writeShellScriptBin "random-wallpaper" (scripts.random-wallpaper ./wallpaper))
-        (writeShellScriptBin "spotify-like" scripts.spotify-like)
+        (writeShellScriptBin "random-album-of-the-day" ''exec ${scripts.random-album-of-the-day} "$@"'')
+        (writeShellScriptBin "random-wallpaper" ''exec ${(scripts.random-wallpaper ./wallpaper)} "$@"'')
+        (writeShellScriptBin "spotify-like" ''exec ${scripts.spotify-like} "$@"'')
         clippy-darwin # cli to copy/paste files (used by yazi plugin)
         comma # run programs not installed but in nixpkgs
         tesseract # Enable OCR
