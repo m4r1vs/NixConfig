@@ -24,6 +24,7 @@
       # Show keypresses
       url = "github:m4r1vs/keypress-visualizer-rust";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
     };
     hunk = {
       # Diff Viewer in Terminal
@@ -49,6 +50,7 @@
       # Show Hyprland keyboard shortcuts
       url = "gitlab:m4r1vs/hyprland-which-key?ref=master";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
     };
     golazo = {
       # Soccer score viewer
@@ -101,6 +103,7 @@
       # Push-to-talk dictation on the NPU; needs configured.npu.server.enable
       url = "gitlab:m4r1vs/npu-dictate?ref=master";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-overlay.follows = "rust-overlay";
     };
     dark-yazi = {
       # Yazi flavor (dark)
@@ -112,8 +115,13 @@
       url = "github:m4r1vs/light.yazi";
       flake = false;
     };
+    rust-overlay = {
+      # Shared by our Rust flake inputs, so the lock only holds one copy
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     pre-commit-hooks = {
-      url = "github:cachix/pre-commit-hooks.nix";
+      url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
