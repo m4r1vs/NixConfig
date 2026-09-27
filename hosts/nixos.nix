@@ -90,7 +90,6 @@ in {
   };
 
   nix.settings.accept-flake-config = true;
-  nix.gc.automatic = lib.mkForce false;
 
   environment = {
     systemPackages = with pkgs;

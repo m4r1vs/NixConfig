@@ -24,10 +24,8 @@ in {
 
   nix =
     {
-      extraOptions = ''
-        experimental-features = nix-command flakes
-      '';
       settings = {
+        experimental-features = ["nix-command" "flakes"];
         trusted-users = [
           "@wheel"
           "@admin"
@@ -68,15 +66,9 @@ in {
           };
         };
       }
+      # NixOS: garbage collection is done by nh clean (hosts/nixos.nix)
       else {
-        optimise = {
-          automatic = true;
-        };
-        gc = {
-          automatic = true;
-          dates = "weekly";
-          options = "--delete-older-than 10d";
-        };
+        optimise.automatic = true;
       }
     );
 
