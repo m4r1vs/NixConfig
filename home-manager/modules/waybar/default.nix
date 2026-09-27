@@ -237,7 +237,11 @@ in {
           "custom/caffeinate" = {
             exec = "${scripts.caffeinate}";
             format = "{}";
-            interval = 5;
+            # Own toggles refresh instantly via SIGRTMIN+8; the slow interval only
+            # catches other apps' inhibitors, which logind has no signal for
+            signal = 8;
+            interval = 60;
+            exec-on-event = false;
             on-click = "${scripts.caffeinate} toggle";
             return-type = "json";
             tooltip = true;
