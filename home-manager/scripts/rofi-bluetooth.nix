@@ -1,5 +1,11 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   rofi-bluetooth = pkgs.writeShellScript "rofi-bluetooth" ''
+    export PATH=${lib.makeBinPath (with pkgs; [bluez util-linux bc procps coreutils gnugrep])}:$PATH
+
     divider=""
     goback="󰌍 Back"
 
@@ -18,7 +24,7 @@
             bluetoothctl power off
             show_menu
         else
-            if rfkill list bluetooth | grep -q 'y blockedes'; then
+            if rfkill list bluetooth | grep -q 'blocked: yes'; then
                 rfkill unblock bluetooth && sleep 3
             fi
             bluetoothctl power on
@@ -40,7 +46,7 @@
     # Toggles scanning state
     toggle_scan() {
         if scan_on; then
-            kill $(pgrep -f "bluetoothctl scan on")
+            pkill -f "bluetoothctl scan on"
             bluetoothctl scan off
             show_menu
         else
