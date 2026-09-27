@@ -1,13 +1,13 @@
 {
+  host,
   lib,
   config,
-  systemArgs,
   pkgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.tmux;
-  isDarwin = systemArgs.system == "aarch64-darwin";
+  inherit (host) isDarwin;
   mkTmuxWindowStatusFormat = {
     shellIconMap,
     showPaneCount,
@@ -156,7 +156,9 @@ in {
           bind-key -n M-l next
           bind-key -n M-h prev
           bind-key -n M-n new-window -c "#{pane_current_path}" \;
-          bind-key -n M-i new-window -c "#{pane_current_path}" ${lib.getExe pkgs.gemini-cli} \; split-window -h -p 65 -c "#{pane_current_path}" ${lib.getExe config.programs.neovim.finalPackage} \; split-window -v -p 12 -c "#{pane_current_path}"
+          ${lib.optionalString config.programs.configured.claude-code.enable ''
+            bind-key -n M-i new-window -c "#{pane_current_path}" ${config.programs.claude-code.finalPackage}/bin/claude \; split-window -h -p 65 -c "#{pane_current_path}" ${lib.getExe config.programs.neovim.finalPackage} \; split-window -v -p 12 -c "#{pane_current_path}"
+          ''}
           bind-key -n M-x kill-window
           bind-key -n M-1 select-window -t 1
           bind-key -n M-2 select-window -t 2
