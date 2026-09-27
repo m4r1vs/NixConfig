@@ -15,7 +15,7 @@ in {
       enable = true;
       package = pkgs.swayimg;
     };
-    home.file."./.config/swayimg/init.lua".text =
+    xdg.configFile."swayimg/init.lua".text =
       #lua
       ''
         swayimg.text.set_size(16)

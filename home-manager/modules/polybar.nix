@@ -13,14 +13,14 @@ in {
     enable = mkEnableOption "Enable Polybar Statusbar";
   };
   config = mkIf cfg.enable {
-    home.file."./.theme/polybar/dark.ini".text = ''
+    home.file.".theme/polybar/dark.ini".text = ''
       background=${theme.backgroundColor}
       foreground=${theme.backgroundColorLight}
       tray-background=${theme.backgroundColor}
       primary=${theme.primaryColor.hex}
       secondary=${theme.secondaryColor.hex}
     '';
-    home.file."./.theme/polybar/light.ini".text = ''
+    home.file.".theme/polybar/light.ini".text = ''
       background=${theme.backgroundColorLight}
       foreground=${theme.backgroundColor}
       tray-background=${theme.primaryColor.hex}

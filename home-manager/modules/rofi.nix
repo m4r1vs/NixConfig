@@ -11,7 +11,7 @@ in {
     enable = mkEnableOption "DMENU and DRUN replacement";
   };
   config = mkIf cfg.enable {
-    home.file."./.theme/rofi/dark.rasi".text =
+    home.file.".theme/rofi/dark.rasi".text =
       /*
       rasi
       */
@@ -34,7 +34,7 @@ in {
           border-radius: 5px;
         }
       '';
-    home.file."./.theme/rofi/light.rasi".text =
+    home.file.".theme/rofi/light.rasi".text =
       /*
       rasi
       */

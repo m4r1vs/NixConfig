@@ -27,7 +27,7 @@ in {
       };
     };
 
-    home.file."./.config/greenclip.toml".text = ''
+    xdg.configFile."greenclip.toml".text = ''
       [greenclip]
         blacklisted_applications = []
         enable_image_support = true

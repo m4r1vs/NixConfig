@@ -10,7 +10,7 @@ in {
     enable = mkEnableOption "Screenshot Editor";
   };
   config = mkIf cfg.enable {
-    home.file."./.config/swappy/config".text = ''
+    xdg.configFile."swappy/config".text = ''
       [Default]
       auto_save=false
       save_dir=$HOME/Pictures/Screenshots

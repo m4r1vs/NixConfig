@@ -10,6 +10,6 @@ in {
     enable = mkEnableOption "Do not show the login message on darwin";
   };
   config = mkIf cfg.enable {
-    home.file."./.hushlogin".text = "";
+    home.file.".hushlogin".text = "";
   };
 }
