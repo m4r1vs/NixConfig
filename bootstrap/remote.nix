@@ -5,6 +5,12 @@
   ...
 }: {
   configured.host.kind = "iso";
+  # Placeholder so the plain configuration evaluates (nix flake check);
+  # the iso-installer image replaces the file systems with its own.
+  fileSystems."/" = lib.mkDefault {
+    device = "tmpfs";
+    fsType = "tmpfs";
+  };
 
   networking = {
     networkmanager.enable = lib.mkForce false;
