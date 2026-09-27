@@ -16,12 +16,15 @@ in {
     };
   };
   config = mkIf cfg.enable {
-    home.file."./.config/nvim/" = {
+    xdg.configFile."nvim" = {
       source = ./nvim;
       recursive = true;
     };
     programs.neovim = {
       enable = true;
+      # Our init.lua replaces the generated one, so load HM's Lua (provider
+      # paths etc.) via --cmd instead of writing it to init.lua
+      sideloadInitLua = true;
       package = pkgs.neovim-unwrapped;
       vimAlias = true;
       defaultEditor = true;
