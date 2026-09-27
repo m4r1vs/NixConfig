@@ -29,7 +29,6 @@
     configured = {
       darkman.enable = host.isDesktop;
       kdeconnect.enable = host.isDesktop;
-      ollama.enable = false;
       auto-power-management.enable = host.hasPowerProfiles;
       auto-upgrade.enable = host.isDesktop;
     };
