@@ -2,51 +2,36 @@
   term-file-chooser =
     pkgs.writeShellScript "term-file-chooser"
     ''
-      set -e
+      set -eu
 
-      if [ "$6" -ge 4 ]; then
-        set -x
-      fi
-
-      multiple="$1"
+      # Contract (xdg-desktop-portal-termfilechooser(5)):
+      #   $1 multiple  $2 directory  $3 save  $4 suggested path  $5 output file  $6 loglevel
+      # The suggested path comes from the (possibly sandboxed) app, so it must
+      # never pass through a shell: arguments are handed to ghostty as argv.
       directory="$2"
-      save="$3"
       path="$4"
       out="$5"
 
-      cmd="${pkgs.yazi}/bin/yazi"
-      termcmd="${pkgs.ghostty}/bin/ghostty --class=ghostty.yazi -e"
-
-      if [ "$save" = "1" ]; then
-        # save a file
-        set -- --chooser-file="$out" "\"$path\""
-      elif [ "$directory" = "1" ]; then
-        # upload files from a directory
-        set -- --chooser-file="$out" --cwd-file="$out"".1" "\"$path\""
-      elif [ "$multiple" = "1" ]; then
-        # upload multiple files
-        set -- --chooser-file="$out" "\"$path\""
-      else
-        # upload only 1 file
-        set -- --chooser-file="$out" "\"$path\""
+      if [ "''${6:-0}" -ge 4 ]; then
+        set -x
       fi
 
-      command="$termcmd $cmd"
-      for arg in "$@"; do
-        command="$command $arg"
-      done
+      args=(--chooser-file="$out")
+      if [ "$directory" = "1" ]; then
+        args+=(--cwd-file="$out.1")
+      fi
 
-      echo "$command" > /tmp/termfilechooser_command.txt
-
-      sh -c "$command"
+      rc=0
+      ${pkgs.ghostty}/bin/ghostty --class=ghostty.yazi -e \
+        ${pkgs.yazi}/bin/yazi "''${args[@]}" -- "$path" || rc=$?
 
       if [ "$directory" = "1" ]; then
-        if [ ! -s "$out" ] && [ -s "$out"".1" ]; then
-          cat "$out"".1" > "$out"
-          rm "$out"".1"
-        else
-          rm "$out"".1"
+        if [ ! -s "$out" ] && [ -s "$out.1" ]; then
+          cat -- "$out.1" > "$out"
         fi
+        rm -f -- "$out.1"
       fi
+
+      exit "$rc"
     '';
 }
