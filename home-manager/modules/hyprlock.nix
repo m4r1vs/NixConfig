@@ -49,8 +49,17 @@ in {
 
           update() {
             ${scripts.mpris-hyprlock} --write-cache "$DIR"
-            # SIGUSR2 = refresh labels (SIGUSR1 would unlock!)
-            ${pkgs.procps}/bin/pkill -USR2 -x hyprlock || true
+            # SIGUSR2 = refresh labels (SIGUSR1 would unlock!). hyprlock only
+            # installs its handler after connecting to Wayland; until then
+            # SIGUSR2 kills it, which ends the autologin session. So only
+            # signal instances whose SigCgt mask has SIGUSR2 (bit 11) set; a
+            # fresh hyprlock reads the cache on its own anyway.
+            for pid in $(${pkgs.procps}/bin/pgrep -x hyprlock); do
+              caught=$(${pkgs.gawk}/bin/awk '/^SigCgt:/ {print $2}' "/proc/$pid/status" 2>/dev/null) && [ -n "$caught" ] || continue
+              if (( (0x$caught >> 11) & 1 )); then
+                kill -USR2 "$pid" 2>/dev/null || true
+              fi
+            done
           }
 
           update

@@ -45,16 +45,22 @@ in {
         startHyprland = pkgs.writeShellScript "start-hyprland-session" ''
           exec ${pkgs.hyprland}/bin/start-hyprland >"$HOME/.hyprland.log" 2>&1
         '';
+        # HYPR_GREETED tells hyprland-session-lock that tuigreet already
+        # authenticated (and unlocked the keyring via greetd's PAM).
+        startGreetedHyprland = pkgs.writeShellScript "start-greeted-hyprland-session" ''
+          export HYPR_GREETED=1
+          exec ${startHyprland}
+        '';
       in {
         useTextGreeter = true;
         enable = true;
         settings = {
           # Every session after the first (logout, crash) has to authenticate.
-          default_session.command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${startHyprland}";
+          default_session.command = "${pkgs.tuigreet}/bin/tuigreet --time --cmd ${startGreetedHyprland}";
           # Autologin once per boot (the disk was already unlocked with LUKS).
-          # HYPR_AUTOLOGIN makes Hyprland lock itself with hyprlock on startup.
+          # Without HYPR_GREETED, Hyprland locks itself with hyprlock on startup.
           initial_session = {
-            command = "${pkgs.coreutils}/bin/env HYPR_AUTOLOGIN=1 ${startHyprland}";
+            command = "${startHyprland}";
             user = systemArgs.username;
           };
         };
