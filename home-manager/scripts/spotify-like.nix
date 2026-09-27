@@ -8,7 +8,7 @@
     name = "spotify-like";
     runtimeInputs = [pkgs.spotify-player pkgs.jq];
     text = ''
-      spotify_player like
+      spotify_player like || true
       NAME="$(spotify_player get key playback | jq -r '.item.name // empty' || true)"
       if [ -z "$NAME" ]; then
         NAME="FAILED TO GET NAME OF TRACK"
