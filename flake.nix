@@ -41,7 +41,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     atai = {
-      # Google Slides remote
+      # AI writing helper for the terminal
       url = "gitlab:m4r1vs/atai?ref=master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -392,7 +392,6 @@
             ]
             ++ nixosModules;
         });
-        bootstrap_local = self.nixosConfigurations.bootstrap_local_x86_64;
         bootstrap_remote_arm64 = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
             globalArgs
@@ -447,7 +446,6 @@
           };
       in {
         inherit (systemArgs) system;
-        specialArgs = {inherit systemArgs self inputs;};
         modules =
           [
             ./hosts/darwin
@@ -460,10 +458,9 @@
           ++ commonModules;
       });
     };
-    packages.x86_64-linux = {
-      bootstrap_local = self.nixosConfigurations.bootstrap_local_x86_64.config.system.build.images.iso-installer;
-      bootstrap_local_x86_64 = self.nixosConfigurations.bootstrap_local_x86_64.config.system.build.images.iso-installer;
-      bootstrap_remote_arm64 = self.nixosConfigurations.bootstrap_remote_arm64.config.system.build.images.iso-installer;
+    packages = {
+      x86_64-linux.bootstrap_local_x86_64 = self.nixosConfigurations.bootstrap_local_x86_64.config.system.build.images.iso-installer;
+      aarch64-linux.bootstrap_remote_arm64 = self.nixosConfigurations.bootstrap_remote_arm64.config.system.build.images.iso-installer;
     };
     checks = forAllSystems (system: let
       inherit (inputs.nixpkgs) lib;
@@ -478,7 +475,7 @@
         );
       hosts =
         lib.filterAttrs
-        (name: host: name != "bootstrap_local" && host.pkgs.stdenv.hostPlatform.system == system)
+        (_: host: host.pkgs.stdenv.hostPlatform.system == system)
         (self.nixosConfigurations // self.darwinConfigurations);
     in {
       pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
