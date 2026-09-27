@@ -15,14 +15,6 @@ in {
 
   config = mkIf cfg.enable {
     services = {
-      displayManager = {
-        autoLogin = {
-          enable = true;
-          user = systemArgs.username;
-        };
-        defaultSession = "steam";
-      };
-
       greetd = {
         enable = true;
         settings = {

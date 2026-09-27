@@ -211,7 +211,11 @@ in {
     };
 
     boot = {
-      kernelPackages = pkgs.linuxPackages_zen;
+      # linux-zen is marked broken on aarch64
+      kernelPackages =
+        if isX86
+        then pkgs.linuxPackages_zen
+        else pkgs.linuxPackages_latest;
       binfmt.emulatedSystems =
         if isX86
         then ["aarch64-linux"]

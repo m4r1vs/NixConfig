@@ -23,6 +23,8 @@
     useDHCP = lib.mkForce false;
     dhcpcd.enable = lib.mkForce false;
     nameservers = lib.mkForce ["8.8.8.8"];
+    # resolv.conf is written by hand below
+    resolvconf.enable = false;
   };
 
   environment.etc."resolv.conf".text = ''

@@ -44,7 +44,10 @@
           hyprctl dispatch exec "${lib.getExe pkgs.slack}"
         ''}
       hyprctl dispatch exec "${lib.getExe pkgs.obsidian} --ozone-platform-hint=auto"
-      hyprctl dispatch exec "${lib.getExe pkgs.spotify} --ozone-platform-hint=auto"
+      ${lib.optionalString (lib.meta.availableOn pkgs.stdenv.hostPlatform pkgs.spotify)
+        ''
+          hyprctl dispatch exec "${lib.getExe pkgs.spotify} --ozone-platform-hint=auto"
+        ''}
       hyprctl dispatch exec "${lib.getExe pkgs.ghostty}"
       hyprctl dispatch exec "${lib.getExe pkgs.brave} --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation"
 
