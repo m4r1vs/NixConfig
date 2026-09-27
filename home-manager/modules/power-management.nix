@@ -25,44 +25,48 @@ in {
     systemd.user.services.power-profile-auto-switch = {
       Unit = {
         Description = "Auto switch power profiles based on AC status";
+        PartOf = ["graphical-session.target"];
         After = ["graphical-session.target"];
+        # Skipped entirely on machines without an AC adapter (desktops)
+        ConditionPathExistsGlob = "/sys/class/power_supply/A[CD]*";
       };
       Service = {
         ExecStart = pkgs.writeShellScript "power-profile-auto-switch" ''
-          # Find the AC power supply
-          AC_PATH=""
-          for p in /sys/class/power_supply/AC* /sys/class/power_supply/ADP* /sys/class/power_supply/ACAD*; do
-            if [ -d "$p" ]; then
-              AC_PATH="$p/online"
+          AC=""
+          for p in /sys/class/power_supply/{AC,ADP,ACAD}*; do
+            if [ -r "$p/online" ]; then
+              AC="$p/online"
               break
             fi
           done
+          [ -n "$AC" ] || exit 0
 
-          if [ -z "$AC_PATH" ]; then
-            echo "No AC power supply found. This is likely not a laptop or the hardware is unsupported."
-            exit 0 # Exit gracefully instead of restart loop if not a laptop
-          fi
-
-          last_status=""
-
-          while true; do
-            current_status=$(cat "$AC_PATH")
-            if [ "$current_status" != "$last_status" ]; then
-              if [ "$current_status" = "1" ]; then
-                ${scripts.powermode} performance
-              else
-                ${scripts.powermode} light
-              fi
-              last_status=$current_status
+          last=""
+          apply() {
+            local status
+            read -r status < "$AC"
+            [ "$status" = "$last" ] && return
+            last=$status
+            if [ "$status" = "1" ]; then
+              ${scripts.powermode} performance
+            else
+              ${scripts.powermode} light
             fi
-            sleep 5
-          done
+          }
+
+          apply
+          # React to power_supply uevents instead of polling sysfs every 5s.
+          # Battery ticks also arrive here, but apply() only reads a file then.
+          while read -r _; do
+            apply
+          done < <(${pkgs.systemd}/bin/udevadm monitor --udev --subsystem-match=power_supply)
+          exit 1 # monitor died, let systemd restart us
         '';
-        Restart = "always";
-        RestartSec = 10;
+        Restart = "on-failure";
+        RestartSec = 5;
       };
       Install = {
-        WantedBy = ["default.target"];
+        WantedBy = ["graphical-session.target"];
       };
     };
   };
