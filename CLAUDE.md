@@ -14,7 +14,7 @@ Multi-platform Nix flake configuring NixOS, nix-darwin, and WSL hosts with home-
 - `sudo nixos-rebuild switch --flake ~/NixConfig/#<host>` — manual equivalent.
 - `nixos-rebuild build --flake .#<host>` — build without switching (useful to verify a config change evaluates and compiles).
 - `nix build .#packages.x86_64-linux.bootstrap_local_x86_64` / `.#packages.aarch64-linux.bootstrap_remote_arm64` — build install ISOs.
-- `nix flake check` — runs the pre-commit hooks and `eval-hosts`, which evaluates every host of the current system (a host that stops evaluating fails the check).
+- `nix flake check` — runs the pre-commit hooks and `eval-hosts`, which evaluates every host of the current system (a host that stops evaluating fails the check). Works on Linux; from darwin use `nix build .#checks.aarch64-darwin.{eval-hosts,pre-commit-check}`, since falkenberg (`hosts/kubenix/kubernetes.nix`) needs an aarch64-linux build during evaluation.
 - Format Nix files with `alejandra` (the formatter used throughout this repo).
 
 ## Architecture
