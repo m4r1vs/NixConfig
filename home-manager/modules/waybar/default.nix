@@ -229,7 +229,11 @@ in {
           "custom/gcal" = {
             exec = "${scripts.waybar-gcal}";
             on-click = "${pkgs.xdg-utils}/bin/xdg-open https://calendar.google.com/calendar/r";
-            interval = 300;
+            on-click-right = "rm -f \"\$XDG_RUNTIME_DIR/waybar-gcal/fetched\"; ${pkgs.procps}/bin/pkill -RTMIN+9 -x '\\.?waybar(-wrapped)?'";
+            # Rendered every minute from a cache that is refetched every 5 minutes
+            interval = 60;
+            signal = 9;
+            exec-on-event = false;
             max-length = 72;
             format = "{}";
             rotate = 0;

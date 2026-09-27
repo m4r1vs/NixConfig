@@ -2,27 +2,35 @@
   waybar-gcal =
     pkgs.writeShellScript "waybar-gcal"
     ''
-      # Helper function to output JSON
-      output_json() {
-          local text="$1"
-          local tooltip="''${2:-}"
-          if [[ -z "$tooltip" ]]; then
-              # Fetch tooltip content (7 day agenda) if not provided
-              tooltip=$(${pkgs.gcalcli}/bin/gcalcli --nocolor agenda now 7d 2>/dev/null || echo "No agenda available")
+      # Runs every minute (so countdowns stay accurate) but only asks Google every
+      # 5 minutes; the agenda is cached in XDG_RUNTIME_DIR in between.
+      # Right-click deletes the cache and sends SIGRTMIN+9 to force a refetch.
+      CACHE="''${XDG_RUNTIME_DIR:-/tmp}/waybar-gcal"
+      mkdir -p -m 700 "$CACHE"
+      gcal() { ${pkgs.coreutils}/bin/timeout -k 5 20 ${pkgs.gcalcli}/bin/gcalcli --nocolor "$@" 2>/dev/null; }
+
+      if [ -z "$(${pkgs.findutils}/bin/find "$CACHE/fetched" -mmin -5 2>/dev/null)" ]; then
+          # Looking ahead 2 days (172800 seconds), without --nostarted to handle "Ongoing"
+          if gcal agenda "now" "2 days" --tsv > "$CACHE/events.tmp"; then
+              mv "$CACHE/events.tmp" "$CACHE/events.tsv"
+              gcal agenda now 7d > "$CACHE/tooltip.tmp" && mv "$CACHE/tooltip.tmp" "$CACHE/tooltip.txt"
+              touch "$CACHE/fetched"
           fi
-          ${pkgs.jq}/bin/jq -nc --arg text "$text" --arg tooltip "$tooltip" '{"text": $text, "tooltip": $tooltip}'
+      fi
+
+      output_json() {
+          local tooltip
+          tooltip=$(cat "$CACHE/tooltip.txt" 2>/dev/null || echo "No agenda available")
+          ${pkgs.jq}/bin/jq -nc --arg text "$1" --arg tooltip "$tooltip" '{"text": $text, "tooltip": $tooltip}'
       }
 
-      # Check if gcalcli is initialized
-      if ! ${pkgs.gcalcli}/bin/gcalcli --nocolor list >/dev/null 2>&1; then
-          output_json "Run gcalcli init first" ""
+      if [ ! -f "$CACHE/events.tsv" ]; then
+          # Never fetched successfully: most likely not authenticated yet
+          ${pkgs.jq}/bin/jq -nc '{"text": "Run gcalcli init first", "tooltip": ""}'
           exit 0
       fi
 
-      # Get the next event in TSV format
-      # We fetch results without --nostarted to handle "Ongoing"
-      # Looking ahead 2 days (172800 seconds)
-      event=$(${pkgs.gcalcli}/bin/gcalcli --nocolor agenda "now" "2 days" --tsv 2>/dev/null)
+      event=$(cat "$CACHE/events.tsv")
 
       if [[ -z "$event" ]]; then
           output_json "󰃮"
