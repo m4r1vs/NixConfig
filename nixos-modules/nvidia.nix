@@ -20,6 +20,8 @@ in {
         enable = true;
       };
       nvidia = {
+        # Required choice for drivers >= 560; open modules need Turing or newer
+        open = mkDefault true;
         modesetting.enable = true;
         powerManagement.enable = true;
         powerManagement.finegrained = false;
