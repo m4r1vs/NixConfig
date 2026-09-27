@@ -446,7 +446,22 @@
       bootstrap_local_x86_64 = self.nixosConfigurations.bootstrap_local_x86_64.config.system.build.images.iso-installer;
       bootstrap_remote_arm64 = self.nixosConfigurations.bootstrap_remote_arm64.config.system.build.images.iso-installer;
     };
-    checks = forAllSystems (system: {
+    checks = forAllSystems (system: let
+      inherit (inputs.nixpkgs) lib;
+      isoHosts = ["bootstrap_local_x86_64" "bootstrap_remote_arm64"];
+      # Evaluate (not build) every host of this system, so a host that stops
+      # evaluating fails `nix flake check` instead of going unnoticed.
+      hostDrvPath = name: host:
+        builtins.unsafeDiscardStringContext (
+          if builtins.elem name isoHosts
+          then host.config.system.build.images.iso-installer.drvPath
+          else host.config.system.build.toplevel.drvPath
+        );
+      hosts =
+        lib.filterAttrs
+        (name: host: name != "bootstrap_local" && host.pkgs.stdenv.hostPlatform.system == system)
+        (self.nixosConfigurations // self.darwinConfigurations);
+    in {
       pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
         src = ./.;
         hooks = {
@@ -455,6 +470,9 @@
           deadnix.enable = true;
         };
       };
+      eval-hosts =
+        inputs.nixpkgs.legacyPackages.${system}.writeText "eval-hosts"
+        (lib.concatLines (lib.mapAttrsToList hostDrvPath hosts));
     });
     devShells = forAllSystems (system: {
       default = inputs.nixpkgs.legacyPackages.${system}.mkShell {
