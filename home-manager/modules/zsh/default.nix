@@ -38,7 +38,6 @@ in {
         size = 50000;
       };
       shellAliases = {
-        bat = "bat --theme auto:system --theme-dark default --theme-light GitHub";
         hud = mkIf config.programs.configured.hunk.enable "hunk diff --watch";
         la = "${lib.getExe pkgs.lsd} -la";
         lg = "${lib.getExe pkgs.lazygit}";

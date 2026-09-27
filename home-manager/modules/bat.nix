@@ -13,6 +13,12 @@ in {
   config = mkIf cfg.enable {
     programs.bat = {
       enable = true;
+      # Follow the system dark/light mode (also used by MANPAGER and help)
+      config = {
+        theme = "auto:system";
+        theme-dark = "default";
+        theme-light = "GitHub";
+      };
       extraPackages = with pkgs.bat-extras; [
         batpipe
         prettybat
