@@ -69,7 +69,6 @@ in {
           nautilus # file browser
           networkmanagerapplet # show wifi/ethernet in sys. tray
           pavucontrol # sound manager
-          polkit_gnome # policy agent
           postman # API Inspection
           shortwave # Web Radio
           signal-desktop # Signal messenger
@@ -77,7 +76,6 @@ in {
           stockfish # chess engine to play against computer
           supertuxkart # Mario Kart Linux
           whatsapp-electron # whatsapp
-          wireplumber # pipewire manager
         ]
         ++ (
           if isWayland
