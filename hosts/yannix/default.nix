@@ -8,10 +8,13 @@
 
   configured = {
     nvidia.enable = false;
-    windowManagers = {
-      hyprland.enable = true;
-      i3.enable = true;
-      gamescope.enable = true;
+    desktop = {
+      enable = true;
+      windowManagers = {
+        hyprland.enable = true;
+        i3.enable = true;
+        gamescope.enable = true;
+      };
     };
   };
 

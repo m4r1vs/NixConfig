@@ -209,6 +209,7 @@
               name = "Tjark Aino Yannis Dhruva Groß";
               email = "tjarkgross@gmx.de";
             };
+            useWorkProfileByDefault = false;
             system = "x86_64-linux";
             theme = makeTheme {
               primary = "orange";
