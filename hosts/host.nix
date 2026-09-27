@@ -66,5 +66,10 @@ in {
     isX11 = readOnly "X11 session" (cfg.windowManager == "i3");
     hasPowerProfiles = readOnly "power-profiles-daemon is enabled" (config.services.power-profiles-daemon.enable or false);
     hasNpuServer = readOnly "NPU transcription server is enabled" (config.configured.npu.server.enable or false);
+    flakePath = mkOption {
+      type = types.str;
+      default = "${config.users.users.${systemArgs.username}.home}/NixConfig";
+      description = "Where this flake is checked out (used by nh, rebuild and auto-upgrade).";
+    };
   };
 }

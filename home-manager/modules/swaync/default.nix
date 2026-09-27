@@ -20,7 +20,7 @@ in {
         @define-color background-clr rgba(${theme.backgroundColorLightRGB}, 0.70);
         @define-color foreground-clr #000000;
 
-        @import url("/home/${systemArgs.username}/.theme/swaync/colors.css");
+        @import url("${config.home.homeDirectory}/.theme/swaync/colors.css");
         @import url("${builtins.path {path = ./base.css;}}");
       '';
     home.file.".theme/swaync/style-dark.css".text =
@@ -29,7 +29,7 @@ in {
         @define-color background-clr rgba(${theme.backgroundColorRGB}, 0.70);
         @define-color foreground-clr #ffffff;
 
-        @import url("/home/${systemArgs.username}/.theme/swaync/colors.css");
+        @import url("${config.home.homeDirectory}/.theme/swaync/colors.css");
         @import url("${builtins.path {path = ./base.css;}}");
       '';
 

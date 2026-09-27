@@ -23,7 +23,7 @@ in {
         @define-color main-foreground #000000;
         @define-color ws-active-foreground #000000;
 
-        @import url("/home/${systemArgs.username}/.theme/waybar/colors.css");
+        @import url("${config.home.homeDirectory}/.theme/waybar/colors.css");
         @import url("${builtins.path {path = ./base.css;}}");
       '';
     home.file.".config/waybar/style-dark.css".text =
@@ -35,7 +35,7 @@ in {
         @define-color main-foreground rgba(214,214,214,1);
         @define-color ws-active-foreground #000000;
 
-        @import url("/home/${systemArgs.username}/.theme/waybar/colors.css");
+        @import url("${config.home.homeDirectory}/.theme/waybar/colors.css");
         @import url("${builtins.path {path = ./base.css;}}");
       '';
 

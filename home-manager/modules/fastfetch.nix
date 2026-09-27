@@ -104,7 +104,7 @@ in {
               type = "command";
               key = "├󰘬";
               keyColor = "blue";
-              text = ''branch=$(git -C ~/NixConfig branch --show-current);upstream=$(git -C ~/NixConfig remote get-url origin); echo "$branch at $upstream"'';
+              text = ''branch=$(git -C ${host.flakePath} branch --show-current);upstream=$(git -C ${host.flakePath} remote get-url origin); echo "$branch at $upstream"'';
             }
           ]
           ++ lib.optionals (!isDarwin) [
@@ -199,7 +199,7 @@ in {
                   if isDarwin
                   then "stat -f %m"
                   else "stat -c %Y";
-              in ''updated=$(d=$(( ( $(date +%s) - $(${statCmd} ~/NixConfig/flake.lock) ) / 86400 )); [ "$d" -gt 0 ] && echo "$d day(s) ago" || echo "$(( ( $(date +%s) - $(${statCmd} ~/NixConfig/flake.lock) ) / 3600 )) hour(s) ago"); echo "$updated"'';
+              in ''updated=$(d=$(( ( $(date +%s) - $(${statCmd} ${host.flakePath}/flake.lock) ) / 86400 )); [ "$d" -gt 0 ] && echo "$d day(s) ago" || echo "$(( ( $(date +%s) - $(${statCmd} ${host.flakePath}/flake.lock) ) / 3600 )) hour(s) ago"); echo "$updated"'';
             }
             {
               type = "custom";

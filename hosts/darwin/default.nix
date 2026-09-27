@@ -15,7 +15,7 @@ in {
     enable = mkEnableOption "Enable darwin specific stuff.";
   };
   config = mkIf cfg.enable {
-    users.users.mn.home = "/Users/mn";
+    users.users.${systemArgs.username}.home = "/Users/${systemArgs.username}";
     nix.enable = true;
     nix.settings.accept-flake-config = true;
 

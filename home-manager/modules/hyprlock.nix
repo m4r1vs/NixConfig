@@ -61,7 +61,7 @@ in {
         };
         background = [
           {
-            path = "/home/${systemArgs.username}/.active_wallpaper.jpg";
+            path = "${config.home.homeDirectory}/.active_wallpaper.jpg";
           }
         ];
         label = [

@@ -1,6 +1,4 @@
-{systemArgs, ...}: {
-  users.users.mn.home = "/Users/${systemArgs.username}";
-
+_: {
   configured.darwin.enable = true;
 
   homebrew = {

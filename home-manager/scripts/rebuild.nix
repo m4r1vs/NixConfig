@@ -14,7 +14,7 @@ in {
       then # bash
         ''
           export PATH="${pkgs.nix-output-monitor}/bin:$PATH"
-          ${pkgs.nh}/bin/nh darwin switch -a ~/NixConfig -H ${systemArgs.hostname} && sudo yabai --load-sa
+          ${pkgs.nh}/bin/nh darwin switch -a ${host.flakePath} -H ${systemArgs.hostname} && sudo yabai --load-sa
         ''
       else #bash
         ''
@@ -26,10 +26,10 @@ in {
           if [ -f /etc/nixos_active_specialisation ]; then
             SPEC=$(cat /etc/nixos_active_specialisation)
             echo -e "Rebuilding and switching to \e[32mspecialisation\e[0m: \e[33m$SPEC\e[0m\n"
-            ${pkgs.nh}/bin/nh os switch -a ~/NixConfig -H ${systemArgs.hostname} -- --specialisation "$SPEC"
+            ${pkgs.nh}/bin/nh os switch -a ${host.flakePath} -H ${systemArgs.hostname} -- --specialisation "$SPEC"
           else
             echo -e "Rebuilding and switching to \e[32mdefault specialisation\e[0m.\n"
-            ${pkgs.nh}/bin/nh os switch -a ~/NixConfig -H ${systemArgs.hostname}
+            ${pkgs.nh}/bin/nh os switch -a ${host.flakePath} -H ${systemArgs.hostname}
           fi
 
           if [ $? -eq 0 ]; then

@@ -30,7 +30,7 @@ with lib; let
     exec ${pkgs.fastflowlm}/bin/flm "$@"
   '';
   # flm downloads its models into $HOME/.config/flm, so the unit needs one
-  homeDir = "/home/${systemArgs.username}";
+  homeDir = config.users.users.${systemArgs.username}.home;
 in {
   options.configured.npu = {
     enable = mkEnableOption "AMD Ryzen AI (XDNA2) NPU userspace: XRT, the amdxdna shim and FastFlowLM";

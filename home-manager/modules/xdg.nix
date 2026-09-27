@@ -246,7 +246,7 @@ in {
           name = "Update System Packages";
           genericName = "Fetch latest from nixpkgs";
           icon = "builder";
-          exec = "${lib.getExe pkgs.ghostty} --wait-after-command=true -e \"${lib.getExe pkgs.nix} flake update --flake ~/NixConfig\"";
+          exec = "${lib.getExe pkgs.ghostty} --wait-after-command=true -e \"${lib.getExe pkgs.nix} flake update --flake ${host.flakePath}\"";
           type = "Application";
           categories = ["Utility"];
         };
@@ -271,7 +271,7 @@ in {
           name = "Open and Edit System Configuration";
           comment = "Edit NixOS system config";
           icon = "mateconf-editor";
-          exec = "${lib.getExe pkgs.ghostty} -e nvim \"/home/${systemArgs.username}/NixConfig/\"";
+          exec = "${lib.getExe pkgs.ghostty} -e nvim \"${host.flakePath}/\"";
           type = "Application";
           categories = ["Utility" "Settings"];
         };
