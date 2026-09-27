@@ -11,35 +11,39 @@
       then
         # bash
         ''
-          message=""
-
-          # Parse arguments manually to find -e
+          # Accept notify-send's arguments: skip options (and their values),
+          # the first positional is the summary, the second the body.
+          pos=()
           while [ "$#" -gt 0 ]; do
             case "$1" in
-              -e)
-                # Check if there is a next argument
-                if [ -n "$2" ]; then
-                  message="$2"
-                  shift 2 # Consume -e and its argument
-                else
-                  echo "Error: -e flag requires an argument." >&2
-                  exit 1
-                fi
+              -u | -t | -a | -i | -c | -h | -A | -r | --urgency | --expire-time | --app-name | --icon | --category | --hint | --action | --replace-id)
+                shift 2
+                ;;
+              --*=* | -e | -p | -w | --transient | --print-id | --wait)
+                shift
+                ;;
+              --)
+                shift
+                pos+=("$@")
+                break
                 ;;
               *)
-                shift # Ignore all other flags/arguments
+                pos+=("$1")
+                shift
                 ;;
             esac
           done
 
-          # Use a default message if -e was not provided
-          if [ -z "$message" ]; then
-            message="Error Parsing nixos-notify"
-          fi
-
-          message=$(echo "$message" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
-
-          osascript -e "display notification \"$message\" with title \"NixBook\""
+          # Values are passed as argv, so quotes in them need no escaping
+          /usr/bin/osascript - "''${pos[0]:-${systemArgs.hostname}}" "''${pos[1]:-}" <<'APPLESCRIPT'
+          on run argv
+            if item 2 of argv is "" then
+              display notification (item 1 of argv) with title "${systemArgs.hostname}"
+            else
+              display notification (item 2 of argv) with title (item 1 of argv)
+            end if
+          end run
+          APPLESCRIPT
         ''
       else
         #bash
