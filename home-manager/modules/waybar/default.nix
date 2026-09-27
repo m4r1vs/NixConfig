@@ -174,6 +174,7 @@ in {
 
           "custom/media" = {
             exec = "${scripts.mediaplayer-wrapper}";
+            restart-interval = 5;
             format = "{}";
             return-type = "json";
             on-click = "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle";
