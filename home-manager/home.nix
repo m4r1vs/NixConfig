@@ -15,7 +15,7 @@
     inherit (systemArgs) username;
     activation.initTheme = lib.hm.dag.entryAfter ["writeBoundary"] ''
       if [ ! -f "$HOME/.theme/palette.json" ]; then
-        $DRY_RUN_CMD ${scripts.custom-wallpaper-theme} "default"
+        run ${scripts.custom-wallpaper-theme} "default"
       fi
     '';
     sessionVariables = lib.mkIf host.isDesktop {

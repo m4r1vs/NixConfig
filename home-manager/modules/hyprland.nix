@@ -22,10 +22,13 @@ in {
   };
   config = mkIf cfg.enable {
     home.activation.copyWallpapers = lib.hm.dag.entryAfter ["writeBoundary"] ''
-      $DRY_RUN_CMD mkdir -p $HOME/Pictures/Wallpapers
-      $DRY_RUN_CMD cp -rn ${../wallpaper}/* $HOME/Pictures/Wallpapers/ 2>/dev/null || true
-      $DRY_RUN_CMD chmod u+w -R $HOME/Pictures/Wallpapers 2>/dev/null || true
-      $DRY_RUN_CMD [ ! -L "$HOME/.active_wallpaper.jpg" ] && ln -s ${../wallpaper/Birch_Trunks.jpg} $HOME/.active_wallpaper.jpg
+      run mkdir -p "$HOME/Pictures/Wallpapers"
+      run cp -rn ${../wallpaper}/* "$HOME/Pictures/Wallpapers/" 2>/dev/null || true
+      run chmod u+w -R "$HOME/Pictures/Wallpapers" 2>/dev/null || true
+      # Link the copy in ~/Pictures, not the store path, so it survives garbage collection
+      if [ ! -L "$HOME/.active_wallpaper.jpg" ]; then
+        run ln -s "$HOME/Pictures/Wallpapers/Birch_Trunks.jpg" "$HOME/.active_wallpaper.jpg"
+      fi
     '';
     services.configured = {
       cliphist.enable = true;
