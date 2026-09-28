@@ -24,6 +24,14 @@ in {
         editorMode = "vim";
         enableArtifact = false;
         model = "opus[1m]";
+        modelSettings = {
+          "claude-opus-5-5" = {
+            effortLevel = "high";
+          };
+          "claude-fable-5-1" = {
+            effortLevel = "high";
+          };
+        };
         permissions.defaultMode = "auto";
         preferredNotifChannel = "terminal_bell";
         skipWorkflowUsageWarning = true;
