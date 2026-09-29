@@ -225,7 +225,7 @@ in {
           "size 1200 800, match:initial_class ^(ghostty.astroterm)$"
 
           "float on,match:initial_class ^(ghostty.spotify_player)$"
-          "size 1600 900, match:initial_class ^(ghostty.spotify_player)$"
+          "size 1600 1160, match:initial_class ^(ghostty.spotify_player)$"
           "workspace special:spotify_player silent,match:initial_class ^(ghostty.spotify_player)$"
 
           "float on,match:initial_class ^(ghostty.obsidian)$"
@@ -283,7 +283,7 @@ in {
             "SUPER, c, Query Wolfram|Alpha with ChatGPT fallback, exec, ${scripts.rofi-launch} calc"
 
             ",F8, Toggle Spotify Workspace, togglespecialworkspace, spotify_player"
-            ",F8, Launch Spotify if not running, exec, pgrep spotify_player || ${lib.getExe pkgs.ghostty} --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
+            ",F8, Launch Spotify if not running, exec, pgrep spotify_player || ${lib.getExe pkgs.ghostty} --custom-shader=${./ghostty/retro-terminal-shader.glsl} --font-size=12 --background-opacity=0.85 --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
 
             "SUPER, F8, Like current track on Spotify, exec, ${scripts.spotify-like}"
             "Shift, F8, Play a random album of the day, exec, ${scripts.random-album-of-the-day}"
