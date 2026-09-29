@@ -841,11 +841,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790330477,
-        "narHash": "sha256-O0UuckZ9tTZ3w4mqFv4Jvzk2qB1P0myFl41znPeqjTA=",
+        "lastModified": 1790673318,
+        "narHash": "sha256-t4PxAboPCy9QR+zDgu0qJKulO+b3rHdHYSrncTKM/54=",
         "owner": "m4r1vs",
         "repo": "spotify-player",
-        "rev": "d1788c42329a7e81aa5326f5775308a6b569c4a9",
+        "rev": "af4052394387be60705b47fd75ad0b7788b41d9a",
         "type": "github"
       },
       "original": {
