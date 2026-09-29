@@ -53,6 +53,18 @@
 
   systemd = {
     sleep.settings.Sleep.HibernateMode = "shutdown";
+
+    /*
+    polkit runs its PAM helper as a sandboxed unit whose private /dev has
+    no camera, so howdy fails and polkit prompts (1Password unlock) fall
+    back to the password. Expose the real /dev, allow only the standard
+    pseudo devices plus V4L; the rest of upstream's hardening stays.
+    */
+    services."polkit-agent-helper@".serviceConfig = {
+      PrivateDevices = false;
+      DevicePolicy = "closed";
+      DeviceAllow = ["char-video4linux rw"];
+    };
   };
 
   services = {
