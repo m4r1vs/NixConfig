@@ -66,6 +66,7 @@ in {
         "macs-fan-control" # View and control fan speeds
         "mediamate" # Better volume UI
         "notion" # Knowledge base
+        "nx-studio" # Nikon RAW Editor
         "obs" # Screen recording and streaming
         "postman" # API Explorer
         # "raycast" # TODO: add back in when v2 is out of beta and in homebrew
