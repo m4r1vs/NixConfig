@@ -15,8 +15,14 @@ in {
   config = mkIf cfg.enable {
     # Not only for interactive zsh, so GUI apps and user services see them too
     home.sessionVariables = {
-      LANG = "en_DK.UTF-8";
-      LANGUAGE = "en_DK.UTF-8";
+      LANG =
+        if isDarwin
+        then "en_US.UTF-8"
+        else "en_DK.UTF-8";
+      LANGUAGE =
+        if isDarwin
+        then "en_US.UTF-8"
+        else "en_DK.UTF-8";
       LC_MONETARY = "de_DE.UTF-8";
       NIXPKGS_ALLOW_UNFREE = "1";
     };
