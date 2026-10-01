@@ -266,6 +266,7 @@ in {
             "SUPER, g, Toggle Hyprland zoomed out mode, exec, ${scripts.toggle-hypr-zoomed-out}"
             "SUPER, d, Rofi search, exec, ${scripts.rofi-launch} search"
             "SUPER, s, Simple Screenshot, exec, ${scripts.screenshot}"
+            "SUPER+Shift, x, Open Linear ticket from clipboard, exec, ${scripts.open-linear-ticket}"
             "SUPER, E, Open file manager, exec, ${scripts.launch-once {
               command = "${lib.getExe pkgs.ghostty} --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi ~/Downloads/";
               grep = "ghostty.yazi";
