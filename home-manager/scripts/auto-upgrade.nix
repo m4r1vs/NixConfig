@@ -19,7 +19,7 @@ in {
           OLD_HEAD=$(git rev-parse HEAD)
           git pull --rebase
           nix flake update
-          git diff --quiet flake.lock || (git add flake.lock && git commit -m "chore: update flake.lock")
+          git diff --quiet flake.lock || (git add flake.lock && git commit -m "nix: auto-update")
           if [ "$OLD_HEAD" != "$(git rev-parse HEAD)" ]; then
             darwin-rebuild build --flake ${host.flakePath}/#${systemArgs.hostname}
             ${scripts.nixos-notify} -e "Flake Update Available" "Flake inputs updated successfully and a dry-run build succeeded."
@@ -33,7 +33,7 @@ in {
           OLD_HEAD=$(git rev-parse HEAD)
           git pull --rebase
           nix flake update
-          git diff --quiet flake.lock || (git add flake.lock && git commit -m "chore: update flake.lock")
+          git diff --quiet flake.lock || (git add flake.lock && git commit -m "nix: auto-update")
           if [ "$OLD_HEAD" != "$(git rev-parse HEAD)" ]; then
             nixos-rebuild dry-build --flake ${host.flakePath}/#${systemArgs.hostname}
             RESPONSE="$(${scripts.nixos-notify} -t 0 -i ${../../assets/nix-flake/with-packages.svg} -e --action="rebuild=Rebuild" "Flake Update Available" "Flake inputs updated successfully and a dry-run build succeeded.")"
