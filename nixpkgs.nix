@@ -148,8 +148,8 @@ in {
           */
 
           inherit (pkgsMaster) claude-code;
+          inherit (pkgsMaster) antigravity-cli;
           clippy-darwin = pkgsUnstable.clippy-copy;
-          inherit (pkgsUnstable) antigravity-cli;
           ghostty =
             if isDarwin
             then pkgsUnstable.ghostty-bin
