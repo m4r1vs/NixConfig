@@ -163,7 +163,20 @@ in {
           inherit (pkgsUnstable) opencode;
           inherit (pkgsUnstable) swayimg;
           inherit (pkgsUnstable) tlrc;
-          inherit (pkgsUnstable) zathura;
+          zathura =
+            if isDarwin
+            then
+              (pkgsUnstable.zathuraPkgs.overrideScope (_self: super: {
+                zathura_core = super.zathura_core.overrideAttrs (old: {
+                  mesonFlags =
+                    old.mesonFlags
+                    ++ [
+                      "-Dtests-x11=disabled"
+                      "-Dtests-wayland=disabled"
+                    ];
+                });
+              })).zathuraWrapper
+            else pkgsUnstable.zathura;
 
           /*
           Temporary Fixes / Updates
