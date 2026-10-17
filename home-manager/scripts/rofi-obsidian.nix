@@ -2,6 +2,7 @@
   pkgs,
   scripts,
   systemArgs,
+  helpers,
   ...
 }: {
   rofi-obsidian =
@@ -17,13 +18,13 @@
           exit 0
         fi
         cd "$VAULT_PATH"
-        find . -name "*.md" -not -path '*/.*' -printf "%P\n" | sed 's/\.md$//' | sort
+        find . -name "*.md" -not -path '*/.*' | sed 's|^\./||; s|\.md$||' | sort
       else
         NOTE="$*"
         ENCODED_NOTE=$(${pkgs.jq}/bin/jq -rn --arg q "$NOTE" '$q|@uri|gsub("%2F"; "/")')
         ENCODED_VAULT=$(${pkgs.jq}/bin/jq -rn --arg q "$VAULT_NAME" '$q|@uri')
 
-        ${pkgs.xdg-utils}/bin/xdg-open "obsidian://open?vault=$ENCODED_VAULT&file=$ENCODED_NOTE" &>/dev/null &
+        ${helpers.openUrl} "obsidian://open?vault=$ENCODED_VAULT&file=$ENCODED_NOTE" &>/dev/null &
         ${scripts.nixos-notify} -u low -t 1200 -h string:synchronous:rofi-obsidian -e "Opened in Obsidian:" "$NOTE"
       fi
       exit 0

@@ -762,6 +762,26 @@
         "type": "github"
       }
     },
+    "rofi-darwin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792420338,
+        "narHash": "sha256-DVBQgEKNUkgQupOyELMJHST8Yb/Q6Ukjsy9GjCfXO2s=",
+        "owner": "m4r1vs",
+        "repo": "RofiDarwin",
+        "rev": "c65e895ba13cdff8eecc4afd7e0990cb2768b066",
+        "type": "gitlab"
+      },
+      "original": {
+        "owner": "m4r1vs",
+        "repo": "RofiDarwin",
+        "type": "gitlab"
+      }
+    },
     "root": {
       "inputs": {
         "atai": "atai",
@@ -786,6 +806,7 @@
         "nixpkgs_unstable": "nixpkgs_unstable",
         "npu-dictate": "npu-dictate",
         "pre-commit-hooks": "pre-commit-hooks",
+        "rofi-darwin": "rofi-darwin",
         "rust-overlay": "rust-overlay",
         "slidecontrol": "slidecontrol",
         "spotify-player": "spotify-player",

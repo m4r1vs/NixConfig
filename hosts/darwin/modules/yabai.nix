@@ -45,6 +45,7 @@ in {
             yabai -m rule --add app="^League of Legends$" manage=off
             yabai -m rule --add app="^Raycast$" manage=off
             yabai -m rule --add app="^Raycast Beta$" manage=off
+            yabai -m rule --add app="^RofiDarwin$" manage=off
             yabai -m rule --add app="^mpv$" manage=off
 
             yabai -m rule --add app="^TV$" title="^.{3,}$" manage=off # match any Apple TV Window with more than 2 letters (should apply to the popout player)
@@ -111,6 +112,9 @@ in {
         lcmd - e : @toggle_scratchpad("yazi", "${pkgs.ghostty}/bin/ghostty --keybind='global:super+enter=unbind' --font-size=14 --title=scratchpad_yazi -e yazi")
         lcmd + shift - e : open ~/Desktop
 
+        lcmd + shift - w : rofi-launch wallpaper
+        lcmd + shift - g : rofi-launch gitlab
+
         lcmd - q : yabai -m window --close
         lcmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')
 
@@ -157,7 +161,6 @@ in {
         f8 : @toggle_scratchpad("spotify", "${pkgs.ghostty}/bin/ghostty --keybind='global:super+enter=unbind' --custom-shader=${../../../home-manager/modules/ghostty/retro-terminal-shader.glsl} --font-size=12 --background-opacity=0.85 --title=scratchpad_spotify -e spotify_player")
         lcmd - f8 : spotify-like
         shift - f8 : random-album-of-the-day
-        lcmd + shift - w : random-wallpaper
 
         f10 | mute
         f11 | sound_down
@@ -225,7 +228,7 @@ in {
         # lcmd - 7 : yabai -m space --focus 7 && ${focusUnderCursor}
         # lcmd - 8 : yabai -m space --focus 8 && ${focusUnderCursor}
         # lcmd - 9 : yabai -m space --focus 9 && ${focusUnderCursor}
-        # lcmd - 0 : yabai -m space --focus recent && ${focusUnderCursor}
+        lcmd - 0 : yabai -m space --focus "$(yabai -m query --spaces | jq '(map(select(."has-focus" or .focused == 1))[0].index) as $i | if $i < 10 and length > 9 then 10 elif $i >= 10 and $i < length then $i + 1 else 9 end')" && ${focusUnderCursor}
 
         lcmd + shift - 1 : yabai -m window --space 1 && yabai -m space --focus 1 && ${focusUnderCursor}
         lcmd + shift - 2 : yabai -m window --space 2 && yabai -m space --focus 2 && ${focusUnderCursor}

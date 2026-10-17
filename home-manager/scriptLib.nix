@@ -56,9 +56,16 @@ Lives outside scripts/ so it isn't picked up as a script itself.
     lib.optionalString (sounds.enable && (sounds.${kind}.enable or false))
     "${lib.getExe pkgs.mpv} --no-video --no-config --no-terminal --volume=80 ${sounds.${kind}.soundFile} >/dev/null 2>&1 &";
 
+  isDarwin = lib.attrByPath ["configured" "host" "isDarwin"] pkgs.stdenv.isDarwin config;
+
   # Clipboard commands of the active session, so scripts don't need `eval`
   clipboard =
-    if lib.attrByPath ["configured" "i3" "enable"] false config
+    if isDarwin
+    then {
+      copy = "/usr/bin/pbcopy";
+      paste = "/usr/bin/pbpaste";
+    }
+    else if lib.attrByPath ["configured" "i3" "enable"] false config
     then {
       copy = "${pkgs.xclip}/bin/xclip -selection clipboard -i";
       paste = "${pkgs.xclip}/bin/xclip -selection clipboard -o";
@@ -67,6 +74,11 @@ Lives outside scripts/ so it isn't picked up as a script itself.
       copy = "${pkgs.wl-clipboard}/bin/wl-copy";
       paste = "${pkgs.wl-clipboard}/bin/wl-paste -n";
     };
+
+  openUrl =
+    if isDarwin
+    then "/usr/bin/open"
+    else "${pkgs.xdg-utils}/bin/xdg-open";
 in {
-  inherit mkScript mkLegacyScript playSound clipboard;
+  inherit mkScript mkLegacyScript playSound clipboard openUrl;
 }

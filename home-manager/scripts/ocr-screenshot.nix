@@ -3,6 +3,7 @@
   scripts,
   helpers,
   config,
+  host,
   ...
 }: {
   ocr-screenshot = pkgs.writeShellScript "ocr-screenshot" ''
@@ -15,7 +16,14 @@
     fi
 
     ${
-      if config.configured.hyprland.enable
+      if host.isDarwin
+      then ''
+        if ! /usr/sbin/screencapture -i "$TMP_IMG" || [ ! -f "$TMP_IMG" ]; then
+          ${scripts.nixos-notify} -u low -e -h string:synchronous:ocr-cancelled "OCR Cancelled"
+          exit 0
+        fi
+      ''
+      else if config.configured.hyprland.enable
       then ''
         HYPR_STDOUT="$WORK/hyprshot.err"
         ${pkgs.hyprshot}/bin/hyprshot -m region -o "$WORK" -f ocr.png --silent --freeze 2> "$HYPR_STDOUT"

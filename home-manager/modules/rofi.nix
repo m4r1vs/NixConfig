@@ -2,6 +2,8 @@
   lib,
   config,
   pkgs,
+  host,
+  scripts,
   ...
 }:
 with lib; let
@@ -10,158 +12,178 @@ in {
   options.programs.configured.rofi = {
     enable = mkEnableOption "DMENU and DRUN replacement";
   };
-  config = mkIf cfg.enable {
-    home.file.".theme/rofi/dark.rasi".text =
-      /*
-      rasi
-      */
-      ''
-        mainbox {
-          background-color: transparent;
-        }
-        window {
-          background-color: rgba(0, 0, 0, 0.38);
-        }
-        entry {
-          text-color: #EFE7DD;
-          placeholder-color: #b5afa7;
-        }
-        element {
-          text-color: #EFE7DD;
-        }
-        element selected {
-          background-color: @secondary;
-          border-radius: 5px;
-        }
-      '';
-    home.file.".theme/rofi/light.rasi".text =
-      /*
-      rasi
-      */
-      ''
-        mainbox {
-          background-color: transparent;
-        }
-        window {
-          background-color: rgba(245, 230, 204, 0.45);
-        }
-        entry {
-          text-color: #000000;
-          placeholder-color: #121212;
-        }
-        element {
-          text-color: #000000;
-        }
-        element selected {
-          background-color: @primary;
-          border-radius: 5px;
-        }
-      '';
-    programs.rofi = {
-      enable = true;
-      package = pkgs.rofi;
-      terminal = "${pkgs.ghostty}/bin/ghostty";
-      extraConfig = {
-        display-drun = "";
-        display-dmenu = "";
-        font = "SFProDisplay Nerd Font Medium 13";
-        location = 0;
-        icon-theme = "Papirus";
-        show-icons = true;
-        kb-remove-to-eol = "";
-        kb-mode-complete = "";
-        kb-move-end = "";
-        kb-accept-entry = "Return,KP_Enter";
-        kb-remove-char-back = "BackSpace,Shift+BackSpace";
-        kb-row-up = ["Control+k" "Alt+k"];
-        kb-row-down = ["Control+j" "Alt+j"];
-        kb-row-right = ["Control+l" "Alt+l"];
-        kb-row-left = ["Control+h" "Alt+h"];
-        kb-page-prev = ["Control+y" "Alt+y"];
-        kb-page-next = ["Control+e" "Alt+e"];
+  config = mkIf cfg.enable (mkMerge [
+    (mkIf host.isDarwin {
+      home = {
+        packages = [
+          pkgs.rofi
+          (pkgs.writeShellScriptBin "rofi-launch" ''exec ${scripts.rofi-launch} "$@"'')
+        ];
+        activation.copyWallpapers = lib.hm.dag.entryAfter ["writeBoundary"] ''
+          run mkdir -p "$HOME/Pictures/Wallpapers"
+          run cp -rn ${../wallpaper}/* "$HOME/Pictures/Wallpapers/" 2>/dev/null || true
+          run chmod u+w -R "$HOME/Pictures/Wallpapers" 2>/dev/null || true
+          if [ ! -L "$HOME/.active_wallpaper.jpg" ]; then
+            run ln -s "$HOME/Pictures/Wallpapers/Birch_Trunks.jpg" "$HOME/.active_wallpaper.jpg"
+          fi
+        '';
       };
-      theme = toString (pkgs.writeText "style.rasi"
-        /*
-        rasi
-        */
-        ''
-          @import "${config.home.homeDirectory}/.theme/rofi/colors.rasi"
+    })
+    (mkIf host.isDesktop {
+      home.file = {
+        ".theme/rofi/dark.rasi".text =
+          /*
+          rasi
+          */
+          ''
+            mainbox {
+              background-color: transparent;
+            }
+            window {
+              background-color: rgba(0, 0, 0, 0.38);
+            }
+            entry {
+              text-color: #EFE7DD;
+              placeholder-color: #b5afa7;
+            }
+            element {
+              text-color: #EFE7DD;
+            }
+            element selected {
+              background-color: @secondary;
+              border-radius: 5px;
+            }
+          '';
+        ".theme/rofi/light.rasi".text =
+          /*
+          rasi
+          */
+          ''
+            mainbox {
+              background-color: transparent;
+            }
+            window {
+              background-color: rgba(245, 230, 204, 0.45);
+            }
+            entry {
+              text-color: #000000;
+              placeholder-color: #121212;
+            }
+            element {
+              text-color: #000000;
+            }
+            element selected {
+              background-color: @primary;
+              border-radius: 5px;
+            }
+          '';
+      };
+      programs.rofi = {
+        enable = true;
+        package = pkgs.rofi;
+        terminal = "${pkgs.ghostty}/bin/ghostty";
+        extraConfig = {
+          display-drun = "";
+          display-dmenu = "";
+          font = "SFProDisplay Nerd Font Medium 13";
+          location = 0;
+          icon-theme = "Papirus";
+          show-icons = true;
+          kb-remove-to-eol = "";
+          kb-mode-complete = "";
+          kb-move-end = "";
+          kb-accept-entry = "Return,KP_Enter";
+          kb-remove-char-back = "BackSpace,Shift+BackSpace";
+          kb-row-up = ["Control+k" "Alt+k"];
+          kb-row-down = ["Control+j" "Alt+j"];
+          kb-row-right = ["Control+l" "Alt+l"];
+          kb-row-left = ["Control+h" "Alt+h"];
+          kb-page-prev = ["Control+y" "Alt+y"];
+          kb-page-next = ["Control+e" "Alt+e"];
+        };
+        theme = toString (pkgs.writeText "style.rasi"
+          /*
+          rasi
+          */
+          ''
+            @import "${config.home.homeDirectory}/.theme/rofi/colors.rasi"
 
-          * {
-            separatorcolor:     transparent;
-            border-color:       transparent;
-          }
+            * {
+              separatorcolor:     transparent;
+              border-color:       transparent;
+            }
 
-          window {
-            background-color: transparent;
-            transparency: "real";
-            fullscreen: true;
-            orientation: vertical;
-            padding: 27.5% 31.5%;
-          }
+            window {
+              background-color: transparent;
+              transparency: "real";
+              fullscreen: true;
+              orientation: vertical;
+              padding: 27.5% 31.5%;
+            }
 
-          mainbox {
-            border-radius: 4px;
-          }
+            mainbox {
+              border-radius: 4px;
+            }
 
-          icon-current-entry {
-            background-color: transparent;
-            size: 22 px;
-            background-color: transparent;
-            padding: 11 6 11 14;
-            alignment: vertical;
-          }
+            icon-current-entry {
+              background-color: transparent;
+              size: 22 px;
+              background-color: transparent;
+              padding: 11 6 11 14;
+              alignment: vertical;
+            }
 
-          element {
-            background-color: transparent;
-            padding: 4 12;
-          }
+            element {
+              background-color: transparent;
+              padding: 4 12;
+            }
 
-          element-text {
-            background-color: transparent;
-            text-color: inherit;
-            highlight: none;
-          }
+            element-text {
+              background-color: transparent;
+              text-color: inherit;
+              highlight: none;
+            }
 
-          element-icon {
-            size: 24 px;
-            background-color: transparent;
-            padding: 0 6 0 0;
-            alignment: vertical;
-          }
+            element-icon {
+              size: 24 px;
+              background-color: transparent;
+              padding: 0 6 0 0;
+              alignment: vertical;
+            }
 
-          listview {
-            background-color: transparent;
-            columns: 1;
-            padding: 8 0;
-            fixed-height: true;
-            fixed-columns: true;
-            fixed-lines: true;
-            border: 0 10 6 10;
-          }
+            listview {
+              background-color: transparent;
+              columns: 1;
+              padding: 8 0;
+              fixed-height: true;
+              fixed-columns: true;
+              fixed-lines: true;
+              border: 0 10 6 10;
+            }
 
-          entry {
-            cursor-width: 0;
-            blink: false;
-            background-color: transparent;
-            padding: 10 10 0 0;
-            margin: 0 -2 0 0;
-          }
+            entry {
+              cursor-width: 0;
+              blink: false;
+              background-color: transparent;
+              padding: 10 10 0 0;
+              margin: 0 -2 0 0;
+            }
 
-          inputbar {
-            background-color: transparent;
-            padding: 0 0 0 8;
-            margin: 0 0 0 0;
-            children: [icon-current-entry, entry];
-          }
+            inputbar {
+              background-color: transparent;
+              padding: 0 0 0 8;
+              margin: 0 0 0 0;
+              children: [icon-current-entry, entry];
+            }
 
-          prompt {
-            background-color: transparent;
-            enabled: false;
-          }
+            prompt {
+              background-color: transparent;
+              enabled: false;
+            }
 
-          @import "${config.home.homeDirectory}/.theme/rofi/current.rasi"
-        '');
-    };
-  };
+            @import "${config.home.homeDirectory}/.theme/rofi/current.rasi"
+          '');
+      };
+    })
+  ]);
 }

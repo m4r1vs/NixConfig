@@ -1,6 +1,7 @@
 {
   pkgs,
   scripts,
+  host,
   ...
 }: {
   rofi-power-menu =
@@ -33,12 +34,24 @@
       icons[cancel]="\Uf0156"
 
       declare -A actions
-      actions[lockscreen]="loginctl lock-session ''${XDG_SESSION_ID-}"
-      #actions[switchuser]="???"
-      actions[suspend]="systemctl suspend"
-      actions[hibernate]="systemctl hibernate"
-      actions[reboot]="${scripts.gracefull-run "systemctl reboot"}"
-      actions[shutdown]="${scripts.gracefull-run "systemctl poweroff"}"
+      ${
+        if host.isDarwin
+        then ''
+          actions[lockscreen]="/usr/bin/pmset displaysleepnow"
+          actions[suspend]="/usr/bin/pmset sleepnow"
+          actions[hibernate]="/usr/bin/pmset sleepnow"
+          actions[reboot]="/usr/bin/osascript -e 'tell app \"System Events\" to restart'"
+          actions[shutdown]="/usr/bin/osascript -e 'tell app \"System Events\" to shut down'"
+        ''
+        else ''
+          actions[lockscreen]="loginctl lock-session ''${XDG_SESSION_ID-}"
+          #actions[switchuser]="???"
+          actions[suspend]="systemctl suspend"
+          actions[hibernate]="systemctl hibernate"
+          actions[reboot]="${scripts.gracefull-run "systemctl reboot"}"
+          actions[shutdown]="${scripts.gracefull-run "systemctl poweroff"}"
+        ''
+      }
 
       # By default, ask for confirmation for actions that are irreversible
       confirmations=(reboot shutdown)
@@ -62,7 +75,7 @@
       }
 
       # Parse command-line options
-      if ! parsed=$(getopt --options=h --longoptions=help,dry-run,confirm:,choices:,choose:,symbols,no-symbols,text,no-text,symbols-font: --name "$0" -- "$@"); then
+      if ! parsed=$(${pkgs.util-linux}/bin/getopt --options=h --longoptions=help,dry-run,confirm:,choices:,choose:,symbols,no-symbols,text,no-text,symbols-font: --name "$0" -- "$@"); then
           echo 'Terminating...' >&2
           exit 1
       fi

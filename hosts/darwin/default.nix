@@ -89,7 +89,7 @@ in {
         Remarkable = 1276493162; # reMarkable tablet companion app
         WhatsApp = 310633997; # WhatsApp
         Word = 462054704; # Word processor
-        # Xcode = 497799835; # Apple IDE
+        Xcode = 497799835; # Apple IDE
       };
     };
 

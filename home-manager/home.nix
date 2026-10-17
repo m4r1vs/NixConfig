@@ -73,7 +73,7 @@
       npu-dictate.enable = host.isDesktop && host.hasNpuServer;
       oh-my-posh.enable = true;
       opencode.enable = host.isDev;
-      rofi.enable = host.isDesktop;
+      rofi.enable = host.isGraphical;
       spotify-player.enable = host.isGraphical || host.isWSL;
       ssh.enable = true;
       swappy.enable = host.isDesktop;

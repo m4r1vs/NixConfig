@@ -124,6 +124,11 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    rofi-darwin = {
+      # macOS-native Liquid Glass Rofi replacement
+      url = "gitlab:m4r1vs/RofiDarwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixConfig = {

@@ -2,8 +2,18 @@
   pkgs,
   helpers,
   scripts,
+  host,
   ...
-}: {
+}: let
+  typeCmd =
+    if host.isDarwin
+    then "${pkgs.skhd-zig}/bin/skhd -t"
+    else "${pkgs.wtype}/bin/wtype --";
+  killallCmd =
+    if host.isDarwin
+    then "/usr/bin/killall"
+    else "${pkgs.psmisc}/bin/killall";
+in {
   rofi-calculator =
     pkgs.writeShellScript "rofi-calculator"
     # bash
@@ -30,14 +40,14 @@
 
           if [ "$first_word" == "" ]; then
             to_be_typed="''${input#* }"
-            coproc (sleep 0.01 && ${pkgs.wtype}/bin/wtype -- "$to_be_typed" > /dev/null 2>&1)
+            coproc (sleep 0.01 && ${typeCmd} "$to_be_typed" > /dev/null 2>&1)
             exit 0
           fi
 
           if [ "$first_word" == "" ]; then
             echo "󰈆 Exit"
             to_be_typed="''${input#* }"
-            ${pkgs.wtype}/bin/wtype -- "$to_be_typed"
+            ${typeCmd} "$to_be_typed"
             exit 0
           fi
 
@@ -59,15 +69,15 @@
         # The API answers in plain text, so match with and without quotes
         if [[ "$RESPONSE" == *"No short answer available"* ]]; then
           ${scripts.nixos-notify} -u low -e -t 2000 "There is no short answer. I'm opening the website for you..."
-          coproc (${pkgs.xdg-utils}/bin/xdg-open "https://wolframalpha.com/input?i=$QUERY" > /dev/null 2>&1)
-          ${pkgs.psmisc}/bin/killall rofi || true
+          coproc (${helpers.openUrl} "https://wolframalpha.com/input?i=$QUERY" > /dev/null 2>&1)
+          ${killallCmd} rofi || true
           exit 0
         elif [[ "$RESPONSE" == *"Wolfram|Alpha did not understand your input"* ]]; then
           ${scripts.nixos-notify} -u low -e -t 2000 "Wait, let me query OpenAI..."
-          ${pkgs.psmisc}/bin/killall rofi || true
+          ${killallCmd} rofi || true
           # GPT_RESPONSE=$(/home/mn/.local/share/mise/installs/bun/latest/bin/bun run /home/mn/code/personal-stuff/totoro/index.ts "$*")
           # dunstify -h string:x-dunst-stack-tag:totoro-assistant -a Totoro -t 0 "$GPT_RESPONSE"
-          coproc (${pkgs.xdg-utils}/bin/xdg-open "https://chatgpt.com/?q=$QUERY" > /dev/null 2>&1)
+          coproc (${helpers.openUrl} "https://chatgpt.com/?q=$QUERY" > /dev/null 2>&1)
           exit 0
         else
           echo "󰆏 $RESPONSE"

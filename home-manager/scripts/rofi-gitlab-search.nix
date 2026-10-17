@@ -1,6 +1,8 @@
 {
   pkgs,
   systemArgs,
+  helpers,
+  scripts,
   ...
 }: let
   gitlab =
@@ -135,7 +137,7 @@
     '';
 
   rofiScript = pkgs.writeShellScript "rofi-gitlab-search" ''
-    export PATH="${pkgs.jq}/bin:${pkgs.curl}/bin:${pkgs.wl-clipboard}/bin:${pkgs.libnotify}/bin:$PATH"
+    export PATH="${pkgs.jq}/bin:${pkgs.curl}/bin:$PATH"
 
     RUNTIME_DIR="''${XDG_RUNTIME_DIR:-/tmp}"
     MRS_JSON="$RUNTIME_DIR/rofi_gitlab_mrs.json"
@@ -179,14 +181,14 @@
       MR_REF=$(jq -r .ref "$SEL_JSON" | head -n 1)
 
       if [ "$1" == "Open in GitLab" ]; then
-        nohup ${pkgs.xdg-utils}/bin/xdg-open "$MR_URL" >/dev/null 2>&1 &
+        nohup ${helpers.openUrl} "$MR_URL" >/dev/null 2>&1 &
         disown -a
       elif [ "$1" == "Copy URL" ]; then
-        echo -n "$MR_URL" | wl-copy
-        notify-send "Copied URL" "$MR_URL"
+        echo -n "$MR_URL" | ${helpers.clipboard.copy}
+        ${scripts.nixos-notify} "Copied URL" "$MR_URL"
       elif [ "$1" == "Copy Branch" ]; then
-        echo -n "$MR_REF" | wl-copy
-        notify-send "Copied Branch" "$MR_REF"
+        echo -n "$MR_REF" | ${helpers.clipboard.copy}
+        ${scripts.nixos-notify} "Copied Branch" "$MR_REF"
       fi
       exit 0
     else

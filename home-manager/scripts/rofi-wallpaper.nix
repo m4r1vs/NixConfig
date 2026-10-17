@@ -2,6 +2,7 @@
   pkgs,
   scripts,
   lib,
+  host,
   ...
 }: {
   rofi-wallpaper = pkgs.writeShellScript "rofi-wallpaper" ''
@@ -42,7 +43,22 @@
         ${scripts.custom-wallpaper-theme} "$CHOICE"
         ${scripts.nixos-notify} -u low -e -i "$WALLPAPER" -h string:synchronous:wallpaper-change -t 1800 "New Wallpaper:" "$CHOICE"
         ln -sfn "$WALLPAPER" "$HOME/.active_wallpaper.jpg"
+        ${
+      if host.isDarwin
+      then ''
+        /usr/bin/osascript <<EOF
+        tell application "System Events"
+            set desktopCount to count of desktops
+            repeat with i from 1 to desktopCount
+                set picture of desktop i to POSIX file "$WALLPAPER"
+            end repeat
+        end tell
+        EOF
+      ''
+      else ''
         ${lib.getExe pkgs.awww} img "$WALLPAPER" --transition-type none
+      ''
+    }
     fi
   '';
 }
