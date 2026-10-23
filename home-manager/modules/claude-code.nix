@@ -29,7 +29,7 @@ in {
             effortLevel = "high";
           };
           "claude-fable-5-1" = {
-            effortLevel = "high";
+            effortLevel = "xhigh";
           };
         };
         permissions.defaultMode = "auto";
