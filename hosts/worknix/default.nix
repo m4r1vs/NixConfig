@@ -87,6 +87,17 @@
     fwupd.enable = true;
 
     /*
+    Work VPN for internal services. The daemon starts on boot; log in once
+    with `netbird up` (the wrapped CLI already points at our management
+    server), the peer config then persists in /var/lib/netbird.
+    */
+    netbird = {
+      enable = true;
+      ui.enable = false;
+      clients.default.environment.NB_MANAGEMENT_URL = "https://netbird.meetovo.dev";
+    };
+
+    /*
     B-Tree FS
     */
     btrfs = {

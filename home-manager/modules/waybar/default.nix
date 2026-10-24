@@ -4,11 +4,13 @@
   scripts,
   systemArgs,
   pkgs,
+  osConfig,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.waybar;
   inherit (systemArgs) theme;
+  hasNetbird = osConfig.services.netbird.enable or false;
 in {
   options.programs.configured.waybar = {
     enable = mkEnableOption "Wayland Statusbar";
@@ -94,15 +96,17 @@ in {
 
           "group/tray-and-battery" = {
             orientation = "horizontal";
-            modules = [
-              "custom/weather"
-              "custom/github"
-              "custom/gcal"
-              "tray"
-              "battery"
-              "custom/notifications"
-              "clock"
-            ];
+            modules =
+              optional hasNetbird "custom/netbird"
+              ++ [
+                "custom/weather"
+                "custom/github"
+                "custom/gcal"
+                "tray"
+                "battery"
+                "custom/notifications"
+                "clock"
+              ];
           };
 
           clock = {
@@ -224,6 +228,18 @@ in {
             on-click-right = "${pkgs.xdg-utils}/bin/xdg-open https://www.wetteronline.de/regenradar/hamburg";
             exec-on-event = false;
             return-type = "json";
+          };
+
+          "custom/netbird" = mkIf hasNetbird {
+            exec = "${scripts.netbird-vpn}";
+            format = "{}";
+            # Own toggles refresh instantly via SIGRTMIN+10
+            signal = 10;
+            interval = 15;
+            exec-on-event = false;
+            on-click = "${scripts.netbird-vpn} down";
+            return-type = "json";
+            tooltip = true;
           };
 
           "custom/gcal" = {

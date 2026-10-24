@@ -12,6 +12,7 @@ with lib; let
   cfg = config.configured.xdg;
   inherit (host) hasPowerProfiles;
   hasFwupd = osConfig.services.fwupd.enable or false;
+  hasNetbird = osConfig.services.netbird.enable or false;
   brave = "${pkgs.brave}/bin/brave ${concatStringsSep " " config.programs.configured.brave.flags}";
 in {
   options.configured.xdg = {
@@ -378,6 +379,15 @@ in {
           exec = "${scripts.caffeinate} toggle";
           type = "Application";
           categories = ["Utility"];
+        };
+        netbird-toggle = mkIf hasNetbird {
+          name = "Toggle Netbird";
+          genericName = "Work VPN";
+          comment = "Connect to or disconnect from the NetBird VPN";
+          icon = "network-vpn";
+          exec = "${scripts.netbird-vpn} toggle";
+          type = "Application";
+          categories = ["Network" "Utility"];
         };
         cleartext-wifi = {
           name = "Show Wi-Fi Password";

@@ -64,7 +64,6 @@ in {
           inkscape-with-extensions # maxxed out inkscape
           jetbrains.idea # intellij idea ultimate
           libnotify # send notifications from terminal
-          xdg-utils # xdg-open, etc.
           loupe # Gnome Image Viewer
           nautilus # file browser
           networkmanagerapplet # show wifi/ethernet in sys. tray
@@ -76,6 +75,7 @@ in {
           stockfish # chess engine to play against computer
           supertuxkart # Mario Kart Linux
           whatsapp-electron # whatsapp
+          xdg-utils # xdg-open, etc.
         ]
         ++ (
           if isWayland
