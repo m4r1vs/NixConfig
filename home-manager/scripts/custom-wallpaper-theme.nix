@@ -23,14 +23,6 @@ in {
           PRIMARY_COLOR_HEX="#A699D0"
           SECONDARY_COLOR_HEX="#FE3700"
           ;;
-        Artemis_II_Moon_and_Star.jpg)
-          PRIMARY_COLOR_HEX="#598F8F"
-          SECONDARY_COLOR_HEX="#A7C2D1"
-          ;;
-        Artemis_II_Earth_From_Capsule.jpg)
-          PRIMARY_COLOR_HEX="#7f9fc9"
-          SECONDARY_COLOR_HEX="#e3be71"
-          ;;
         Koivu.jpg)
           PRIMARY_COLOR_HEX="#6281AD"
           SECONDARY_COLOR_HEX="#DAC05F"
@@ -95,10 +87,6 @@ in {
           PRIMARY_COLOR_HEX="#E35203";
           SECONDARY_COLOR_HEX="#FF9605";
           ;;
-        Ghibli_Puddle_on_Train_Tracks.jpg)
-          PRIMARY_COLOR_HEX="#376C96";
-          SECONDARY_COLOR_HEX="#E4C200";
-          ;;
         Graffiti_Bird.jpg)
           PRIMARY_COLOR_HEX="#027180";
           SECONDARY_COLOR_HEX="#A56326";
@@ -135,10 +123,6 @@ in {
           PRIMARY_COLOR_HEX="#B98E7E";
           SECONDARY_COLOR_HEX="#937678";
           ;;
-        Frozen_Stream_Macro.jpg)
-          PRIMARY_COLOR_HEX="#99ADCD";
-          SECONDARY_COLOR_HEX="#87A7CC";
-          ;;
         Neon_Pepsi_from_Uber.jpg)
           PRIMARY_COLOR_HEX="#4A8AE4";
           SECONDARY_COLOR_HEX="#A7371B";
@@ -147,9 +131,37 @@ in {
           PRIMARY_COLOR_HEX="#CE5D97";
           SECONDARY_COLOR_HEX="#A02F6F";
           ;;
-        Greg_Girad_Looking_towards_Pudong.jpg)
-          PRIMARY_COLOR_HEX="#EC94D3";
-          SECONDARY_COLOR_HEX="#346BD3";
+        Alster_Sailing.jpg)
+          PRIMARY_COLOR_HEX="#527d96";
+          SECONDARY_COLOR_HEX="#fe8f00";
+          ;;
+        Autumn_Berries.jpg)
+          PRIMARY_COLOR_HEX="#d4a453";
+          SECONDARY_COLOR_HEX="#f42f24";
+          ;;
+        Balcony_Fig.jpg)
+          PRIMARY_COLOR_HEX="#597805";
+          SECONDARY_COLOR_HEX="#d89d3f";
+          ;;
+        Birch_Trunks.jpg)
+          PRIMARY_COLOR_HEX="#81913F"
+          SECONDARY_COLOR_HEX="#DB8C4B"
+          ;;
+        Containers.jpg)
+          PRIMARY_COLOR_HEX="#c05200";
+          SECONDARY_COLOR_HEX="#a6adfb";
+          ;;
+        Cows_in_Wedel.jpg)
+          PRIMARY_COLOR_HEX="#699443";
+          SECONDARY_COLOR_HEX="#c6815f";
+          ;;
+        Dike_from_Bike.jpg)
+          PRIMARY_COLOR_HEX="#c1c18b";
+          SECONDARY_COLOR_HEX="#8d917a";
+          ;;
+        Mühlendamm_Bokeh.jpg)
+          PRIMARY_COLOR_HEX="#864a4a";
+          SECONDARY_COLOR_HEX="#a297fd";
           ;;
         *)
           PRIMARY_COLOR_HEX="#81913F"
