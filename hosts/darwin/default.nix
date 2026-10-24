@@ -43,6 +43,7 @@ in {
         */
         "ghidra" # Disassembler and reverse engineering tool
         "mole" # CLI to free up disk space
+        "netbirdio/tap/netbird" # VPN
         "zig" # zig programming language
       ];
       casks = [
