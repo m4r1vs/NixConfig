@@ -338,7 +338,7 @@ in {
           genericName = "os.meetovo.de";
           comment = "Open Meetovo OS";
           icon = "applications-system";
-          exec = "${brave} --profile-directory=Default https://os.meetovo.de";
+          exec = "${brave} --profile-directory=Default https://os.tools.meetovo.de";
           terminal = false;
           type = "Application";
           categories = ["Network" "Office"];
@@ -351,7 +351,7 @@ in {
           genericName = "gitlab.meetovo.dev";
           comment = "Open Meetovo GitLab";
           icon = "gitlab";
-          exec = "${brave} --profile-directory=Default https://gitlab.meetovo.dev";
+          exec = "${brave} --profile-directory=Default https://gitlab.tools.meetovo.dev";
           terminal = false;
           type = "Application";
           categories = ["Development" "Network"];

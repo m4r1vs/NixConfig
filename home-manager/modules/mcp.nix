@@ -20,7 +20,7 @@ in {
 
       apiUrl = mkOption {
         type = types.str;
-        default = "https://gitlab.meetovo.dev/api/v4";
+        default = "https://gitlab.tools.meetovo.dev/api/v4";
         example = "https://gitlab.example.com/api/v4";
         description = ''
           GitLab API v4 endpoint. The OAuth endpoints are derived from it by

@@ -182,7 +182,7 @@
             useWorkProfileByDefault = true;
             obsidianVault = "Marius' Remote Vault";
             gitlab = {
-              url = "https://gitlab.meetovo.dev";
+              url = "https://gitlab.tools.meetovo.dev";
               username = "m4r1vs";
             };
             system = "x86_64-linux";
