@@ -488,6 +488,26 @@
         "type": "github"
       }
     },
+    "menubar-compat": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793202081,
+        "narHash": "sha256-ZZVeI/9PE8/JjUo1lXGaqb8xWpwS9wB0oypHlyznMyM=",
+        "owner": "m4r1vs",
+        "repo": "MenubarCompat",
+        "rev": "9d522ac3a1db5f9f86e0bcd5977a13bdd3201861",
+        "type": "gitlab"
+      },
+      "original": {
+        "owner": "m4r1vs",
+        "repo": "MenubarCompat",
+        "type": "gitlab"
+      }
+    },
     "nix-amd-ai": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -797,6 +817,7 @@
         "hyprland-which-key": "hyprland-which-key",
         "keypress-visualizer": "keypress-visualizer",
         "light-yazi": "light-yazi",
+        "menubar-compat": "menubar-compat",
         "nix-amd-ai": "nix-amd-ai",
         "nix-darwin": "nix-darwin_2",
         "nix-index-database": "nix-index-database",

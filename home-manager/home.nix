@@ -79,6 +79,7 @@
       swappy.enable = host.isDesktop;
       swayimg.enable = host.isWayland;
       tmux.enable = true;
+      waybar.enable = lib.mkDefault host.isDarwin;
       yazi.enable = host.isDev;
       zsh.enable = true;
     };

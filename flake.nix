@@ -129,6 +129,11 @@
       url = "gitlab:m4r1vs/RofiDarwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    menubar-compat = {
+      # macOS-native Waybar-compatible statusbar items
+      url = "gitlab:m4r1vs/MenubarCompat";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixConfig = {

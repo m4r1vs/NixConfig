@@ -2,6 +2,7 @@
   pkgs,
   scripts,
   helpers,
+  host,
   ...
 }: {
   netbird-vpn = helpers.mkScript {
@@ -10,13 +11,22 @@
     text =
       # bash
       ''
-        # The system wrapper from services.netbird knows the daemon socket and
-        # our management URL; a plain pkgs.netbird would talk to the wrong socket.
-        netbird=/run/current-system/sw/bin/netbird
+        # On NixOS, the system wrapper from services.netbird knows the daemon
+        # socket and management URL; on macOS, Homebrew provides the CLI.
+        netbird=${
+          if host.isDarwin
+          then "/opt/homebrew/bin/netbird"
+          else "/run/current-system/sw/bin/netbird"
+        }
 
-        # Waybar's custom/netbird module refreshes on SIGRTMIN+10
+        # Waybar's custom/netbird module refreshes on SIGRTMIN+10; on macOS,
+        # MenubarCompat refreshes via its socket CLI.
         refresh_waybar() {
-            pkill -RTMIN+10 -x '\.?waybar(-wrapped)?' || true
+            ${
+          if host.isDarwin
+          then "${pkgs.menubar-compat}/bin/menubar-compat signal 10 || true"
+          else "pkill -RTMIN+10 -x '\\.?waybar(-wrapped)?' || true"
+        }
         }
 
         # The CLI retries an unreachable daemon for ~10s, so cap it

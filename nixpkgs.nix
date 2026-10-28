@@ -295,6 +295,11 @@ in {
             then inputs.rofi-darwin.packages.${stdenv.hostPlatform.system}.default
             else prev.rofi;
 
+          menubar-compat =
+            if isDarwin
+            then inputs.menubar-compat.packages.${stdenv.hostPlatform.system}.default
+            else null;
+
           rofi-unwrapped = rofi-unwrapped.overrideAttrs (_oldAttrs: {
             patchPhase = ''
               echo "NoDisplay=true" >> ./data/rofi-theme-selector.desktop
