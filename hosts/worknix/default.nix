@@ -30,6 +30,14 @@
     };
   };
 
+  /*
+  Local CA of the meetovo-backend dev proxy (`dev trust`), so curl and other
+  tools trust https://<instance>.localhost. A copy of
+  ~/.local/state/meetovo-dev/data/caddy/pki/authorities/local/root.crt; replace
+  it when that state directory is recreated (the proxy then makes a new CA).
+  */
+  security.pki.certificateFiles = [./meetovo-dev-ca.crt];
+
   hardware = {
     enableRedistributableFirmware = true;
     tuxedo-drivers.enable = true;
