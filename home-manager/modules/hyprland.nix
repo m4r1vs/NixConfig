@@ -238,7 +238,7 @@ in {
           "eDP-1,2880x1800@120.00,0x0, 1.25" # Internal
           "Virtual-1,3024x1890@60.00,0x0, 1.5" # For Extending Screen wirelessly
           "desc:Samsung Electric Company LS27D70xE HK2YA02261, 3840x2160@60.00, auto-up, 1.5" # External Office Meetovo
-          "desc:LG Electronics 27GL850 912NTVSCD959, 2560x1440@59.95, auto-up, 1" # External LG at home
+          "desc:LG Electronics 27GL850 912NTVSCD959, 2560x1440@144.00, auto-up, 1" # External LG at home
           ", highres, auto-up, 1" # Everything Else Auto
         ];
         binds.movefocus_cycles_fullscreen = false;
