@@ -287,7 +287,11 @@ in {
 
     virtualisation = lib.mkIf isX86 {
       spiceUSBRedirection.enable = true;
-      libvirtd.enable = true;
+      libvirtd = {
+        enable = true;
+        # lets libvirt find virtiofsd for <filesystem type='mount'> host shares
+        qemu.vhostUserPackages = [pkgs.virtiofsd];
+      };
     };
 
     programs = {
