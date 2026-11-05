@@ -163,6 +163,18 @@ in {
           PRIMARY_COLOR_HEX="#864a4a";
           SECONDARY_COLOR_HEX="#a297fd";
           ;;
+        Elbe_Hadag_Shaky.jpg)
+          PRIMARY_COLOR_HEX="#F1B141";
+          SECONDARY_COLOR_HEX="#3676E2";
+          ;;
+        Elbe_Shipwreck.jpg)
+          PRIMARY_COLOR_HEX="#E4570E";
+          SECONDARY_COLOR_HEX="#94B4E6";
+          ;;
+        Sunset_Sky.jpg)
+          PRIMARY_COLOR_HEX="#9F81A0";
+          SECONDARY_COLOR_HEX="#FF5650";
+          ;;
         *)
           PRIMARY_COLOR_HEX="#81913F"
           SECONDARY_COLOR_HEX="#DB8C4B"
