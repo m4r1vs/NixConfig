@@ -182,6 +182,21 @@ in {
           Temporary Fixes / Updates
           */
 
+          # Fix cursor landing N columns right of target on tmux 3.7+ (schasse/tmux-jump#50)
+          tmuxPlugins =
+            prev.tmuxPlugins
+            // {
+              jump = prev.tmuxPlugins.jump.overrideAttrs {
+                version = "2026-10-31";
+                src = fetchFromGitHub {
+                  owner = "schasse";
+                  repo = "tmux-jump";
+                  rev = "b547c5ec10fc33baa75953479892007e8eca34a0";
+                  hash = "sha256-ia9AfVa6akDEzZVcESVqwnY3nB1uLbxU1ZlBH1j1/tk=";
+                };
+              };
+            };
+
           /*
           Own Forks
           */
