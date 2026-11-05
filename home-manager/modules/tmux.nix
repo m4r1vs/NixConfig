@@ -28,7 +28,9 @@ with lib; let
       "#{?#{==:#{pane_current_command},zsh},"
       + "#{?#{window_active},,} ${pathFormat},"
       + "${"${iconSubstitutions}#{pane_current_command}${closeSubstitutions}"}"
-      + " ${pathFormat}"
+      # Claude Code sets the pane title to "✳ <session name>" (follows /rename);
+      # show that name instead of the directory, without the prefix glyph.
+      + " #{?#{m/r:claude,#{pane_current_command}},#{s|^[^ ]+ ||:pane_title},${pathFormat}}"
       + "}${
         if showPaneCount
         then "#{?#{>:#{window_panes},1}, (#{window_panes}),}"
