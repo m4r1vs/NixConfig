@@ -17,6 +17,9 @@ in {
       nix-direnv.enable = true;
       mise.enable = true;
       silent = true;
+      config.whitelist.prefix = [
+        "${config.home.homeDirectory}/Projects"
+      ];
     };
     home.packages = [
       pkgs.mise
