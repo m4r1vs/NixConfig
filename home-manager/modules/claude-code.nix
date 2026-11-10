@@ -57,7 +57,7 @@ in {
           "claude-opus-5-5" = {
             effortLevel = "high";
           };
-          "claude-fable-5-1" = {
+          "claude-fable-5-2" = {
             effortLevel = "xhigh";
           };
         };
