@@ -30,8 +30,8 @@
       fi
 
       if [ -n "$next_window" ]; then
-        ${pkgs.hyprland}/bin/hyprctl dispatch focuswindow address:"$next_window"
-        ${pkgs.hyprland}/bin/hyprctl dispatch bringactivetotop
+        ${pkgs.hyprland}/bin/hyprctl dispatch "hl.dsp.focus({ window = 'address:$next_window' })"
+        ${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.window.bring_to_top()'
       fi
     '';
 }

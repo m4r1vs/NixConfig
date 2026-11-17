@@ -182,6 +182,18 @@ in {
           Temporary Fixes / Updates
           */
 
+          # Waybar 0.15.0 sends legacy `dispatch workspace N` on workspace click, which
+          # Hyprland's Lua config rejects. Backport of Alexays/Waybar#5013 (first commit,
+          # via Gentoo's hyproverlay), released in 0.16.0; delete this and the patch once
+          # nixpkgs has it.
+          waybar =
+            if lib.versionOlder prev.waybar.version "0.16.0"
+            then
+              prev.waybar.overrideAttrs (oldAttrs: {
+                patches = (oldAttrs.patches or []) ++ [./patches/waybar-0.15.0-hyprland-lua-ipc.patch];
+              })
+            else prev.waybar;
+
           # Fix cursor landing N columns right of target on tmux 3.7+ (schasse/tmux-jump#50)
           tmuxPlugins =
             prev.tmuxPlugins

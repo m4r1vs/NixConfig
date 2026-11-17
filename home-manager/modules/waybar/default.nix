@@ -316,8 +316,8 @@ in {
               active-only = false;
               on-click = "activate";
               disable-scroll = true;
-              on-scroll-up = "${pkgs.hyprland}/bin/hyprctl dispatch workspace -1";
-              on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch workspace +1";
+              on-scroll-up = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.focus({ workspace = \"-1\" })'";
+              on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.focus({ workspace = \"+1\" })'";
               persistent-workspaces = {};
             };
 

@@ -19,7 +19,7 @@
       ${lib.getExe pkgs.hyprlock} || status=$?
       if [ "$status" -ne 0 ]; then
         logger -t hyprland-session-lock "hyprlock exited with $status, ending the session"
-        hyprctl dispatch exit
+        hyprctl dispatch 'hl.dsp.exit()'
       fi
     '';
   };

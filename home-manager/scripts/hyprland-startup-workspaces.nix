@@ -4,7 +4,15 @@
   lib,
   systemArgs,
   ...
-}: {
+}: let
+  toLua = lib.generators.toLua {};
+  # With the Lua config, `hyprctl dispatch X` evaluates `hl.dispatch(X)`, so the
+  # argument must be a Lua dispatcher expression. hyprctl prints Lua errors but
+  # still exits 0.
+  dispatch = lua: "hyprctl dispatch ${lib.escapeShellArg lua}";
+  exec = cmd: dispatch "hl.dsp.exec_cmd(${toLua cmd})";
+  workspace = ws: dispatch "hl.dsp.focus({ workspace = ${toString ws} })";
+in {
   hyprland-startup-workspaces =
     pkgs.writeShellScript "hyprland-startup-workspaces"
     # bash
@@ -40,40 +48,34 @@
 
       ${scripts.nixos-notify} -u low -e -t 12000 -h string:synchronous:startup-script "$WELCOME_STRING" "Let me get everything running for you..."
 
-      hyprctl dispatch exec "${lib.getExe pkgs.waybar}"
-      hyprctl dispatch exec "${lib.getExe pkgs.signal-desktop} --ozone-platform-hint=auto"
-      hyprctl dispatch exec "${lib.getExe pkgs.whatsapp-electron} --ozone-platform-hint=auto"
-      ${lib.optionalString systemArgs.useWorkProfileByDefault
-        # bash
-        ''
-          hyprctl dispatch exec "${lib.getExe pkgs.slack}"
-        ''}
-      hyprctl dispatch exec "${lib.getExe pkgs.obsidian} --ozone-platform-hint=auto"
+      ${exec (lib.getExe pkgs.waybar)}
+      ${exec "${lib.getExe pkgs.signal-desktop} --ozone-platform-hint=auto"}
+      ${exec "${lib.getExe pkgs.whatsapp-electron} --ozone-platform-hint=auto"}
+      ${lib.optionalString systemArgs.useWorkProfileByDefault (exec (lib.getExe pkgs.slack))}
+      ${exec "${lib.getExe pkgs.obsidian} --ozone-platform-hint=auto"}
       ${lib.optionalString (lib.meta.availableOn pkgs.stdenv.hostPlatform pkgs.spotify)
-        ''
-          hyprctl dispatch exec "${lib.getExe pkgs.spotify} --ozone-platform-hint=auto"
-        ''}
-      hyprctl dispatch exec "${lib.getExe pkgs.ghostty}"
-      hyprctl dispatch exec "${lib.getExe pkgs.brave} --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation"
+        (exec "${lib.getExe pkgs.spotify} --ozone-platform-hint=auto")}
+      ${exec (lib.getExe pkgs.ghostty)}
+      ${exec "${lib.getExe pkgs.brave} --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation"}
 
       sleep 2
-      hyprctl dispatch workspace 2
+      ${workspace 2}
       sleep 2
-      hyprctl dispatch workspace 3
+      ${workspace 3}
       sleep 1
       ${lib.optionalString systemArgs.useWorkProfileByDefault
         # bash
         ''
-          hyprctl dispatch workspace 4
+          ${workspace 4}
           sleep 1
         ''}
-      hyprctl dispatch workspace 6
+      ${workspace 6}
       sleep 1
-      hyprctl dispatch workspace 9
+      ${workspace 9}
 
       sleep 2
 
-      hyprctl dispatch workspace 1
+      ${workspace 1}
       ${scripts.nixos-notify} -u low -e -t 3000 -h string:synchronous:startup-script "You're ready to go 󱓟 "
 
       exit 0

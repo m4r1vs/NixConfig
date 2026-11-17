@@ -18,11 +18,11 @@ in {
     xdg.configFile."swayimg/init.lua".text =
       #lua
       ''
-        swayimg.text.set_size(16)
-        swayimg.text.set_foreground(0xaaffffff)
-        swayimg.viewer.set_default_scale("optimal")
+        swayimg.text.size = 16
+        swayimg.text.color = 0xaaffffff
+        swayimg.viewer.default_scale = "optimal"
 
-        swayimg.enable_overlay(true)
+        swayimg.overlay = true
         swayimg.viewer.on_key("q", function ()
           swayimg.exit(0)
         end)

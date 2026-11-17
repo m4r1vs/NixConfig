@@ -405,11 +405,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1780573652,
-        "narHash": "sha256-RBw3ue13Ys+iKQ/rcypnWFYHk78/6WVY/9x3EVaxeWw=",
+        "lastModified": 1795007609,
+        "narHash": "sha256-OscK9bGzmS9ADsBHb5nsrljI+wU0Q7Q/seQBqNTNdms=",
         "owner": "m4r1vs",
         "repo": "hyprland-which-key",
-        "rev": "c9ec138ec2a79c2baec2e9036f9c69bb970fcc33",
+        "rev": "63b8618b529d36d655da69282339be989516464b",
         "type": "gitlab"
       },
       "original": {

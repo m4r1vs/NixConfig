@@ -21,10 +21,10 @@
             CURRENT_WORKSPACE=$(${pkgs.hyprland}/bin/hyprctl monitors -j | ${pkgs.jq}/bin/jq -r ".[] | select(.focused == true) | .activeWorkspace.id")
 
             if [ "$WORKSPACE" = "$CURRENT_WORKSPACE" ]; then
-              ${pkgs.hyprland}/bin/hyprctl dispatch movetoworkspacesilent "special:minimized,address:$ADDR"
+              ${pkgs.hyprland}/bin/hyprctl dispatch "hl.dsp.window.move({ workspace = 'special:minimized', follow = false, window = 'address:$ADDR' })"
             else
-              ${pkgs.hyprland}/bin/hyprctl dispatch movetoworkspace "$CURRENT_WORKSPACE,address:$ADDR"
-              ${pkgs.hyprland}/bin/hyprctl dispatch focuswindow address:$ADDR
+              ${pkgs.hyprland}/bin/hyprctl dispatch "hl.dsp.window.move({ workspace = '$CURRENT_WORKSPACE', window = 'address:$ADDR' })"
+              ${pkgs.hyprland}/bin/hyprctl dispatch "hl.dsp.focus({ window = 'address:$ADDR' })"
             fi
             exit 0
           else

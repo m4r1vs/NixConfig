@@ -22,7 +22,8 @@ in {
           lock_cmd = "pidof hyprlock || hyprlock"; # Do not lock if already locked
           before_sleep_cmd = "pidof hyprlock || hyprlock"; # Do not lock if already locked
           on_lock_cmd = "pidof hyprlock || hyprlock"; # Do not lock if already locked
-          after_sleep_cmd = "${pkgs.hyprland}/bin/hyprctl dispatch dpms on"; # Turn on display (if turned off)
+          # Turn on display (if turned off); wrapped so hyprlang doesn't parse the Lua
+          after_sleep_cmd = "${pkgs.writeShellScript "hypridle-dpms-on" "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms({ action = \"on\" })'"}";
           ignore_dbus_inhibit = false;
           ignore_systemd_inhibit = false;
           ignore_wayland_inhibit = false;

@@ -16,6 +16,59 @@ with lib; let
   geminiClass = "brave-gemini.google.com__-${personalBraveProfile}";
   npuDictate = lib.getExe config.programs.npu-dictate.package;
   helium = lib.getExe (config.programs.helium.package.override {inherit (config.programs.helium) flags;});
+
+  inherit (lib.generators) mkLuaInline;
+  toLua = lib.generators.toLua {};
+
+  mkBind = keys: description: action: opts: {
+    _args = [
+      keys
+      (mkLuaInline action)
+      (opts // {inherit description;})
+    ];
+  };
+
+  bindd = keys: description: action: mkBind keys description action {};
+  bindde = keys: description: action: mkBind keys description action {repeating = true;};
+  binddle = keys: description: action:
+    mkBind keys description action {
+      locked = true;
+      repeating = true;
+    };
+  binddrin = keys: description: action:
+    mkBind keys description action {
+      release = true;
+      ignore_mods = true;
+      non_consuming = true;
+    };
+  exec = cmd: "hl.dsp.exec_cmd(${toLua cmd})";
+  moveOrTile = dir: x: y: ''
+    function()
+      local w = hl.get_active_window()
+      if w ~= nil and w.floating then
+        hl.dispatch(hl.dsp.window.move({ x = ${toString x}, y = ${toString y}, relative = true }))
+      else
+        hl.dispatch(hl.dsp.window.move({ direction = ${toLua dir} }))
+      end
+    end'';
+  # fullscreen_state has no "keep current" client mode, so pass the window's current one
+  toggleFakeFullscreen = ''
+    function()
+      local w = hl.get_active_window()
+      if w ~= nil then
+        hl.dispatch(hl.dsp.window.fullscreen_state({ internal = 2, client = w.fullscreen_client, action = "toggle" }))
+      end
+    end'';
+  toggleWorkspaceFloating = ''
+    function()
+      local ws = hl.get_active_workspace()
+      if ws ~= nil then
+        local action = #hl.get_windows({ workspace = ws, floating = false }) > 0 and "enable" or "disable"
+        for _, w in ipairs(hl.get_windows({ workspace = ws })) do
+          hl.dispatch(hl.dsp.window.float({ window = w, action = action }))
+        end
+      end
+    end'';
 in {
   options.programs.configured.hyprland = {
     enable = mkEnableOption "Tiling Wayland Window Manager";
@@ -36,391 +89,566 @@ in {
       swaync.enable = true;
     };
     wayland.windowManager.hyprland = {
-      configType = "hyprlang";
+      configType = "lua";
       enable = true;
-      plugins = with pkgs; [
-        hyprlandPlugins.hypr-dynamic-cursors
-      ];
       settings = {
-        exec-once = [
-          # Keep shell logic in scripts: an exec-once value starting with `[`
-          # is parsed as exec rules, not as the command.
-          "${scripts.hyprland-session-lock}"
-          "${pkgs._1password-gui}/bin/1password --silent"
-          "${scripts.hyprland-startup-workspaces}"
-          "${scripts.firmware-update-check}"
-          "${scripts.volume-change-notify}"
-          "${scripts.brightness-change-notify}"
-          "hyprctl setcursor Bibata-Modern-Ice 20"
-        ];
-        cursor = {
-          inactive_timeout = 3;
-          use_cpu_buffer = 1;
-        };
-        env =
+        env = map (pair: {_args = pair;}) (
           [
-            "QT_WAYLAND_DISABLE_WINDOWDECORATION,1"
+            ["QT_WAYLAND_DISABLE_WINDOWDECORATION" "1"]
           ]
           ++ lib.optionals osConfig.configured.nvidia.enable [
-            "LIBVA_DRIVER_NAME,nvidia"
-            "GBM_BACKEND,nvidia-drm"
-            "__GLX_VENDOR_LIBRARY_NAME,nvidia"
-            "__NV_PRIME_RENDER_OFFLOAD,1"
-            "__GL_GSYNC_ALLOWED,1"
-            "__GL_VRR_ALLOWED,1"
-            "WLR_DRM_NO_ATOMIC,1"
-            "__VK_LAYER_NV_optimus,NVIDIA_only"
-            "NVD_BACKEND,direct"
-          ];
-        input = {
-          kb_layout = "us,de";
-          kb_options = "caps:escape";
-          touchpad = {
-            natural_scroll = true;
-            scroll_factor = 0.2;
-          };
-          follow_mouse = 1;
-          sensitivity = 0.2;
-          force_no_accel = false;
-          accel_profile = "adaptive";
-          numlock_by_default = true;
-        };
-        misc = {
-          vrr = 1;
-          disable_hyprland_logo = true;
-          animate_manual_resizes = true;
-          enable_swallow = true;
-          swallow_regex = "^ghostty\.(.+)$";
-          disable_splash_rendering = true;
-          initial_workspace_tracking = 0;
-          force_default_wallpaper = 0;
-        };
-        layerrule = [
-          "order 1,match:namespace keypress-visualizer"
-          "blur on,match:namespace keypress-visualizer"
-          "ignore_alpha 0.69,match:namespace keypress-visualizer"
-
-          "order 2,match:namespace hyprpicker" # Top Layer
-          "no_anim on,match:namespace hyprpicker"
-
-          "order 3,match:namespace swaync-notification-window"
-          "blur on,match:namespace swaync-notification-window"
-          "ignore_alpha 0.65,match:namespace swaync-notification-window"
-          "above_lock 1,match:namespace swaync-notification-window"
-
-          "order 4,match:namespace rofi"
-          "blur on,match:namespace rofi"
-
-          "order 5,match:namespace waybar"
-
-          "order 6,match:namespace swaync-control-center" # Bottom Layer
-          "blur on,match:namespace swaync-control-center"
-          "ignore_alpha 0.65,match:namespace swaync-control-center"
-          "dim_around on,match:namespace swaync-control-center"
+            ["LIBVA_DRIVER_NAME" "nvidia"]
+            ["GBM_BACKEND" "nvidia-drm"]
+            ["__GLX_VENDOR_LIBRARY_NAME" "nvidia"]
+            ["__NV_PRIME_RENDER_OFFLOAD" "1"]
+            ["__GL_GSYNC_ALLOWED" "1"]
+            ["__GL_VRR_ALLOWED" "1"]
+            ["WLR_DRM_NO_ATOMIC" "1"]
+            ["__VK_LAYER_NV_optimus" "NVIDIA_only"]
+            ["NVD_BACKEND" "direct"]
+          ]
+        );
+        curve = [
+          {
+            _args = [
+              "smooth"
+              {
+                type = "bezier";
+                points = [
+                  [0.05 0.9]
+                  [0.1 1]
+                ];
+              }
+            ];
+          }
         ];
-        gesture = [
-          "5, swipe, move"
-          "4, swipe, resize"
-          "3, horizontal, workspace"
-          "3, pinch, fullscreen"
-        ];
-        opengl = {
-          nvidia_anti_flicker = false;
-        };
-        general = {
-          border_size = 0;
-          gaps_in = 4;
-          gaps_out = 8;
-          allow_tearing = true;
-          layout = "dwindle";
-        };
-        ecosystem = {
-          no_update_news = true;
-        };
-        plugin = {
-          dynamic-cursors = {
+        animation = [
+          {
+            leaf = "windows";
             enabled = true;
-            threshold = 1;
-            mode = "tilt";
-            shake = {
-              enabled = false;
+            speed = 2;
+            bezier = "smooth";
+            style = "popin 75%";
+          }
+          {
+            leaf = "windowsIn";
+            enabled = true;
+            speed = 2;
+            bezier = "smooth";
+            style = "popin 75%";
+          }
+          {
+            leaf = "windowsOut";
+            enabled = true;
+            speed = 2;
+            bezier = "smooth";
+            style = "popin 75%";
+          }
+          {
+            leaf = "windowsMove";
+            enabled = true;
+            speed = 2;
+            bezier = "smooth";
+            style = "slide";
+          }
+          {
+            leaf = "layers";
+            enabled = true;
+            speed = 3.3;
+            bezier = "smooth";
+            style = "fade";
+          }
+          {
+            leaf = "fade";
+            enabled = true;
+            speed = 3.3;
+            bezier = "smooth";
+          }
+          {
+            leaf = "workspaces";
+            enabled = true;
+            speed = 2;
+            bezier = "smooth";
+            style = "slide";
+          }
+          {
+            leaf = "specialWorkspace";
+            enabled = true;
+            speed = 2.5;
+            bezier = "smooth";
+            style = "slidefadevert 6%";
+          }
+        ];
+        config = {
+          cursor = {
+            inactive_timeout = 3;
+            use_cpu_buffer = 1;
+          };
+          input = {
+            kb_layout = "us,de";
+            kb_options = "caps:escape";
+            touchpad = {
+              natural_scroll = true;
+              scroll_factor = 0.2;
+            };
+            follow_mouse = 1;
+            sensitivity = 0.2;
+            force_no_accel = false;
+            accel_profile = "adaptive";
+            numlock_by_default = true;
+          };
+          misc = {
+            vrr = 1;
+            disable_hyprland_logo = true;
+            animate_manual_resizes = true;
+            enable_swallow = true;
+            swallow_regex = "^ghostty\\.(.+)$";
+            disable_splash_rendering = true;
+            initial_workspace_tracking = 0;
+            force_default_wallpaper = 0;
+          };
+          opengl = {
+            nvidia_anti_flicker = false;
+          };
+          general = {
+            border_size = 0;
+            gaps_in = 4;
+            gaps_out = 8;
+            allow_tearing = true;
+            layout = "dwindle";
+          };
+          ecosystem = {
+            no_update_news = true;
+          };
+          dwindle = {
+            preserve_split = true;
+          };
+          decoration = {
+            rounding = 6;
+            rounding_power = 4;
+            dim_inactive = true;
+            dim_strength = 0.06;
+            inactive_opacity = 0.96;
+            dim_special = 0.2;
+            dim_around = 0.2;
+            shadow = {
+              enabled = true;
+              range = 24;
+              scale = 0.99;
+              offset = "0 3";
+              render_power = 3;
+              color = "0x90000000";
+              color_inactive = "0x62000000";
+            };
+            blur = {
+              special = true;
+              enabled = true;
+              size = 2;
+              vibrancy = 0.25;
+              passes = 3;
+              new_optimizations = true;
+              ignore_opacity = true;
+              xray = false;
             };
           };
-        };
-        dwindle = {
-          preserve_split = true;
-        };
-        decoration = {
-          rounding = 6;
-          rounding_power = 4;
-          dim_inactive = true;
-          dim_strength = 0.06;
-          inactive_opacity = 0.96;
-          dim_special = 0.2;
-          dim_around = 0.2;
-          shadow = {
+          animations = {
             enabled = true;
-            range = 24;
-            scale = 0.99;
-            offset = "0 3";
-            render_power = 3;
-            color = "0x90000000";
-            color_inactive = "0x62000000";
           };
-          blur = {
-            special = true;
-            enabled = true;
-            size = 2;
-            vibrancy = 0.25;
-            passes = 3;
-            new_optimizations = true;
-            ignore_opacity = true;
-            xray = false;
+          binds = {
+            movefocus_cycles_fullscreen = false;
           };
         };
-        animations = {
-          enabled = true;
-          bezier = [
-            "smooth, 0.05, 0.9, 0.1, 1"
-          ];
-          animation = [
-            "windows, 1, 2, smooth, popin 75%"
-            "windowsIn, 1, 2, smooth, popin 75%"
-            "windowsOut, 1, 2, smooth, popin 75%"
-            "windowsMove, 1, 2, smooth, slide"
-            "layers, 1, 3.3, smooth, fade"
-            "fade, 1, 3.3, smooth"
-            "workspaces, 1, 2, smooth, slide"
-            "specialWorkspace, 1, 2.5, smooth, slidefadevert 6%"
-          ];
-        };
-        windowrule = [
-          "no_blur on, match:class ^()$, match:title ^()$"
-
-          "workspace 1, match:initial_class ^(brave-browser)$"
-          "workspace 2, match:initial_class ^(ghostty.default)$"
-          "workspace 3, match:initial_class ^(md.obsidian.Obsidian)$"
-          "workspace 4, match:initial_class ^(slack)$"
-          "workspace 6, match:initial_class ^(spotify)$"
-          "workspace 9, match:initial_class ^(signal)$"
-          "workspace 9, match:initial_title ^(WhatsApp Electron)(.*)$"
-
-          "float on,match:initial_class ^(${geminiClass})$"
-          "size 1790 1144, match:initial_class ^(${geminiClass})$"
-          "center on, match:initial_class ^(${geminiClass})$"
-
-          "float on,match:initial_class ^(ghostty.yazi)$"
-          "size 1400 700, match:initial_class ^(ghostty.yazi)$"
-
-          "float on,match:initial_class ^(ghostty.fastfetch)$"
-          "size 1220 740, match:initial_class ^(ghostty.fastfetch)$"
-
-          "float on,match:initial_class ^(ghostty.weather)$"
-          "size 1200 800, match:initial_class ^(ghostty.weather)$"
-
-          "float on,match:initial_class ^(ghostty.asciiquarium)$"
-          "size 1200 800, match:initial_class ^(ghostty.asciiquarium)$"
-
-          "float on,match:initial_class ^(ghostty.astroterm)$"
-          "size 1200 800, match:initial_class ^(ghostty.astroterm)$"
-
-          "float on,match:initial_class ^(ghostty.spotify_player)$"
-          "size 1600 1160, match:initial_class ^(ghostty.spotify_player)$"
-          "workspace special:spotify_player silent,match:initial_class ^(ghostty.spotify_player)$"
-
-          "float on,match:initial_class ^(ghostty.obsidian)$"
-          "size 1600 900, match:initial_class ^(ghostty.obsidian)$"
-          "workspace special:obsidian_nvim silent,match:initial_class ^(ghostty.obsidian)$"
-
-          "workspace special:helium silent,match:initial_class ^(helium)$"
+        layer_rule = [
+          {
+            match.namespace = "keypress-visualizer";
+            order = 1;
+            blur = true;
+            ignore_alpha = 0.69;
+          }
+          {
+            match.namespace = "hyprpicker"; # Top Layer
+            order = 2;
+            no_anim = true;
+          }
+          {
+            match.namespace = "swaync-notification-window";
+            order = 3;
+            blur = true;
+            ignore_alpha = 0.65;
+            above_lock = 1;
+          }
+          {
+            match.namespace = "rofi";
+            order = 4;
+            blur = true;
+          }
+          {
+            match.namespace = "waybar";
+            order = 5;
+          }
+          {
+            match.namespace = "swaync-control-center"; # Bottom Layer
+            order = 6;
+            blur = true;
+            ignore_alpha = 0.65;
+            dim_around = true;
+          }
+        ];
+        gesture = [
+          {
+            fingers = 5;
+            direction = "swipe";
+            action = "move";
+          }
+          {
+            fingers = 4;
+            direction = "swipe";
+            action = "resize";
+          }
+          {
+            fingers = 3;
+            direction = "horizontal";
+            action = "workspace";
+          }
+          {
+            fingers = 3;
+            direction = "pinch";
+            action = "fullscreen";
+          }
+        ];
+        window_rule = [
+          {
+            match = {
+              class = "^()$";
+              title = "^()$";
+            };
+            no_blur = true;
+          }
+          {
+            match.initial_class = "^(brave-browser)$";
+            workspace = 1;
+          }
+          {
+            match.initial_class = "^(ghostty.default)$";
+            workspace = 2;
+          }
+          {
+            match.initial_class = "^(md.obsidian.Obsidian)$";
+            workspace = 3;
+          }
+          {
+            match.initial_class = "^(slack)$";
+            workspace = 4;
+          }
+          {
+            match.initial_class = "^(spotify)$";
+            workspace = 6;
+          }
+          {
+            match.initial_class = "^(signal)$";
+            workspace = 9;
+          }
+          {
+            match.initial_title = "^(WhatsApp Electron)(.*)$";
+            workspace = 9;
+          }
+          {
+            match.initial_class = "^(${geminiClass})$";
+            float = true;
+            size = "1790 1144";
+            center = true;
+          }
+          {
+            match.initial_class = "^(ghostty.yazi)$";
+            float = true;
+            size = "1400 700";
+          }
+          {
+            match.initial_class = "^(ghostty.fastfetch)$";
+            float = true;
+            size = "1220 740";
+          }
+          {
+            match.initial_class = "^(ghostty.weather)$";
+            float = true;
+            size = "1200 800";
+          }
+          {
+            match.initial_class = "^(ghostty.asciiquarium)$";
+            float = true;
+            size = "1200 800";
+          }
+          {
+            match.initial_class = "^(ghostty.astroterm)$";
+            float = true;
+            size = "1200 800";
+          }
+          {
+            match.initial_class = "^(ghostty.spotify_player)$";
+            float = true;
+            size = "1600 1160";
+            workspace = "special:spotify_player silent";
+          }
+          {
+            match.initial_class = "^(ghostty.obsidian)$";
+            float = true;
+            size = "1600 900";
+            workspace = "special:obsidian_nvim silent";
+          }
+          {
+            match.initial_class = "^(helium)$";
+            workspace = "special:helium silent";
+          }
         ];
         monitor = [
-          "eDP-1,2880x1800@120.00,0x0, 1.25" # Internal
-          "Virtual-1,3024x1890@60.00,0x0, 1.5" # For Extending Screen wirelessly
-          "desc:Samsung Electric Company LS27D70xE HK2YA02261, 3840x2160@60.00, auto-up, 1.5" # External Office Meetovo
-          "desc:LG Electronics 27GL850 912NTVSCD959, 2560x1440@144.00, auto-up, 1" # External LG at home
-          ", highres, auto-up, 1" # Everything Else Auto
+          {
+            output = "eDP-1"; # Internal
+            mode = "2880x1800@120.00";
+            position = "0x0";
+            scale = 1.25;
+          }
+          {
+            output = "Virtual-1"; # For Extending Screen wirelessly
+            mode = "3024x1890@60.00";
+            position = "0x0";
+            scale = 1.5;
+          }
+          {
+            output = "desc:Samsung Electric Company LS27D70xE HK2YA02261"; # External Office Meetovo
+            mode = "3840x2160@60.00";
+            position = "auto-up";
+            scale = 1.5;
+          }
+          {
+            output = "desc:LG Electronics 27GL850 912NTVSCD959"; # External LG at home
+            mode = "2560x1440@144.00";
+            position = "auto-up";
+            scale = 1;
+          }
+          {
+            output = ""; # Everything Else Auto
+            mode = "highres";
+            position = "auto-up";
+            scale = 1;
+          }
         ];
-        binds.movefocus_cycles_fullscreen = false;
-        bindd =
+        on = [
+          {
+            _args = [
+              "hyprland.start"
+              (mkLuaInline ''
+                function()
+                  hl.exec_cmd(${toLua "${scripts.hyprland-session-lock}"})
+                  hl.exec_cmd(${toLua "${pkgs._1password-gui}/bin/1password --silent"})
+                  hl.exec_cmd(${toLua "${scripts.hyprland-startup-workspaces}"})
+                  hl.exec_cmd(${toLua "${scripts.firmware-update-check}"})
+                  hl.exec_cmd(${toLua "${scripts.volume-change-notify}"})
+                  hl.exec_cmd(${toLua "${scripts.brightness-change-notify}"})
+                  hl.exec_cmd("hyprctl setcursor Bibata-Modern-Ice 20")
+                end'')
+            ];
+          }
+        ];
+        bind =
           [
-            "SUPER, q, Kill active window, killactive"
+            (bindd "SUPER + q" "Kill active window" "hl.dsp.window.close()")
 
-            "SUPER, Tab, Cycle next window, exec, ${scripts.cycle-windows "next"}"
-            "SUPER+Shift, Tab, Cycle previous window, exec, ${scripts.cycle-windows "prev"}"
+            (bindd "SUPER + Tab" "Cycle next window" (exec "${scripts.cycle-windows "next"}"))
+            (bindd "SUPER + SHIFT + Tab" "Cycle previous window" (exec "${scripts.cycle-windows "prev"}"))
 
-            "SUPER, h, Move focus left, movefocus, l"
-            "SUPER, l, Move focus right, movefocus, r"
-            "SUPER, k, Move focus up, movefocus, u"
-            "SUPER, j, Move focus down, movefocus, d"
+            (bindd "SUPER + h" "Move focus left" ''hl.dsp.focus({ direction = "l" })'')
+            (bindd "SUPER + l" "Move focus right" ''hl.dsp.focus({ direction = "r" })'')
+            (bindd "SUPER + k" "Move focus up" ''hl.dsp.focus({ direction = "u" })'')
+            (bindd "SUPER + j" "Move focus down" ''hl.dsp.focus({ direction = "d" })'')
 
-            "SUPER, h, Bring active to top left, bringactivetotop, l"
-            "SUPER, l, Bring active to top right, bringactivetotop, r"
-            "SUPER, k, Bring active to top up, bringactivetotop, u"
-            "SUPER, j, Bring active to top down, bringactivetotop, d"
+            (bindd "SUPER + h" "Bring active to top left" "hl.dsp.window.bring_to_top()")
+            (bindd "SUPER + l" "Bring active to top right" "hl.dsp.window.bring_to_top()")
+            (bindd "SUPER + k" "Bring active to top up" "hl.dsp.window.bring_to_top()")
+            (bindd "SUPER + j" "Bring active to top down" "hl.dsp.window.bring_to_top()")
 
-            "SUPER, t, Toggle split vertical/horizontal, layoutmsg, togglesplit"
+            (bindd "SUPER + t" "Toggle split vertical/horizontal" ''hl.dsp.layout("togglesplit")'')
 
-            "SUPER, Return, Open Ghostty Terminal Emulator, exec, ${lib.getExe pkgs.ghostty}"
-            "SUPER, F, Toggle fullscreen, fullscreen,"
-            "SUPER, g, Toggle Hyprland zoomed out mode, exec, ${scripts.toggle-hypr-zoomed-out}"
-            "SUPER, d, Rofi search, exec, ${scripts.rofi-launch} search"
-            "SUPER, s, Simple Screenshot, exec, ${scripts.screenshot}"
-            "SUPER+Shift, x, Open Linear ticket from clipboard, exec, ${scripts.open-linear-ticket}"
-            "SUPER, E, Open file manager, exec, ${scripts.launch-once {
+            (bindd "SUPER + Return" "Open Ghostty Terminal Emulator" (exec (lib.getExe pkgs.ghostty)))
+            (bindd "SUPER + F" "Toggle fullscreen" "hl.dsp.window.fullscreen()")
+            (bindd "SUPER + g" "Toggle Hyprland zoomed out mode" (exec "${scripts.toggle-hypr-zoomed-out}"))
+            (bindd "SUPER + d" "Rofi search" (exec "${scripts.rofi-launch} search"))
+            (bindd "SUPER + s" "Simple Screenshot" (exec "${scripts.screenshot}"))
+            (bindd "SUPER + SHIFT + x" "Open Linear ticket from clipboard" (exec "${scripts.open-linear-ticket}"))
+            (bindd "SUPER + E" "Open file manager" (exec "${scripts.launch-once {
               command = "${lib.getExe pkgs.ghostty} --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi ~/Downloads/";
               grep = "ghostty.yazi";
               useHypr = true;
               toggle = true;
-            }}"
-            "SUPER, m, Emoji Picker, exec, ${scripts.rofi-launch} emoji"
-            "SUPER, SPACE, Switch keyboard layout, exec, ${scripts.switch-kb-layout}"
-            "ALT, d, Open Google Gemini, exec, ${scripts.launch-once {
+            }}"))
+            (bindd "SUPER + m" "Emoji Picker" (exec "${scripts.rofi-launch} emoji"))
+            (bindd "SUPER + SPACE" "Switch keyboard layout" (exec "${scripts.switch-kb-layout}"))
+            (bindd "ALT + d" "Open Google Gemini" (exec "${scripts.launch-once {
               command = "${pkgs.brave}/bin/brave --app=https://gemini.google.com --profile-directory=${personalBraveProfile}";
               grep = geminiClass;
               useHypr = true;
               toggle = true;
-            }}"
-            "SUPER, c, Query Wolfram|Alpha with ChatGPT fallback, exec, ${scripts.rofi-launch} calc"
+            }}"))
+            (bindd "SUPER + c" "Query Wolfram|Alpha with ChatGPT fallback" (exec "${scripts.rofi-launch} calc"))
 
-            ",F8, Toggle Spotify Workspace, togglespecialworkspace, spotify_player"
-            ",F8, Launch Spotify if not running, exec, pgrep spotify_player || ${lib.getExe pkgs.ghostty} --font-size=12 --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"
+            (bindd "F8" "Toggle Spotify Workspace" ''hl.dsp.workspace.toggle_special("spotify_player")'')
+            (bindd "F8" "Launch Spotify if not running" (exec "pgrep spotify_player || ${lib.getExe pkgs.ghostty} --font-size=12 --class=ghostty.spotify_player -e ${pkgs.spotify-player}/bin/spotify_player"))
 
-            "SUPER, F8, Like current track on Spotify, exec, ${scripts.spotify-like}"
-            "Shift, F8, Play a random album of the day, exec, ${scripts.random-album-of-the-day}"
+            (bindd "SUPER + F8" "Like current track on Spotify" (exec "${scripts.spotify-like}"))
+            (bindd "SHIFT + F8" "Play a random album of the day" (exec "${scripts.random-album-of-the-day}"))
 
-            ",F7, Wireless virtual Screen, exec, ${scripts.wireless-screen}"
+            (bindd "F7" "Wireless virtual Screen" (exec "${scripts.wireless-screen}"))
 
-            ",F11, Toggle Obsidian Neovim Workspace, togglespecialworkspace, obsidian_nvim"
-            ",F11, Launch Obsidian if not launched, exec, ${scripts.launch-once {
+            (bindd "F11" "Toggle Obsidian Neovim Workspace" ''hl.dsp.workspace.toggle_special("obsidian_nvim")'')
+            (bindd "F11" "Launch Obsidian if not launched" (exec "${scripts.launch-once {
               command = "${pkgs.obsidian}/bin/obsidian";
               grep = "initialTitle:.*Obsidian.*";
               useHypr = true;
-            }}"
-            ",F11, Launch Neovim in Obsidian Vault, exec, ${scripts.launch-once {
+            }}"))
+            (bindd "F11" "Launch Neovim in Obsidian Vault" (exec "${scripts.launch-once {
               command = "${lib.getExe pkgs.ghostty} --class=ghostty.obsidian -e ${config.programs.neovim.finalPackage}/bin/nvim \"~/Documents/Marius\\\'\\\ Remote\\\ Vault\"";
               grep = "ghostty\\\.obsidian";
               useHypr = true;
-            }}"
-            "Shift, F11, Launch Obsidian if not launched, exec, ${scripts.launch-once {
+            }}"))
+            (bindd "SHIFT + F11" "Launch Obsidian if not launched" (exec "${scripts.launch-once {
               command = "${pkgs.obsidian}/bin/obsidian";
               grep = "initialClass: obsidian";
               useHypr = true;
-            }}"
-            "Shift, F11, Toggle Obsidian Workspace, togglespecialworkspace, obsidian"
+            }}"))
+            (bindd "SHIFT + F11" "Toggle Obsidian Workspace" ''hl.dsp.workspace.toggle_special("obsidian")'')
 
-            ",F12, Toggle Helium Workspace, togglespecialworkspace, helium"
-            ",F12, Launch Helium if not running, exec, ${scripts.launch-once {
+            (bindd "F12" "Toggle Helium Workspace" ''hl.dsp.workspace.toggle_special("helium")'')
+            (bindd "F12" "Launch Helium if not running" (exec "${scripts.launch-once {
               command = "${helium}";
               grep = "helium";
               useHypr = true;
-            }}"
+            }}"))
 
-            "SUPER+Shift, Return, SSH Session Selection, exec, ${scripts.rofi-launch} ssh"
-            "SUPER+Shift, G, GitLab MR search, exec, ${scripts.rofi-launch} gitlab"
-            "SUPER+Shift, Space, Toggle active window floating, togglefloating"
-            "SUPER+Shift, s, Take Screenshot and then edit it, exec, ${scripts.screenshot} edit"
-            "SUPER+Shift, F, Toggle fake fullscreen, fullscreenstate, 2,"
-            "SUPER+Shift, N, Move current workspace to next monitor, movecurrentworkspacetomonitor, +1"
-            "SUPER+Shift, t, Open Rofi Translation Menu, exec, ${scripts.rofi-launch} translate"
-            "SUPER+Shift, c, Toggle Notification Center, exec, ${pkgs.swaynotificationcenter}/bin/swaync-client -t"
-            "SUPER+Shift, d, Toggle Dark Mode, exec, ${pkgs.darkman}/bin/darkman toggle"
-            "SUPER+Shift, w, Change Wallpaper, exec, ${scripts.rofi-launch} wallpaper"
-            "SUPER+Shift, z, Toggle zen mode, exec, ${scripts.toggle-zen}"
-            "SUPER+Shift, g, Toggle workspace floating, workspaceopt, allfloat"
-            "SUPER+Shift, P, Color picker, exec, ${pkgs.hyprpicker}/bin/hyprpicker -a"
-            "SUPER+Shift, q, Power Menu, exec, ${scripts.rofi-launch} power"
-            "SUPER+Shift, i, 1Password quick access, exec, ${pkgs._1password-gui}/bin/1password --quick-access"
-            "SUPER+Shift, v, Rofi Clipboard History, exec, ${scripts.rofi-launch} cliphist"
-            "SUPER+Shift, o, Obsidian Search, exec, ${scripts.rofi-launch} obsidian"
+            (bindd "SUPER + SHIFT + Return" "SSH Session Selection" (exec "${scripts.rofi-launch} ssh"))
+            (bindd "SUPER + SHIFT + G" "GitLab MR search" (exec "${scripts.rofi-launch} gitlab"))
+            (bindd "SUPER + SHIFT + Space" "Toggle active window floating" ''hl.dsp.window.float({ action = "toggle" })'')
+            (bindd "SUPER + ALT + Space" "Toggle workspace floating" toggleWorkspaceFloating)
+            (bindd "SUPER + SHIFT + s" "Take Screenshot and then edit it" (exec "${scripts.screenshot} edit"))
+            (bindd "SUPER + SHIFT + F" "Toggle fake fullscreen" toggleFakeFullscreen)
+            (bindd "SUPER + SHIFT + N" "Move current workspace to next monitor" ''hl.dsp.workspace.move({ monitor = "+1" })'')
+            (bindd "SUPER + SHIFT + t" "Open Rofi Translation Menu" (exec "${scripts.rofi-launch} translate"))
+            (bindd "SUPER + SHIFT + c" "Toggle Notification Center" (exec "${pkgs.swaynotificationcenter}/bin/swaync-client -t"))
+            (bindd "SUPER + SHIFT + d" "Toggle Dark Mode" (exec "${pkgs.darkman}/bin/darkman toggle"))
+            (bindd "SUPER + SHIFT + w" "Change Wallpaper" (exec "${scripts.rofi-launch} wallpaper"))
+            (bindd "SUPER + SHIFT + z" "Toggle zen mode" (exec "${scripts.toggle-zen}"))
+            (bindd "SUPER + SHIFT + P" "Color picker" (exec "${pkgs.hyprpicker}/bin/hyprpicker -a"))
+            (bindd "SUPER + SHIFT + q" "Power Menu" (exec "${scripts.rofi-launch} power"))
+            (bindd "SUPER + SHIFT + i" "1Password quick access" (exec "${pkgs._1password-gui}/bin/1password --quick-access"))
+            (bindd "SUPER + SHIFT + v" "Rofi Clipboard History" (exec "${scripts.rofi-launch} cliphist"))
+            (bindd "SUPER + SHIFT + o" "Obsidian Search" (exec "${scripts.rofi-launch} obsidian"))
 
-            "SUPER+Ctrl, s, Copy text from screen using OCR, exec, ${scripts.ocr-screenshot}"
+            (bindd "SUPER + CTRL + s" "Copy text from screen using OCR" (exec "${scripts.ocr-screenshot}"))
 
             # bound to mousewheel left/right
-            "Ctrl+Shift, Left, Previous workspace, workspace, m-1"
-            "Ctrl+Shift, Right, Next workspace, workspace, m+1"
+            (bindd "CTRL + SHIFT + Left" "Previous workspace" ''hl.dsp.focus({ workspace = "m-1" })'')
+            (bindd "CTRL + SHIFT + Right" "Next workspace" ''hl.dsp.focus({ workspace = "m+1" })'')
           ]
           ++ (
             builtins.concatLists (builtins.genList (
                 i: let
                   ws = i + 1;
                 in [
-                  "SUPER, ${toString ws}, Switch to workspace ${toString ws}, workspace, ${toString ws}"
-                  "SUPER+Shift, ${toString ws}, Move to workspace ${toString ws}, movetoworkspace, ${toString ws}"
-                  "SUPER+CTRL, ${toString ws}, Move to workspace ${toString ws} silently, movetoworkspacesilent, ${toString ws}"
+                  (bindd "SUPER + ${toString ws}" "Switch to workspace ${toString ws}" ''hl.dsp.focus({ workspace = ${toString ws} })'')
+                  (bindd "SUPER + SHIFT + ${toString ws}" "Move to workspace ${toString ws}" ''hl.dsp.window.move({ workspace = ${toString ws} })'')
+                  (bindd "SUPER + CTRL + ${toString ws}" "Move to workspace ${toString ws} silently" ''hl.dsp.window.move({ workspace = ${toString ws}, follow = false })'')
                 ]
               )
               9)
           )
           ++ lib.optionals config.services.blueman-applet.enable [
-            "SUPER+Shift, b, Rofi Bluetooth, exec, ${scripts.rofi-launch} bluetooth"
+            (bindd "SUPER + SHIFT + b" "Rofi Bluetooth" (exec "${scripts.rofi-launch} bluetooth"))
           ]
           ++ lib.optionals config.programs.configured.npu-dictate.enable [
-            "SUPER, v, Dictate (hold to talk), exec, ${npuDictate} start"
+            (bindd "SUPER + v" "Dictate (hold to talk)" (exec "${npuDictate} start"))
+            # On key release (r flag), ignore mods (i) and bubble through (n)
+            (binddrin "v" "Dictate (transcribe)" (exec "${npuDictate} stop"))
+          ]
+          ++ [
+            # Allow on lockscreen (locked) and allow repeat (repeating)
+            (binddle "XF86AudioRaiseVolume" "Increase volume" (exec "${pkgs.pamixer}/bin/pamixer -i 5"))
+            (binddle "XF86AudioLowerVolume" "Decrease volume" (exec "${pkgs.pamixer}/bin/pamixer -d 5"))
+            (binddle "XF86AudioMute" "Mute audio" (exec "${pkgs.pamixer}/bin/pamixer -t"))
+            (binddle "XF86AudioMicMute" "Mute microphone" (exec "${pkgs.pamixer}/bin/pamixer --default-source -t"))
+            (binddle "XF86AudioPlay" "Toggle media playback" (exec "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"))
+            (binddle "XF86AudioPause" "Toggle media playback" (exec "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"))
+            (binddle "XF86AudioNext" "Next track" (exec "${pkgs.waybar-mpris}/bin/waybar-mpris --send player-next"))
+            (binddle "XF86AudioPrev" "Previous track" (exec "${pkgs.waybar-mpris}/bin/waybar-mpris --send player-prev"))
+            (binddle "XF86MonBrightnessUp" "Increase brightness" (exec "${pkgs.brightnessctl}/bin/brightnessctl set 5%+"))
+            (binddle "XF86MonBrightnessDown" "Decrease brightness" (exec "${pkgs.brightnessctl}/bin/brightnessctl set 5%-"))
+            (binddle "SUPER + bracketright" "Increase volume" (exec "${pkgs.pamixer}/bin/pamixer -i 5"))
+            (binddle "SUPER + slash" "Decrease volume" (exec "${pkgs.pamixer}/bin/pamixer -d 5"))
+            (binddle "SUPER + p" "Toggle media playback (play/pause)" (exec "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"))
+            (binddle "SUPER + backslash" "Mute audio" (exec "${pkgs.pamixer}/bin/pamixer -t"))
+            (binddle "SUPER + SHIFT + bracketright" "Increase brightness" (exec "${pkgs.brightnessctl}/bin/brightnessctl set 5%+"))
+            (binddle "SUPER + SHIFT + slash" "Decrease brightness" (exec "${pkgs.brightnessctl}/bin/brightnessctl set 5%-"))
+
+            # A drag/resize ends at the next key or mouse-button event: in practice releasing
+            # the button, X/Y/Z or SUPER
+            (bindd "SUPER + mouse:272" "Move window" "hl.dsp.window.drag()")
+            (bindd "SUPER + mouse:273" "Resize window" "hl.dsp.window.resize()")
+            (bindd "SUPER + X" "Resize window" "hl.dsp.window.resize()")
+            (bindd "SUPER + Y" "Move window" "hl.dsp.window.drag()")
+            (bindd "SUPER + Z" "Move window" "hl.dsp.window.drag()")
+
+            # Allow repeat (repeating = true)
+            (bindde "SUPER + SHIFT + h" "Move window left" (moveOrTile "l" (-30) 0))
+            (bindde "SUPER + SHIFT + l" "Move window right" (moveOrTile "r" 30 0))
+            (bindde "SUPER + SHIFT + k" "Move window up" (moveOrTile "u" 0 (-30)))
+            (bindde "SUPER + SHIFT + j" "Move window down" (moveOrTile "d" 0 30))
+
+            (bindde "SUPER + ALT + l" "Resize window right" ''hl.dsp.window.resize({ x = 30, y = 0, relative = true })'')
+            (bindde "SUPER + ALT + h" "Resize window left" ''hl.dsp.window.resize({ x = -30, y = 0, relative = true })'')
+            (bindde "SUPER + ALT + k" "Resize window up" ''hl.dsp.window.resize({ x = 0, y = -30, relative = true })'')
+            (bindde "SUPER + ALT + j" "Resize window down" ''hl.dsp.window.resize({ x = 0, y = 30, relative = true })'')
+
+            (bindde "CTRL + semicolon" "Type ö" (exec "${pkgs.wtype}/bin/wtype ö"))
+            (bindde "CTRL + apostrophe" "Type ä" (exec "${pkgs.wtype}/bin/wtype ä"))
+            (bindde "CTRL + bracketleft" "Type ü" (exec "${pkgs.wtype}/bin/wtype ü"))
+            (bindde "CTRL + minus" "Type ß" (exec "${pkgs.wtype}/bin/wtype ß"))
+
+            (bindde "CTRL + SHIFT + semicolon" "Type Ö" (exec "${pkgs.wtype}/bin/wtype Ö"))
+            (bindde "CTRL + SHIFT + apostrophe" "Type Ä" (exec "${pkgs.wtype}/bin/wtype Ä"))
+            (bindde "CTRL + SHIFT + bracketleft" "Type Ü" (exec "${pkgs.wtype}/bin/wtype Ü"))
+
+            (bindde "SUPER + semicolon" "Type ö" (exec "${pkgs.wtype}/bin/wtype ö"))
+            (bindde "SUPER + apostrophe" "Type ä" (exec "${pkgs.wtype}/bin/wtype ä"))
+            (bindde "SUPER + bracketleft" "Type ü" (exec "${pkgs.wtype}/bin/wtype ü"))
+            (bindde "SUPER + minus" "Type ß" (exec "${pkgs.wtype}/bin/wtype ß"))
+
+            (bindde "SUPER + SHIFT + semicolon" "Type Ö" (exec "${pkgs.wtype}/bin/wtype Ö"))
+            (bindde "SUPER + SHIFT + apostrophe" "Type Ä" (exec "${pkgs.wtype}/bin/wtype Ä"))
+            (bindde "SUPER + SHIFT + bracketleft" "Type Ü" (exec "${pkgs.wtype}/bin/wtype Ü"))
           ];
-        binddrin = lib.optionals config.programs.configured.npu-dictate.enable [
-          # On key release (r flag), ignore mods (i) and bubble through (n)
-          ",v, Dictate (transcribe), exec, ${npuDictate} stop" # No-op when start wasn't run
-        ];
-        binddle = [
-          # Allow on lockscreen (l flag) and allow repeat (e flag)
-          ", XF86AudioRaiseVolume, Increase volume, exec, ${pkgs.pamixer}/bin/pamixer -i 5"
-          ", XF86AudioLowerVolume, Decrease volume, exec, ${pkgs.pamixer}/bin/pamixer -d 5"
-          ", XF86AudioMute, Mute audio, exec, ${pkgs.pamixer}/bin/pamixer -t"
-          ", XF86AudioMicMute, Mute microphone, exec, ${pkgs.pamixer}/bin/pamixer --default-source -t"
-          ", XF86AudioPlay, Toggle media playback, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"
-          ", XF86AudioPause, Toggle media playback, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"
-          ", XF86AudioNext, Next track, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send player-next"
-          ", XF86AudioPrev, Previous track, exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send player-prev"
-          ", XF86MonBrightnessUp, Increase brightness, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%+"
-          ", XF86MonBrightnessDown, Decrease brightness, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%-"
-          "SUPER, bracketright, Increase volume, exec, ${pkgs.pamixer}/bin/pamixer -i 5"
-          "SUPER, slash, Decrease volume, exec, ${pkgs.pamixer}/bin/pamixer -d 5"
-          "SUPER, p, Toggle media playback (play/pause), exec, ${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"
-          "SUPER, backslash, Mute audio, exec, ${pkgs.pamixer}/bin/pamixer -t"
-          "SUPER+Shift, bracketright, Increase brightness, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%+"
-          "SUPER+Shift, slash, Decrease brightness, exec, ${pkgs.brightnessctl}/bin/brightnessctl set 5%-"
-        ];
-        binddm = [
-          # Bind Mouse (m flag)
-          "SUPER, mouse:272, Move window, movewindow"
-          "SUPER, mouse:273, Resize window, resizewindow"
-          "SUPER, X, Resize window, resizewindow"
-          "SUPER, Y, Move window, movewindow"
-          "SUPER, Z, Move window, movewindow"
-        ];
-        bindde = [
-          # Allow repeat (e flag)
-          "SUPER+Shift, h, Move window left, exec, $moveactivewindow -30 0 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow l"
-          "SUPER+Shift, l, Move window right, exec, $moveactivewindow 30 0 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow r"
-          "SUPER+Shift, k, Move window up, exec, $moveactivewindow  0 -30 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow u"
-          "SUPER+Shift, j, Move window down, exec, $moveactivewindow 0 30 || ${pkgs.hyprland}/bin/hyprctl dispatch movewindow d"
-
-          "SUPER+alt, l, Resize window right, resizeactive, 30 0"
-          "SUPER+alt, h, Resize window left, resizeactive, -30 0"
-          "SUPER+alt, k, Resize window up, resizeactive, 0 -30"
-          "SUPER+alt, j, Resize window down, resizeactive, 0 30"
-
-          "CTRL, semicolon, Type ö, exec, ${pkgs.wtype}/bin/wtype ö"
-          "CTRL, apostrophe, Type ä, exec, ${pkgs.wtype}/bin/wtype ä"
-          "CTRL, bracketleft, Type ü, exec, ${pkgs.wtype}/bin/wtype ü"
-          "CTRL, minus, Type ß, exec, ${pkgs.wtype}/bin/wtype ß"
-
-          "CTRL+Shift, semicolon, Type Ö, exec, ${pkgs.wtype}/bin/wtype Ö"
-          "CTRL+Shift, apostrophe, Type Ä, exec, ${pkgs.wtype}/bin/wtype Ä"
-          "CTRL+Shift, bracketleft, Type Ü, exec, ${pkgs.wtype}/bin/wtype Ü"
-
-          "SUPER, semicolon, Type ö, exec, ${pkgs.wtype}/bin/wtype ö"
-          "SUPER, apostrophe, Type ä, exec, ${pkgs.wtype}/bin/wtype ä"
-          "SUPER, bracketleft, Type ü, exec, ${pkgs.wtype}/bin/wtype ü"
-          "SUPER, minus, Type ß, exec, ${pkgs.wtype}/bin/wtype ß"
-
-          "SUPER+Shift, semicolon, Type Ö, exec, ${pkgs.wtype}/bin/wtype Ö"
-          "SUPER+Shift, apostrophe, Type Ä, exec, ${pkgs.wtype}/bin/wtype Ä"
-          "SUPER+Shift, bracketleft, Type Ü, exec, ${pkgs.wtype}/bin/wtype Ü"
-        ];
-        "$moveactivewindow" = "grep -q \"true\" <<< $(${pkgs.hyprland}/bin/hyprctl activewindow -j | jq -r .floating) && ${pkgs.hyprland}/bin/hyprctl dispatch moveactive";
       };
+      extraConfig =
+        # lua
+        ''
+          -- Loaded by the config rather than home-manager's `plugins` (a one-off `hyprctl plugin load`
+          -- on hyprland.start), so a rebuild that changes the store path swaps the loaded plugin. After a
+          -- Hyprland bump the new build refuses the still-running compositor until Hyprland restarts
+          hl.plugin.load("${pkgs.hyprlandPlugins.hypr-dynamic-cursors}/lib/libhypr-dynamic-cursors.so")
+
+          -- The plugin is loaded after this file has run and then reloads the config. Its options exist
+          -- only while it is loaded; setting them otherwise is an unknown-key error
+          if hl.get_config("plugin.dynamic_cursors.enabled") ~= nil then
+            hl.config({
+              plugin = {
+                dynamic_cursors = {
+                  enabled = true,
+                  threshold = 1,
+                  mode = "tilt",
+                  shake = {
+                    enabled = false,
+                  },
+                },
+              },
+            })
+          end
+        '';
     };
   };
 }
