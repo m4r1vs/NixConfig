@@ -175,6 +175,22 @@ in {
           PRIMARY_COLOR_HEX="#9F81A0";
           SECONDARY_COLOR_HEX="#FF5650";
           ;;
+        Cambrils_Sunset.jpg)
+          PRIMARY_COLOR_HEX="#fd7400";
+          SECONDARY_COLOR_HEX="#284360";
+          ;;
+        Mountains_South_of_Barca.jpg)
+          PRIMARY_COLOR_HEX="#96c0e8";
+          SECONDARY_COLOR_HEX="#ff990a";
+          ;;
+        Road_to_Catalonian_Chapel.jpg)
+          PRIMARY_COLOR_HEX="#682605";
+          SECONDARY_COLOR_HEX="#5b7f14";
+          ;;
+        Salou_Beachside_Greens.jpg)
+          PRIMARY_COLOR_HEX="#9bd801";
+          SECONDARY_COLOR_HEX="#a40000";
+          ;;
         *)
           PRIMARY_COLOR_HEX="#81913F"
           SECONDARY_COLOR_HEX="#DB8C4B"
