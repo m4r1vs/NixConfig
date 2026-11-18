@@ -342,6 +342,33 @@ in {
             alsaSupport = true;
             githubSupport = true;
           };
+
+          /*
+          tuxedo-drivers 4.20.1 doesn't build on Linux 7.3 (NixOS/nixpkgs#576266).
+          Turns itself off once the 26.05 backport (NixOS/nixpkgs#583561) lands.
+          */
+          kernelPackagesExtensions =
+            prev.kernelPackagesExtensions
+            ++ [
+              (_kfinal: kprev: {
+                tuxedo-drivers =
+                  if versionOlder kprev.tuxedo-drivers.version "4.25.0"
+                  then
+                    kprev.tuxedo-drivers.overrideAttrs (old: {
+                      version = "4.25.0";
+                      src = fetchFromGitLab {
+                        group = "tuxedocomputers";
+                        owner = "development/packages";
+                        repo = "tuxedo-drivers";
+                        rev = "v4.25.0";
+                        hash = "sha256-AER+JPl3lem1OFV51VdOZAnr3Uy1BFSpEJNrE+shYis=";
+                      };
+                      # upstream moved usr/ to files/usr/ in 4.21.0
+                      postInstall = builtins.replaceStrings ["usr/lib/udev"] ["files/usr/lib/udev"] old.postInstall;
+                    })
+                  else kprev.tuxedo-drivers;
+              })
+            ];
         })
     ];
   };
