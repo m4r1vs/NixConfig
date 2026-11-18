@@ -14,6 +14,65 @@ with lib; let
   hasFwupd = osConfig.services.fwupd.enable or false;
   hasNetbird = osConfig.services.netbird.enable or false;
   brave = "${pkgs.brave}/bin/brave ${concatStringsSep " " config.programs.configured.brave.flags}";
+
+  /*
+  mimeapps.list knows no wildcards, so "every text file" has to be spelled
+  out. This derives the per-class defaults from the MIME database xdg-open
+  detects types with and installs them as the lowest-priority mimeapps.list
+  ($XDG_DATA_DIRS/applications): xdg.mimeApps.defaultApplications below wins.
+  */
+  mimeClassDefaults =
+    pkgs.runCommand "mime-class-defaults" {
+      mimeDb = "${pkgs.shared-mime-info}/share/mime";
+      swayimgDesktop = "${config.programs.swayimg.package}/share/applications/swayimg.desktop";
+      # Derived from text/plain, yet documents to view rather than text to edit
+      notText = [
+        "application/postscript"
+        "application/rtf"
+        "application/vnd.oasis.opendocument.graphics-flat-xml"
+        "application/vnd.oasis.opendocument.presentation-flat-xml"
+        "application/vnd.oasis.opendocument.spreadsheet-flat-xml"
+        "application/vnd.oasis.opendocument.text-flat-xml"
+        "application/x-abiword"
+        "application/x-fictionbook+xml"
+        "application/x-font-type1"
+      ];
+    } ''
+      list=$out/share/applications/mimeapps.list
+      mkdir -p "$(dirname "$list")"
+      {
+        echo "[Default Applications]"
+
+        # Music and videos
+        awk '/^(audio|video)\// { print $0 "=mpv.desktop" }' "$mimeDb/types"
+
+        # Images and vectors: whatever swayimg says it can open
+        sed -n 's/^MimeType=//p' "$swayimgDesktop" | tr ';' '\n' | sed '/^$/d; s/$/=swayimg.desktop/'
+
+        # Text: text/* and everything derived from it (JSON, YAML, XML, scripts, ...)
+        awk -v notText="$notText" '
+          BEGIN { split(notText, list, " "); for (i in list) skip[list[i]] = 1 }
+          # subclasses: "<type> <parent>"
+          FNR == NR { children[$2] = children[$2] " " $1; next }
+          /^text\// { seen[$0] = 1; queue[++n] = $0 }
+          END {
+            for (i = 1; i <= n; i++) {
+              count = split(children[queue[i]], child, " ")
+              for (j = 1; j <= count; j++)
+                if (!(child[j] in seen)) { seen[child[j]] = 1; queue[++n] = child[j] }
+            }
+            for (i = 1; i <= n; i++)
+              if (queue[i] ~ /^(text|application)\// && !(queue[i] in skip))
+                print queue[i] "=nvim.desktop"
+          }
+        ' "$mimeDb/subclasses" "$mimeDb/types"
+      } > "$list"
+
+      # Fail the build instead of silently losing defaults if the database layout changes
+      for expected in text/markdown=nvim.desktop application/json=nvim.desktop image/png=swayimg.desktop audio/mpeg=mpv.desktop; do
+        grep -qxF "$expected" "$list" || { echo "mime-class-defaults: missing $expected" >&2; exit 1; }
+      done
+    '';
 in {
   options.configured.xdg = {
     enable = mkEnableOption "Cross-Desktop-Group";
@@ -28,6 +87,7 @@ in {
     home.file = {
       ".icons/default".source = "${pkgs.bibata-cursors}/share/icons/Bibata-Modern-Ice";
     };
+    home.packages = [mimeClassDefaults];
     xdg = {
       userDirs = {
         enable = true;
@@ -39,28 +99,13 @@ in {
       };
       mimeApps = {
         enable = true;
+        # Only what differs from mimeClassDefaults (text: nvim, images:
+        # swayimg, audio and video: mpv)
         defaultApplications = {
           "application/pdf" = ["org.pwmt.zathura-pdf-mupdf.desktop"];
           "inode/directory" = ["yazi.desktop"];
           "text/html" = ["brave-browser.desktop"];
-          "text/plain" = ["nvim.desktop"];
-          "text/x-markdown" = ["org.gnome.gitlab.somas.Apostrophe.desktop"];
-          "image/svg+xml" = ["swayimg.desktop"];
-          "image/jpeg" = ["swayimg.desktop"];
-          "image/png" = ["swayimg.desktop"];
-          "image/gif" = ["swayimg.desktop"];
-          "image/heic" = ["swayimg.desktop"];
-          "video/mp4" = ["mpv.desktop"];
-          "video/webm" = ["mpv.desktop"];
-          "video/quicktime" = ["mpv.desktop"];
-          "video/mpeg" = ["mpv.desktop"];
-          "audio/mpeg" = ["io.bassi.Amberol.desktop"];
-          "audio/wav" = ["io.bassi.Amberol.desktop"];
-          "audio/ogg" = ["io.bassi.Amberol.desktop"];
-          "audio/flac" = ["io.bassi.Amberol.desktop"];
-          "audio/aac" = ["io.bassi.Amberol.desktop"];
-          "audio/webm" = ["io.bassi.Amberol.desktop"];
-          "audio/mp4" = ["io.bassi.Amberol.desktop"];
+          "application/xhtml+xml" = ["brave-browser.desktop"];
         };
       };
       desktopEntries = {
@@ -183,7 +228,7 @@ in {
           genericName = "New Improved Vim - Text Editor";
           icon = "vim";
           type = "Application";
-          exec = "${lib.getExe pkgs.ghostty} -e nvim %u";
+          exec = "${scripts.nvim-in-terminal {nvim = "${config.programs.neovim.finalPackage}/bin/nvim";}} %F";
           settings = {
             Keywords = "Text;editor";
           };
