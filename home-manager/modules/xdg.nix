@@ -442,6 +442,14 @@ in {
           type = "Application";
           categories = ["Utility"];
         };
+        copy-local-ip = {
+          name = "Copy local IP";
+          genericName = "Copy this machine's IP address";
+          icon = "network-wired";
+          exec = "${scripts.copy-local-ip}";
+          type = "Application";
+          categories = ["Network" "Utility"];
+        };
         rofi-ssh = {
           name = "SSH Launcher";
           genericName = "SUPER+Shift+Enter";
