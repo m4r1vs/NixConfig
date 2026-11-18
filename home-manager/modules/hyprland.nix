@@ -88,6 +88,18 @@ in {
       hypridle.enable = true;
       swaync.enable = true;
     };
+    /*
+    Swallowing (misc.enable_swallow below) only finds a terminal that is a
+    parent process of the new window, which it is not inside tmux. These take
+    the place of the real programs on PATH and cover the terminal instead
+    */
+    home.packages = let
+      overlaid = class: program:
+        hiPrio (pkgs.writeShellScriptBin (baseNameOf program) ''exec ${scripts.terminal-overlay} ${class} ${program} "$@"'');
+    in [
+      (overlaid "mpv" "${config.programs.mpv.finalPackage}/bin/mpv")
+      (overlaid "org.pwmt.zathura" "${pkgs.zathura}/bin/zathura")
+    ];
     wayland.windowManager.hyprland = {
       configType = "lua";
       enable = true;
