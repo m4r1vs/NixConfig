@@ -56,6 +56,12 @@
     kernelParams = [
       "acpi.ec_no_wakeup=1"
       "amdgpu.gpu_recovery=1"
+      /*
+      DC_DISABLE_REPLAY: no Panel Replay on the internal panel. After an
+      s2idle resume its state changes time out (dmub_replay_enable WARN in
+      dmesg), the suspected cause of the panel stuttering until reboot
+      */
+      "amdgpu.dcdebugmask=0x400"
     ];
   };
 
