@@ -8,7 +8,8 @@
 }:
 with lib; let
   cfg = config.programs.configured.yazi;
-  inherit (host) isDarwin;
+  inherit (host) isDarwin isDesktop;
+  xdgOpen = "${pkgs.xdg-utils}/bin/xdg-open";
 in {
   options.programs.configured.yazi = {
     enable = mkEnableOption "Terminal File Manager";
@@ -79,49 +80,81 @@ in {
           max_height = 1200;
           image_quality = 60;
         };
-        opener = {
-          edit = [
+        opener =
+          {
+            edit = [
+              {
+                run = "${config.programs.neovim.finalPackage}/bin/nvim \"$@\"";
+                desc = "NeoVim";
+                block = true;
+                for = "unix";
+              }
+            ];
+            /*
+            The program is xdg-open's choice (xdg.mimeApps). Blocking keeps it
+            a child of this terminal, which is what lets Hyprland swallow the
+            terminal until the program exits. xdg-open takes a single file, so
+            %s1 makes yazi run it once per selected file
+            */
+            open = [
+              {
+                run = "${xdgOpen} %s1";
+                desc = "xdg-open";
+                block = true;
+                for = "unix";
+              }
+            ];
+            play = [
+              {
+                run = "mpv \"$@\"";
+                block = true;
+                for = "unix";
+              }
+            ];
+          }
+          // optionalAttrs isDesktop {
+            # A browser outlives the file: don't wait for it, and start it
+            # outside this terminal's process tree so it can't swallow it
+            browse = [
+              {
+                run = "${pkgs.util-linux}/bin/setsid -f ${xdgOpen} %s1";
+                desc = "Browser";
+                orphan = true;
+                for = "linux";
+              }
+            ];
+          };
+        /*
+        Everything not listed falls through to yazi's preset, which ends in
+        "open" (xdg-open). Text stays with "edit": yazi sniffs the content,
+        xdg-open goes by file name first and would send e.g. *.svelte to the
+        browser. Both end up in nvim inside this terminal
+        */
+        open.prepend_rules =
+          optionals isDesktop [
             {
-              run = "${config.programs.neovim.finalPackage}/bin/nvim \"$@\"";
-              desc = "NeoVim";
-              block = true;
-              for = "unix";
+              url = "*.{html,htm,xhtml}";
+              use = ["browse" "edit" "reveal"];
+            }
+          ]
+          ++ [
+            {
+              mime = "image/*";
+              use = ["open"];
+            }
+            {
+              mime = "{audio,video}/*";
+              # mpv.desktop gives music a window too, "play" stays in the terminal
+              use =
+                if isDesktop
+                then ["open" "play"]
+                else ["play" "open"];
+            }
+            {
+              mime = "text/*";
+              use = ["edit"];
             }
           ];
-          open = [
-            {
-              run = "${pkgs.xdg-utils}/bin/xdg-open \"$@\"";
-              desc = "xdg-open";
-              block = true;
-              for = "unix";
-            }
-          ];
-          play = [
-            {
-              run = "mpv \"$@\"";
-              block = true;
-              for = "unix";
-            }
-          ];
-        };
-        open.prepend_rules = [
-          {
-            mime = "image/*";
-            use = ["open"];
-          }
-          {
-            mime = "audio/*";
-            use = ["play" "open"];
-          }
-          {
-            mime = "video/*";
-            use = ["play" "open"];
-          }
-          {
-            mime = "text/*";
-            use = ["edit"];
-          }
-        ];
         plugin.prepend_fetchers = [
           {
             id = "git";
