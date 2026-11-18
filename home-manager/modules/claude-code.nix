@@ -11,6 +11,7 @@ in {
     enable = mkEnableOption "Claude Code - vibecoding assistant";
   };
   config = mkIf cfg.enable {
+    home.sessionVariables.CLAUDE_CODE_EXPERIMENTAL_CODE_MODE = "1";
     programs.claude-code = {
       enable = true;
       enableMcpIntegration = true;
