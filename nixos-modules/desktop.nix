@@ -171,7 +171,12 @@ in {
           # fails with "Device or resource busy".
           extraConfig."51-bluez-roles" = {
             "monitor.bluez.properties" = {
-              "bluez5.roles" = ["a2dp_source" "hfp_ag"];
+              "bluez5.roles" = ["a2dp_source" "hfp_ag" "bap_source"];
+              "bluez5.enable-sbc-xq" = true;
+              "bluez5.enable-msbc" = true;
+              "bluez5.enable-hw-volume" = true;
+              "bluez5.a2dp.ldac.quality" = "auto";
+              "bluez5.codecs" = ["sbc" "sbc_xq" "aac" "ldac" "aptx" "aptx_hd" "lc3"];
             };
           };
         };

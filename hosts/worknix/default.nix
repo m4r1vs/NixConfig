@@ -40,6 +40,7 @@
 
   hardware = {
     enableRedistributableFirmware = true;
+    wirelessRegulatoryDatabase = true;
     tuxedo-drivers = {
       enable = true;
       # Cap charge at 80% ("stationary") to reduce battery wear
@@ -57,6 +58,11 @@
   };
 
   boot = {
+    kernelModules = ["tcp_bbr"];
+    extraModprobeConfig = ''
+      # Unlock 6 GHz Wi-Fi 6E channels on MT7922 in Germany
+      options cfg80211 ieee80211_regdom=DE
+    '';
     kernelParams = [
       "acpi.ec_no_wakeup=1"
       "amdgpu.gpu_recovery=1"
@@ -80,6 +86,9 @@
       "vm.dirty_bytes" = 268435456; # 256 MiB
       # No multi-page swap readahead when backed by zswap/NVMe
       "vm.page-cluster" = 0;
+      # TCP BBR congestion control with fq pacing
+      "net.core.default_qdisc" = "fq";
+      "net.ipv4.tcp_congestion_control" = "bbr";
     };
   };
 
@@ -160,6 +169,8 @@
       # Use none scheduler on NVMe drives instead of linux-zen's kyber default
       ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
     '';
+
+    hardware.bolt.enable = true;
   };
 
   security = {
