@@ -155,6 +155,11 @@
         fileSystems = ["/"];
       };
     };
+
+    udev.extraRules = ''
+      # Use none scheduler on NVMe drives instead of linux-zen's kyber default
+      ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
+    '';
   };
 
   security = {
