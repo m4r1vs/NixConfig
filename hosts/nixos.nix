@@ -55,6 +55,15 @@ in {
     PermitRootLogin = "no";
   };
 
+  # Let the kernel relocate btrfs block groups whose usage drops below 30%
+  # (e.g. after deleting node_modules) instead of leaving them allocated but
+  # mostly empty until a manual `btrfs balance`. Only fires when a free crosses
+  # the threshold; check reclaim_count/reclaim_bytes next to the files.
+  systemd.tmpfiles.rules = mkIf config.services.btrfs.autoScrub.enable [
+    "w /sys/fs/btrfs/*/allocation/data/bg_reclaim_threshold - - - - 30"
+    "w /sys/fs/btrfs/*/allocation/metadata/bg_reclaim_threshold - - - - 30"
+  ];
+
   time.timeZone = "Europe/Berlin";
   i18n.defaultLocale = "en_DK.UTF-8";
   i18n.extraLocaleSettings.LC_MONETARY = "de_DE.UTF-8";

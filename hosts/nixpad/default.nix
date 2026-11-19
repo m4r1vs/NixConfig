@@ -44,7 +44,7 @@
     btrfs = {
       autoScrub = {
         enable = true;
-        interval = "weekly";
+        interval = "monthly";
         fileSystems = ["/"];
       };
     };
