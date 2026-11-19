@@ -101,6 +101,15 @@
     fwupd.enable = true;
 
     /*
+    Split DNS via D-Bus for NetBird. With NixOS's default openresolv, NetBird
+    takes exclusive ownership of /etc/resolv.conf and caches the original
+    upstream nameservers at `netbird up` time, so switching networks leaves DNS
+    pointing at the previous network's unreachable router until NetBird is
+    cycled.
+    */
+    resolved.enable = true;
+
+    /*
     Work VPN for internal services. The daemon starts on boot; log in once
     with `netbird up` (the wrapped CLI already points at our management
     server), the peer config then persists in /var/lib/netbird.
