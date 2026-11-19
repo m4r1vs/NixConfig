@@ -66,6 +66,13 @@
       dmesg), the suspected cause of the panel stuttering until reboot
       */
       "amdgpu.dcdebugmask=0x400"
+      # Compress swapped pages in RAM before hitting the 110 TBW QLC swapfile
+      "zswap.enabled=1"
+      "zswap.compressor=zstd"
+      "zswap.max_pool_percent=20"
+      "zswap.shrinker_enabled=0"
+      # Stop periodic NMI watchdog interrupts and free a PMU counter on all threads
+      "nmi_watchdog=0"
     ];
   };
 
