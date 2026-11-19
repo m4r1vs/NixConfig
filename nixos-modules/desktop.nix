@@ -117,6 +117,7 @@ in {
 
     services = {
       configured.kmscon.enable = true;
+      configured.auto-upgrade.enable = mkDefault true;
 
       /*
       Touchpad support
