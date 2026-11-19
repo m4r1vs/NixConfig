@@ -40,7 +40,11 @@
 
   hardware = {
     enableRedistributableFirmware = true;
-    tuxedo-drivers.enable = true;
+    tuxedo-drivers = {
+      enable = true;
+      # Cap charge at 80% ("stationary") to reduce battery wear
+      settings.charging-profile = "stationary";
+    };
 
     /*
     Radeon 890M: early KMS so plymouth starts without a mode switch,
