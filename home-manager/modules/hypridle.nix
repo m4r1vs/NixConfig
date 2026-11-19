@@ -10,6 +10,9 @@ with lib; let
   DIM_SCREEN_SECS = 5 * 60; # Dim Screen after 5 Minutes
   LOCK_SCREEN_SECS = 10 * 60; # Lock after 10
   SCREEN_OFF_SECS = 14 * 60; # Screen off after 14
+  # Wrapped so hyprlang doesn't parse the Lua arguments
+  dpmsOn = pkgs.writeShellScript "hypridle-dpms-on" "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms({ action = \"on\" })'";
+  dpmsOff = pkgs.writeShellScript "hypridle-dpms-off" "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms({ action = \"off\" })'";
 in {
   options.services.configured.hypridle = {
     enable = mkEnableOption "Idle Daemon (start lockscreen automatically, etc..)";
@@ -22,8 +25,8 @@ in {
           lock_cmd = "pidof hyprlock || hyprlock"; # Do not lock if already locked
           before_sleep_cmd = "pidof hyprlock || hyprlock"; # Do not lock if already locked
           on_lock_cmd = "pidof hyprlock || hyprlock"; # Do not lock if already locked
-          # Turn on display (if turned off); wrapped so hyprlang doesn't parse the Lua
-          after_sleep_cmd = "${pkgs.writeShellScript "hypridle-dpms-on" "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms({ action = \"on\" })'"}";
+          # Turn on display (if turned off)
+          after_sleep_cmd = "${dpmsOn}";
           ignore_dbus_inhibit = false;
           ignore_systemd_inhibit = false;
           ignore_wayland_inhibit = false;
@@ -44,8 +47,8 @@ in {
             }
             {
               timeout = SCREEN_OFF_SECS;
-              on-timeout = "${pkgs.brightnessctl}/bin/brightnessctl -s set 0";
-              on-resume = "${pkgs.brightnessctl}/bin/brightnessctl -s set 100%";
+              on-timeout = "${dpmsOff}";
+              on-resume = "${dpmsOn}";
             }
           ]
           ++ (
