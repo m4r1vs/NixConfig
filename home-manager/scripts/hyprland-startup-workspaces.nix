@@ -3,9 +3,11 @@
   scripts,
   lib,
   systemArgs,
+  config,
   ...
 }: let
   toLua = lib.generators.toLua {};
+  braveFlags = config.home-manager.users.${systemArgs.username}.programs.configured.brave.flags;
   # With the Lua config, `hyprctl dispatch X` evaluates `hl.dispatch(X)`, so the
   # argument must be a Lua dispatcher expression. hyprctl prints Lua errors but
   # still exits 0.
@@ -56,7 +58,7 @@ in {
       ${lib.optionalString (lib.meta.availableOn pkgs.stdenv.hostPlatform pkgs.spotify)
         (exec "${lib.getExe pkgs.spotify} --ozone-platform-hint=auto")}
       ${exec (lib.getExe pkgs.ghostty)}
-      ${exec "${lib.getExe pkgs.brave} --profile-directory=Default --ozone-platform-hint=auto --enable-features=TouchpadOverscrollHistoryNavigation"}
+      ${exec "${lib.getExe pkgs.brave} --profile-directory=Default ${lib.concatStringsSep " " braveFlags}"}
 
       sleep 2
       ${workspace 2}

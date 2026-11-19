@@ -11,7 +11,10 @@ with lib; let
   isNvidia = osConfig.configured.nvidia.enable or false;
   useVaapi = host.isDesktop && host.isX86 && !isNvidia;
   features =
-    ["TouchpadOverscrollHistoryNavigation"]
+    [
+      "TouchpadOverscrollHistoryNavigation"
+      "WaylandWindowDecorations"
+    ]
     ++ optionals useVaapi [
       "AcceleratedVideoDecodeLinuxGL"
       "AcceleratedVideoDecodeLinuxZeroCopyGL"
