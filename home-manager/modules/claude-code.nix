@@ -15,6 +15,11 @@ in {
     programs.claude-code = {
       enable = true;
       enableMcpIntegration = true;
+      context = ''
+        # Memory
+
+        Never add memory on your own. If you truly believe saving something across sessions is valuable, ask for confirmation before writing to memory.
+      '';
       skills = {
         # Read from the source tree: referencing the built package forces a
         # bun2nix IFD, which breaks evaluating Linux hosts from darwin.
