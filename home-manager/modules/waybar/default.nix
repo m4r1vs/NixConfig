@@ -388,7 +388,6 @@ in {
             };
 
             backlight = {
-              device = "intel_backlight";
               rotate = 0;
               format = "{icon} {percent}%";
               format-icons = ["" "" "" "" "" "" "" "" ""];
