@@ -15,6 +15,15 @@ in {
   config = mkIf cfg.enable {
     programs.mpv = {
       enable = true;
+      config = mkIf isDesktop (
+        {
+          hwdec = "auto-safe";
+          vo = "gpu-next";
+        }
+        // optionalAttrs host.isX86 {
+          gpu-api = "vulkan";
+        }
+      );
       scripts = with pkgs;
         [
           mpvScripts.sponsorblock

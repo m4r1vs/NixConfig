@@ -1,4 +1,5 @@
 {
+  host,
   lib,
   config,
   scripts,
@@ -119,6 +120,9 @@ in {
             ["__VK_LAYER_NV_optimus" "NVIDIA_only"]
             ["NVD_BACKEND" "direct"]
           ]
+          ++ lib.optionals (!osConfig.configured.nvidia.enable && host.isX86) [
+            ["LIBVA_DRIVER_NAME" "radeonsi"]
+          ]
         );
         curve = [
           {
@@ -210,7 +214,7 @@ in {
             numlock_by_default = true;
           };
           misc = {
-            vrr = 1;
+            vrr = 2;
             disable_hyprland_logo = true;
             animate_manual_resizes = true;
             enable_swallow = true;
@@ -218,6 +222,12 @@ in {
             disable_splash_rendering = true;
             initial_workspace_tracking = 0;
             force_default_wallpaper = 0;
+          };
+          render = {
+            direct_scanout = 2;
+          };
+          xwayland = {
+            force_zero_scaling = true;
           };
           opengl = {
             nvidia_anti_flicker = false;
