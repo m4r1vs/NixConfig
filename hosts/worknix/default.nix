@@ -74,6 +74,13 @@
       # Stop periodic NMI watchdog interrupts and free a PMU counter on all threads
       "nmi_watchdog=0"
     ];
+    kernel.sysctl = {
+      # Cap dirty writeback buffers on 32 GiB RAM (overrides dirty_*_ratio defaults)
+      "vm.dirty_background_bytes" = 67108864; # 64 MiB
+      "vm.dirty_bytes" = 268435456; # 256 MiB
+      # No multi-page swap readahead when backed by zswap/NVMe
+      "vm.page-cluster" = 0;
+    };
   };
 
   systemd = {
@@ -89,6 +96,13 @@
       PrivateDevices = false;
       DevicePolicy = "closed";
       DeviceAllow = ["char-video4linux rw"];
+    };
+
+    coredump.settings.Coredump = {
+      Storage = "external";
+      Compress = "yes";
+      MaxUse = "1G";
+      ProcessSizeMax = "1G";
     };
   };
 
