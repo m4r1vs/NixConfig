@@ -171,6 +171,25 @@
     '';
 
     hardware.bolt.enable = true;
+
+    # Hide the IR camera from browsers/video calls while keeping /dev/video2 usable by Howdy.
+    # Match on IR names rather than USB ID 2b7e:c906 (shared with the RGB webcam).
+    pipewire.wireplumber.extraConfig."51-disable-ir-camera" = {
+      "monitor.v4l2.rules" = [
+        {
+          matches = [
+            {"device.description" = "~.*IR.*";}
+            {"device.product.name" = "~.*IR.*";}
+            {"api.v4l2.cap.card" = "~.*IR.*";}
+          ];
+          actions = {
+            update-props = {
+              "device.disabled" = true;
+            };
+          };
+        }
+      ];
+    };
   };
 
   security = {
