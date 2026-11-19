@@ -11,6 +11,10 @@ in {
     enable = mkEnableOption "Antigravity CLI - vibecoding assistant";
   };
   config = mkIf cfg.enable {
+    # agy rewrites settings.json as a regular file on UI changes (e.g. model switch),
+    # which otherwise collides with an existing settings.json..hm-backup on activation
+    home.file.".gemini/antigravity-cli/settings.json".force = true;
+
     programs.antigravity-cli = {
       enable = true;
       enableMcpIntegration = true;
