@@ -48,7 +48,8 @@ in {
             [ "$status" = "$last" ] && return
             last=$status
             if [ "$status" = "1" ]; then
-              ${scripts.powermode} performance
+              # Balanced keeps amd-pstate-epp dynamic instead of locking the performance governor
+              ${scripts.powermode} auto
             else
               ${scripts.powermode} light
             fi
