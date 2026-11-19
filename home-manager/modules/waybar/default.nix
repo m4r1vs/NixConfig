@@ -365,6 +365,8 @@ in {
                 "([^/ ]+/[^/ ]+):.* - Brave" = " $1";
                 "(.*) · (.+) · ([^/ ]+/[^/ ]+) - Brave" = " $3 - $2";
                 "(.+) · ([^/ ]+/[^/ ]+) - Brave" = " $2 - $1";
+                "(.*) · GitLab - Brave" = " $1";
+                "GitLab - Brave" = " GitLab";
                 "(.*) - Discord" = " $1";
                 "(.*) — 1Password" = "󰌋 $1";
                 "1Password" = "󰌋 Authorize 1Password";
