@@ -23,7 +23,7 @@ in {
   config = mkIf cfg.enable {
     programs.helium = {
       enable = true;
-      inherit (config.programs.configured.brave) flags;
+      inherit (config.programs.configured.browser) flags;
     };
   };
 }

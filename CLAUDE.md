@@ -49,6 +49,10 @@ Script files also receive `helpers` from `home-manager/scriptLib.nix`: prefer `h
 - `winix` — NixOS on WSL. `nixbook` — macOS via nix-darwin (`hosts/darwin/`). `yannix` — machine for a different user.
 - `hosts/nixos.nix` is shared by all NixOS hosts; `hosts/default.nix` + `nixpkgs.nix` are shared by everything including darwin.
 
+### Browser
+
+`home-manager/modules/browser.nix` picks the browsers by role: `programs.configured.browser.default` (opens links, launcher entries, workspace 1) and `.side` (special workspace on F12). Modules and scripts read `programs.configured.browser.resolved` (command, window class, process name, profiles) and never name a browser package themselves.
+
 ### Desktop specialisations
 
 `nixos-modules/desktop.nix` defines `configured.desktop.windowManagers.{hyprland,i3,gamescope}` as NixOS specialisations with one marked default. The `rebuild` script keeps the active specialisation across rebuilds.

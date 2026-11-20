@@ -1,11 +1,14 @@
 {
   systemArgs,
   lib,
+  config,
   osConfig,
   scripts,
   host,
   ...
-}: {
+}: let
+  usesBrowser = name: host.isDesktop && builtins.elem name config.programs.configured.browser.installed;
+in {
   imports = [
     ./modules
     ./packages.nix
@@ -48,7 +51,7 @@
     configured = {
       antigravity-cli.enable = host.isDev;
       bat.enable = true;
-      brave.enable = host.isDesktop;
+      brave.enable = usesBrowser "brave";
       claude-code.enable = host.isDev;
       direnv.enable = true;
       docker-darwin.enable = host.isDarwin;
@@ -56,7 +59,7 @@
       fzf.enable = true;
       ghostty.enable = host.isGraphical || host.isWSL;
       git.enable = true;
-      helium.enable = host.isDesktop;
+      helium.enable = usesBrowser "helium";
       hunk.enable = host.isDev;
       lazygit.enable = true;
       mcp.enable = host.isDev;

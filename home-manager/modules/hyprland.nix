@@ -5,18 +5,15 @@
   scripts,
   pkgs,
   osConfig,
-  systemArgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.hyprland;
-  personalBraveProfile =
-    if systemArgs.useWorkProfileByDefault
-    then "Secondary"
-    else "Default";
-  geminiClass = "brave-gemini.google.com__-${personalBraveProfile}";
+  browsers = config.programs.configured.browser.resolved;
+  browser = browsers.default;
+  sideBrowser = browsers.side;
+  geminiClass = "${browser.appClassPrefix}-gemini.google.com__-${browsers.personalProfile}";
   npuDictate = lib.getExe config.programs.npu-dictate.package;
-  helium = lib.getExe (config.programs.helium.package.override {inherit (config.programs.helium) flags;});
   has1Password = osConfig.programs._1password-gui.enable;
 
   inherit (lib.generators) mkLuaInline;
@@ -343,90 +340,93 @@ in {
             action = "fullscreen";
           }
         ];
-        window_rule = [
-          {
-            match = {
-              class = "^()$";
-              title = "^()$";
-            };
-            no_blur = true;
-          }
-          {
-            match.initial_class = "^(brave-browser)$";
-            workspace = 1;
-          }
-          {
-            match.initial_class = "^(ghostty.default)$";
-            workspace = 2;
-          }
-          {
-            match.initial_class = "^(md.obsidian.Obsidian)$";
-            workspace = 3;
-          }
-          {
-            match.initial_class = "^(slack)$";
-            workspace = 4;
-          }
-          {
-            match.initial_class = "^(spotify)$";
-            workspace = 6;
-          }
-          {
-            match.initial_class = "^(signal)$";
-            workspace = 9;
-          }
-          {
-            match.initial_title = "^(WhatsApp Electron)(.*)$";
-            workspace = 9;
-          }
-          {
-            match.initial_class = "^(${geminiClass})$";
-            float = true;
-            size = "1790 1144";
-            center = true;
-          }
-          {
-            match.initial_class = "^(ghostty.yazi)$";
-            float = true;
-            size = "1400 700";
-          }
-          {
-            match.initial_class = "^(ghostty.fastfetch)$";
-            float = true;
-            size = "1220 740";
-          }
-          {
-            match.initial_class = "^(ghostty.weather)$";
-            float = true;
-            size = "1200 800";
-          }
-          {
-            match.initial_class = "^(ghostty.asciiquarium)$";
-            float = true;
-            size = "1200 800";
-          }
-          {
-            match.initial_class = "^(ghostty.astroterm)$";
-            float = true;
-            size = "1200 800";
-          }
-          {
-            match.initial_class = "^(ghostty.spotify_player)$";
-            float = true;
-            size = "1600 1160";
-            workspace = "special:spotify_player silent";
-          }
-          {
-            match.initial_class = "^(ghostty.obsidian)$";
-            float = true;
-            size = "1600 900";
-            workspace = "special:obsidian_nvim silent";
-          }
-          {
-            match.initial_class = "^(helium)$";
-            workspace = "special:helium silent";
-          }
-        ];
+        window_rule =
+          [
+            {
+              match = {
+                class = "^()$";
+                title = "^()$";
+              };
+              no_blur = true;
+            }
+            {
+              match.initial_class = "^(${browser.windowClass})$";
+              workspace = 1;
+            }
+            {
+              match.initial_class = "^(ghostty.default)$";
+              workspace = 2;
+            }
+            {
+              match.initial_class = "^(md.obsidian.Obsidian)$";
+              workspace = 3;
+            }
+            {
+              match.initial_class = "^(slack)$";
+              workspace = 4;
+            }
+            {
+              match.initial_class = "^(spotify)$";
+              workspace = 6;
+            }
+            {
+              match.initial_class = "^(signal)$";
+              workspace = 9;
+            }
+            {
+              match.initial_title = "^(WhatsApp Electron)(.*)$";
+              workspace = 9;
+            }
+            {
+              match.initial_class = "^(${geminiClass})$";
+              float = true;
+              size = "1790 1144";
+              center = true;
+            }
+            {
+              match.initial_class = "^(ghostty.yazi)$";
+              float = true;
+              size = "1400 700";
+            }
+            {
+              match.initial_class = "^(ghostty.fastfetch)$";
+              float = true;
+              size = "1220 740";
+            }
+            {
+              match.initial_class = "^(ghostty.weather)$";
+              float = true;
+              size = "1200 800";
+            }
+            {
+              match.initial_class = "^(ghostty.asciiquarium)$";
+              float = true;
+              size = "1200 800";
+            }
+            {
+              match.initial_class = "^(ghostty.astroterm)$";
+              float = true;
+              size = "1200 800";
+            }
+            {
+              match.initial_class = "^(ghostty.spotify_player)$";
+              float = true;
+              size = "1600 1160";
+              workspace = "special:spotify_player silent";
+            }
+            {
+              match.initial_class = "^(ghostty.obsidian)$";
+              float = true;
+              size = "1600 900";
+              workspace = "special:obsidian_nvim silent";
+            }
+          ]
+          ++ optionals (sideBrowser != null) [
+            {
+              match.initial_class = "^(${sideBrowser.windowClass})$";
+              workspace = "special:${sideBrowser.name} silent";
+            }
+          ];
         monitor = [
           {
             output = "eDP-1"; # Internal
@@ -514,7 +514,7 @@ in {
             (bindd "SUPER + m" "Emoji Picker" (exec "${scripts.rofi-launch} emoji"))
             (bindd "SUPER + SPACE" "Switch keyboard layout" (exec "${scripts.switch-kb-layout}"))
             (bindd "ALT + d" "Open Google Gemini" (exec "${scripts.launch-once {
-              command = "${pkgs.brave}/bin/brave --app=https://gemini.google.com --profile-directory=${personalBraveProfile}";
+              command = "${browser.exe} --app=https://gemini.google.com --profile-directory=${browsers.personalProfile}";
               grep = geminiClass;
               useHypr = true;
               toggle = true;
@@ -546,14 +546,16 @@ in {
               useHypr = true;
             }}"))
             (bindd "SHIFT + F11" "Toggle Obsidian Workspace" ''hl.dsp.workspace.toggle_special("obsidian")'')
-
-            (bindd "F12" "Toggle Helium Workspace" ''hl.dsp.workspace.toggle_special("helium")'')
-            (bindd "F12" "Launch Helium if not running" (exec "${scripts.launch-once {
-              command = "${helium}";
-              grep = "helium";
+          ]
+          ++ lib.optionals (sideBrowser != null) [
+            (bindd "F12" "Toggle ${sideBrowser.title} Workspace" ''hl.dsp.workspace.toggle_special("${sideBrowser.name}")'')
+            (bindd "F12" "Launch ${sideBrowser.title} if not running" (exec "${scripts.launch-once {
+              inherit (sideBrowser) command;
+              grep = sideBrowser.windowClass;
               useHypr = true;
             }}"))
-
+          ]
+          ++ [
             (bindd "SUPER + SHIFT + Return" "SSH Session Selection" (exec "${scripts.rofi-launch} ssh"))
           ]
           ++ lib.optionals host.isDev [

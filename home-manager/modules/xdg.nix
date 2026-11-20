@@ -13,7 +13,25 @@ with lib; let
   inherit (host) hasPowerProfiles;
   hasFwupd = osConfig.services.fwupd.enable or false;
   hasNetbird = osConfig.services.netbird.enable or false;
-  brave = "${pkgs.brave}/bin/brave ${concatStringsSep " " config.programs.configured.brave.flags}";
+  browsers = config.programs.configured.browser;
+  # Without a second profile the browser's own desktop entry is used as it is
+  browser = browsers.resolved.default;
+  browserMimeTypes = [
+    "application/pdf"
+    "application/rdf+xml"
+    "application/rss+xml"
+    "application/xhtml+xml"
+    "application/xhtml_xml"
+    "application/xml"
+    "image/gif"
+    "image/jpeg"
+    "image/png"
+    "image/webp"
+    "text/html"
+    "text/xml"
+    "x-scheme-handler/http"
+    "x-scheme-handler/https"
+  ];
 
   /*
   mimeapps.list knows no wildcards, so "every text file" has to be spelled
@@ -104,8 +122,8 @@ in {
         defaultApplications = {
           "application/pdf" = ["org.pwmt.zathura-pdf-mupdf.desktop"];
           "inode/directory" = ["yazi.desktop"];
-          "text/html" = ["brave-browser.desktop"];
-          "application/xhtml+xml" = ["brave-browser.desktop"];
+          "text/html" = ["${browser.desktopEntry}.desktop"];
+          "application/xhtml+xml" = ["${browser.desktopEntry}.desktop"];
         };
       };
       desktopEntries = {
@@ -318,72 +336,42 @@ in {
           type = "Application";
           categories = ["Utility" "Settings"];
         };
-        brave-browser = {
+        ${browser.desktopEntry} = mkIf browsers.secondaryProfile {
           name =
             if systemArgs.useWorkProfileByDefault
             then "Work Browser"
             else "Personal Browser";
-          exec = ''${brave} --profile-directory=Default %U'';
+          exec = ''${browser.command} --profile-directory=Default %U'';
           icon =
             if systemArgs.useWorkProfileByDefault
-            then "brave-browser-dev"
-            else "brave-browser-nightly";
+            then browser.icons.work
+            else browser.icons.personal;
           terminal = false;
           type = "Application";
           categories = ["WebBrowser" "Network"];
-          mimeType = [
-            "application/pdf"
-            "application/rdf+xml"
-            "application/rss+xml"
-            "application/xhtml+xml"
-            "application/xhtml_xml"
-            "application/xml"
-            "image/gif"
-            "image/jpeg"
-            "image/png"
-            "image/webp"
-            "text/html"
-            "text/xml"
-            "x-scheme-handler/http"
-            "x-scheme-handler/https"
-          ];
+          mimeType = browserMimeTypes;
         };
-        brave-secondary = {
+        ${browser.secondaryDesktopEntry} = mkIf browsers.secondaryProfile {
           name =
             if systemArgs.useWorkProfileByDefault
             then "Personal Browser"
             else "Work Browser";
-          exec = ''${brave} --profile-directory=Secondary %U'';
+          exec = ''${browser.command} --profile-directory=Secondary %U'';
           icon =
             if systemArgs.useWorkProfileByDefault
-            then "brave-browser-nightly"
-            else "brave-browser-dev";
+            then browser.icons.personal
+            else browser.icons.work;
           terminal = false;
           type = "Application";
           categories = ["WebBrowser" "Network"];
-          mimeType = [
-            "application/pdf"
-            "application/rdf+xml"
-            "application/rss+xml"
-            "application/xhtml+xml"
-            "application/xhtml_xml"
-            "application/xml"
-            "image/gif"
-            "image/jpeg"
-            "image/png"
-            "image/webp"
-            "text/html"
-            "text/xml"
-            "x-scheme-handler/http"
-            "x-scheme-handler/https"
-          ];
+          mimeType = browserMimeTypes;
         };
         meetovo-os = mkIf systemArgs.useWorkProfileByDefault {
           name = "Meetovo OS";
           genericName = "os.meetovo.de";
           comment = "Open Meetovo OS";
           icon = "applications-system";
-          exec = "${brave} --profile-directory=Default https://os.tools.meetovo.de";
+          exec = "${browser.command} --profile-directory=${browsers.resolved.workProfile} https://os.tools.meetovo.de";
           terminal = false;
           type = "Application";
           categories = ["Network" "Office"];
@@ -396,7 +384,7 @@ in {
           genericName = "gitlab.meetovo.dev";
           comment = "Open Meetovo GitLab";
           icon = "gitlab";
-          exec = "${brave} --profile-directory=Default https://gitlab.tools.meetovo.dev";
+          exec = "${browser.command} --profile-directory=${browsers.resolved.workProfile} https://gitlab.tools.meetovo.dev";
           terminal = false;
           type = "Application";
           categories = ["Development" "Network"];
@@ -409,7 +397,7 @@ in {
           genericName = "linear.app";
           comment = "Open Linear";
           icon = "linear";
-          exec = "${brave} --profile-directory=Default https://linear.app";
+          exec = "${browser.command} --profile-directory=${browsers.resolved.workProfile} https://linear.app";
           terminal = false;
           type = "Application";
           categories = ["Office" "Development"];

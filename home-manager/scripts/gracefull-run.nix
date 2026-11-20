@@ -1,9 +1,13 @@
 {
+  config,
+  helpers,
   pkgs,
   scripts,
-  helpers,
+  systemArgs,
   ...
-}: {
+}: let
+  browser = config.home-manager.users.${systemArgs.username}.programs.configured.browser.resolved.default;
+in {
   gracefull-run = command:
     pkgs.writeShellScript "gracefull-run"
     ''
@@ -25,7 +29,7 @@
 
       ${helpers.playSound "shutdown"}
 
-      ${pkgs.psmisc}/bin/killall -q -w brave
+      ${pkgs.psmisc}/bin/killall -q -w ${browser.processName}
 
       ${command}
     '';

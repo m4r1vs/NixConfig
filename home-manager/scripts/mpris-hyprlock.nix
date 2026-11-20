@@ -1,4 +1,11 @@
-{pkgs, ...}: {
+{
+  config,
+  pkgs,
+  systemArgs,
+  ...
+}: let
+  browser = config.home-manager.users.${systemArgs.username}.programs.configured.browser.resolved.default;
+in {
   # `mpris-hyprlock --title|--artist|...` prints one field. `--write-cache DIR`
   # computes everything once and writes one file per field, which is what the
   # hyprlock-mpris-cache service does on every player change.
@@ -70,7 +77,7 @@
         fi
       }
 
-      if [[ "$PLAYER" == *"brave"* ]]; then
+      if [[ "$PLAYER" == *"${browser.mprisName}"* ]]; then
           SOURCE_ICON=" 󰖟 "
       elif [[ "$PLAYER" == *"spotify"* ]]; then
           SOURCE_ICON="  "
