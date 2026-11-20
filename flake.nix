@@ -277,36 +277,6 @@
             ]
             ++ nixosModules;
         });
-        yannix = inputs.nixpkgs.lib.nixosSystem (let
-          systemArgs = {
-            username = "taydg";
-            git = {
-              name = "Tjark Aino Yannis Dhruva Groß";
-              email = "tjarkgross@gmx.de";
-            };
-            useWorkProfileByDefault = false;
-            system = "x86_64-linux";
-            theme = makeTheme {
-              primary = "orange";
-              secondary = "green";
-            };
-            hostname = "yannix";
-          };
-        in {
-          inherit (systemArgs) system;
-          modules =
-            [
-              ./hosts/yannix
-              ./hosts/nixos.nix
-
-              inputs.disko.nixosModules.disko
-              inputs.nix-index-database.nixosModules.nix-index
-              inputs.home-manager.nixosModules.home-manager
-
-              {config._module.args = {inherit systemArgs self inputs;};}
-            ]
-            ++ nixosModules;
-        });
         virtnix = inputs.nixpkgs.lib.nixosSystem (let
           systemArgs =
             globalArgs
