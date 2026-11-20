@@ -156,14 +156,21 @@
     };
 
     /*
-    B-Tree FS
+    B-Tree FS & SSD health monitoring (110 TBW QLC Crucial P310)
     */
     btrfs = {
       autoScrub = {
         enable = true;
         interval = "monthly";
         fileSystems = ["/"];
+        limit = "250M";
       };
+    };
+
+    smartd = {
+      enable = true;
+      extraOptions = ["-i" "3600"];
+      notifications.systembus-notify.enable = true;
     };
 
     udev.extraRules = ''
