@@ -61,7 +61,11 @@ in {
     isX86 = readOnly "x86_64" (hasPrefix "x86_64" systemArgs.system);
     isGraphical = readOnly "Has a local GUI (NixOS desktop or macOS)" (cfg.isDesktop || cfg.isDarwin);
     isHeadless = readOnly "Server or installer ISO" (cfg.isServer || cfg.isISO);
-    isDev = readOnly "Interactive dev machine that gets the full toolchain" (cfg.isGraphical || cfg.isWSL);
+    isDev = mkOption {
+      type = types.bool;
+      default = cfg.isGraphical || cfg.isWSL;
+      description = "Interactive dev machine that gets the full toolchain. Set to false on a graphical host of a non-developer.";
+    };
     isWayland = readOnly "Wayland session" (cfg.windowManager == "hyprland" || cfg.windowManager == "gamescope");
     isX11 = readOnly "X11 session" (cfg.windowManager == "i3");
     hasPowerProfiles = readOnly "power-profiles-daemon is enabled" (config.services.power-profiles-daemon.enable or false);
