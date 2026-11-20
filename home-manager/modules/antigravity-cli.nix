@@ -24,6 +24,10 @@ in {
         hunk = "${inputs.hunk}/packages/hunk/skills/hunk-review/SKILL.md";
       };
       permissions = {
+        allow = [
+          "mcp(gitlab/*)"
+          "mcp(nixos/*)"
+        ];
         ask = [
           "command(npm test)"
           "command(npm run test:cov)"
@@ -32,9 +36,7 @@ in {
       };
       settings = {
         "$schema" = "https://antigravity.google/schemas/v1/settings.json";
-        agentMode = "auto";
         artifactReviewPolicy = "always-proceed";
-        colorScheme = "terminal";
         editorMode = "vim";
         enableTerminalSandbox = true;
         model = "Gemini 4 Neon (High)";
