@@ -217,7 +217,7 @@ in {
             numlock_by_default = true;
           };
           misc = {
-            vrr = 2;
+            vrr = 1;
             disable_hyprland_logo = true;
             animate_manual_resizes = true;
             enable_swallow = true;
