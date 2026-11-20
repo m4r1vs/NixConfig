@@ -113,6 +113,9 @@
       MaxUse = "1G";
       ProcessSizeMax = "1G";
     };
+
+    # Replaced by earlyoom, which reacts faster on Hyprland without per-app cgroup scopes
+    oomd.enable = false;
   };
 
   services = {
@@ -171,6 +174,11 @@
       enable = true;
       extraOptions = ["-i" "3600"];
       notifications.systembus-notify.enable = true;
+    };
+
+    earlyoom = {
+      enable = true;
+      enableNotifications = true;
     };
 
     udev.extraRules = ''
