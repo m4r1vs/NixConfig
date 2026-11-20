@@ -3,10 +3,12 @@
   config,
   scripts,
   pkgs,
+  osConfig,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.i3;
+  has1Password = osConfig.programs._1password-gui.enable;
   mod = "Mod4";
   terminal = "${pkgs.ghostty}/bin/ghostty";
   npuDictate = getExe config.programs.npu-dictate.package;
@@ -50,61 +52,64 @@ in {
           smartGaps = false;
         };
         bars = [];
-        startup = [
-          {
-            command = "${pkgs.autorandr}/bin/autorandr -c";
-            always = true;
-            notification = false;
-          }
-          {
-            command = "${pkgs.writeShellScript "launch-polybar" ''
-              polybar-msg cmd quit
-              sleep 2
-              WLAN_INTERFACE=$(ip a | grep wlp | awk -F': ' '{ print $2 }')
-              if type "xrandr"; then
-                for m in $(xrandr --query | grep " connected" | cut -d " " -f1); do
-                  MONITOR=$m polybar --reload clock &
-                  MONITOR=$m polybar --reload media &
-                  MONITOR=$m polybar --reload workspaces &
-                  MONITOR=$m polybar --reload sysinfo &
-                done
-              else
-                polybar --reload clock &
-                polybar --reload media &
-                polybar --reload workspaces &
-                polybar --reload sysinfo &
-              fi
-              polybar --reload tray &
-            ''}";
-            always = true;
-            notification = false;
-          }
-          {
-            command = "${pkgs.haskellPackages.greenclip}/bin/greenclip daemon";
-            always = false;
-            notification = false;
-          }
-          {
-            command = "sleep 1 && ${pkgs.feh}/bin/feh --bg-fill --randomize ${builtins.path {path = ../wallpaper;}}/*";
-            always = false;
-            notification = false;
-          }
-          {
-            command = "${scripts.brightness-change-notify}";
-            always = false;
-            notification = false;
-          }
-          {
-            command = "${scripts.volume-change-notify}";
-            always = false;
-            notification = false;
-          }
-          {
-            command = "${pkgs._1password-gui}/bin/1password --silent --ozone-platform-hint=x11";
-            always = false;
-            notification = false;
-          }
-        ];
+        startup =
+          [
+            {
+              command = "${pkgs.autorandr}/bin/autorandr -c";
+              always = true;
+              notification = false;
+            }
+            {
+              command = "${pkgs.writeShellScript "launch-polybar" ''
+                polybar-msg cmd quit
+                sleep 2
+                WLAN_INTERFACE=$(ip a | grep wlp | awk -F': ' '{ print $2 }')
+                if type "xrandr"; then
+                  for m in $(xrandr --query | grep " connected" | cut -d " " -f1); do
+                    MONITOR=$m polybar --reload clock &
+                    MONITOR=$m polybar --reload media &
+                    MONITOR=$m polybar --reload workspaces &
+                    MONITOR=$m polybar --reload sysinfo &
+                  done
+                else
+                  polybar --reload clock &
+                  polybar --reload media &
+                  polybar --reload workspaces &
+                  polybar --reload sysinfo &
+                fi
+                polybar --reload tray &
+              ''}";
+              always = true;
+              notification = false;
+            }
+            {
+              command = "${pkgs.haskellPackages.greenclip}/bin/greenclip daemon";
+              always = false;
+              notification = false;
+            }
+            {
+              command = "sleep 1 && ${pkgs.feh}/bin/feh --bg-fill --randomize ${builtins.path {path = ../wallpaper;}}/*";
+              always = false;
+              notification = false;
+            }
+            {
+              command = "${scripts.brightness-change-notify}";
+              always = false;
+              notification = false;
+            }
+            {
+              command = "${scripts.volume-change-notify}";
+              always = false;
+              notification = false;
+            }
+          ]
+          ++ optionals has1Password [
+            {
+              command = "${pkgs._1password-gui}/bin/1password --silent --ozone-platform-hint=x11";
+              always = false;
+              notification = false;
+            }
+          ];
         inherit terminal;
         defaultWorkspace = "workspace number 1";
         window = {
@@ -153,7 +158,11 @@ in {
 
           "${mod}+space" = "exec --no-startup-id ${scripts.switch-kb-layout}";
 
-          "${mod}+Shift+i" = "exec --no-startup-id ${pkgs._1password-gui}/bin/1password --quick-access";
+          ${
+            if has1Password
+            then "${mod}+Shift+i"
+            else null
+          } = "exec --no-startup-id ${pkgs._1password-gui}/bin/1password --quick-access";
 
           "${mod}+h" = "focus left";
           "${mod}+j" = "focus down";

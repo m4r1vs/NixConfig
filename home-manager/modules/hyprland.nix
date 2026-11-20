@@ -17,6 +17,7 @@ with lib; let
   geminiClass = "brave-gemini.google.com__-${personalBraveProfile}";
   npuDictate = lib.getExe config.programs.npu-dictate.package;
   helium = lib.getExe (config.programs.helium.package.override {inherit (config.programs.helium) flags;});
+  has1Password = osConfig.programs._1password-gui.enable;
 
   inherit (lib.generators) mkLuaInline;
   toLua = lib.generators.toLua {};
@@ -464,7 +465,7 @@ in {
               (mkLuaInline ''
                 function()
                   hl.exec_cmd(${toLua "${scripts.hyprland-session-lock}"})
-                  hl.exec_cmd(${toLua "${pkgs._1password-gui}/bin/1password --silent"})
+                  ${optionalString has1Password "hl.exec_cmd(${toLua "${pkgs._1password-gui}/bin/1password --silent"})"}
                   hl.exec_cmd(${toLua "${scripts.hyprland-startup-workspaces}"})
                   hl.exec_cmd(${toLua "${scripts.firmware-update-check}"})
                   hl.exec_cmd(${toLua "${scripts.volume-change-notify}"})
@@ -570,7 +571,11 @@ in {
             (bindd "SUPER + SHIFT + z" "Toggle zen mode" (exec "${scripts.toggle-zen}"))
             (bindd "SUPER + SHIFT + P" "Color picker" (exec "${pkgs.hyprpicker}/bin/hyprpicker -a"))
             (bindd "SUPER + SHIFT + q" "Power Menu" (exec "${scripts.rofi-launch} power"))
+          ]
+          ++ lib.optionals has1Password [
             (bindd "SUPER + SHIFT + i" "1Password quick access" (exec "${pkgs._1password-gui}/bin/1password --quick-access"))
+          ]
+          ++ [
             (bindd "SUPER + SHIFT + v" "Rofi Clipboard History" (exec "${scripts.rofi-launch} cliphist"))
             (bindd "SUPER + SHIFT + o" "Obsidian Search" (exec "${scripts.rofi-launch} obsidian"))
 
