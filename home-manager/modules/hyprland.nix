@@ -14,6 +14,10 @@ with lib; let
   sideBrowser = browsers.side;
   geminiClass = "${browser.appClassPrefix}-gemini.google.com__-${browsers.personalProfile}";
   npuDictate = lib.getExe config.programs.npu-dictate.package;
+  # pamixer stops at 100% unless it is told to boost
+  boost = cfg.maxVolume > 100;
+  volumeUp = "${pkgs.pamixer}/bin/pamixer ${optionalString boost "--allow-boost --set-limit ${toString cfg.maxVolume} "}-i 5";
+  volumeDown = "${pkgs.pamixer}/bin/pamixer ${optionalString boost "--allow-boost "}-d 5";
   has1Password = osConfig.programs._1password-gui.enable;
 
   inherit (lib.generators) mkLuaInline;
@@ -75,6 +79,11 @@ in {
       type = types.bool;
       default = true;
       description = "Type German umlauts from a US layout with CTRL or SUPER plus ; ' [ and -. Turn off on a German layout, where they take CTRL+minus away from the apps.";
+    };
+    maxVolume = mkOption {
+      type = types.ints.between 100 150;
+      default = 100;
+      description = "How far the volume keys and the Waybar scroll wheel may raise the volume, in percent.";
     };
   };
   config = mkIf cfg.enable {
@@ -615,8 +624,8 @@ in {
           ]
           ++ [
             # Allow on lockscreen (locked) and allow repeat (repeating)
-            (binddle "XF86AudioRaiseVolume" "Increase volume" (exec "${pkgs.pamixer}/bin/pamixer -i 5"))
-            (binddle "XF86AudioLowerVolume" "Decrease volume" (exec "${pkgs.pamixer}/bin/pamixer -d 5"))
+            (binddle "XF86AudioRaiseVolume" "Increase volume" (exec volumeUp))
+            (binddle "XF86AudioLowerVolume" "Decrease volume" (exec volumeDown))
             (binddle "XF86AudioMute" "Mute audio" (exec "${pkgs.pamixer}/bin/pamixer -t"))
             (binddle "XF86AudioMicMute" "Mute microphone" (exec "${pkgs.pamixer}/bin/pamixer --default-source -t"))
             (binddle "XF86AudioPlay" "Toggle media playback" (exec "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"))
@@ -625,8 +634,8 @@ in {
             (binddle "XF86AudioPrev" "Previous track" (exec "${pkgs.waybar-mpris}/bin/waybar-mpris --send player-prev"))
             (binddle "XF86MonBrightnessUp" "Increase brightness" (exec "${pkgs.brightnessctl}/bin/brightnessctl set 5%+"))
             (binddle "XF86MonBrightnessDown" "Decrease brightness" (exec "${pkgs.brightnessctl}/bin/brightnessctl set 5%-"))
-            (binddle "SUPER + bracketright" "Increase volume" (exec "${pkgs.pamixer}/bin/pamixer -i 5"))
-            (binddle "SUPER + slash" "Decrease volume" (exec "${pkgs.pamixer}/bin/pamixer -d 5"))
+            (binddle "SUPER + bracketright" "Increase volume" (exec volumeUp))
+            (binddle "SUPER + slash" "Decrease volume" (exec volumeDown))
             (binddle "SUPER + p" "Toggle media playback (play/pause)" (exec "${pkgs.waybar-mpris}/bin/waybar-mpris --send toggle"))
             (binddle "SUPER + backslash" "Mute audio" (exec "${pkgs.pamixer}/bin/pamixer -t"))
             (binddle "SUPER + SHIFT + bracketright" "Increase brightness" (exec "${pkgs.brightnessctl}/bin/brightnessctl set 5%+"))

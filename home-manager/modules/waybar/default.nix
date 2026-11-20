@@ -10,6 +10,8 @@
 }:
 with lib; let
   cfg = config.programs.configured.waybar;
+  inherit (config.programs.configured.hyprland) maxVolume;
+  boost = maxVolume > 100;
   inherit (systemArgs) theme;
   hasNetbird =
     (osConfig.services.netbird.enable or false)
@@ -411,8 +413,8 @@ in {
               format-muted = "";
               on-click = "${pkgs.pavucontrol}/bin/pavucontrol -t 3";
               on-click-right = "${pkgs.pamixer}/bin/pamixer -t";
-              on-scroll-up = "${pkgs.pamixer}/bin/pamixer -i 1";
-              on-scroll-down = "${pkgs.pamixer}/bin/pamixer -d 1";
+              on-scroll-up = "${pkgs.pamixer}/bin/pamixer ${optionalString boost "--allow-boost --set-limit ${toString maxVolume} "}-i 1";
+              on-scroll-down = "${pkgs.pamixer}/bin/pamixer ${optionalString boost "--allow-boost "}-d 1";
               tooltip-format = "{icon} {desc} // {volume}%";
               scroll-step = 5;
               format-icons = {
