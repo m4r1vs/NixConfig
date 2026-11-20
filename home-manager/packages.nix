@@ -23,6 +23,19 @@ in {
         golazo # show soccer scores in terminal
         kubectl # kubernetes CLI
       ]
+      ++ lib.optionals (host.isDev && isGraphical) [
+        # Install on dev machines with a GUI (MacOS and NixOS Desktop):
+        android-tools # android studio and emulator
+        d2 # dot alternative (create beautiful graphs)
+        dbeaver-bin # database explorer (postgres, mysql, etc.)
+      ]
+      ++ lib.optionals (host.isDev && isDesktop) [
+        # Install on NixOS dev desktops only:
+        gaphor # UML and SysML Editor
+        jetbrains.idea # intellij idea ultimate
+        postman # API Inspection
+        slack # Work Communications
+      ]
       ++ lib.optionals (host.isDesktop || host.isDarwin) [
         (writeShellScriptBin "auto-upgrade" ''exec ${scripts.auto-upgrade} "$@"'')
       ]
@@ -37,10 +50,7 @@ in {
       ]
       ++ lib.optionals isGraphical [
         # Install on MacOS and NixOS Desktop
-        android-tools # android studio and emulator
         atai # openai wrapper to write in the terminal for me
-        d2 # dot alternative (create beautiful graphs)
-        dbeaver-bin # database explorer (postgres, mysql, etc.)
         gcalcli # Google Calendar CLI
         obsidian # notes
         prismlauncher # minecraft mod launcher
@@ -52,7 +62,6 @@ in {
           amberol # fancy mp3 player
           apostrophe # Markdown Viewer
           diebahn # deutsche bahn arrivals/departures/delays
-          gaphor # UML and SysML Editor
           gimp-with-plugins # maxxed out gimp
           gnome-chess # chess
           gnome-clocks # alarms, timers, etc.
@@ -62,16 +71,13 @@ in {
           gnome-weather # weather forecast
           gradia # Screenshot annotation tool
           inkscape-with-extensions # maxxed out inkscape
-          jetbrains.idea # intellij idea ultimate
           libnotify # send notifications from terminal
           loupe # Gnome Image Viewer
           nautilus # file browser
           networkmanagerapplet # show wifi/ethernet in sys. tray
           pavucontrol # sound manager
-          postman # API Inspection
           shortwave # Web Radio
           signal-desktop # Signal messenger
-          slack # Work Communications
           stockfish # chess engine to play against computer
           supertuxkart # Mario Kart Linux
           whatsapp-electron # whatsapp
