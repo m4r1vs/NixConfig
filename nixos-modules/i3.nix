@@ -9,6 +9,11 @@ with lib; let
 in {
   options.configured.i3 = {
     enable = mkEnableOption "Enable i3 tiling window manager as desktop environment";
+    scaling = mkOption {
+      type = types.number;
+      default = 1;
+      description = "Display scaling factor of the X session, for HiDPI screens.";
+    };
   };
   config = mkIf cfg.enable {
     environment = {
@@ -19,11 +24,11 @@ in {
         xclip
       ];
       variables = {
-        GDK_SCALE = "1";
-        GDK_DPI_SCALE = "1";
-        _JAVA_OPTIONS = "-Dsun.java2d.uiScale=1";
+        GDK_SCALE = toString (builtins.floor cfg.scaling);
+        GDK_DPI_SCALE = toString (cfg.scaling / (builtins.floor cfg.scaling));
+        _JAVA_OPTIONS = "-Dsun.java2d.uiScale=${toString cfg.scaling}";
         QT_AUTO_SCREEN_SCALE_FACTOR = "1";
-        XCURSOR_SIZE = "20";
+        XCURSOR_SIZE = toString (builtins.floor (20 * cfg.scaling));
       };
     };
     security.pam.services = {
@@ -39,7 +44,7 @@ in {
         };
       };
       xserver = {
-        dpi = 96;
+        dpi = builtins.floor (96 * cfg.scaling);
         upscaleDefaultCursor = true;
         enable = true;
         xkb = {

@@ -9,6 +9,7 @@
 with lib; let
   cfg = config.programs.configured.i3;
   has1Password = osConfig.programs._1password-gui.enable;
+  inherit (osConfig.configured.i3) scaling;
   mod = "Mod4";
   terminal = "${pkgs.ghostty}/bin/ghostty";
   npuDictate = getExe config.programs.npu-dictate.package;
@@ -47,8 +48,8 @@ in {
       config = {
         modifier = mod;
         gaps = {
-          bottom = 8 + 20;
-          inner = 6;
+          bottom = builtins.floor ((8 + 20) * scaling);
+          inner = builtins.floor (6 * scaling);
           smartGaps = false;
         };
         bars = [];
