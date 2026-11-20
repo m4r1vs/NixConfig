@@ -5,6 +5,7 @@
   scripts,
   pkgs,
   osConfig,
+  systemArgs,
   ...
 }:
 with lib; let
@@ -19,6 +20,15 @@ with lib; let
   volumeUp = "${pkgs.pamixer}/bin/pamixer ${optionalString boost "--allow-boost --set-limit ${toString cfg.maxVolume} "}-i 5";
   volumeDown = "${pkgs.pamixer}/bin/pamixer ${optionalString boost "--allow-boost "}-d 5";
   has1Password = osConfig.programs._1password-gui.enable;
+  startupCommand =
+    if any (app: app.command != null) cfg.startupApps
+    then "${scripts.hyprland-startup-workspaces}"
+    else lib.getExe pkgs.waybar;
+  # Startup apps that a window rule recognises stay on their workspace for good
+  pinnedApps = let
+    numberedFirst = a: b: isInt a.workspace && (!isInt b.workspace || a.workspace < b.workspace);
+  in
+    sort numberedFirst (filter (app: app.match != null && app.workspace != null) cfg.startupApps);
 
   inherit (lib.generators) mkLuaInline;
   toLua = lib.generators.toLua {};
@@ -75,6 +85,78 @@ with lib; let
 in {
   options.programs.configured.hyprland = {
     enable = mkEnableOption "Tiling Wayland Window Manager";
+    startupApps = mkOption {
+      type = types.listOf (types.submodule {
+        options = {
+          command = mkOption {
+            type = types.nullOr types.str;
+            default = null;
+            description = "What to start at login. Null starts nothing and only keeps matching windows on the workspace.";
+          };
+          workspace = mkOption {
+            type = types.nullOr (types.either types.int types.str);
+            default = null;
+            example = "name:0";
+            description = "The workspace the app opens on: a number, or a name such as name:0 or special:music.";
+          };
+          match = mkOption {
+            type = types.nullOr (types.attrsOf types.str);
+            default = null;
+            example = {initial_class = "^(signal)$";};
+            description = "How to recognise the app's windows (the match of a window rule). With it they always open on the workspace, not only at login.";
+          };
+        };
+      });
+      default = [
+        {
+          command = "${getExe pkgs.signal-desktop} --ozone-platform-hint=auto";
+          workspace = 9;
+          match.initial_class = "^(signal)$";
+        }
+        {
+          command = "${getExe pkgs.whatsapp-electron} --ozone-platform-hint=auto";
+          workspace = 9;
+          match.initial_title = "^(WhatsApp Electron)(.*)$";
+        }
+        {
+          # Started on the work machine only, kept on its workspace everywhere
+          command =
+            if systemArgs.useWorkProfileByDefault
+            then getExe pkgs.slack
+            else null;
+          workspace = 4;
+          match.initial_class = "^(slack)$";
+        }
+        {
+          command = "${getExe pkgs.obsidian} --ozone-platform-hint=auto";
+          workspace = 3;
+          match.initial_class = "^(md.obsidian.Obsidian)$";
+        }
+        {
+          command =
+            if meta.availableOn pkgs.stdenv.hostPlatform pkgs.spotify
+            then "${getExe pkgs.spotify} --ozone-platform-hint=auto"
+            else null;
+          workspace = 6;
+          match.initial_class = "^(spotify)$";
+        }
+        {
+          command = getExe pkgs.ghostty;
+          workspace = 2;
+          match.initial_class = "^(ghostty.default)$";
+        }
+        {
+          command = concatStringsSep " " ([browser.exe "--profile-directory=Default"] ++ browser.args);
+          workspace = 1;
+          match.initial_class = "^(${browser.windowClass})$";
+        }
+      ];
+      description = ''
+        The apps that hyprland-startup-workspaces opens at login, in this
+        order, after Waybar. A host that sets this replaces the whole list;
+        an empty list starts Waybar alone.
+      '';
+    };
     umlautBinds = mkOption {
       type = types.bool;
       default = true;
@@ -364,34 +446,9 @@ in {
               };
               no_blur = true;
             }
-            {
-              match.initial_class = "^(${browser.windowClass})$";
-              workspace = 1;
-            }
-            {
-              match.initial_class = "^(ghostty.default)$";
-              workspace = 2;
-            }
-            {
-              match.initial_class = "^(md.obsidian.Obsidian)$";
-              workspace = 3;
-            }
-            {
-              match.initial_class = "^(slack)$";
-              workspace = 4;
-            }
-            {
-              match.initial_class = "^(spotify)$";
-              workspace = 6;
-            }
-            {
-              match.initial_class = "^(signal)$";
-              workspace = 9;
-            }
-            {
-              match.initial_title = "^(WhatsApp Electron)(.*)$";
-              workspace = 9;
-            }
+          ]
+          ++ map (app: {inherit (app) match workspace;}) pinnedApps
+          ++ [
             {
               match.initial_class = "^(${geminiClass})$";
               float = true;
@@ -482,7 +539,7 @@ in {
                 function()
                   hl.exec_cmd(${toLua "${scripts.hyprland-session-lock}"})
                   ${optionalString has1Password "hl.exec_cmd(${toLua "${pkgs._1password-gui}/bin/1password --silent"})"}
-                  hl.exec_cmd(${toLua "${scripts.hyprland-startup-workspaces}"})
+                  hl.exec_cmd(${toLua startupCommand})
                   hl.exec_cmd(${toLua "${scripts.firmware-update-check}"})
                   hl.exec_cmd(${toLua "${scripts.volume-change-notify}"})
                   hl.exec_cmd(${toLua "${scripts.brightness-change-notify}"})

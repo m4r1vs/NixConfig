@@ -7,13 +7,31 @@
   ...
 }: let
   toLua = lib.generators.toLua {};
-  browser = config.home-manager.users.${systemArgs.username}.programs.configured.browser.resolved.default;
+  cfg = config.home-manager.users.${systemArgs.username}.programs.configured.hyprland;
+  # What to open is a host's choice: programs.configured.hyprland.startupApps
+  apps = lib.filter (app: app.command != null) cfg.startupApps;
   # With the Lua config, `hyprctl dispatch X` evaluates `hl.dispatch(X)`, so the
   # argument must be a Lua dispatcher expression. hyprctl prints Lua errors but
   # still exits 0.
   dispatch = lua: "hyprctl dispatch ${lib.escapeShellArg lua}";
   exec = cmd: dispatch "hl.dsp.exec_cmd(${toLua cmd})";
   workspace = ws: dispatch "hl.dsp.focus({ workspace = ${toString ws} })";
+  # An app that no window rule recognises is put on its workspace as it starts
+  launch = app:
+    exec ((lib.optionalString (app.match == null && app.workspace != null) "[workspace ${toString app.workspace} silent] ") + app.command);
+  /*
+  Every numbered workspace that gets an app is shown once, so that its windows
+  are drawn before they are needed. The session ends on the lowest one.
+  */
+  numbered = lib.unique (lib.sort lib.lessThan (lib.filter builtins.isInt (map (app: app.workspace) apps)));
+  stops = lib.drop 1 numbered;
+  visit = index: ws: ''
+    ${workspace ws}
+    sleep ${
+      if index == 0 || index == builtins.length stops - 1
+      then "2"
+      else "1"
+    }'';
 in {
   hyprland-startup-workspaces =
     pkgs.writeShellScript "hyprland-startup-workspaces"
@@ -51,33 +69,11 @@ in {
       ${scripts.nixos-notify} -u low -e -t 12000 -h string:synchronous:startup-script "$WELCOME_STRING" "Let me get everything running for you..."
 
       ${exec (lib.getExe pkgs.waybar)}
-      ${exec "${lib.getExe pkgs.signal-desktop} --ozone-platform-hint=auto"}
-      ${exec "${lib.getExe pkgs.whatsapp-electron} --ozone-platform-hint=auto"}
-      ${lib.optionalString systemArgs.useWorkProfileByDefault (exec (lib.getExe pkgs.slack))}
-      ${exec "${lib.getExe pkgs.obsidian} --ozone-platform-hint=auto"}
-      ${lib.optionalString (lib.meta.availableOn pkgs.stdenv.hostPlatform pkgs.spotify)
-        (exec "${lib.getExe pkgs.spotify} --ozone-platform-hint=auto")}
-      ${exec (lib.getExe pkgs.ghostty)}
-      ${exec (lib.concatStringsSep " " ([browser.exe "--profile-directory=Default"] ++ browser.args))}
+      ${lib.concatMapStringsSep "\n" launch apps}
 
       sleep 2
-      ${workspace 2}
-      sleep 2
-      ${workspace 3}
-      sleep 1
-      ${lib.optionalString systemArgs.useWorkProfileByDefault
-        # bash
-        ''
-          ${workspace 4}
-          sleep 1
-        ''}
-      ${workspace 6}
-      sleep 1
-      ${workspace 9}
-
-      sleep 2
-
-      ${workspace 1}
+      ${lib.concatStringsSep "\n" (lib.imap0 visit stops)}
+      ${lib.optionalString (numbered != []) (workspace (lib.head numbered))}
       ${scripts.nixos-notify} -u low -e -t 3000 -h string:synchronous:startup-script "You're ready to go 󱓟 "
 
       exit 0
