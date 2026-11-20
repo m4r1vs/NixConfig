@@ -85,6 +85,7 @@ in {
       default = 100;
       description = "How far the volume keys and the Waybar scroll wheel may raise the volume, in percent.";
     };
+    powerMenuExit = mkEnableOption "a power menu entry that ends the Hyprland session and returns to the login screen";
   };
   config = mkIf cfg.enable {
     home.activation.copyWallpapers = lib.hm.dag.entryAfter ["writeBoundary"] ''

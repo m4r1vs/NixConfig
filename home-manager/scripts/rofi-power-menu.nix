@@ -1,9 +1,22 @@
 {
+  config,
+  host,
   pkgs,
   scripts,
-  host,
+  systemArgs,
   ...
-}: {
+}: let
+  exitHyprland =
+    host.windowManager
+    == "hyprland"
+    && config.home-manager.users.${systemArgs.username}.programs.configured.hyprland.powerMenuExit;
+  # Appended to existing lines, so the script is unchanged without the entry
+  exitEntry = pkgs.lib.optionalString exitHyprland ''
+
+    texts[hyprland]="restart hyprland"
+    icons[hyprland]="\Uf0343"
+    actions[hyprland]="${pkgs.hyprland}/bin/hyprctl dispatch hl.dsp.exit()"'';
+in {
   rofi-power-menu =
     pkgs.writeShellScript "rofi-power-menu"
     ''
@@ -11,7 +24,7 @@
       set -u
 
       # All supported choices
-      all=(shutdown reboot suspend hibernate lockscreen)
+      all=(shutdown reboot suspend hibernate lockscreen${pkgs.lib.optionalString exitHyprland " hyprland"})
 
       # By default, show all (i.e., just copy the array)
       show=("''${all[@]}")
@@ -54,7 +67,7 @@
       }
 
       # By default, ask for confirmation for actions that are irreversible
-      confirmations=(reboot shutdown)
+      confirmations=(reboot shutdown${pkgs.lib.optionalString exitHyprland " hyprland"})${exitEntry}
 
       # By default, no dry run
       dryrun=false
