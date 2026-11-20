@@ -321,6 +321,9 @@ in {
               on-scroll-up = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.focus({ workspace = \"-1\" })'";
               on-scroll-down = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.focus({ workspace = \"+1\" })'";
               persistent-workspaces = {};
+              # Hyprland's own order: a named workspace such as name:0 has a
+              # negative id and sits left of workspace 1, as it does when cycling
+              sort-by = "id";
             };
 
             "hyprland/window" = {
