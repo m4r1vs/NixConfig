@@ -198,7 +198,10 @@ in {
         config = {
           cursor = {
             inactive_timeout = 3;
-            use_cpu_buffer = 1;
+            use_cpu_buffer =
+              if osConfig.configured.nvidia.enable
+              then 1
+              else 0;
           };
           input = {
             kb_layout = "us,de";
