@@ -51,6 +51,7 @@ in {
         size = 50000;
       };
       shellAliases = {
+        cclaude = mkIf config.programs.configured.claude-code.enable "CLAUDE_CODE_EXPERIMENTAL_CODE_MODE=1 claude";
         hud = mkIf config.programs.configured.hunk.enable "hunk diff --watch";
         la = "${lib.getExe pkgs.lsd} -la";
         lg = "${lib.getExe pkgs.lazygit}";
