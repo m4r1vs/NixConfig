@@ -121,7 +121,8 @@ in {
             ["__VK_LAYER_NV_optimus" "NVIDIA_only"]
             ["NVD_BACKEND" "direct"]
           ]
-          ++ lib.optionals (!osConfig.configured.nvidia.enable && host.isX86) [
+          # AMD graphics; libva finds the Intel driver by itself
+          ++ lib.optionals (!osConfig.configured.nvidia.enable && host.isX86 && builtins.elem "kvm-amd" osConfig.boot.kernelModules) [
             ["LIBVA_DRIVER_NAME" "radeonsi"]
           ]
         );
