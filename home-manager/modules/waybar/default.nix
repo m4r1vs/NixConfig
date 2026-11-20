@@ -148,9 +148,9 @@ in {
               orientation = "horizontal";
               modules =
                 optional hasNetbird "custom/netbird"
+                ++ ["custom/weather"]
+                ++ optional host.isDev "custom/github"
                 ++ [
-                  "custom/weather"
-                  "custom/github"
                   "custom/gcal"
                   "tray"
                   "battery"
@@ -216,7 +216,7 @@ in {
               on-click-right = "${scripts.rofi-launch} power";
             };
 
-            "custom/github" = {
+            "custom/github" = mkIf host.isDev {
               exec = "${scripts.waybar-github}";
               on-click = "${pkgs.xdg-utils}/bin/xdg-open https://github.com/notifications";
               interval = 60;

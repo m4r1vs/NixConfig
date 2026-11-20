@@ -498,7 +498,11 @@ in {
             (bindd "SUPER + g" "Toggle Hyprland zoomed out mode" (exec "${scripts.toggle-hypr-zoomed-out}"))
             (bindd "SUPER + d" "Rofi search" (exec "${scripts.rofi-launch} search"))
             (bindd "SUPER + s" "Simple Screenshot" (exec "${scripts.screenshot}"))
+          ]
+          ++ lib.optionals host.isDev [
             (bindd "SUPER + SHIFT + x" "Open Linear ticket from clipboard" (exec "${scripts.open-linear-ticket}"))
+          ]
+          ++ [
             (bindd "SUPER + E" "Open file manager" (exec "${scripts.launch-once {
               command = "${lib.getExe pkgs.ghostty} --class=ghostty.yazi -e ${pkgs.yazi}/bin/yazi ~/Downloads/";
               grep = "ghostty.yazi";
@@ -549,7 +553,11 @@ in {
             }}"))
 
             (bindd "SUPER + SHIFT + Return" "SSH Session Selection" (exec "${scripts.rofi-launch} ssh"))
+          ]
+          ++ lib.optionals host.isDev [
             (bindd "SUPER + SHIFT + G" "GitLab MR search" (exec "${scripts.rofi-launch} gitlab"))
+          ]
+          ++ [
             (bindd "SUPER + SHIFT + Space" "Toggle active window floating" ''hl.dsp.window.float({ action = "toggle" })'')
             (bindd "SUPER + ALT + Space" "Toggle workspace floating" toggleWorkspaceFloating)
             (bindd "SUPER + SHIFT + s" "Take Screenshot and then edit it" (exec "${scripts.screenshot} edit"))
