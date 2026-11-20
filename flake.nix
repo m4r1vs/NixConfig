@@ -174,7 +174,45 @@
         inputs.keypress-visualizer.nixosModules.default
       ]
       ++ commonModules;
+    /*
+    Builds a NixOS workstation from this configuration. Hosts that live in
+    another repository and have this flake as an input are built with it, so
+    its arguments are a public interface (see CLAUDE.md).
+    */
+    mkHost = {
+      hostname,
+      username,
+      git,
+      # Colour names from makeTheme.nix: {primary, secondary}
+      theme,
+      system ? "x86_64-linux",
+      modules ? [],
+      # Further module arguments, such as the flake inputs of the calling flake
+      extraArgs ? {},
+    }: let
+      systemArgs = {
+        inherit username git system hostname;
+        useWorkProfileByDefault = false;
+        theme = makeTheme theme;
+      };
+    in
+      inputs.nixpkgs.lib.nixosSystem {
+        inherit system;
+        modules =
+          modules
+          ++ [
+            ./hosts/nixos.nix
+
+            inputs.disko.nixosModules.disko
+            inputs.nix-index-database.nixosModules.nix-index
+            inputs.home-manager.nixosModules.home-manager
+
+            {config._module.args = {inherit systemArgs self inputs;} // extraArgs;}
+          ]
+          ++ nixosModules;
+      };
   in {
+    lib = {inherit mkHost;};
     nixosConfigurations =
       {
         worknix = inputs.nixpkgs.lib.nixosSystem (let
@@ -483,6 +521,8 @@
     checks = forAllSystems (system: let
       inherit (inputs.nixpkgs) lib;
       isoHosts = ["bootstrap_local_x86_64" "bootstrap_remote_arm64"];
+      # Called the way another repository's flake calls it, with this flake as its input
+      downstreamExample = ((import ./examples/downstream/flake.nix).outputs {upstream = self;}).nixosConfigurations;
       # Evaluate (not build) every host of this system, so a host that stops
       # evaluating fails `nix flake check` instead of going unnoticed.
       hostDrvPath = name: host:
@@ -494,7 +534,7 @@
       hosts =
         lib.filterAttrs
         (_: host: host.pkgs.stdenv.hostPlatform.system == system)
-        (self.nixosConfigurations // self.darwinConfigurations);
+        (self.nixosConfigurations // self.darwinConfigurations // downstreamExample);
     in {
       pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
         src = ./.;

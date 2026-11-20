@@ -21,6 +21,10 @@ The argument `systemArgs` is passed down to all modules both in home-manager, ni
 It contains global varibales such as username, git e-mail and
 default theming colors. The variables can be set globally or per-host in `flake.nix`.
 
+## Hosts in other repositories
+
+A machine does not have to be defined here to use this configuration. `examples/downstream` shows a flake that has this one as its input and builds its host with `lib.mkHost`: it gets the desktop, programs and scripts from here and only defines what is specific to that machine. Updating is `nix flake update`.
+
 ## NeoVim
 
 I use [lazy.nvim](https://github.com/folke/lazy.nvim) to manage plugins. The plugin versions are not directly pinned to nixpkgs.
