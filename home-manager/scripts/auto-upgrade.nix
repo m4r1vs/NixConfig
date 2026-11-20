@@ -115,7 +115,13 @@ in {
 
           OLD_HEAD="$(git rev-parse HEAD)"
 
-          if ! git pull --rebase; then
+          # A checkout without an upstream branch has nothing to pull or to push to
+          HAS_UPSTREAM=0
+          if git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; then
+            HAS_UPSTREAM=1
+          fi
+
+          if [ "$HAS_UPSTREAM" -eq 1 ] && ! git pull --rebase; then
             notify_failure \
               "NixOS Auto-Update Failed" \
               "git pull --rebase failed in ${host.flakePath}."
@@ -160,7 +166,9 @@ in {
           if [ "$SYSTEM_PATH" = "$CURRENT_BOOT" ]; then
             if [ "$LOCK_CHANGED" -eq 1 ]; then
               git commit --only -m "nix: auto-update" -- flake.lock
-              git push || true
+              if [ "$HAS_UPSTREAM" -eq 1 ]; then
+                git push || true
+              fi
             fi
             exit 0
           fi
@@ -176,7 +184,7 @@ in {
           PUSH_FAILED=0
           if [ "$LOCK_CHANGED" -eq 1 ]; then
             git commit --only -m "nix: auto-update" -- flake.lock
-            if ! git push; then
+            if [ "$HAS_UPSTREAM" -eq 1 ] && ! git push; then
               PUSH_FAILED=1
             fi
           fi
