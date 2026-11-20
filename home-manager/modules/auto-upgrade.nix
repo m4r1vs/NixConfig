@@ -9,7 +9,13 @@
   cfg = config.services.configured.auto-upgrade;
 in {
   options.services.configured.auto-upgrade = {
-    enable = lib.mkEnableOption "Daily flake update and automatic boot rebuild with notifications";
+    enable = lib.mkEnableOption "Scheduled flake update and automatic boot rebuild with notifications";
+    schedule = lib.mkOption {
+      type = lib.types.str;
+      default = "daily";
+      example = "weekly";
+      description = "How often to look for updates, as a systemd calendar expression. A run that was missed while the machine was off is made up for.";
+    };
   };
   config = lib.mkIf (cfg.enable && host.isLinux) {
     assertions = [
@@ -35,8 +41,7 @@ in {
         Description = "Timer for Automated Flake Update";
       };
       Timer = {
-        # Run daily (or customize the frequency as desired, e.g., "hourly")
-        OnCalendar = "daily";
+        OnCalendar = cfg.schedule;
         Persistent = true;
       };
       Install = {
