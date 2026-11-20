@@ -1,4 +1,8 @@
-{systemArgs, ...}: {
+{
+  config,
+  systemArgs,
+  ...
+}: {
   imports = [
     ./disks.nix
     ./hardware-configuration.nix
@@ -101,10 +105,35 @@
     back to the password. Expose the real /dev, allow only the standard
     pseudo devices plus V4L; the rest of upstream's hardening stays.
     */
-    services."polkit-agent-helper@".serviceConfig = {
-      PrivateDevices = false;
-      DevicePolicy = "closed";
-      DeviceAllow = ["char-video4linux rw"];
+    services = {
+      "polkit-agent-helper@".serviceConfig = {
+        PrivateDevices = false;
+        DevicePolicy = "closed";
+        DeviceAllow = ["char-video4linux rw"];
+      };
+
+      /*
+      power-profiles-daemon only looks UPower up on the bus and never
+      activates it, and NixOS starts upower on D-Bus activation only
+      */
+      upower.wantedBy = ["graphical.target"];
+
+      /*
+      Panel power savings (ABM) on battery is an opt-in power-profiles-daemon
+      action kept in its state file. Each call makes the daemon restart its
+      drivers, so stay active instead of running again on every rebuild
+      */
+      ppd-panel-power-savings = {
+        description = "Enable power-profiles-daemon panel power savings";
+        wantedBy = ["graphical.target"];
+        wants = ["power-profiles-daemon.service"];
+        after = ["power-profiles-daemon.service"];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${config.services.power-profiles-daemon.package}/bin/powerprofilesctl configure-action amdgpu_panel_power --enable";
+        };
+      };
     };
 
     coredump.settings.Coredump = {
@@ -123,6 +152,11 @@
     Dynamic CPU/Power modes
     */
     power-profiles-daemon.enable = true;
+
+    /*
+    Battery state for power-profiles-daemon (battery-aware EPP, panel power savings)
+    */
+    upower.enable = true;
 
     /*
     Face unlock via the internal IR camera
