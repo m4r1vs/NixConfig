@@ -143,21 +143,10 @@ in {
       };
 
       /*
-      Auto-Discovery of
-      network devices
-      */
-      avahi = {
-        enable = false;
-        nssmdns4 = true;
-        openFirewall = true;
-      };
-
-      /*
       Audio
       */
       pipewire = {
         enable = true;
-        raopOpenFirewall = true;
         pulse.enable = true;
         alsa.enable = true;
         alsa.support32Bit = true;
@@ -178,15 +167,6 @@ in {
               "bluez5.a2dp.ldac.quality" = "auto";
               "bluez5.codecs" = ["sbc" "sbc_xq" "aac" "ldac" "aptx" "aptx_hd" "lc3"];
             };
-          };
-        };
-        extraConfig.pipewire = {
-          "10-airplay" = {
-            "context.modules" = [
-              {
-                name = "libpipewire-module-raop-discover";
-              }
-            ];
           };
         };
       };

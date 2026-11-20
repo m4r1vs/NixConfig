@@ -22,7 +22,7 @@
     system-sounds.enable = true;
     /*
     Ryzen AI 9 HX 370 NPU. The server runs whisper-large-v3-turbo, which is
-    what npu-dictate (SUPER+ALT+V, hold to talk) transcribes against.
+    what npu-dictate (SUPER+v, hold to talk) transcribes against.
     */
     npu = {
       enable = true;
@@ -130,7 +130,8 @@
     };
 
     /*
-    BIOS/EC updates via LVFS; limine signs fwupd.efi with our sbctl keys
+    UEFI dbx and peripheral firmware via LVFS (Uniwill BIOS/EC updates come via
+    the TUXEDO portal); limine signs fwupd.efi with our sbctl keys.
     */
     fwupd.enable = true;
 
