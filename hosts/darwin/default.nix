@@ -52,7 +52,6 @@ in {
         */
         "1password" # Password manager
         "affinity" # Photoshot alternative
-        "android-studio" # Android IDE
         "blender" # 3D Modelling
         "brave-browser" # Web browser
         "calibre" # EBook Management
@@ -63,7 +62,6 @@ in {
         "iriunwebcam" # Use phone as webcam
         "keycastr" # Show keystrokes on screen
         "linearmouse" # Smooth mouse acceleration
-        "lm-studio" # Run LLMs locally
         "macs-fan-control" # View and control fan speeds
         "mediamate" # Better volume UI
         "notion" # Knowledge base
@@ -83,13 +81,9 @@ in {
         App Store apps to install by their numeric ID.
         Find apps by sharing them from the App Store and looking at the URL.
         */
-        DavinciResolve = 571213070; # Video editing software
-        Excel = 462058435; # Spreadsheet software
         GarageBand = 682658836; # Music creation software
-        PowerPoint = 462062816; # Presentation software
         Remarkable = 1276493162; # reMarkable tablet companion app
         WhatsApp = 310633997; # WhatsApp
-        Word = 462054704; # Word processor
         Xcode = 497799835; # Apple IDE
       };
     };
