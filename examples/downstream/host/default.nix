@@ -44,9 +44,11 @@ the eval-hosts check fails here when a change would break them.
       memtest = true;
       secureboot = false;
     };
+    laptop = {
+      enable = true;
+      chargeLimit = 80;
+    };
   };
-
-  services.power-profiles-daemon.enable = true;
 
   programs = {
     _1password.enable = lib.mkForce false;

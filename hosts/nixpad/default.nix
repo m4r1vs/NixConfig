@@ -6,6 +6,7 @@
 
   configured = {
     nvidia.enable = false;
+    laptop.enable = true;
     desktop = {
       enable = true;
       windowManagers = {
@@ -32,22 +33,6 @@
     };
 
     # TODO: Add fingerpint support either by installing a different sensor or packaging https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=libfprint-goodixtls-55x4
-
-    /*
-    Dynamic CPU/Power modes
-    */
-    power-profiles-daemon.enable = true;
-
-    /*
-    B-Tree FS
-    */
-    btrfs = {
-      autoScrub = {
-        enable = true;
-        interval = "monthly";
-        fileSystems = ["/"];
-      };
-    };
   };
 
   system = {

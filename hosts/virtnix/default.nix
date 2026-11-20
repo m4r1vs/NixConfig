@@ -33,19 +33,6 @@
     options edns0
   '';
 
-  services = {
-    /*
-    B-Tree FS
-    */
-    btrfs = {
-      autoScrub = {
-        enable = true;
-        interval = "monthly";
-        fileSystems = ["/"];
-      };
-    };
-  };
-
   system = {
     nixos.label = systemArgs.hostname + ".niveri.dev";
   };

@@ -10,6 +10,7 @@
 
   configured = {
     nvidia.enable = false;
+    laptop.enable = true;
     desktop = {
       enable = true;
       windowManagers = {
@@ -44,7 +45,7 @@
 
   hardware = {
     enableRedistributableFirmware = true;
-    wirelessRegulatoryDatabase = true;
+    # Uniwill BIOS/EC updates come via the TUXEDO portal, not fwupd/LVFS
     tuxedo-drivers = {
       enable = true;
       # Cap charge at 80% ("stationary") to reduce battery wear
@@ -62,11 +63,6 @@
   };
 
   boot = {
-    kernelModules = ["tcp_bbr"];
-    extraModprobeConfig = ''
-      # Unlock 6 GHz Wi-Fi 6E channels on MT7922 in Germany
-      options cfg80211 ieee80211_regdom=DE
-    '';
     kernelParams = [
       "acpi.ec_no_wakeup=1"
       "amdgpu.gpu_recovery=1"
@@ -76,23 +72,14 @@
       dmesg), the suspected cause of the panel stuttering until reboot
       */
       "amdgpu.dcdebugmask=0x400"
-      # Compress swapped pages in RAM before hitting the 110 TBW QLC swapfile
-      "zswap.enabled=1"
-      "zswap.compressor=zstd"
-      "zswap.max_pool_percent=20"
-      "zswap.shrinker_enabled=0"
-      # Stop periodic NMI watchdog interrupts and free a PMU counter on all threads
-      "nmi_watchdog=0"
     ];
     kernel.sysctl = {
-      # Cap dirty writeback buffers on 32 GiB RAM (overrides dirty_*_ratio defaults)
+      # Cap dirty writeback buffers on 32 GiB RAM (overrides dirty_*_ratio defaults);
+      # the swapfile sits on a 110 TBW QLC drive
       "vm.dirty_background_bytes" = 67108864; # 64 MiB
       "vm.dirty_bytes" = 268435456; # 256 MiB
       # No multi-page swap readahead when backed by zswap/NVMe
       "vm.page-cluster" = 0;
-      # TCP BBR congestion control with fq pacing
-      "net.core.default_qdisc" = "fq";
-      "net.ipv4.tcp_congestion_control" = "bbr";
     };
   };
 
@@ -113,12 +100,6 @@
       };
 
       /*
-      power-profiles-daemon only looks UPower up on the bus and never
-      activates it, and NixOS starts upower on D-Bus activation only
-      */
-      upower.wantedBy = ["graphical.target"];
-
-      /*
       Panel power savings (ABM) on battery is an opt-in power-profiles-daemon
       action kept in its state file. Each call makes the daemon restart its
       drivers, so stay active instead of running again on every rebuild
@@ -135,29 +116,9 @@
         };
       };
     };
-
-    coredump.settings.Coredump = {
-      Storage = "external";
-      Compress = "yes";
-      MaxUse = "1G";
-      ProcessSizeMax = "1G";
-    };
-
-    # Replaced by earlyoom, which reacts faster on Hyprland without per-app cgroup scopes
-    oomd.enable = false;
   };
 
   services = {
-    /*
-    Dynamic CPU/Power modes
-    */
-    power-profiles-daemon.enable = true;
-
-    /*
-    Battery state for power-profiles-daemon (battery-aware EPP, panel power savings)
-    */
-    upower.enable = true;
-
     /*
     Face unlock via the internal IR camera
     */
@@ -165,12 +126,6 @@
       enable = true;
       settings.video.device_path = "/dev/v4l/by-path/pci-0000:65:00.4-usb-0:1:1.2-video-index0";
     };
-
-    /*
-    UEFI dbx and peripheral firmware via LVFS (Uniwill BIOS/EC updates come via
-    the TUXEDO portal); limine signs fwupd.efi with our sbctl keys.
-    */
-    fwupd.enable = true;
 
     /*
     Split DNS via D-Bus for NetBird. With NixOS's default openresolv, NetBird
@@ -191,36 +146,6 @@
       ui.enable = false;
       clients.default.environment.NB_MANAGEMENT_URL = "https://netbird.meetovo.dev";
     };
-
-    /*
-    B-Tree FS & SSD health monitoring (110 TBW QLC Crucial P310)
-    */
-    btrfs = {
-      autoScrub = {
-        enable = true;
-        interval = "monthly";
-        fileSystems = ["/"];
-        limit = "250M";
-      };
-    };
-
-    smartd = {
-      enable = true;
-      extraOptions = ["-i" "3600"];
-      notifications.systembus-notify.enable = true;
-    };
-
-    earlyoom = {
-      enable = true;
-      enableNotifications = true;
-    };
-
-    udev.extraRules = ''
-      # Use none scheduler on NVMe drives instead of linux-zen's kyber default
-      ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
-    '';
-
-    hardware.bolt.enable = true;
 
     # Hide the IR camera from browsers/video calls while keeping /dev/video2 usable by Howdy.
     # Match on IR names rather than USB ID 2b7e:c906 (shared with the RGB webcam).

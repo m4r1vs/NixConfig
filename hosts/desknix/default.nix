@@ -39,19 +39,6 @@
   hardware.bluetooth.enable = lib.mkForce false;
   services.blueman.enable = lib.mkForce false;
 
-  services = {
-    /*
-    B-Tree FS
-    */
-    btrfs = {
-      autoScrub = {
-        enable = true;
-        interval = "monthly";
-        fileSystems = ["/"];
-      };
-    };
-  };
-
   /*
   Extra Nvidia Settings
   */

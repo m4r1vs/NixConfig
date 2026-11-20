@@ -8,6 +8,7 @@
 with lib; let
   cfg = config.configured.desktop;
   inherit (config.configured.host) isX86;
+  rootIsBtrfs = (config.fileSystems."/".fsType or "") == "btrfs";
 in {
   options.configured.desktop = {
     enable = mkEnableOption "Enable a Desktop Environment";
@@ -189,6 +190,55 @@ in {
       gnome.gnome-keyring.enable = true;
       gvfs.enable = true;
       blueman.enable = true;
+
+      /*
+      Hardware services, on real machines only (the aarch64 desktop is a VM)
+      */
+
+      # UEFI dbx, device and peripheral firmware via LVFS; limine signs
+      # fwupd.efi with our sbctl keys
+      fwupd.enable = isX86;
+
+      # Authorises USB4/Thunderbolt devices (boltctl)
+      hardware.bolt.enable = isX86;
+
+      # SSD health, with a notification when SMART reports trouble
+      smartd = mkIf isX86 {
+        enable = true;
+        extraOptions = ["-i" "3600"];
+        notifications.systembus-notify.enable = true;
+      };
+
+      /*
+      B-Tree FS: a throttled monthly scrub of the root file system
+      */
+      btrfs.autoScrub = {
+        enable = mkDefault rootIsBtrfs;
+        interval = mkDefault "monthly";
+        limit = mkDefault "250M";
+      };
+
+      earlyoom = {
+        enable = true;
+        enableNotifications = true;
+      };
+
+      udev.extraRules = ''
+        # Use none scheduler on NVMe drives instead of linux-zen's kyber default
+        ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
+      '';
+    };
+
+    systemd = {
+      coredump.settings.Coredump = {
+        Storage = "external";
+        Compress = "yes";
+        MaxUse = "1G";
+        ProcessSizeMax = "1G";
+      };
+
+      # Replaced by earlyoom, which reacts faster on Hyprland without per-app cgroup scopes
+      oomd.enable = false;
     };
 
     security = {
@@ -226,6 +276,16 @@ in {
         "rd.udev.log_level=3"
         "udev.log_priority=3"
       ];
+      kernelModules = ["tcp_bbr"];
+      kernel.sysctl = {
+        # TCP BBR congestion control with fq pacing
+        "net.core.default_qdisc" = "fq";
+        "net.ipv4.tcp_congestion_control" = "bbr";
+      };
+      extraModprobeConfig = ''
+        # German regulatory domain for Wi-Fi; in the world domain 6 GHz stays off
+        options cfg80211 ieee80211_regdom=DE
+      '';
     };
 
     networking = {
@@ -253,6 +313,7 @@ in {
     };
 
     hardware = lib.mkIf isX86 {
+      wirelessRegulatoryDatabase = true;
       bluetooth = {
         enable = true;
         powerOnBoot = true;

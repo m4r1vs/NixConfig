@@ -56,7 +56,7 @@ A host can live in its own repository that has this flake as its only input and 
 That makes these a public interface. Keep them working, or change `examples/downstream` and the downstream repository in the same go:
 
 - the arguments of `lib.mkHost` (`hostname`, `username`, `git`, `theme`, `system`, `modules`, `extraArgs`);
-- `configured.host.isDev`, `configured.i3.scaling`;
+- `configured.host.isDev`, `configured.i3.scaling`, `configured.laptop.{enable,chargeLimit}`;
 - `programs.configured.browser.{default,side,secondaryProfile}`, `programs.configured.hyprland.{startupApps,umlautBinds,maxVolume,powerMenuExit}`, `programs.configured.hyprlock.scaling`, `services.configured.auto-upgrade.schedule`;
 - the shape of `wayland.windowManager.hyprland.settings` (`bind` entries with `_args`, `monitor`, `window_rule`, `workspace_rule`, `on`) and `programs.waybar.settings.mainBar`, which downstream hosts extend.
 
@@ -65,6 +65,10 @@ When adding something that is about development, work or personal habits (a keyb
 ### Browser
 
 `home-manager/modules/browser.nix` picks the browsers by role: `programs.configured.browser.default` (opens links, launcher entries, workspace 1) and `.side` (special workspace on F12). Modules and scripts read `programs.configured.browser.resolved` (command, window class, process name, profiles) and never name a browser package themselves.
+
+### Hardware settings
+
+What every graphical machine gets lives in `nixos-modules/desktop.nix` (firmware updates, SSD health, earlyoom, NVMe scheduler, btrfs scrub defaults, BBR). What only a battery-powered machine wants lives in `nixos-modules/laptop.nix` behind `configured.laptop.enable` (power-profiles-daemon with UPower, zswap, optional `chargeLimit`). A host file keeps only what is specific to that model (drivers, kernel quirks, face unlock), so a new improvement that is not tied to one model goes into one of the two modules.
 
 ### Desktop specialisations
 
