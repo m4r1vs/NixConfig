@@ -71,6 +71,11 @@ with lib; let
 in {
   options.programs.configured.hyprland = {
     enable = mkEnableOption "Tiling Wayland Window Manager";
+    umlautBinds = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Type German umlauts from a US layout with CTRL or SUPER plus ; ' [ and -. Turn off on a German layout, where they take CTRL+minus away from the apps.";
+    };
   };
   config = mkIf cfg.enable {
     home.activation.copyWallpapers = lib.hm.dag.entryAfter ["writeBoundary"] ''
@@ -645,7 +650,8 @@ in {
             (bindde "SUPER + ALT + h" "Resize window left" ''hl.dsp.window.resize({ x = -30, y = 0, relative = true })'')
             (bindde "SUPER + ALT + k" "Resize window up" ''hl.dsp.window.resize({ x = 0, y = -30, relative = true })'')
             (bindde "SUPER + ALT + j" "Resize window down" ''hl.dsp.window.resize({ x = 0, y = 30, relative = true })'')
-
+          ]
+          ++ lib.optionals cfg.umlautBinds [
             (bindde "CTRL + semicolon" "Type ö" (exec "${pkgs.wtype}/bin/wtype ö"))
             (bindde "CTRL + apostrophe" "Type ä" (exec "${pkgs.wtype}/bin/wtype ä"))
             (bindde "CTRL + bracketleft" "Type ü" (exec "${pkgs.wtype}/bin/wtype ü"))
