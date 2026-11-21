@@ -20,6 +20,7 @@ the eval-hosts check fails here when a change would break them.
       fsType = "vfat";
     };
   };
+  boot.initrd.luks.devices.cryptroot.device = "/dev/disk/by-partlabel/luks";
 
   assertions = [
     {
@@ -42,7 +43,12 @@ the eval-hosts check fails here when a change would break them.
     i3.scaling = 2;
     limine = {
       memtest = true;
-      secureboot = false;
+      secureboot = true;
+    };
+    # Placeholders; real values are read on the machine (TPM_HARDENINGS.md)
+    tpmUnlock = {
+      volumeKeyId = "0000000000000000000000000000000000000000000000000000000000000000";
+      resumeOffset = 0;
     };
     laptop = {
       enable = true;

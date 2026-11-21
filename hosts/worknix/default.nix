@@ -24,6 +24,11 @@
       secureboot = true;
       resolution = "2880x1800";
     };
+    # Read with read-tpm-unlock-values.sh on 2026-11-21 (TPM_HARDENINGS.md)
+    tpmUnlock = {
+      volumeKeyId = "b56faa02df4bf493c765b812cf899c19b28aaab916d89dc9ef03e27abb770712";
+      resumeOffset = 533760;
+    };
     system-sounds.enable = true;
     /*
     Ryzen AI 9 HX 370 NPU. The server runs whisper-large-v3-turbo, which is
