@@ -6,11 +6,57 @@ limit. The quirks of one model stay in its host.
 {
   lib,
   config,
+  pkgs,
+  systemArgs,
   ...
 }:
 with lib; let
   cfg = config.configured.laptop;
   limit = toString cfg.chargeLimit;
+
+  cpufreqHelper = pkgs.writeShellApplication {
+    name = "powermode-cpufreq";
+    text = ''
+      if [ "$#" -ne 1 ]; then
+        echo "Usage: powermode-cpufreq {cap|restore}" >&2
+        exit 1
+      fi
+
+      mode="$1"
+      case "$mode" in
+        cap|restore) ;;
+        *)
+          echo "Usage: powermode-cpufreq {cap|restore}" >&2
+          exit 1
+          ;;
+      esac
+
+      cap_khz=${toString cfg.veryLightMaxFreqKHz}
+
+      for p in /sys/devices/system/cpu/cpufreq/policy*; do
+        [ -w "$p/scaling_max_freq" ] || continue
+        [ -r "$p/cpuinfo_max_freq" ] || continue
+        [ -r "$p/cpuinfo_min_freq" ] || continue
+
+        hw_max=$(< "$p/cpuinfo_max_freq")
+        hw_min=$(< "$p/cpuinfo_min_freq")
+
+        if [ "$mode" = "cap" ]; then
+          target=$cap_khz
+          if [ "$target" -gt "$hw_max" ]; then
+            target=$hw_max
+          fi
+          if [ "$target" -lt "$hw_min" ]; then
+            target=$hw_min
+          fi
+        else
+          target=$hw_max
+        fi
+
+        printf '%s\n' "$target" > "$p/scaling_max_freq"
+      done
+    '';
+  };
 in {
   options.configured.laptop = {
     enable = mkEnableOption "Settings for battery-powered machines";
@@ -23,6 +69,21 @@ in {
         battery driver has charge_control_end_threshold (ThinkPads do); null
         keeps what the firmware has stored.
       '';
+    };
+    veryLightMaxFreqKHz = mkOption {
+      type = types.ints.positive;
+      default = 1400000;
+      example = 1600000;
+      description = ''
+        CPU frequency ceiling (in kHz) applied across all cpufreq policies in
+        very-light power mode, clamped to each policy's hardware min/max bounds.
+      '';
+    };
+    cpufreqHelper = mkOption {
+      type = types.package;
+      readOnly = true;
+      default = cpufreqHelper;
+      description = "Locked-down root helper that caps or restores per-policy scaling_max_freq for very-light power mode.";
     };
   };
 
@@ -51,6 +112,18 @@ in {
       HighEfficiencyModeEnabled = true;
       BatterySaverModeAvailability = 1;
     };
+
+    security.sudo.extraRules = [
+      {
+        users = [systemArgs.username];
+        commands = [
+          {
+            command = "${cfg.cpufreqHelper}/bin/powermode-cpufreq";
+            options = ["NOPASSWD"];
+          }
+        ];
+      }
+    ];
 
     services = {
       /*

@@ -1,11 +1,28 @@
 {
   pkgs,
   lib,
+  config,
   scripts,
   helpers,
   host,
   ...
-}: {
+}: let
+  hasCpufreqHelper = config.configured.laptop.enable or false;
+  cpufreqHelper = "${config.configured.laptop.cpufreqHelper}/bin/powermode-cpufreq";
+  veryLightFreqGHz = let
+    mhz = config.configured.laptop.veryLightMaxFreqKHz / 1000;
+    whole = mhz / 1000;
+    tenths = (mhz - whole * 1000) / 100;
+  in "${toString whole}.${toString tenths} GHz";
+  veryLightDetails =
+    if hasCpufreqHelper
+    then "${veryLightFreqGHz} cap, 60 Hz, visuals off"
+    else "60 Hz, visuals off";
+  veryLightTooltip =
+    if hasCpufreqHelper
+    then "Power saver · ${veryLightFreqGHz} cap · 60 Hz · visuals off"
+    else "Power saver · 60 Hz · visuals off";
+in {
   powermode = helpers.mkScript {
     name = "powermode";
     runtimeInputs =
@@ -26,6 +43,13 @@
         # Waybar's custom/powermode module refreshes on SIGRTMIN+11.
         refresh_waybar() {
           pkill -RTMIN+11 -x '\.?waybar(-wrapped)?' || true
+        }
+
+        apply_cpufreq() {
+          ${lib.optionalString hasCpufreqHelper ''
+          /run/wrappers/bin/sudo -n ${cpufreqHelper} "$1" >/dev/null 2>&1 || true
+        ''}
+          : "$1"
         }
 
         current_mode() {
@@ -102,6 +126,7 @@
         performance)
           rm -f "$STATE_FILE"
           powerprofilesctl set performance
+          apply_cpufreq restore
           apply_hyprland full
           refresh_waybar
           ${scripts.nixos-notify} -u low -e -h string:synchronous:powermode-changed "Power Mode: Performance" "Max performance enabled"
@@ -109,6 +134,7 @@
         auto)
           rm -f "$STATE_FILE"
           powerprofilesctl set balanced
+          apply_cpufreq restore
           apply_hyprland full
           refresh_waybar
           ${scripts.nixos-notify} -u low -e -h string:synchronous:powermode-changed "Power Mode: Auto" "Balanced power and performance"
@@ -116,6 +142,7 @@
         light)
           rm -f "$STATE_FILE"
           powerprofilesctl set power-saver
+          apply_cpufreq restore
           apply_hyprland full
           refresh_waybar
           ${scripts.nixos-notify} -u low -e -h string:synchronous:powermode-changed "Power Mode: Light" "Power saving enabled"
@@ -123,14 +150,17 @@
         very-light)
           touch "$STATE_FILE"
           powerprofilesctl set power-saver
+          apply_cpufreq cap
           apply_hyprland very-light
           refresh_waybar
-          ${scripts.nixos-notify} -u low -e -h string:synchronous:powermode-changed "Power Mode: Very Light" "Maximum power saving (60 Hz, visuals off)"
+          ${scripts.nixos-notify} -u low -e -h string:synchronous:powermode-changed "Power Mode: Very Light" "Maximum power saving (${veryLightDetails})"
           ;;
         apply)
           if [ "$(current_mode)" = "very-light" ]; then
+            apply_cpufreq cap
             apply_hyprland very-light
           else
+            apply_cpufreq restore
             apply_hyprland full
           fi
           refresh_waybar
@@ -140,7 +170,7 @@
           ;;
         waybar)
           if [ "$(current_mode)" = "very-light" ]; then
-            echo '{"text":"","class":"very-light","tooltip":"<b>Power Mode: Very Light</b>\nPower saver · 60 Hz · visuals off\n\nClick to change"}'
+            echo '{"text":"","class":"very-light","tooltip":"<b>Power Mode: Very Light</b>\n${veryLightTooltip}\n\nClick to change"}'
           else
             echo '{"text":"","class":"inactive"}'
           fi
