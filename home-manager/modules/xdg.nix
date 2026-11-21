@@ -368,10 +368,10 @@ in {
         };
         meetovo-os = mkIf systemArgs.useWorkProfileByDefault {
           name = "Meetovo OS";
-          genericName = "os.meetovo.de";
+          genericName = "os.tools.meetovo.dev";
           comment = "Open Meetovo OS";
           icon = "applications-system";
-          exec = "${browser.command} --profile-directory=${browsers.resolved.workProfile} https://os.tools.meetovo.de";
+          exec = "${browser.command} --profile-directory=${browsers.resolved.workProfile} https://os.tools.meetovo.dev";
           terminal = false;
           type = "Application";
           categories = ["Network" "Office"];
