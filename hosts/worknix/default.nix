@@ -58,11 +58,13 @@
     };
 
     /*
-    Radeon 890M: early KMS so plymouth starts without a mode switch,
-    plus ROCm/OpenCL compute
+    Radeon 890M with ROCm/OpenCL compute. No early KMS: with amdgpu in the
+    initrd, the kernel that boots to restore a hibernation image brings the
+    GPU up first, and the restored kernel then finds its MES firmware busy
+    (gfx_v11_0 resume fails with -110, the screen stays black or garbled)
     */
     amdgpu = {
-      initrd.enable = true;
+      initrd.enable = false;
       opencl.enable = true;
     };
   };
