@@ -11,6 +11,7 @@
   configured = {
     nvidia.enable = false;
     laptop.enable = true;
+    mdns.enable = true;
     desktop = {
       enable = true;
       windowManagers = {

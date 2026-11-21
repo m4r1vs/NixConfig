@@ -12,6 +12,7 @@
   configured = {
     nvidia.enable = true;
     razer.enable = true;
+    mdns.enable = true;
     desktop = {
       enable = true;
       windowManagers = {

@@ -6,7 +6,10 @@
 }:
 with lib; let
   cfg = config.programs.configured.ssh;
-  inherit (host) isDarwin;
+  inherit (host) isDarwin isDev;
+  # Own machines that announce themselves via mDNS/Bonjour (configured.mdns
+  # on NixOS, networking.localHostName on darwin).
+  lanHosts = ["worknix" "nixpad" "desknix" "nixbook"];
 in {
   options.programs.configured.ssh = {
     enable = mkEnableOption "Secure Shell";
@@ -15,6 +18,10 @@ in {
     programs.ssh = {
       enable = true;
       enableDefaultConfig = false;
+      # `ssh worknix` -> worknix.local, resolved on whatever LAN we're on.
+      settings."Host ${concatStringsSep " " lanHosts}" = mkIf isDev (hm.dag.entryBefore ["Host *"] {
+        HostName = "%h.local";
+      });
       settings."Host *" = {
         forwardAgent = false;
         addKeysToAgent = "no";
