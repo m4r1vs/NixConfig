@@ -395,6 +395,26 @@
         "type": "github"
       }
     },
+    "hyprland-macos-zoom": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795299067,
+        "narHash": "sha256-5w/9uuXRxISmSSh5RiQBH57ZwvzSuW6kVP7h3ckjW44=",
+        "owner": "m4r1vs",
+        "repo": "hyprland-macos-zoom",
+        "rev": "f81d1a2e9043f10c4bdf7ee91fd565156fe68d57",
+        "type": "github"
+      },
+      "original": {
+        "owner": "m4r1vs",
+        "repo": "hyprland-macos-zoom",
+        "type": "github"
+      }
+    },
     "hyprland-which-key": {
       "inputs": {
         "nixpkgs": [
@@ -814,6 +834,7 @@
         "home-manager": "home-manager",
         "homepage": "homepage",
         "hunk": "hunk",
+        "hyprland-macos-zoom": "hyprland-macos-zoom",
         "hyprland-which-key": "hyprland-which-key",
         "keypress-visualizer": "keypress-visualizer",
         "light-yazi": "light-yazi",

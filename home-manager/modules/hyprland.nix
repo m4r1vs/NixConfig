@@ -292,13 +292,19 @@ in {
           }
         ];
         config = {
-          cursor = {
-            inactive_timeout = 3;
-            use_cpu_buffer =
-              if osConfig.configured.nvidia.enable
-              then 1
-              else 0;
-          };
+          cursor =
+            {
+              inactive_timeout = 3;
+              use_cpu_buffer =
+                if osConfig.configured.nvidia.enable
+                then 1
+                else 0;
+            }
+            # Zoomed view moves continuously with the pointer (macOS "Continuously with Pointer")
+            // lib.optionalAttrs host.isDev {
+              zoom_detached_camera = false;
+              zoom_rigid = false;
+            };
           input = {
             kb_layout = "us,de";
             kb_options = "caps:escape";
@@ -759,6 +765,34 @@ in {
                   shake = {
                     enabled = false,
                   },
+                },
+              },
+            })
+          end
+        ''
+        # Continuous macOS-like screen zoom on CTRL + scroll. Takes CTRL + scroll away from
+        # applications (e.g. page zoom in browsers), hence only on dev hosts
+        + lib.optionalString host.isDev
+        # lua
+        ''
+
+          hl.plugin.load("${pkgs.hyprlandPlugins.macos-zoom}/lib/macos-zoom.so")
+
+          if hl.get_config("plugin.macos_zoom.raw_scroll") ~= nil then
+            hl.config({
+              plugin = {
+                macos_zoom = {
+                  raw_scroll = true,
+                  modifier = "CTRL",
+                  consume_scroll = true,
+                  sensitivity = 0.01,
+                  max_factor = 40.0,
+                  independent_displays = true,
+                  -- the touchpad scrolls naturally; zoom in when the fingers move up, as on macOS
+                  invert_touchpad = true,
+                  -- keep zooming and slow down after the fingers lift
+                  momentum = true,
+                  momentum_decay = 300.0,
                 },
               },
             })

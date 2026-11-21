@@ -370,6 +370,9 @@ in {
               })
             ];
         })
+
+      # hyprlandPlugins.macos-zoom, built against the Hyprland above
+      inputs.hyprland-macos-zoom.overlays.default
     ];
   };
 }

@@ -52,6 +52,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.rust-overlay.follows = "rust-overlay";
     };
+    hyprland-macos-zoom = {
+      # macOS-like ctrl+scroll screen zoom (Hyprland plugin)
+      url = "github:m4r1vs/hyprland-macos-zoom";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     golazo = {
       # Soccer score viewer
       url = "github:m4r1vs/golazo?ref=main";
