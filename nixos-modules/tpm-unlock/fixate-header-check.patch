@@ -1,0 +1,151 @@
+From 972e3a216ed1c863d4888dbb23aa933bbbb33f37 Mon Sep 17 00:00:00 2001
+From: NixConfig <nixconfig@localhost>
+Date: Sat, 21 Nov 2026 16:26:48 +0100
+Subject: [PATCH] cryptsetup: check the LUKS2 header when fixate-volume-key= is
+ set
+
+fixate-volume-key= compares an HMAC of the unlocked volume key, but the
+LUKS2 JSON header is not authenticated and decides how that key is used:
+
+- a default segment that is not "crypt" is activated with dm-linear, so
+  a copy of the genuine header (keyslots and TPM2 token intact) with
+  that one segment changed passes the check and maps unencrypted data;
+- a null cipher passes the check the same way, in any spelling
+  libcryptsetup's crypt_is_cipher_null() accepts (a substring match, so
+  "capi:ecb(cipher_null)-plain" too);
+- with a reencryption in progress the default segment is the keyless
+  "backup-final" one, crypt_get_volume_key_size() returns 0 and
+  measured_crypt_activate_by_passphrase() activated without comparing
+  the key at all.
+
+Before comparing the key, require a LUKS2 volume with no reencryption,
+no mandatory requirements and exactly one "crypt" segment with a real
+cipher, checked on the header already loaded into the crypt_device. And
+refuse instead of falling through when no volume key is defined.
+
+All refusals are -EINVAL, like the existing key id mismatch: -EPERM is
+read as a wrong key and turned into -EAGAIN, which would move on to a
+passphrase prompt for a header that cannot pass anyway.
+---
+ src/cryptsetup/cryptsetup.c | 87 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 87 insertions(+)
+
+diff --git a/src/cryptsetup/cryptsetup.c b/src/cryptsetup/cryptsetup.c
+index 2c78bce..5c9a133 100644
+--- a/src/cryptsetup/cryptsetup.c
++++ b/src/cryptsetup/cryptsetup.c
+@@ -1173,6 +1173,78 @@ static int log_external_activation(int r, const char *volume) {
+         return 0;
+ }
+ 
++static bool cipher_spec_is_null(const char *spec) {
++        /* Mirrors libcryptsetup's crypt_is_cipher_null(), which is not exported and decides whether the
++         * volume key is dropped at activation: a substring match, so "capi:ecb(cipher_null)-plain" counts */
++        return isempty(spec) || strstr(spec, "cipher_null") || streq(spec, "null");
++}
++
++static int verify_fixated_header(struct crypt_device *cd) {
++        _cleanup_(sd_json_variant_unrefp) sd_json_variant *v = NULL;
++        sd_json_variant *segments, *segment, *w, *mandatory;
++        const char *json = NULL, *cipher;
++        int r;
++
++        assert(cd);
++
++        /* Every refusal below is -EINVAL, like the key id mismatch: callers turn -EPERM into -EAGAIN ("wrong
++         * key, try the next way of unlocking") and would then ask for a passphrase on a header that cannot
++         * pass anyway.
++         *
++         * fixate-volume-key= proves that the unlock produced the expected volume key, but the LUKS2 JSON
++         * header is not authenticated and decides how that key is used. A non-"crypt" segment is mapped
++         * with dm-linear (the key unused), a cipher_null segment encrypts nothing, and a reencryption in
++         * progress makes the volume key size 0, which used to skip the key check altogether. So insist on
++         * exactly one plain dm-crypt segment. This checks the header already loaded into cd, the one the
++         * activation uses, so there is no second read of the device. */
++
++        if (!streq_ptr(crypt_get_type(cd), CRYPT_LUKS2))
++                return log_error_errno(SYNTHETIC_ERRNO(EINVAL),
++                                       "fixate-volume-key= requires a LUKS2 volume, refusing.");
++
++        if (crypt_reencrypt_status(cd, NULL) != CRYPT_REENCRYPT_NONE)
++                return log_error_errno(SYNTHETIC_ERRNO(EINVAL),
++                                       "Volume has a reencryption in progress, refusing with fixate-volume-key=.");
++
++        cipher = crypt_get_cipher(cd);
++        if (cipher_spec_is_null(cipher) || cipher_spec_is_null(crypt_get_cipher_mode(cd)))
++                return log_error_errno(SYNTHETIC_ERRNO(EINVAL),
++                                       "Volume is not encrypted (cipher '%s'), refusing with fixate-volume-key=.",
++                                       strna(cipher));
++
++        r = crypt_dump_json(cd, &json, /* flags= */ 0);
++        if (r < 0)
++                return log_error_errno(r, "Failed to dump LUKS2 header: %m");
++
++        r = sd_json_parse(json, /* flags= */ 0, &v, /* reterr_line= */ NULL, /* reterr_column= */ NULL);
++        if (r < 0)
++                return log_error_errno(r, "Failed to parse LUKS2 header: %m");
++
++        segments = sd_json_variant_by_key(v, "segments");
++        /* Objects count keys and values separately, so one segment is two elements */
++        if (!sd_json_variant_is_object(segments) || sd_json_variant_elements(segments) != 2)
++                return log_error_errno(SYNTHETIC_ERRNO(EINVAL),
++                                       "Volume does not have exactly one data segment, refusing with fixate-volume-key=.");
++
++        segment = sd_json_variant_by_key(segments, "0");
++        w = sd_json_variant_by_key(segment, "type");
++        if (!sd_json_variant_is_string(w) || !streq(sd_json_variant_string(w), "crypt"))
++                return log_error_errno(SYNTHETIC_ERRNO(EINVAL),
++                                       "Volume's data segment is not of type 'crypt', refusing with fixate-volume-key=.");
++
++        w = sd_json_variant_by_key(segment, "encryption");
++        if (!sd_json_variant_is_string(w) || cipher_spec_is_null(sd_json_variant_string(w)))
++                return log_error_errno(SYNTHETIC_ERRNO(EINVAL),
++                                       "Volume's data segment is not encrypted, refusing with fixate-volume-key=.");
++
++        mandatory = sd_json_variant_by_key(sd_json_variant_by_key(sd_json_variant_by_key(v, "config"), "requirements"), "mandatory");
++        if (sd_json_variant_elements(mandatory) > 0)
++                return log_error_errno(SYNTHETIC_ERRNO(EINVAL),
++                                       "Volume has mandatory requirements set, refusing with fixate-volume-key=.");
++
++        return 0;
++}
++
+ static int measured_crypt_activate_by_volume_key(
+                 struct crypt_device *cd,
+                 const char *name,
+@@ -1193,6 +1265,10 @@ static int measured_crypt_activate_by_volume_key(
+         if (arg_fixate_volume_key) {
+                  _cleanup_free_ char *key_id = NULL;
+ 
++                 r = verify_fixated_header(cd);
++                 if (r < 0)
++                         return r;
++
+                  r = cryptsetup_get_volume_key_id(
+                                  cd,
+                                  /* volume_name= */ name,
+@@ -1251,10 +1327,21 @@ static int measured_crypt_activate_by_passphrase(
+         if (arg_tpm2_measure_pcr == UINT_MAX && !arg_fixate_volume_key)
+                 goto shortcut;
+ 
++        if (arg_fixate_volume_key) {
++                r = verify_fixated_header(cd);
++                if (r < 0)
++                        return r;
++        }
++
+         r = crypt_get_volume_key_size(cd);
+         if (r < 0)
+                 return r;
+         if (r == 0) {
++                /* Activating without the volume key would skip the fixate-volume-key= check */
++                if (arg_fixate_volume_key)
++                        return log_error_errno(SYNTHETIC_ERRNO(EINVAL),
++                                               "No volume key defined, refusing with fixate-volume-key=.");
++
+                 log_debug("Not measuring volume key, none defined.");
+                 goto shortcut;
+         }
+-- 
+2.54.0
+

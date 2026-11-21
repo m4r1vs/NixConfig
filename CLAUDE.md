@@ -72,7 +72,7 @@ What every graphical machine gets lives in `nixos-modules/desktop.nix` (firmware
 
 ### Disk unlock
 
-`nixos-modules/tpm-unlock.nix` turns on TPM unlock of `cryptroot` wherever `configured.limine.secureboot` is set, and pins what the initrd trusts before the disk opens: the volume key (`configured.tpmUnlock.volumeKeyId`) and the hibernation resume location (`.resumeOffset`). Both are per-host values read on the machine itself; background and procedure in `TPM_HARDENINGS.md`.
+`nixos-modules/tpm-unlock.nix` turns on TPM unlock of `cryptroot` wherever `configured.limine.secureboot` is set, and pins what the initrd trusts before the disk opens: the volume key (`configured.tpmUnlock.volumeKeyId`) and the hibernation resume location (`.resumeOffset`). Both are per-host values read on the machine itself; background and procedure in `TPM_HARDENINGS.md`. Its initrd runs a patched systemd (`fixate-header-check.patch`) so the pin also covers the LUKS2 header; the patch has to keep applying to the systemd nixpkgs ships.
 
 ### Desktop specialisations
 

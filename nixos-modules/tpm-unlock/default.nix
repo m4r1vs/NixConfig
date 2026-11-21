@@ -17,6 +17,13 @@ Both values come from the machine itself (see TPM_HARDENINGS.md):
   sudo btrfs inspect-internal map-swapfile -r /swap/swapfile   # resumeOffset
   # volumeKeyId: systemd-cryptsetup prints it when given a wrong one
 
+The LUKS2 header itself is not authenticated, and systemd-cryptsetup 260
+checks only the key: a header copy with its segment turned into a plain
+mapping, or a volume mid-reencryption, would pass. fixate-header-check.patch
+makes it also insist on exactly one encrypted segment. Only the initrd gets the
+patched systemd, so it is built locally whenever nixpkgs moves systemd, and a
+patch that stops applying fails the build instead of booting unprotected.
+
 The pin changes when the volume is re-encrypted or the mapping renamed, the
 offset when the swapfile is recreated. Changing a passphrase or enrolling the
 TPM changes neither. Once the pin is in, delete the older generations: their
@@ -78,7 +85,12 @@ in {
     })
 
     (mkIf (cfg.volumeKeyId != null) {
-      boot.initrd.luks.devices.${cfg.device}.crypttabExtraOpts = ["fixate-volume-key=${cfg.volumeKeyId}"];
+      boot.initrd = {
+        luks.devices.${cfg.device}.crypttabExtraOpts = ["fixate-volume-key=${cfg.volumeKeyId}"];
+        systemd.package = config.systemd.package.overrideAttrs (old: {
+          patches = (old.patches or []) ++ [./fixate-header-check.patch];
+        });
+      };
     })
 
     (mkIf (cfg.resumeOffset != null) {
