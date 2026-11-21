@@ -117,8 +117,12 @@ in {
     configured.gamescope.enable = cfg.windowManagers.gamescope.enable && cfg.windowManagers.gamescope.default;
 
     services = {
-      configured.kmscon.enable = true;
-      configured.auto-upgrade.enable = mkDefault true;
+      configured = {
+        kmscon.enable = true;
+        auto-upgrade.enable = mkDefault true;
+        # Lets the firmware notification install updates and restart
+        firmware-update.enable = mkDefault config.services.fwupd.enable;
+      };
 
       /*
       Touchpad support
