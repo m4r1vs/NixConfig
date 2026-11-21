@@ -48,7 +48,7 @@ in {
           {album}
           {metadata}'';
         tracks_playback_limit = 50;
-        app_refresh_duration_in_ms = 32;
+        app_refresh_duration_in_ms = 250;
         playback_refresh_duration_in_ms = 0;
         page_size_in_rows = 20;
         play_icon = " ";

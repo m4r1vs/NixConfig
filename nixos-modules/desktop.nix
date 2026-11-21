@@ -142,6 +142,7 @@ in {
       */
       printing = {
         enable = true;
+        startWhenNeeded = true;
         drivers = with pkgs; [
           brlaser
         ];
@@ -325,7 +326,7 @@ in {
           General = {
             Name = systemArgs.hostname;
             ControllerMode = "dual";
-            FastConnectable = "true";
+            FastConnectable = "false";
             Experimental = "true";
           };
           Policy = {AutoEnable = "true";};

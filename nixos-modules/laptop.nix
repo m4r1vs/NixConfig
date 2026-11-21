@@ -27,18 +27,30 @@ in {
   };
 
   config = mkIf cfg.enable {
-    boot.kernelParams =
-      [
-        # Stop periodic NMI watchdog interrupts and free a PMU counter on all threads
-        "nmi_watchdog=0"
-      ]
-      ++ optionals (config.swapDevices != []) [
-        # Compress swapped pages in RAM before they reach the disk
-        "zswap.enabled=1"
-        "zswap.compressor=zstd"
-        "zswap.max_pool_percent=20"
-        "zswap.shrinker_enabled=0"
-      ];
+    boot = {
+      kernelParams =
+        [
+          # Stop periodic NMI watchdog interrupts and free a PMU counter on all threads
+          "nmi_watchdog=0"
+        ]
+        ++ optionals (config.swapDevices != []) [
+          # Compress swapped pages in RAM before they reach the disk
+          "zswap.enabled=1"
+          "zswap.compressor=zstd"
+          "zswap.max_pool_percent=20"
+          "zswap.shrinker_enabled=0"
+        ];
+      kernel.sysctl = {
+        # Coalesce periodic dirty writebacks (default 500 = 5s) so NVMe stays in deep APST sleep longer
+        "vm.dirty_writeback_centisecs" = 1500;
+      };
+    };
+
+    # Enforce Memory Saver and Battery Saver below threshold in Brave on laptops
+    environment.etc."brave/policies/managed/power.json".text = builtins.toJSON {
+      HighEfficiencyModeEnabled = true;
+      BatterySaverModeAvailability = 1;
+    };
 
     services = {
       /*
@@ -57,10 +69,26 @@ in {
       '';
     };
 
-    /*
-    power-profiles-daemon only looks UPower up on the bus and never
-    activates it, and NixOS starts upower on D-Bus activation only
-    */
-    systemd.services.upower.wantedBy = ["graphical.target"];
+    systemd.services = {
+      /*
+      power-profiles-daemon only looks UPower up on the bus and never
+      activates it, and NixOS starts upower on D-Bus activation only
+      */
+      upower.wantedBy = ["graphical.target"];
+
+      # Keep heavy periodic maintenance off battery power
+      nix-optimise = mkIf config.nix.optimise.automatic {
+        unitConfig.ConditionACPower = true;
+      };
+      nh-clean = mkIf config.programs.nh.clean.enable {
+        unitConfig.ConditionACPower = true;
+      };
+      fwupd-refresh = mkIf config.services.fwupd.enable {
+        unitConfig.ConditionACPower = true;
+      };
+      "btrfs-scrub--" = mkIf (config.services.btrfs.autoScrub.enable && builtins.elem "/" config.services.btrfs.autoScrub.fileSystems) {
+        unitConfig.ConditionACPower = true;
+      };
+    };
   };
 }

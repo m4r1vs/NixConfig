@@ -4,7 +4,7 @@
     ''
       # Fetch notifications using gh CLI
       # Use --cache to avoid hitting rate limits too hard
-      notifications=$( ${pkgs.gh}/bin/gh api notifications --cache 1m 2>/dev/null )
+      notifications=$( ${pkgs.gh}/bin/gh api notifications --cache 4m 2>/dev/null )
 
       if [ $? -ne 0 ]; then
         # If gh fails (e.g. not logged in), output nothing

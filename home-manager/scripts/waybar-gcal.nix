@@ -3,13 +3,13 @@
     pkgs.writeShellScript "waybar-gcal"
     ''
       # Runs every minute (so countdowns stay accurate) but only asks Google every
-      # 5 minutes; the agenda is cached in XDG_RUNTIME_DIR in between.
+      # 15 minutes; the agenda is cached in XDG_RUNTIME_DIR in between.
       # Right-click deletes the cache and sends SIGRTMIN+9 to force a refetch.
       CACHE="''${XDG_RUNTIME_DIR:-/tmp}/waybar-gcal"
       mkdir -p -m 700 "$CACHE"
       gcal() { ${pkgs.coreutils}/bin/timeout -k 5 20 ${pkgs.gcalcli}/bin/gcalcli --nocolor "$@" 2>/dev/null; }
 
-      if [ -z "$(${pkgs.findutils}/bin/find "$CACHE/fetched" -mmin -5 2>/dev/null)" ]; then
+      if [ -z "$(${pkgs.findutils}/bin/find "$CACHE/fetched" -mmin -15 2>/dev/null)" ]; then
           # Looking ahead 2 days (172800 seconds), without --nostarted to handle "Ongoing"
           if gcal agenda "now" "2 days" --tsv > "$CACHE/events.tmp"; then
               mv "$CACHE/events.tmp" "$CACHE/events.tsv"

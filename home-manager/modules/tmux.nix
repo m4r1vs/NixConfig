@@ -215,7 +215,7 @@ in {
           set -g status-left-length 60
 
           # Nothing in the status line forks anymore; hooks below handle changes
-          set -g status-interval 5
+          set -g status-interval 30
 
           # Update status bar immediately on session/window changes
           set-hook -g client-session-changed 'refresh-client -S'

@@ -123,7 +123,7 @@ in {
             shadow_boost = 0.5;
           }
           {
-            text = "cmd[update:2000] ${capped scripts.battery-status}";
+            text = "cmd[update:30000] ${capped scripts.battery-status}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             font_size = scale 12;
             font_family = "SFProDisplay Nerd Font SemiBold";
@@ -137,7 +137,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:4000:1] ${capped "${scripts.mpris-hyprlock} --read title"}";
+            text = "cmd[update:60000:1] ${capped "${scripts.mpris-hyprlock} --read title"}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.86)";
             font_size = scale 12;
             font_family = "SFProDisplay Nerd Font Bold";
@@ -151,7 +151,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:4000:1] ${capped "${scripts.mpris-hyprlock} --read length"}";
+            text = "cmd[update:60000:1] ${capped "${scripts.mpris-hyprlock} --read length"}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
             font_size = scale 12;
             font_family = "SFProDisplay Nerd Font SemiBold";
@@ -165,7 +165,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:4000:1] ${capped "${scripts.mpris-hyprlock} --read source"}";
+            text = "cmd[update:60000:1] ${capped "${scripts.mpris-hyprlock} --read source"}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.32)";
             font_size = scale 64;
             font_family = "SFProDisplay Nerd Font SemiBold";
@@ -180,7 +180,7 @@ in {
             shadow_boost = 0.9;
           }
           {
-            text = "cmd[update:4000:1] ${capped "${scripts.mpris-hyprlock} --read artist"}";
+            text = "cmd[update:60000:1] ${capped "${scripts.mpris-hyprlock} --read artist"}";
             color = "rgba(${theme.backgroundColorLightRGB}, 0.56)";
             font_family = "SFProDisplay Nerd Font SemiBold";
             font_size = scale 12;
@@ -250,7 +250,7 @@ in {
             rounding = 5;
             border_size = 0;
             rotate = 0;
-            reload_time = 4;
+            reload_time = 15;
             reload_cmd = capped "${scripts.mpris-hyprlock} --read arturl";
             position = scaleStr "24, -21";
             halign = "left";

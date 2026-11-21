@@ -29,6 +29,7 @@ in {
       Unit = {
         Description = "Automated NixOS Flake Update and Boot Rebuild";
         After = ["graphical-session.target"];
+        ConditionACPower = true;
       };
       Service = {
         ExecStart = "${scripts.auto-upgrade}";

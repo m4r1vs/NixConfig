@@ -22,7 +22,7 @@ with lib; let
       format = "{}";
       # Own toggles refresh instantly via SIGRTMIN+10 (or menubar-compat signal 10)
       signal = 10;
-      interval = 15;
+      interval = 60;
       exec-on-event = false;
       on-click = "${scripts.netbird-vpn} down";
       return-type = "json";
@@ -155,6 +155,9 @@ in {
                 ++ [
                   "custom/gcal"
                   "tray"
+                ]
+                ++ optional host.hasPowerProfiles "custom/powermode"
+                ++ [
                   "battery"
                   "custom/notifications"
                   "clock"
@@ -221,7 +224,7 @@ in {
             "custom/github" = mkIf host.isDev {
               exec = "${scripts.waybar-github}";
               on-click = "${pkgs.xdg-utils}/bin/xdg-open https://github.com/notifications";
-              interval = 60;
+              interval = 300;
               exec-on-event = false;
               format = "{}";
               rotate = 0;
@@ -308,6 +311,19 @@ in {
               interval = 60;
               exec-on-event = false;
               on-click = "${scripts.caffeinate} toggle";
+              return-type = "json";
+              tooltip = true;
+            };
+
+            "custom/powermode" = mkIf host.hasPowerProfiles {
+              exec = "${scripts.powermode} waybar";
+              format = "{}";
+              # Own switches refresh instantly via SIGRTMIN+11; slow poll catches
+              # external powerprofilesctl changes
+              signal = 11;
+              interval = 60;
+              exec-on-event = false;
+              on-click = "${scripts.rofi-launch} powermode";
               return-type = "json";
               tooltip = true;
             };

@@ -1,29 +1,43 @@
-{pkgs, ...}: {
-  volume-change-notify =
-    pkgs.writeShellScript "volume-change-notify"
-    ''
-      volume_output=$(${pkgs.wireplumber}/bin/wpctl get-volume @DEFAULT_SINK@)
-      volume=$(echo "$volume_output" | sed 's/ \[MUTED\]//' | awk -F ': ' '{ print $2 }')
-      muted=$(echo "$volume_output" | grep -oF "[MUTED]")
+{
+  pkgs,
+  helpers,
+  ...
+}: {
+  volume-change-notify = helpers.mkScript {
+    name = "volume-change-notify";
+    runtimeInputs = [
+      pkgs.gawk
+      pkgs.libnotify
+      pkgs.pulseaudio
+      pkgs.wireplumber
+    ];
+    text =
+      # bash
+      ''
+        export LC_ALL=C
+        volume_output=$(wpctl get-volume @DEFAULT_SINK@ 2>/dev/null || true)
 
-      ${pkgs.pipewire}/bin/pw-mon --hide-params --hide-props | while IFS= read -r line; do
-        if [[ "$line" == changed* ]]; then
-          new_volume_output=$(${pkgs.wireplumber}/bin/wpctl get-volume @DEFAULT_SINK@)
-          new_volume=$(echo "$new_volume_output" | sed 's/ \[MUTED\]//' | awk -F ": " '{ print $2 }')
-          new_muted=$(echo "$new_volume_output" | grep -oF "[MUTED]")
-
-          if [[ "$new_volume" != "$volume" || "$new_muted" != "$muted" ]]; then
-            volume=$new_volume
-            muted=$new_muted
-            device_name="$(${pkgs.wireplumber}/bin/wpctl inspect @DEFAULT_SINK@ | grep "node.description" | awk -F'"' '{ for (i=2; i<=NF; i+=2) printf "%s\n", $i }')"
-            if [[ -n "$muted" ]]; then
-              ${pkgs.libnotify}/bin/notify-send -u low -e -t 1600 -h int:value:0 -h string:synchronous:volume-change-notify "$device_name" "Muted  "
-            else
-              volume_percentage=$(echo "$volume * 100" | ${pkgs.bc}/bin/bc | awk -F '.' '{ print $1 }')
-              ${pkgs.libnotify}/bin/notify-send -u low -e -t 1600 -h int:value:$volume_percentage -h string:synchronous:volume-change-notify "$device_name" "$volume_percentage%"
-            fi
-          fi
-        fi
-      done
-    '';
+        # Subscribe to sink/server events via PipeWire's PulseAudio layer instead
+        # of pw-mon, which fires on every unrelated PipeWire node/stream change.
+        pactl subscribe | while IFS= read -r line; do
+          case "$line" in
+            "Event 'change' on sink #"*|"Event 'change' on server"*)
+              new_volume_output=$(wpctl get-volume @DEFAULT_SINK@ 2>/dev/null || true)
+              if [ -n "$new_volume_output" ] && [ "$new_volume_output" != "$volume_output" ]; then
+                volume_output="$new_volume_output"
+                device_name=$(wpctl inspect @DEFAULT_SINK@ 2>/dev/null | awk -F'"' '/node\.description/ { print $2; exit }')
+                if [[ "$volume_output" == *"[MUTED]"* ]]; then
+                  notify-send -u low -e -t 1600 -h int:value:0 -h string:synchronous:volume-change-notify "$device_name" "Muted  "
+                else
+                  vol_raw="''${volume_output#Volume: }"
+                  vol_raw="''${vol_raw%% *}"
+                  vol_pct=$((10#''${vol_raw/./}))
+                  notify-send -u low -e -t 1600 -h "int:value:$vol_pct" -h string:synchronous:volume-change-notify "$device_name" "''${vol_pct}%"
+                fi
+              fi
+              ;;
+          esac
+        done
+      '';
+  };
 }

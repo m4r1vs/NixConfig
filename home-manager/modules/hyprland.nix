@@ -543,6 +543,7 @@ in {
                   hl.exec_cmd(${toLua "${scripts.firmware-update-check}"})
                   hl.exec_cmd(${toLua "${scripts.volume-change-notify}"})
                   hl.exec_cmd(${toLua "${scripts.brightness-change-notify}"})
+                  ${optionalString host.hasPowerProfiles "hl.exec_cmd(${toLua "${scripts.powermode} apply"})"}
                   hl.exec_cmd("hyprctl setcursor Bibata-Modern-Ice 20")
                 end'')
             ];

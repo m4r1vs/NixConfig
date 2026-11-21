@@ -41,25 +41,49 @@ in {
           done
           [ -n "$AC" ] || exit 0
 
+          BAT=""
+          for p in /sys/class/power_supply/BAT*; do
+            if [ -r "$p/capacity" ]; then
+              BAT="$p/capacity"
+              break
+            fi
+          done
+
           last=""
           apply() {
-            local status
+            local status desired cap
             read -r status < "$AC"
-            [ "$status" = "$last" ] && return
-            last=$status
             if [ "$status" = "1" ]; then
               # Balanced keeps amd-pstate-epp dynamic instead of locking the performance governor
-              ${scripts.powermode} auto
+              desired="auto"
+            elif [ "$last" = "very-light" ]; then
+              # Stay in very-light while unplugged to avoid 29% <-> 30% bounce
+              desired="very-light"
+            elif [ -n "$BAT" ] && read -r cap < "$BAT" && [[ "$cap" =~ ^[0-9]+$ ]] && [ "$cap" -lt 30 ]; then
+              desired="very-light"
             else
-              ${scripts.powermode} light
+              desired="light"
             fi
+            [ "$desired" = "$last" ] && return
+            last=$desired
+            ${scripts.powermode} "$desired"
           }
 
           apply
           # React to power_supply uevents instead of polling sysfs every 5s.
-          # Battery ticks also arrive here, but apply() only reads a file then.
-          while read -r _; do
-            apply
+          # Battery ticks also arrive here; the 60s timeout is a fallback for
+          # drivers that skip intermediate capacity uevents.
+          while true; do
+            if read -r -t 60 _; then
+              apply
+            else
+              rc=$?
+              if [ "$rc" -gt 128 ]; then
+                apply
+              else
+                break
+              fi
+            fi
           done < <(${pkgs.systemd}/bin/udevadm monitor --udev --subsystem-match=power_supply)
           exit 1 # monitor died, let systemd restart us
         '';
