@@ -537,6 +537,18 @@ in {
           type = "Application";
           categories = ["Settings" "System"];
         };
+        rofi-nightlight = mkIf config.services.configured.hyprsunset.enable {
+          name = "Night Light";
+          genericName = "Adjust Color Temperature (Hyprsunset)";
+          comment = "Switch solar schedule or pick a custom screen color temperature";
+          icon = "cs-nightlight";
+          exec = "${scripts.rofi-launch} nightlight";
+          type = "Application";
+          categories = ["Settings"];
+          settings = {
+            Keywords = "hyprsunset;night;light;sunset;temperature;warm;kelvin;blue;truetone";
+          };
+        };
         rofi-wifi = {
           name = "Wi-Fi Manager";
           genericName = "SUPER+Shift+W";

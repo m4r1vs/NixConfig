@@ -13,6 +13,10 @@ with lib; let
   # Wrapped so hyprlang doesn't parse the Lua arguments
   dpmsOn = pkgs.writeShellScript "hypridle-dpms-on" "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms({ action = \"on\" })'";
   dpmsOff = pkgs.writeShellScript "hypridle-dpms-off" "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms({ action = \"off\" })'";
+  afterSleep = pkgs.writeShellScript "hypridle-after-sleep" ''
+    ${dpmsOn}
+    ${optionalString config.services.configured.hyprsunset.enable "${scripts.nightlight} sync >/dev/null 2>&1 || true"}
+  '';
 in {
   options.services.configured.hypridle = {
     enable = mkEnableOption "Idle Daemon (start lockscreen automatically, etc..)";
@@ -25,8 +29,8 @@ in {
           lock_cmd = "pidof hyprlock || hyprlock"; # Do not lock if already locked
           before_sleep_cmd = "pidof hyprlock || hyprlock"; # Do not lock if already locked
           on_lock_cmd = "pidof hyprlock || hyprlock"; # Do not lock if already locked
-          # Turn on display (if turned off)
-          after_sleep_cmd = "${dpmsOn}";
+          # Turn on display (if turned off) and re-sync solar night light
+          after_sleep_cmd = "${afterSleep}";
           ignore_dbus_inhibit = false;
           ignore_systemd_inhibit = false;
           ignore_wayland_inhibit = false;

@@ -32,6 +32,9 @@ with lib; let
 
   inherit (lib.generators) mkLuaInline;
   toLua = lib.generators.toLua {};
+  inherit (systemArgs) theme;
+  darkBgHex = lib.removePrefix "#" theme.backgroundColor;
+  lightBgHex = lib.removePrefix "#" theme.backgroundColorLight;
 
   mkBind = keys: description: action: opts: {
     _args = [
@@ -48,11 +51,12 @@ with lib; let
       locked = true;
       repeating = true;
     };
-  binddrin = keys: description: action:
+  binddrint = keys: description: action:
     mkBind keys description action {
       release = true;
       ignore_mods = true;
       non_consuming = true;
+      transparent = true;
     };
   exec = cmd: "hl.dsp.exec_cmd(${toLua cmd})";
   moveOrTile = dir: x: y: ''
@@ -168,6 +172,13 @@ in {
       description = "How far the volume keys and the Waybar scroll wheel may raise the volume, in percent.";
     };
     powerMenuExit = mkEnableOption "a power menu entry that ends the Hyprland session and returns to the login screen";
+    hyprtasking = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable macOS Mission Control-style workspace overview via Hyprtasking (3-finger swipe up/down).";
+      };
+    };
   };
   config = mkIf cfg.enable {
     home.activation.copyWallpapers = lib.hm.dag.entryAfter ["writeBoundary"] ''
@@ -182,6 +193,7 @@ in {
     services.configured = {
       cliphist.enable = true;
       hypridle.enable = true;
+      hyprsunset.enable = mkDefault true;
       swaync.enable = true;
     };
     /*
@@ -330,6 +342,10 @@ in {
           };
           render = {
             direct_scanout = 2;
+            ctm_animation =
+              if osConfig.configured.nvidia.enable
+              then 0
+              else 1;
           };
           xwayland = {
             force_zero_scaling = true;
@@ -339,6 +355,11 @@ in {
           };
           general = {
             border_size = 0;
+            # Used by Hyprtasking workspace tiles (regular windows stay borderless)
+            col = {
+              active_border = "rgba(ffffffcc)";
+              inactive_border = "rgba(ffffff24)";
+            };
             gaps_in = 4;
             gaps_out = 8;
             allow_tearing = true;
@@ -684,8 +705,10 @@ in {
           ]
           ++ lib.optionals config.programs.configured.npu-dictate.enable [
             (bindd "SUPER + v" "Dictate (hold to talk)" (exec "${npuDictate} start"))
-            # On key release (r flag), ignore mods (i) and bubble through (n)
-            (binddrin "v" "Dictate (transcribe)" (exec "${npuDictate} stop"))
+            # On key release (r flag), ignore mods (i) and bubble through (n).
+            # Transparent (t): releasing anything else while v is held (Super first,
+            # a mouse click) shadows an ordinary release bind, and the stop is never sent.
+            (binddrint "v" "Dictate (transcribe)" (exec "${npuDictate} stop"))
           ]
           ++ [
             # Allow on lockscreen (locked) and allow repeat (repeating)
@@ -764,6 +787,60 @@ in {
                   mode = "tilt",
                   shake = {
                     enabled = false,
+                  },
+                },
+              },
+            })
+          end
+        ''
+        # macOS Tahoe / Mission Control-style workspace overview (3-finger swipe up/down)
+        + lib.optionalString cfg.hyprtasking.enable
+        # lua
+        ''
+
+          hl.plugin.load("${pkgs.hyprlandPlugins.hyprtasking}/lib/libhyprtasking.so")
+
+          if hl.get_config("plugin.hyprtasking.layout") ~= nil then
+            local theme_mode = "dark"
+            local mode_file = io.open((os.getenv("HOME") or "") .. "/.theme/mode", "r")
+            if mode_file ~= nil then
+              local raw = mode_file:read("*l")
+              mode_file:close()
+              if raw == "light" then
+                theme_mode = "light"
+              end
+            end
+
+            local is_light = theme_mode == "light"
+            hl.config({
+              general = {
+                col = {
+                  active_border = is_light and "rgba(${darkBgHex}99)" or "rgba(ffffffcc)",
+                  inactive_border = is_light and "rgba(${darkBgHex}22)" or "rgba(ffffff24)",
+                },
+              },
+              plugin = {
+                hyprtasking = {
+                  layout = "linear",
+                  bg_color = is_light and 0xa8${lightBgHex} or 0x94${darkBgHex},
+                  gap_size = 12,
+                  border_size = 2,
+                  exit_on_hovered = true,
+                  warp_on_move_window = 1,
+                  close_overview_on_reload = true,
+                  gestures = {
+                    enabled = false,
+                    open_distance = 180,
+                  },
+                  linear = {
+                    top = true,
+                    height = 170,
+                    scroll_speed = 1.0,
+                    blur = true,
+                    workspace_margin = 24,
+                    workspace_scale = 0.0,
+                    workspace_dim = 0.0,
+                    workspace_blur = false,
                   },
                 },
               },

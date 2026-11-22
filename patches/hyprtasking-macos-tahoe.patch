@@ -1,0 +1,1073 @@
+diff -ruN a/src/globals.hpp b/src/globals.hpp
+--- a/src/globals.hpp	2026-11-22 11:00:07.643838477 +0100
++++ b/src/globals.hpp	2026-11-22 11:00:07.663073741 +0100
+@@ -22,6 +22,10 @@
+ inline CFunctionHook* is_solitary_blocked_hook = nullptr;
+ typedef uint32_t (*origIsSolitaryBlocked)(void*, bool);
+ inline void* render_window = nullptr;
++inline void* render_background = nullptr;
++inline void* render_layer = nullptr;
++inline void* render_workspace_windows = nullptr;
++inline void* render_workspace_windows_fullscreen = nullptr;
+ 
+ inline std::unique_ptr<HTManager> ht_manager;
+ 
+diff -ruN a/src/input.cpp b/src/input.cpp
+--- a/src/input.cpp	2026-11-22 11:00:07.643838477 +0100
++++ b/src/input.cpp	2026-11-22 11:00:07.664313787 +0100
+@@ -11,57 +11,53 @@
+ #include "manager.hpp"
+ #include "overview.hpp"
+ 
+-bool HTManager::start_window_drag() {
+-    const PHLMONITOR cursor_monitor = g_pCompositor->getMonitorFromCursor();
+-    const PHTVIEW cursor_view = get_view_from_monitor(cursor_monitor);
+-    if (cursor_monitor == nullptr || cursor_view == nullptr || !cursor_view->active
+-        || cursor_view->closing)
+-        return false;
+-
+-    if (!cursor_view->layout->should_manage_mouse()) {
+-        // hide all views if should not manage mouse but active
+-        hide_all_views();
+-        return true;
+-    }
+-
+-    const Vector2D mouse_coords = g_pInputManager->getMouseCoordsInternal();
+-    const WORKSPACEID workspace_id = cursor_view->layout->get_ws_id_from_global(mouse_coords);
+-    PHLWORKSPACE cursor_workspace = g_pCompositor->getWorkspaceByID(workspace_id);
+-
+-    // If left click on non-workspace workspace, do nothing
++namespace {
++bool drag_pressed = false;
++bool drag_active = false;
++Vector2D drag_start_coords = {};
++WORKSPACEID drag_start_ws = WORKSPACE_INVALID;
++constexpr double DRAG_THRESHOLD_PX = 8.0;
++
++void begin_deferred_drag(
++    const PHLMONITOR& cursor_monitor,
++    const PHTVIEW& cursor_view,
++    const Vector2D& current_mouse_coords
++) {
++    PHLWORKSPACE cursor_workspace = g_pCompositor->getWorkspaceByID(drag_start_ws);
+     if (cursor_workspace == nullptr)
+-        return false;
++        return;
+ 
+-    // PHLWORKSPACEREF o_workspace = cursor_monitor->m_activeWorkspace;
+     cursor_monitor->changeWorkspace(cursor_workspace, true);
+ 
+     const Vector2D workspace_coords =
+-        cursor_view->layout->global_to_local_ws_unscaled(mouse_coords, workspace_id)
++        cursor_view->layout->global_to_local_ws_unscaled(drag_start_coords, drag_start_ws)
+         + cursor_monitor->m_position;
+ 
+     g_pPointerManager->warpTo(workspace_coords);
+     g_pKeybindManager->changeMouseBindMode(MBIND_MOVE);
+-    g_pPointerManager->warpTo(mouse_coords);
++    g_pPointerManager->warpTo(current_mouse_coords);
+ 
+     const SP<Layout::ITarget> target = g_layoutManager->dragController()->target();
+     if (target == nullptr)
+-        return false;
++        return;
+ 
+     const PHLWINDOW dragged_window = target->window();
+     if (dragged_window != nullptr) {
+         if (g_layoutManager->dragController()->draggingTiled()) {
+             const Vector2D pre_pos = cursor_view->layout->local_ws_unscaled_to_global(
+                 dragged_window->m_realPosition->value() - dragged_window->m_monitor->m_position,
+-                workspace_id
++                drag_start_ws
+             );
+             const Vector2D post_pos = cursor_view->layout->local_ws_unscaled_to_global(
+                 dragged_window->m_realPosition->goal() - dragged_window->m_monitor->m_position,
+-                workspace_id
++                drag_start_ws
+             );
+             const Vector2D mapped_pre_pos =
+-                (pre_pos - mouse_coords) / cursor_view->layout->drag_window_scale() + mouse_coords;
++                (pre_pos - current_mouse_coords) / cursor_view->layout->drag_window_scale()
++                + current_mouse_coords;
+             const Vector2D mapped_post_pos =
+-                (post_pos - mouse_coords) / cursor_view->layout->drag_window_scale() + mouse_coords;
++                (post_pos - current_mouse_coords) / cursor_view->layout->drag_window_scale()
++                + current_mouse_coords;
+ 
+             dragged_window->m_realPosition->setValueAndWarp(mapped_pre_pos);
+             *dragged_window->m_realPosition = mapped_post_pos;
+@@ -69,14 +65,50 @@
+             g_pInputManager->simulateMouseMovement();
+         }
+     }
++}
++} // namespace
+ 
+-    // if (o_workspace != nullptr)
+-    //     cursor_monitor->changeWorkspace(o_workspace.lock(), true);
++bool HTManager::start_window_drag() {
++    const PHLMONITOR cursor_monitor = g_pCompositor->getMonitorFromCursor();
++    const PHTVIEW cursor_view = get_view_from_monitor(cursor_monitor);
++    if (cursor_monitor == nullptr || cursor_view == nullptr || !cursor_view->active
++        || cursor_view->closing) {
++        drag_pressed = false;
++        drag_active = false;
++        return false;
++    }
+ 
++    if (!cursor_view->layout->should_manage_mouse()) {
++        // hide all views if clicking outside the workspace strip
++        drag_pressed = false;
++        drag_active = false;
++        hide_all_views(true);
++        return true;
++    }
++
++    const Vector2D mouse_coords = g_pInputManager->getMouseCoordsInternal();
++    const WORKSPACEID workspace_id = cursor_view->layout->get_ws_id_from_global(mouse_coords);
++    if (workspace_id == WORKSPACE_INVALID) {
++        drag_pressed = false;
++        drag_active = false;
++        return true;
++    }
++
++    // Defer actual window drag until pointer moves past threshold;
++    // a plain click selects the workspace and closes the overview on release.
++    drag_pressed = true;
++    drag_active = false;
++    drag_start_coords = mouse_coords;
++    drag_start_ws = workspace_id;
+     return true;
+ }
+ 
+ bool HTManager::end_window_drag() {
++    const bool was_pressed = drag_pressed;
++    const bool was_dragging = drag_active;
++    drag_pressed = false;
++    drag_active = false;
++
+     const PHLMONITOR cursor_monitor = g_pCompositor->getMonitorFromCursor();
+     const PHTVIEW cursor_view = get_view_from_monitor(cursor_monitor);
+     if (cursor_monitor == nullptr || cursor_view == nullptr) {
+@@ -90,6 +122,12 @@
+         return false;
+     }
+ 
++    // Plain left click on a workspace tile: activate it and close overview
++    if (was_pressed && !was_dragging) {
++        g_pKeybindManager->changeMouseBindMode(MBIND_INVALID);
++        return exit_to_workspace();
++    }
++
+     // For linear layout: if dropping on big workspace, just pass on
+     if (!cursor_view->layout->should_manage_mouse()) {
+         g_pKeybindManager->changeMouseBindMode(MBIND_INVALID);
+@@ -194,6 +232,23 @@
+ }
+ 
+ bool HTManager::on_mouse_move() {
++    if (!drag_pressed || drag_active)
++        return false;
++
++    const PHLMONITOR cursor_monitor = g_pCompositor->getMonitorFromCursor();
++    const PHTVIEW cursor_view = get_view_from_monitor(cursor_monitor);
++    if (cursor_monitor == nullptr || cursor_view == nullptr || !cursor_view->active
++        || cursor_view->closing) {
++        drag_pressed = false;
++        drag_active = false;
++        return false;
++    }
++
++    const Vector2D mouse_coords = g_pInputManager->getMouseCoordsInternal();
++    if (mouse_coords.distance(drag_start_coords) >= DRAG_THRESHOLD_PX) {
++        drag_active = true;
++        begin_deferred_drag(cursor_monitor, cursor_view, mouse_coords);
++    }
+     return false;
+ }
+ 
+diff -ruN a/src/layout/layout_base.hpp b/src/layout/layout_base.hpp
+--- a/src/layout/layout_base.hpp	2026-11-22 11:00:07.643889692 +0100
++++ b/src/layout/layout_base.hpp	2026-11-22 11:00:07.663116050 +0100
+@@ -41,6 +41,7 @@
+ 
+     // Warp the show/hide animations to perc (from closed to open)
+     virtual void close_open_lerp(float perc) = 0;
++    virtual float current_open_progress() { return 0.f; }
+     virtual void on_show(CallbackFun on_complete = nullptr) = 0;
+     virtual void on_hide(CallbackFun on_complete = nullptr) = 0;
+     virtual void
+diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
+--- a/src/layout/linear.cpp	2026-11-22 11:00:07.643889692 +0100
++++ b/src/layout/linear.cpp	2026-11-22 11:00:07.664017997 +0100
+@@ -1,6 +1,11 @@
+ #include "linear.hpp"
+ 
++#include <algorithm>
++#include <cmath>
++#include <vector>
+ #include <hyprland/src/Compositor.hpp>
++#include <hyprland/src/render/pass/RendererHintsPassElement.hpp>
++#include <wlr-layer-shell-unstable-v1.hpp>
+ #include <hyprland/src/config/ConfigManager.hpp>
+ #include <hyprland/src/config/ConfigValue.hpp>
+ #include <hyprland/src/helpers/MiscFunctions.hpp>
+@@ -49,6 +54,18 @@
+         anim_tree->getAnimationPropertyConfig("fadeDim"),
+         AVARDAMAGE_NONE
+     );
++    g_pAnimationManager->createAnimation(
++        Vector2D {0.f, 0.f},
++        static_zero_offset,
++        anim_tree->getAnimationPropertyConfig("workspaces"),
++        AVARDAMAGE_NONE
++    );
++    g_pAnimationManager->createAnimation(
++        1.f,
++        static_full_alpha,
++        anim_tree->getAnimationPropertyConfig("workspaces"),
++        AVARDAMAGE_NONE
++    );
+ 
+     init_position();
+ }
+@@ -57,6 +74,16 @@
+     return "linear";
+ }
+ 
++float HTLayoutLinear::current_open_progress() {
++    const PHLMONITOR monitor = get_monitor();
++    if (monitor == nullptr)
++        return 0.f;
++    const float HEIGHT = HTConfig::value<Config::FLOAT>("linear:height") * monitor->m_scale;
++    if (HEIGHT <= 0.f)
++        return 0.f;
++    return std::clamp(view_offset->value() / HEIGHT, 0.f, 1.f);
++}
++
+ void HTLayoutLinear::close_open_lerp(float perc) {
+     const PHLMONITOR monitor = get_monitor();
+     if (monitor == nullptr)
+@@ -88,15 +115,25 @@
+ }
+ 
+ void HTLayoutLinear::on_hide(CallbackFun on_complete) {
++    const PHLMONITOR monitor = get_monitor();
++    if (monitor == nullptr)
++        return;
++
++    if (view_offset->value() <= 0.01f) {
++        view_offset->resetAllCallbacks();
++        view_offset->setValueAndWarp(0.f);
++        blur_strength->setValueAndWarp(0.f);
++        dim_opacity->setValueAndWarp(0.f);
++        if (on_complete != nullptr)
++            on_complete(view_offset);
++        return;
++    }
++
+     CScopeGuard x([this, &on_complete] {
+         if (on_complete != nullptr)
+             view_offset->setCallbackOnEnd(on_complete);
+     });
+ 
+-    const PHLMONITOR monitor = get_monitor();
+-    if (monitor == nullptr)
+-        return;
+-
+     *view_offset = 0;
+     *blur_strength = 0;
+     *dim_opacity = 0;
+@@ -196,16 +233,21 @@
+ }
+ 
+ bool HTLayoutLinear::should_render_window(PHLWINDOW window) {
+-    bool ori_result = HTLayoutBase::should_render_window(window);
+-
+     const PHLMONITOR monitor = get_monitor();
+     if (window == nullptr || monitor == nullptr)
+-        return ori_result;
++        return HTLayoutBase::should_render_window(window);
+ 
+     const SP<Layout::ITarget> target = g_layoutManager->dragController()->target();
+     if (target != nullptr && window == target->window())
+         return false;
+ 
++    if (rendering_thumbnail_ws != WORKSPACE_INVALID) {
++        if (window->m_workspace == nullptr)
++            return false;
++        return window->m_workspace->m_id == rendering_thumbnail_ws;
++    }
++
++    bool ori_result = HTLayoutBase::should_render_window(window);
+     if (rendering_standard_ws)
+         return ori_result;
+ 
+@@ -289,15 +331,24 @@
+             continue;
+         monitor_workspaces.push_back(workspace->m_id);
+     }
++    // Always include all empty numbered workspaces 1..9
++    for (WORKSPACEID id = 1; id <= 9; ++id) {
++        if (g_pCompositor->getWorkspaceByID(id) == nullptr)
++            monitor_workspaces.push_back(id);
++    }
+     std::sort(monitor_workspaces.begin(), monitor_workspaces.end());
+ 
+-    WORKSPACEID big_id = monitor_workspaces.back();
+-    while (g_pCompositor->getWorkspaceByID(big_id) != nullptr)
+-        big_id++;
+-    monitor_workspaces.push_back(big_id);
++    const float GAP_SIZE = HTConfig::value<Config::FLOAT>("gap_size") * monitor->m_scale;
++    const float ws_w = calculate_ws_box(0, 0, stage).w;
++    const float total_width =
++        (static_cast<float>(monitor_workspaces.size()) * (ws_w + GAP_SIZE)) + GAP_SIZE;
++    const float center_x = total_width < monitor->m_transformedSize.x
++        ? (monitor->m_transformedSize.x - total_width) / 2.f
++        : 0.f;
+ 
+     for (const auto& [x, ws_id] : monitor_workspaces | std::views::enumerate) {
+         CBox ws_box = calculate_ws_box(x, 0, stage);
++        ws_box.x += center_x;
+         overview_layout[ws_id] = {x, 0, ws_box};
+     }
+ }
+@@ -328,55 +379,135 @@
+     g_pHyprRenderer->damageMonitor(monitor);
+     g_pHyprRenderer->m_renderData.pMonitor->m_blurFBShouldRender = true;
+ 
+-    // Do a dance with active workspaces: Hyprland will only properly render the
+-    // current active one so make the workspace active before rendering it, etc
+     const PHLWORKSPACE start_workspace = monitor->m_activeWorkspace;
+-    g_pDesktopAnimationManager->startAnimation(
+-        start_workspace,
+-        CDesktopAnimationManager::ANIMATION_TYPE_OUT,
+-        false,
+-        true
+-    );
+-    start_workspace->m_visible = false;
+-
+-    const PHLWORKSPACE big_ws = monitor->m_activeWorkspace;
++    const PHLWORKSPACE big_ws = start_workspace;
+ 
++    const bool linear_blur = (bool)HTConfig::value<Config::INTEGER>("linear:blur");
++    const bool linear_top = (bool)HTConfig::value<Config::INTEGER>("linear:top");
++    const float progress = HEIGHT > 0.f ? std::clamp(view_offset->value() / HEIGHT, 0.f, 1.f) : 0.f;
++
++    // Render main zoomed-out workspace using Hyprland's untouched live m_renderOffset,
++    // m_alpha, m_visible, and m_forceRendering so horizontal workspace swipes & slides
++    // animate smoothly without freezing or flickering.
+     rendering_standard_ws = true;
+-    monitor->m_activeWorkspace = big_ws;
+-    g_pDesktopAnimationManager->startAnimation(
+-        start_workspace,
+-        CDesktopAnimationManager::ANIMATION_TYPE_IN,
+-        false,
+-        true
+-    );
+-    big_ws->m_visible = true;
++    rendering_thumbnail_ws = WORKSPACE_INVALID;
+ 
+     // use pixel size for geometry
+     CBox mon_box = {{0, 0}, monitor->m_pixelSize};
+-    // Render the current workspace on the screen
+-    ((render_workspace_t)(render_workspace_hook->m_original))(
+-        g_pHyprRenderer.get(),
+-        monitor,
+-        big_ws,
+-        time,
+-        mon_box
+-    );
+ 
+-    // add blur/dim over the original workspace
+-    CRectPassElement::SRectData blur_data;
+-    blur_data.color = CHyprColor(0, 0, 0, dim_opacity->value());
+-    blur_data.box = mon_box;
+-    blur_data.blur = (bool)HTConfig::value<Config::INTEGER>("linear:blur");
+-    blur_data.blurA = blur_strength->value();
+-    g_pHyprRenderer->m_renderPass.add(makeUnique<CRectPassElement>(blur_data));
+-
+-    g_pDesktopAnimationManager->startAnimation(
+-        start_workspace,
+-        CDesktopAnimationManager::ANIMATION_TYPE_OUT,
+-        false,
+-        true
+-    );
+-    big_ws->m_visible = false;
++    // 1. Static full-size wallpaper and bottom layers (1:1 scale, never zoomed)
++    ((render_background_t)render_background)(g_pHyprRenderer.get(), monitor);
++    for (auto const& ls : monitor->m_layerSurfaceLayers[ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND]) {
++        if (auto locked = ls.lock())
++            ((render_layer_t)render_layer)(g_pHyprRenderer.get(), locked, monitor, time, false, false);
++    }
++    for (auto const& ls : monitor->m_layerSurfaceLayers[ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM]) {
++        if (auto locked = ls.lock())
++            ((render_layer_t)render_layer)(g_pHyprRenderer.get(), locked, monitor, time, false, false);
++    }
++
++    // 2. Optional backdrop dim/blur over wallpaper only (default: crisp wallpaper, no dimming)
++    const bool ws_blur = (bool)HTConfig::value<Config::INTEGER>("linear:workspace_blur");
++    const float ws_dim = std::clamp(HTConfig::value<Config::FLOAT>("linear:workspace_dim"), 0.f, 1.f);
++    if (progress > 0.001f && (ws_blur || ws_dim > 0.001f)) {
++        CRectPassElement::SRectData bg_fx;
++        bg_fx.color = CHyprColor(0, 0, 0, ws_dim * progress);
++        bg_fx.box = mon_box;
++        bg_fx.blur = ws_blur;
++        bg_fx.blurA = blur_strength->value();
++        g_pHyprRenderer->m_renderPass.add(makeUnique<CRectPassElement>(bg_fx));
++    }
++
++    // 3. Zoomed-out active workspace windows (crisp, with clean margin below picker & above Waybar)
++    const float mon_w = monitor->m_transformedSize.x;
++    const float mon_h = monitor->m_transformedSize.y;
++    const float ws_top = static_cast<float>(monitor->m_reservedArea.top()) * monitor->m_scale;
++    const float ws_bottom =
++        mon_h - static_cast<float>(monitor->m_reservedArea.bottom()) * monitor->m_scale;
++    const float usable_h = std::max(1.f, ws_bottom - ws_top);
++    const float ws_margin =
++        std::max(0.f, HTConfig::value<Config::FLOAT>("linear:workspace_margin")) * monitor->m_scale;
++
++    const float target_top = linear_top ? (HEIGHT + ws_margin) : (ws_top + ws_margin);
++    const float target_bottom = linear_top ? (ws_bottom - ws_margin) : (mon_h - HEIGHT - ws_margin);
++    const float target_h = std::max(1.f, target_bottom - target_top);
++    const float cfg_scale = HTConfig::value<Config::FLOAT>("linear:workspace_scale");
++    const float target_scale = cfg_scale > 0.f
++        ? std::clamp(cfg_scale, 0.3f, 1.0f)
++        : std::clamp(target_h / usable_h, 0.5f, 0.95f);
++
++    const float target_tx = (mon_w - mon_w * target_scale) / 2.f;
++    const float target_ty = linear_top
++        ? (target_top - ws_top * target_scale)
++        : (target_bottom - ws_bottom * target_scale);
++
++    const float cur_scale = std::lerp(1.f, target_scale, progress);
++    const float cur_tx = std::lerp(0.f, target_tx, progress);
++    const float cur_ty = std::lerp(0.f, target_ty, progress);
++
++    const bool apply_zoom =
++        progress > 0.001f && (cur_scale != 1.f || cur_tx != 0.f || cur_ty != 0.f);
++    if (apply_zoom) {
++        SRenderModifData zoom_modif {};
++        zoom_modif.modifs.emplace_back(
++            SRenderModifData::eRenderModifType::RMOD_TYPE_TRANSLATE,
++            Vector2D {cur_tx / cur_scale, cur_ty / cur_scale}
++        );
++        zoom_modif.modifs.emplace_back(
++            SRenderModifData::eRenderModifType::RMOD_TYPE_SCALE,
++            cur_scale
++        );
++        g_pHyprRenderer->m_renderPass.add(
++            makeUnique<CRendererHintsPassElement>(CRendererHintsPassElement::SData {zoom_modif})
++        );
++    }
++
++    if (big_ws->m_hasFullscreenWindow)
++        ((render_workspace_windows_t)render_workspace_windows_fullscreen)(
++            g_pHyprRenderer.get(), monitor, big_ws, time
++        );
++    else
++        ((render_workspace_windows_t)render_workspace_windows)(
++            g_pHyprRenderer.get(), monitor, big_ws, time
++        );
++
++    for (auto const& ws : g_pCompositor->getWorkspaces()) {
++        if (ws->m_alpha->value() <= 0.f || !ws->m_isSpecialWorkspace)
++            continue;
++        if (ws->m_hasFullscreenWindow)
++            ((render_workspace_windows_t)render_workspace_windows_fullscreen)(
++                g_pHyprRenderer.get(), monitor, ws.lock(), time
++            );
++        else
++            ((render_workspace_windows_t)render_workspace_windows)(
++                g_pHyprRenderer.get(), monitor, ws.lock(), time
++            );
++    }
++
++    for (auto const& w : g_pCompositor->m_windows) {
++        if (w->isHidden() && !w->m_isMapped && !w->m_fadingOut)
++            continue;
++        if (!w->m_pinned || !w->m_isFloating)
++            continue;
++        if (!g_pHyprRenderer->shouldRenderWindow(w, monitor))
++            continue;
++        ((render_window_t)render_window)(
++            g_pHyprRenderer.get(), w, monitor, time, true, RENDER_PASS_ALL, false, false
++        );
++    }
++
++    if (apply_zoom) {
++        g_pHyprRenderer->m_renderPass.add(makeUnique<CRendererHintsPassElement>(
++            CRendererHintsPassElement::SData {SRenderModifData {}}
++        ));
++    }
++
++    // 4. Crisp, unzoomed top layers (e.g. Waybar anchored at bottom)
++    for (auto const& ls : monitor->m_layerSurfaceLayers[ZWLR_LAYER_SHELL_V1_LAYER_TOP]) {
++        if (auto locked = ls.lock())
++            ((render_layer_t)render_layer)(g_pHyprRenderer.get(), locked, monitor, time, false, false);
++    }
++
+     rendering_standard_ws = false;
+ 
+     CBox view_box = {
+@@ -385,12 +516,52 @@
+     };
+ 
+     CRectPassElement::SRectData data;
+-    data.color = CHyprColor {HTConfig::value<Config::INTEGER>("bg_color")}.stripA();
++    data.color = CHyprColor {HTConfig::value<Config::INTEGER>("bg_color")};
+     data.box = view_box;
++    data.blur = linear_blur;
++    data.blurA = blur_strength->value();
+     g_pHyprRenderer->m_renderPass.add(makeUnique<CRectPassElement>(data));
+ 
++    const float edge_h = std::max(1.f, std::round(monitor->m_scale));
++    const float edge_y = linear_top ? (view_box.y + view_box.h - edge_h) : view_box.y;
++    CRectPassElement::SRectData edge_data;
++    edge_data.color = CHyprColor(1.f, 1.f, 1.f, 0.16f * progress);
++    edge_data.box = CBox {{0.f, edge_y}, {(float)monitor->m_transformedSize.x, edge_h}};
++    g_pHyprRenderer->m_renderPass.add(makeUnique<CRectPassElement>(edge_data));
++
+     build_overview_layout(HT_VIEW_ANIMATING);
+ 
++    const WORKSPACEID hovered_ws = should_manage_mouse()
++        ? get_ws_id_from_global(g_pInputManager->getMouseCoordsInternal())
++        : WORKSPACE_INVALID;
++
++    // 5. Snapshot workspace flags and render each picker thumbnail at static {0,0}/alpha=1
++    // without calling startAnimation(), preserving live swipe/slide animations.
++    struct SavedWSFlags {
++        PHLWORKSPACE ws;
++        bool visible;
++        bool force_rendering;
++    };
++    std::vector<SavedWSFlags> saved_ws_flags;
++    for (PHLWORKSPACE ws : g_pCompositor->getWorkspacesCopy()) {
++        if (ws == nullptr || ws->m_monitor != monitor || ws->m_isSpecialWorkspace)
++            continue;
++        saved_ws_flags.push_back({ws, ws->m_visible, ws->m_forceRendering});
++        ws->m_visible = false;
++        ws->m_forceRendering = false;
++    }
++
++    CScopeGuard restore_ws_guard([&] {
++        rendering_thumbnail_ws = WORKSPACE_INVALID;
++        for (const auto& entry : saved_ws_flags) {
++            if (entry.ws == nullptr)
++                continue;
++            entry.ws->m_visible = entry.visible;
++            entry.ws->m_forceRendering = entry.force_rendering;
++        }
++        monitor->m_activeWorkspace = start_workspace;
++    });
++
+     CBox global_mon_box = {monitor->m_position, monitor->m_transformedSize};
+     for (const auto& [ws_id, ws_layout] : overview_layout) {
+         // Could be nullptr, in which we render only layers
+@@ -400,27 +571,46 @@
+         if (global_box.intersection(global_mon_box).empty())
+             continue;
+ 
+-        const Config::CGradientValueData border_col = workspace == big_ws ? *ACTIVECOL : *INACTIVECOL;
++        const bool is_active_ws = workspace == big_ws;
++        const bool is_hovered_ws = !is_active_ws && ws_id == hovered_ws;
++        const Config::CGradientValueData border_col =
++            (is_active_ws || is_hovered_ws) ? *ACTIVECOL : *INACTIVECOL;
+         CBox border_box = ws_layout.box;
+ 
+-        CBorderPassElement::SBorderData data;
+-        data.box = border_box;
+-        data.grad1 = border_col;
+-        data.borderSize = BORDERSIZE;
+-        g_pHyprRenderer->m_renderPass.add(makeUnique<CBorderPassElement>(data));
+-
+-        render_workspace_at_box(monitor, workspace, time, ws_layout.box);
++        CBorderPassElement::SBorderData bdata;
++        bdata.box = border_box;
++        bdata.grad1 = border_col;
++        bdata.borderSize = BORDERSIZE;
++        bdata.a = is_hovered_ws ? 0.65f : 1.0f;
++        bdata.round = 0;
++        bdata.outerRound = std::round(4.f * monitor->m_scale);
++        bdata.roundingPower = 4.f;
++        g_pHyprRenderer->m_renderPass.add(makeUnique<CBorderPassElement>(bdata));
++
++        const float ws_scale = ws_layout.box.w / monitor->m_transformedSize.x;
++        CBox render_box = {ws_layout.box.pos() / ws_scale, ws_layout.box.size()};
++        if (monitor->m_transform % 2 == 1)
++            std::swap(render_box.w, render_box.h);
++
++        rendering_thumbnail_ws = ws_id;
++        if (workspace != nullptr) {
++            std::swap(workspace->m_renderOffset, static_zero_offset);
++            std::swap(workspace->m_alpha, static_full_alpha);
++            workspace->m_visible = true;
++            monitor->m_activeWorkspace = workspace;
++        }
++
++        ((render_workspace_t)(render_workspace_hook->m_original))(
++            g_pHyprRenderer.get(), monitor, workspace, time, render_box
++        );
++
++        if (workspace != nullptr) {
++            workspace->m_visible = false;
++            std::swap(workspace->m_renderOffset, static_zero_offset);
++            std::swap(workspace->m_alpha, static_full_alpha);
++        }
+     }
+ 
+-    monitor->m_activeWorkspace = start_workspace;
+-    g_pDesktopAnimationManager->startAnimation(
+-        start_workspace,
+-        CDesktopAnimationManager::ANIMATION_TYPE_IN,
+-        false,
+-        true
+-    );
+-    start_workspace->m_visible = true;
+-
+     // Render dragged window at mouse cursor
+     const PHTVIEW cursor_view = ht_manager->get_view_from_cursor();
+     if (cursor_view == nullptr)
+diff -ruN a/src/layout/linear.hpp b/src/layout/linear.hpp
+--- a/src/layout/linear.hpp	2026-11-22 11:00:07.643889692 +0100
++++ b/src/layout/linear.hpp	2026-11-22 11:00:07.663157347 +0100
+@@ -9,8 +9,11 @@
+     PHLANIMVAR<float> view_offset;
+     PHLANIMVAR<float> blur_strength;
+     PHLANIMVAR<float> dim_opacity;
++    PHLANIMVAR<Vector2D> static_zero_offset;
++    PHLANIMVAR<float> static_full_alpha;
+ 
+     bool rendering_standard_ws;
++    WORKSPACEID rendering_thumbnail_ws = WORKSPACE_INVALID;
+ 
+   public:
+     HTLayoutLinear(VIEWID view_id);
+@@ -21,6 +24,7 @@
+     virtual CBox calculate_ws_box(int x, int y, HTViewStage stage);
+ 
+     virtual void close_open_lerp(float perc);
++    virtual float current_open_progress();
+     virtual void on_show(CallbackFun on_complete);
+     virtual void on_hide(CallbackFun on_complete);
+     virtual void on_move(WORKSPACEID old_id, WORKSPACEID new_id, CallbackFun on_complete);
+diff -ruN a/src/main.cpp b/src/main.cpp
+--- a/src/main.cpp	2026-11-22 11:00:07.643889692 +0100
++++ b/src/main.cpp	2026-11-22 11:00:07.664738035 +0100
+@@ -1,6 +1,11 @@
+ #include <linux/input-event-codes.h>
+ 
++#include <algorithm>
+ #include <cmath>
++#include <deque>
++#include <optional>
++#include <xkbcommon/xkbcommon-keysyms.h>
++#include <hyprland/src/managers/input/trackpad/TrackpadGestures.hpp>
+ 
+ #include <hyprland/src/Compositor.hpp>
+ #include <hyprland/src/SharedDefs.hpp>
+@@ -519,7 +524,184 @@
+ static void on_swipe_end(IPointer::SSwipeEndEvent e, Event::SCallbackInfo& info) {
+     if (ht_manager == nullptr)
+         return;
+-    info.cancelled = ht_manager->swipe_end();
++    ht_manager->swipe_end();
++}
++
++namespace {
++struct VerticalSample {
++    uint32_t timeMs = 0;
++    float deltaP = 0.f;
++};
++
++constexpr uint32_t VERTICAL_VEL_WINDOW_MS = 100;
++constexpr float VERTICAL_FLICK_VEL = 0.0012f;
++
++class CHTVerticalGesture : public ITrackpadGesture {
++  public:
++    void begin(const STrackpadGestureBegin& e) override {
++        tracking = false;
++        samples.clear();
++        if (ht_manager == nullptr || !e.swipe)
++            return;
++
++        const PHTVIEW view = ht_manager->get_view_from_cursor();
++        if (view == nullptr || view->layout == nullptr)
++            return;
++
++        if (!view->active) {
++            if (e.direction != TRACKPAD_GESTURE_DIR_UP)
++                return;
++            started_open = false;
++            progress = 0.f;
++            view->begin_gesture_open();
++            view->layout->close_open_lerp(0.f);
++            tracking = true;
++        } else {
++            started_open = true;
++            progress = view->layout->current_open_progress();
++            view->closing = false;
++            view->active = true;
++            tracking = true;
++        }
++    }
++
++    void update(const STrackpadGestureUpdate& e) override {
++        if (!tracking || ht_manager == nullptr || !e.swipe)
++            return;
++
++        const PHTVIEW view = ht_manager->get_view_from_cursor();
++        if (view == nullptr || view->layout == nullptr) {
++            tracking = false;
++            return;
++        }
++
++        const float open_dist =
++            std::max(40.f, HTConfig::value<Config::FLOAT>("gestures:open_distance"));
++        const float delta_p = static_cast<float>(-e.swipe->delta.y) / open_dist;
++        progress = std::clamp(progress + delta_p, 0.f, 1.f);
++
++        samples.push_back({e.swipe->timeMs, delta_p});
++        while (samples.size() > 1
++               && static_cast<int64_t>(e.swipe->timeMs) - samples.front().timeMs
++                   > VERTICAL_VEL_WINDOW_MS) {
++            samples.pop_front();
++        }
++
++        view->layout->close_open_lerp(progress);
++        if (const PHLMONITOR mon = view->get_monitor()) {
++            g_pHyprRenderer->damageMonitor(mon);
++            g_pCompositor->scheduleFrameForMonitor(mon);
++        }
++    }
++
++    void end(const STrackpadGestureEnd& e) override {
++        if (!tracking)
++            return;
++        tracking = false;
++
++        if (ht_manager == nullptr)
++            return;
++        const PHTVIEW view = ht_manager->get_view_from_cursor();
++        if (view == nullptr)
++            return;
++
++        float vel = 0.f;
++        if (samples.size() >= 2) {
++            const uint32_t dt = samples.back().timeMs > samples.front().timeMs
++                ? (samples.back().timeMs - samples.front().timeMs)
++                : 1;
++            float sum = 0.f;
++            for (size_t i = 1; i < samples.size(); ++i)
++                sum += samples[i].deltaP;
++            vel = sum / static_cast<float>(dt);
++        }
++        samples.clear();
++
++        bool should_open = false;
++        if (e.swipe && e.swipe->cancelled) {
++            should_open = started_open;
++        } else if (vel > VERTICAL_FLICK_VEL && progress > 0.08f) {
++            should_open = true;
++        } else if (vel < -VERTICAL_FLICK_VEL && progress < 0.92f) {
++            should_open = false;
++        } else {
++            should_open = progress >= 0.45f;
++        }
++
++        if (should_open) {
++            view->show(false);
++        } else {
++            // If user only peeked from closed and pulled back down, keep active workspace;
++            // if closing an already-open overview, honor exit_on_hovered.
++            view->hide(false, !started_open);
++        }
++    }
++
++  private:
++    bool tracking = false;
++    bool started_open = false;
++    float progress = 0.f;
++    std::deque<VerticalSample> samples;
++};
++
++void register_vertical_gesture() {
++    if (!g_pTrackpadGestures)
++        return;
++    g_pTrackpadGestures->removeGesture(3, TRACKPAD_GESTURE_DIR_VERTICAL, 0, 1.f, false);
++    const auto res = g_pTrackpadGestures->addGesture(
++        makeUnique<CHTVerticalGesture>(),
++        3,
++        TRACKPAD_GESTURE_DIR_VERTICAL,
++        0,
++        1.f,
++        false
++    );
++    if (!res) {
++        Log::logger->log(
++            ERR,
++            "[Hyprtasking] Failed to register 3-finger vertical gesture: {}",
++            res.error()
++        );
++    }
++}
++
++std::optional<uint32_t> swallowed_esc_keycode;
++
++bool is_escape_key(uint32_t keycode) {
++    if (keycode == KEY_ESC)
++        return true;
++    if (!g_pInputManager)
++        return false;
++    for (const auto& kb : g_pInputManager->m_keyboards) {
++        if (!kb || !kb->m_enabled)
++            continue;
++        xkb_state* st = kb->m_xkbSymState ? kb->m_xkbSymState : kb->m_xkbState;
++        if (!st)
++            continue;
++        if (xkb_state_key_get_one_sym(st, keycode + 8) == XKB_KEY_Escape)
++            return true;
++    }
++    return false;
++}
++} // namespace
++
++static void on_key(IKeyboard::SKeyEvent e, Event::SCallbackInfo& info) {
++    if (e.state == WL_KEYBOARD_KEY_STATE_RELEASED) {
++        if (swallowed_esc_keycode.has_value() && *swallowed_esc_keycode == e.keycode) {
++            swallowed_esc_keycode.reset();
++            info.cancelled = true;
++        }
++        return;
++    }
++
++    if (ht_manager == nullptr || !ht_manager->has_active_view())
++        return;
++
++    if (e.state == WL_KEYBOARD_KEY_STATE_PRESSED && is_escape_key(e.keycode)) {
++        swallowed_esc_keycode = e.keycode;
++        ht_manager->hide_all_views(true);
++        info.cancelled = true;
++    }
+ }
+ 
+ static void cancel_event(Event::SCallbackInfo& info) {
+@@ -580,6 +762,7 @@
+     }
+ 
+     ht_manager->refresh_all_grid_caches();
++    register_vertical_gesture();
+ }
+ 
+ static void init_functions() {
+@@ -669,6 +852,38 @@
+         fail_exit("No renderWindow");
+     render_window = FNS3[0].address;
+ 
++    static auto FNS_BG = HyprlandAPI::findFunctionsByName(
++        PHANDLE,
++        "_ZN6Render13IHyprRenderer16renderBackgroundEN9Hyprutils6Memory14CSharedPointerI8CMonitorEE"
++    );
++    if (FNS_BG.empty())
++        fail_exit("No renderBackground");
++    render_background = FNS_BG[0].address;
++
++    static auto FNS_LAYER = HyprlandAPI::findFunctionsByName(
++        PHANDLE,
++        "_ZN6Render13IHyprRenderer11renderLayerEN9Hyprutils6Memory14CSharedPointerIN7Desktop4View13CLayerSurfaceEEENS3_I8CMonitorEERKNSt6chrono10time_pointINSA_3_V212steady_clockENSA_8durationIlSt5ratioILl1ELl1000000000EEEEEEbb"
++    );
++    if (FNS_LAYER.empty())
++        fail_exit("No renderLayer");
++    render_layer = FNS_LAYER[0].address;
++
++    static auto FNS_WSW = HyprlandAPI::findFunctionsByName(
++        PHANDLE,
++        "_ZN6Render13IHyprRenderer22renderWorkspaceWindowsEN9Hyprutils6Memory14CSharedPointerI8CMonitorEENS3_I10CWorkspaceEERKNSt6chrono10time_pointINS8_3_V212steady_clockENS8_8durationIlSt5ratioILl1ELl1000000000EEEEEE"
++    );
++    if (FNS_WSW.empty())
++        fail_exit("No renderWorkspaceWindows");
++    render_workspace_windows = FNS_WSW[0].address;
++
++    static auto FNS_WSWF = HyprlandAPI::findFunctionsByName(
++        PHANDLE,
++        "_ZN6Render13IHyprRenderer32renderWorkspaceWindowsFullscreenEN9Hyprutils6Memory14CSharedPointerI8CMonitorEENS3_I10CWorkspaceEERKNSt6chrono10time_pointINS8_3_V212steady_clockENS8_8durationIlSt5ratioILl1ELl1000000000EEEEEE"
++    );
++    if (FNS_WSWF.empty())
++        fail_exit("No renderWorkspaceWindowsFullscreen");
++    render_workspace_windows_fullscreen = FNS_WSWF[0].address;
++
+     static auto FNS4 = HyprlandAPI::findFunctionsByName(PHANDLE, "isSolitaryBlocked");
+     if (FNS4.empty())
+         fail_exit("No isSolitaryBlocked");
+@@ -686,6 +901,7 @@
+     static auto P1 = Event::bus()->m_events.input.mouse.button.listen(on_mouse_button);
+     static auto P2 = Event::bus()->m_events.input.mouse.move.listen(on_mouse_move);
+     static auto P3 = Event::bus()->m_events.input.mouse.axis.listen(on_mouse_axis);
++    static auto PKEY = Event::bus()->m_events.input.keyboard.key.listen(on_key);
+ 
+     // TODO: support touch
+     static auto P4 = Event::bus()->m_events.input.touch.down.listen([&] (ITouch::SDownEvent e, Event::SCallbackInfo i) { cancel_event(i); } );
+@@ -776,6 +992,10 @@
+     addConfigValue(CFloatValue, "linear:height", "height", 300.f);
+     addConfigValue(CFloatValue, "linear:scroll_speed", "scroll speed", 1.f);
+     addConfigValue(CIntValue, "linear:top", "top", 0);
++    addConfigValue(CFloatValue, "linear:workspace_margin", "workspace zoom margin", 24.f);
++    addConfigValue(CFloatValue, "linear:workspace_scale", "workspace zoom scale (<=0 for auto)", 0.f);
++    addConfigValue(CFloatValue, "linear:workspace_dim", "workspace backdrop dim opacity", 0.f);
++    addConfigValue(CIntValue, "linear:workspace_blur", "blur wallpaper behind zoomed workspace", 0);
+ 
+     // HyprlandAPI::reloadConfig();
+ }
+@@ -799,6 +1019,7 @@
+     register_callbacks();
+     init_functions();
+     register_monitors();
++    register_vertical_gesture();
+ 
+     Log::logger->log(LOG, "[Hyprtasking] Plugin initialized");
+ 
+@@ -806,6 +1027,8 @@
+ }
+ 
+ APICALL EXPORT void PLUGIN_EXIT() {
++    if (g_pTrackpadGestures)
++        g_pTrackpadGestures->removeGesture(3, TRACKPAD_GESTURE_DIR_VERTICAL, 0, 1.f, false);
+     Log::logger->log(LOG, "[Hyprtasking] Plugin exiting");
+     // prevent crashes
+     ht_manager->hide_all_views();
+diff -ruN a/src/manager.cpp b/src/manager.cpp
+--- a/src/manager.cpp	2026-11-22 11:00:07.643889692 +0100
++++ b/src/manager.cpp	2026-11-22 11:00:07.663797767 +0100
+@@ -98,11 +98,11 @@
+     }
+ }
+ 
+-void HTManager::hide_all_views() {
++void HTManager::hide_all_views(bool force_active_ws) {
+     for (PHTVIEW view : views) {
+         if (view == nullptr)
+             continue;
+-        view->hide(false);
++        view->hide(false, force_active_ws);
+     }
+ }
+ 
+diff -ruN a/src/manager.hpp b/src/manager.hpp
+--- a/src/manager.hpp	2026-11-22 11:00:07.643889692 +0100
++++ b/src/manager.hpp	2026-11-22 11:00:07.663643931 +0100
+@@ -20,7 +20,7 @@
+     void reset();
+ 
+     void show_all_views();
+-    void hide_all_views();
++    void hide_all_views(bool force_active_ws = false);
+     void show_cursor_view();
+ 
+     void refresh_all_grid_caches();
+diff -ruN a/src/overview.cpp b/src/overview.cpp
+--- a/src/overview.cpp	2026-11-22 11:00:07.643889692 +0100
++++ b/src/overview.cpp	2026-11-22 11:00:07.663465309 +0100
+@@ -44,7 +44,7 @@
+     }
+ }
+ 
+-void HTView::do_exit_behavior(bool exit_on_mouse) {
++void HTView::do_exit_behavior(bool exit_on_mouse, bool force_active_ws) {
+     const PHLMONITOR monitor = get_monitor();
+     if (monitor == nullptr) //???
+         return;
+@@ -60,8 +60,9 @@
+ 
+     const int EXIT_ON_HOVERED = HTConfig::value<Config::INTEGER>("exit_on_hovered");
+ 
+-    const WORKSPACEID ws_id =
+-        (exit_on_mouse || EXIT_ON_HOVERED) ? try_get_hover_id() : monitor->m_activeWorkspace->m_id;
++    const WORKSPACEID ws_id = (!force_active_ws && (exit_on_mouse || EXIT_ON_HOVERED))
++        ? try_get_hover_id()
++        : monitor->m_activeWorkspace->m_id;
+     PHLWORKSPACE workspace = g_pCompositor->getWorkspaceByID(ws_id);
+ 
+     if (workspace == nullptr && ws_id != WORKSPACE_INVALID)
+@@ -72,6 +73,20 @@
+     monitor->changeWorkspace(workspace);
+ }
+ 
++void HTView::begin_gesture_open() {
++    const PHLMONITOR monitor = get_monitor();
++    if (monitor == nullptr || monitor->m_activeWorkspace == nullptr)
++        return;
++
++    active = true;
++    closing = false;
++    navigating = false;
++    layout->init_position();
++    Cursor::overrideController->setOverride("left_ptr", Cursor::CURSOR_OVERRIDE_UNKNOWN);
++    g_pHyprRenderer->damageMonitor(monitor);
++    g_pCompositor->scheduleFrameForMonitor(monitor);
++}
++
+ void HTView::show(bool recalculate) {
+     const PHLMONITOR monitor = get_monitor();
+     if (monitor == nullptr)
+@@ -95,7 +110,7 @@
+     g_pCompositor->scheduleFrameForMonitor(monitor);
+ }
+ 
+-void HTView::hide(bool exit_on_mouse) {
++void HTView::hide(bool exit_on_mouse, bool force_active_ws) {
+     const PHLMONITOR monitor = get_monitor();
+     if (monitor == nullptr)
+         return;
+@@ -103,7 +118,7 @@
+     if (active_workspace == nullptr)
+         return;
+ 
+-    do_exit_behavior(exit_on_mouse);
++    do_exit_behavior(exit_on_mouse, force_active_ws);
+ 
+     active = true;
+     closing = true;
+diff -ruN a/src/overview.hpp b/src/overview.hpp
+--- a/src/overview.hpp	2026-11-22 11:00:07.643889692 +0100
++++ b/src/overview.hpp	2026-11-22 11:00:07.663188926 +0100
+@@ -26,13 +26,14 @@
+ 
+     SP<HTLayoutBase> layout;
+ 
+-    void do_exit_behavior(bool exit_on_mouse);
++    void do_exit_behavior(bool exit_on_mouse, bool force_active_ws = false);
+     void warp_window(Config::INTEGER warp, PHLWINDOW window);
+ 
+     PHLMONITOR get_monitor();
+ 
++    void begin_gesture_open();
+     void show(bool recalculate = true);
+-    void hide(bool exit_on_mouse);
++    void hide(bool exit_on_mouse, bool force_active_ws = false);
+ 
+     void move_id(WORKSPACEID ws_id, bool move_window);
+     // arg is up, down, left, right;
+diff -ruN a/src/types.hpp b/src/types.hpp
+--- a/src/types.hpp	2026-11-22 11:00:07.644103881 +0100
++++ b/src/types.hpp	2026-11-22 11:00:07.662997520 +0100
+@@ -27,4 +27,20 @@
+     bool standalone
+ );
+ 
++typedef void (*render_background_t)(void* thisptr, PHLMONITOR pMonitor);
++typedef void (*render_layer_t)(
++    void* thisptr,
++    PHLLS pLayer,
++    PHLMONITOR pMonitor,
++    const Time::steady_tp& time,
++    bool popups,
++    bool lockscreen
++);
++typedef void (*render_workspace_windows_t)(
++    void* thisptr,
++    PHLMONITOR pMonitor,
++    PHLWORKSPACE pWorkspace,
++    const Time::steady_tp& time
++);
++
+ typedef long VIEWID;

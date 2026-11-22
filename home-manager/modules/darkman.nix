@@ -10,13 +10,23 @@ with lib; let
 in {
   options.services.configured.darkman = {
     enable = mkEnableOption "Automatically change dark/light theme based on the position of the sun in the sky.";
+    latitude = mkOption {
+      type = types.float;
+      default = 53.54;
+      description = "Latitude used for solar sunrise/sunset calculation.";
+    };
+    longitude = mkOption {
+      type = types.float;
+      default = 9.98;
+      description = "Longitude used for solar sunrise/sunset calculation.";
+    };
   };
   config = mkIf cfg.enable {
     services.darkman = {
       enable = true;
       settings = {
-        lat = 53.54;
-        lng = 9.98;
+        lat = cfg.latitude;
+        lng = cfg.longitude;
         usegeoclue = false;
       };
       darkModeScripts = {

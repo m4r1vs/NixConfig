@@ -154,6 +154,7 @@ in {
             if isDarwin
             then pkgsUnstable.ghostty-bin
             else pkgsUnstable.ghostty;
+          inherit (pkgsUnstable) hyprsunset;
           inherit (pkgsUnstable) inter-nerdfont;
           inherit (pkgsUnstable) neovim;
           inherit (pkgsUnstable) neovim-unwrapped;
@@ -193,6 +194,34 @@ in {
                 patches = (oldAttrs.patches or []) ++ [./patches/waybar-0.15.0-hyprland-lua-ipc.patch];
               })
             else prev.waybar;
+
+          # Hyprtasking is not packaged in nixos-26.05 (and unstable targets Hyprland 0.57+);
+          # build the v0.55.4-pinned commit against our Hyprland with macOS Tahoe linear styling.
+          hyprlandPlugins =
+            prev.hyprlandPlugins
+            // lib.optionalAttrs (!(prev.hyprlandPlugins ? hyprtasking)) {
+              hyprtasking = prev.hyprlandPlugins.mkHyprlandPlugin {
+                pluginName = "hyprtasking";
+                version = "0-unstable-2026-06-11";
+                src = fetchFromGitHub {
+                  owner = "raybbian";
+                  repo = "hyprtasking";
+                  rev = "765575445ce34989575a99f304d0b279e6a980b6";
+                  hash = "sha256-7CvSvTEk6rAX/K56QoPbWe7tr+9KGBAugXYJGc6eOEg=";
+                };
+                patches = [./patches/hyprtasking-macos-tahoe.patch];
+                nativeBuildInputs = [
+                  meson
+                  ninja
+                ];
+                meta = {
+                  homepage = "https://github.com/raybbian/hyprtasking";
+                  description = "Powerful workspace management plugin for Hyprland";
+                  license = lib.licenses.bsd3;
+                  platforms = lib.platforms.linux;
+                };
+              };
+            };
 
           # Fix cursor landing N columns right of target on tmux 3.7+ (schasse/tmux-jump#50)
           tmuxPlugins =

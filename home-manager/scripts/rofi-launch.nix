@@ -43,6 +43,9 @@
         powermode)
           ${scripts.rofi-powermode}
           ;;
+        nightlight)
+          ${scripts.rofi-nightlight}
+          ;;
         wifi)
           ${scripts.rofi-wifi}
           ;;
@@ -60,7 +63,7 @@
           ${scripts.rofi-translate}
           ;;
         *)
-          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|cliphist|powermode|obsidian|gitlab|ocr|wifi|translate}"
+          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|cliphist|powermode|nightlight|obsidian|gitlab|ocr|wifi|translate}"
           exit 1
           ;;
       esac
