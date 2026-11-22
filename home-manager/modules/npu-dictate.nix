@@ -19,7 +19,7 @@ in {
   ];
 
   options.programs.configured.npu-dictate = {
-    enable = mkEnableOption "Push-to-talk dictation: hold a key, speak, release, and whisper-large-v3-turbo on the NPU types it out";
+    enable = mkEnableOption "Push-to-talk dictation: hold a key and speak; the words appear as you say them and whisper-large-v3-turbo on the NPU replaces them with its transcript";
   };
 
   config = mkIf cfg.enable (optionalAttrs (!isDarwin) {
@@ -31,6 +31,17 @@ in {
     */
     programs.npu-dictate = {
       enable = true;
+      /*
+      Words show up in the focused field while the key is held, underlined,
+      and the NPU transcript replaces them: a short dictation in one piece at
+      release, a long one phrase by phrase at pauses. The streaming model
+      (Nemotron 3.5, German and English) is a 475 MB fetch and keeps about
+      1.5 GB of memory for as long as the daemon runs. The daemon registers as
+      the seat's input method for this, so it cannot run next to fcitx5 or
+      ibus; where an app offers no text field (or on i3) the text is typed at
+      release as before.
+      */
+      live.enable = true;
       settings = {
         server = {
           # Named in the notification when the backend is down

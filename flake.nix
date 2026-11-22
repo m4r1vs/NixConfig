@@ -105,9 +105,11 @@
       url = "github:noamsto/nix-amd-ai";
     };
     npu-dictate = {
-      # Push-to-talk dictation on the NPU; needs configured.npu.server.enable
+      # Push-to-talk dictation on the NPU; needs configured.npu.server.enable.
+      # Deliberately NOT following our nixpkgs: its live recogniser links
+      # sherpa-onnx, and the flake pins the nixpkgs whose sherpa-onnx matches
+      # the crate it builds with. Following would fail its version assertion.
       url = "gitlab:m4r1vs/npu-dictate?ref=master";
-      inputs.nixpkgs.follows = "nixpkgs";
       inputs.rust-overlay.follows = "rust-overlay";
     };
     dark-yazi = {
