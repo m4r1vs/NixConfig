@@ -520,6 +520,16 @@ in {
               workspace = "special:obsidian_nvim silent";
             }
           ]
+          # hey-computer's long answers (Marker, app id set by its viewer
+          # command): a column for reading, over whatever is open
+          ++ optionals config.programs.configured.hey-computer.enable [
+            {
+              match.initial_class = "^(hey-computer\\.answer)$";
+              float = true;
+              size = "1000 1100";
+              center = true;
+            }
+          ]
           ++ optionals (sideBrowser != null) [
             {
               match.initial_class = "^(${sideBrowser.windowClass})$";

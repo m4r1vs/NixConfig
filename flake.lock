@@ -330,6 +330,30 @@
         "type": "github"
       }
     },
+    "hey-computer": {
+      "inputs": {
+        "home-manager": [
+          "home-manager"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "obsidian-skills": "obsidian-skills"
+      },
+      "locked": {
+        "lastModified": 1795430541,
+        "narHash": "sha256-qYpf3cq7CjhPU8pbuTYHNugNXptSWS/k7iLQauBymPE=",
+        "owner": "m4r1vs",
+        "repo": "hey-computer",
+        "rev": "5e09401ec66cacb194e44955669b23fae9e485be",
+        "type": "github"
+      },
+      "original": {
+        "owner": "m4r1vs",
+        "repo": "hey-computer",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -781,11 +805,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795305597,
-        "narHash": "sha256-LYDoTVkkovMbvXrQb4zL0KA36nXSuruDM0CSYKvCM8k=",
+        "lastModified": 1795343941,
+        "narHash": "sha256-UATvTtGgwaB4Op+WXRajmIGCoPijHaeoskTgS2pp/Wk=",
         "owner": "m4r1vs",
         "repo": "npu-dictate",
-        "rev": "52514cc232a4223b36fefc198d33274dc7bda80e",
+        "rev": "5c433eec98bd418ac5b93a22d1247ac79b5e5fe5",
         "type": "gitlab"
       },
       "original": {
@@ -793,6 +817,23 @@
         "ref": "master",
         "repo": "npu-dictate",
         "type": "gitlab"
+      }
+    },
+    "obsidian-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1795194247,
+        "narHash": "sha256-L6qIfM2TKp+g3j0J2SxfWf5qeqahCe7+YcSOMPoePOs=",
+        "owner": "obsidianmd",
+        "repo": "obsidian-skills",
+        "rev": "b110b2f8e9eb1f287892f937050dfd40af862cbb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "obsidianmd",
+        "repo": "obsidian-skills",
+        "rev": "b110b2f8e9eb1f287892f937050dfd40af862cbb",
+        "type": "github"
       }
     },
     "pre-commit-hooks": {
@@ -845,6 +886,7 @@
         "gitlab-mcp": "gitlab-mcp",
         "golazo": "golazo",
         "helium": "helium",
+        "hey-computer": "hey-computer",
         "home-manager": "home-manager",
         "homepage": "homepage",
         "hunk": "hunk",

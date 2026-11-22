@@ -112,6 +112,15 @@
       url = "gitlab:m4r1vs/npu-dictate?ref=master";
       inputs.rust-overlay.follows = "rust-overlay";
     };
+    hey-computer = {
+      # Voice assistant on a warm agy agent, asked through npu-dictate's
+      # "Hey Computer, …". It builds with nixpkgs' own Rust (no rust-overlay
+      # input to follow); home-manager is only used by its checks. Its
+      # obsidian-skills input stays pinned by the flake on purpose.
+      url = "github:m4r1vs/hey-computer";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
     dark-yazi = {
       # Yazi flavor (dark)
       url = "github:m4r1vs/dark.yazi";

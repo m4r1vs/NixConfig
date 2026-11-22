@@ -53,7 +53,7 @@ If the action is probably best done by hyprland itself, find the dispatcher in [
 ## 3. Implement keybind
 
 Now edit `home-manager/modules/hyprland.nix` to add the keybind based on the user's inputs.
-`home-manager/modules/hyprland.nix` uses `configType = "lua"`; binds go in `settings.bind` through the helpers in the `let` block at the top of the file (`bindd`, `bindde`, `binddle`, `binddrin`, `exec`, ...):
+`home-manager/modules/hyprland.nix` uses `configType = "lua"`; binds go in `settings.bind` through the helpers in the `let` block at the top of the file (`bindd`, `bindde`, `binddle`, `binddrint`, `exec`, ...):
 
 - Key combinations use `+` between modifiers and the key, with uppercase modifiers (`SUPER`, `SHIFT`, `CTRL`, `ALT`), e.g. `"SUPER + SHIFT + x"`.
 - Dispatchers use `hl.dsp.*` Lua expressions (e.g. `(exec "${scripts.my-script}")`, `''hl.dsp.window.close()''`, `''hl.dsp.focus({ direction = "l" })''`) or a Lua function (`function() ... end`) defined as a helper in the `let` block, like `moveOrTile` and `toggleFakeFullscreen`; functions must run dispatchers through `hl.dispatch(...)`.

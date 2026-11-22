@@ -42,6 +42,11 @@ in {
       default = {};
       description = "Additional or overridden module definitions for MenubarCompat on macOS.";
     };
+    weatherLocation = mkOption {
+      type = types.str;
+      default = "Hamburg";
+      description = "The place the weather module shows (a wttr.in location). The weather voice command asks for the same one.";
+    };
   };
   config = mkIf cfg.enable (mkMerge [
     (mkIf host.isDarwin {
@@ -278,7 +283,7 @@ in {
               format = "{}";
               tooltip = true;
               interval = 1800;
-              exec = "${pkgs.wttrbar}/bin/wttrbar --nerd --location Hamburg --custom-indicator \"{ICON} {temp_C}°C\"";
+              exec = "${pkgs.wttrbar}/bin/wttrbar --nerd --location ${escapeShellArg cfg.weatherLocation} --custom-indicator \"{ICON} {temp_C}°C\"";
               on-click = "${lib.getExe pkgs.ghostty} --class=ghostty.weather --wait-after-command=true -e ${pkgs.curl}/bin/curl https://wttr.in";
               on-click-right = "${pkgs.xdg-utils}/bin/xdg-open https://www.wetteronline.de/regenradar/hamburg";
               exec-on-event = false;

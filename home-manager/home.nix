@@ -60,6 +60,12 @@ in {
       ghostty.enable = host.isGraphical || host.isWSL;
       git.enable = true;
       helium.enable = usesBrowser "helium";
+      # Off until turned on by hand: its agent runs shell commands without
+      # confirmation, and can become root wherever this account can without a
+      # password (hey-computer's README, "Permission model"). To turn it on
+      # where npu-dictate can trigger it ("Hey Computer, …"), set this to
+      #   host.isDev && host.hasNpuServer && host.windowManager == "hyprland"
+      hey-computer.enable = false;
       hunk.enable = host.isDev;
       lazygit.enable = true;
       mcp.enable = host.isDev;
