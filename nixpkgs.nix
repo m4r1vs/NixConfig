@@ -164,24 +164,19 @@ in {
           inherit (pkgsUnstable) opencode;
           inherit (pkgsUnstable) swayimg;
           inherit (pkgsUnstable) tlrc;
-          zathura =
-            if isDarwin
-            then
-              (pkgsUnstable.zathuraPkgs.overrideScope (_self: super: {
-                zathura_core = super.zathura_core.overrideAttrs (old: {
-                  mesonFlags =
-                    old.mesonFlags
-                    ++ [
-                      "-Dtests-x11=disabled"
-                      "-Dtests-wayland=disabled"
-                    ];
-                });
-              })).zathuraWrapper
-            else pkgsUnstable.zathura;
 
           /*
           Temporary Fixes / Updates
           */
+
+          # zathura builds with appstream, which since 1.2.3 on nixos-unstable needs
+          # wayland, and nixpkgs has no wayland on darwin: nixbook stops evaluating.
+          # Fixed on master by NixOS/nixpkgs#591085; back to
+          # `inherit (pkgsUnstable) zathura;` once nixos-unstable has it.
+          zathura =
+            if isDarwin
+            then pkgsMaster.zathura
+            else pkgsUnstable.zathura;
 
           # Waybar 0.15.0 sends legacy `dispatch workspace N` on workspace click, which
           # Hyprland's Lua config rejects. Backport of Alexays/Waybar#5013 (first commit,
