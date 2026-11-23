@@ -405,6 +405,11 @@ in {
           binds = {
             movefocus_cycles_fullscreen = false;
           };
+          gestures = {
+            workspace_swipe_use_r = true;
+            # Enabled conditionally while Hyprtasking overview is open
+            workspace_swipe_forever = false;
+          };
         };
         layer_rule = [
           {
@@ -822,6 +827,13 @@ in {
             end
 
             local is_light = theme_mode == "light"
+            local ht_gestures = {
+              enabled = false,
+              open_distance = 180,
+            }
+            if hl.get_config("plugin.hyprtasking.gestures.workspace_swipe_forever") ~= nil then
+              ht_gestures.workspace_swipe_forever = true
+            end
             hl.config({
               general = {
                 col = {
@@ -838,10 +850,7 @@ in {
                   exit_on_hovered = true,
                   warp_on_move_window = 1,
                   close_overview_on_reload = true,
-                  gestures = {
-                    enabled = false,
-                    open_distance = 180,
-                  },
+                  gestures = ht_gestures,
                   linear = {
                     top = true,
                     height = 170,

@@ -1,8 +1,11 @@
 diff -ruN a/src/globals.hpp b/src/globals.hpp
---- a/src/globals.hpp	2026-11-22 11:00:07.643838477 +0100
-+++ b/src/globals.hpp	2026-11-22 11:00:07.663073741 +0100
-@@ -22,6 +22,10 @@
+--- a/src/globals.hpp	2026-11-23 15:03:00.380479236 +0100
++++ b/src/globals.hpp	2026-11-23 15:03:00.388477441 +0100
+@@ -20,8 +20,13 @@
+ inline CFunctionHook* blur_optimizations_hook = nullptr;
+ inline CFunctionHook* should_render_window_hook = nullptr;
  inline CFunctionHook* is_solitary_blocked_hook = nullptr;
++inline CFunctionHook* workspace_swipe_update_hook = nullptr;
  typedef uint32_t (*origIsSolitaryBlocked)(void*, bool);
  inline void* render_window = nullptr;
 +inline void* render_background = nullptr;
@@ -13,8 +16,8 @@ diff -ruN a/src/globals.hpp b/src/globals.hpp
  inline std::unique_ptr<HTManager> ht_manager;
  
 diff -ruN a/src/input.cpp b/src/input.cpp
---- a/src/input.cpp	2026-11-22 11:00:07.643838477 +0100
-+++ b/src/input.cpp	2026-11-22 11:00:07.664313787 +0100
+--- a/src/input.cpp	2026-11-23 15:03:00.380479236 +0100
++++ b/src/input.cpp	2026-11-23 15:03:00.388675774 +0100
 @@ -11,57 +11,53 @@
  #include "manager.hpp"
  #include "overview.hpp"
@@ -187,8 +190,8 @@ diff -ruN a/src/input.cpp b/src/input.cpp
  }
  
 diff -ruN a/src/layout/layout_base.hpp b/src/layout/layout_base.hpp
---- a/src/layout/layout_base.hpp	2026-11-22 11:00:07.643889692 +0100
-+++ b/src/layout/layout_base.hpp	2026-11-22 11:00:07.663116050 +0100
+--- a/src/layout/layout_base.hpp	2026-11-23 15:03:00.380587811 +0100
++++ b/src/layout/layout_base.hpp	2026-11-23 15:03:00.389874835 +0100
 @@ -41,6 +41,7 @@
  
      // Warp the show/hide animations to perc (from closed to open)
@@ -198,13 +201,15 @@ diff -ruN a/src/layout/layout_base.hpp b/src/layout/layout_base.hpp
      virtual void on_hide(CallbackFun on_complete = nullptr) = 0;
      virtual void
 diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
---- a/src/layout/linear.cpp	2026-11-22 11:00:07.643889692 +0100
-+++ b/src/layout/linear.cpp	2026-11-22 11:00:07.664017997 +0100
-@@ -1,6 +1,11 @@
+--- a/src/layout/linear.cpp	2026-11-23 15:03:00.380587811 +0100
++++ b/src/layout/linear.cpp	2026-11-23 15:03:00.390334231 +0100
+@@ -1,6 +1,13 @@
  #include "linear.hpp"
  
 +#include <algorithm>
++#include <climits>
 +#include <cmath>
++#include <set>
 +#include <vector>
  #include <hyprland/src/Compositor.hpp>
 +#include <hyprland/src/render/pass/RendererHintsPassElement.hpp>
@@ -212,7 +217,7 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
  #include <hyprland/src/config/ConfigManager.hpp>
  #include <hyprland/src/config/ConfigValue.hpp>
  #include <hyprland/src/helpers/MiscFunctions.hpp>
-@@ -49,6 +54,18 @@
+@@ -49,6 +56,18 @@
          anim_tree->getAnimationPropertyConfig("fadeDim"),
          AVARDAMAGE_NONE
      );
@@ -231,7 +236,7 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
  
      init_position();
  }
-@@ -57,6 +74,16 @@
+@@ -57,6 +76,16 @@
      return "linear";
  }
  
@@ -248,7 +253,7 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
  void HTLayoutLinear::close_open_lerp(float perc) {
      const PHLMONITOR monitor = get_monitor();
      if (monitor == nullptr)
-@@ -88,15 +115,25 @@
+@@ -88,15 +117,25 @@
  }
  
  void HTLayoutLinear::on_hide(CallbackFun on_complete) {
@@ -278,7 +283,7 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
      *view_offset = 0;
      *blur_strength = 0;
      *dim_opacity = 0;
-@@ -196,16 +233,21 @@
+@@ -196,16 +235,36 @@
  }
  
  bool HTLayoutLinear::should_render_window(PHLWINDOW window) {
@@ -299,11 +304,26 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
 +        return window->m_workspace->m_id == rendering_thumbnail_ws;
 +    }
 +
++    if (rendering_neighbor_ws != WORKSPACE_INVALID) {
++        if (window->m_workspace == nullptr || window->m_pinned)
++            return false;
++        if (window->m_workspace->m_id != rendering_neighbor_ws)
++            return false;
++        if (!window->visibleOnMonitor(monitor))
++            return false;
++        if (window->m_workspace->m_hasFullscreenWindow && !window->isAllowedOverFullscreen()
++            && window->alphaValue(Desktop::View::WINDOW_ALPHA_FADE)
++                * window->alphaValue(Desktop::View::WINDOW_ALPHA_FULLSCREEN)
++                == 0.f)
++            return false;
++        return true;
++    }
++
 +    bool ori_result = HTLayoutBase::should_render_window(window);
      if (rendering_standard_ws)
          return ori_result;
  
-@@ -289,15 +331,24 @@
+@@ -289,19 +348,122 @@
              continue;
          monitor_workspaces.push_back(workspace->m_id);
      }
@@ -332,7 +352,105 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
          overview_layout[ws_id] = {x, 0, ws_box};
      }
  }
-@@ -328,55 +379,135 @@
+ 
++namespace {
++WORKSPACEID get_neighbor_workspace_id(
++    const PHLMONITOR& monitor,
++    WORKSPACEID base_id,
++    int step,
++    bool use_r
++) {
++    if (monitor == nullptr || step == 0 || base_id == WORKSPACE_INVALID)
++        return WORKSPACE_INVALID;
++
++    if (!use_r) {
++        std::vector<WORKSPACEID> monitor_ws_ids;
++        for (const PHLWORKSPACE& ws : g_pCompositor->getWorkspacesCopy()) {
++            if (ws == nullptr || ws->m_isSpecialWorkspace || ws->m_monitor != monitor)
++                continue;
++            monitor_ws_ids.push_back(ws->m_id);
++        }
++        std::sort(monitor_ws_ids.begin(), monitor_ws_ids.end());
++
++        const auto it = std::find(monitor_ws_ids.begin(), monitor_ws_ids.end(), base_id);
++        if (it == monitor_ws_ids.end())
++            return WORKSPACE_INVALID;
++
++        const ssize_t idx = std::distance(monitor_ws_ids.begin(), it) + step;
++        if (idx < 0 || idx >= static_cast<ssize_t>(monitor_ws_ids.size()))
++            return WORKSPACE_INVALID;
++        return monitor_ws_ids[idx];
++    }
++
++    std::set<WORKSPACEID> invalid_ws_ids;
++    std::vector<WORKSPACEID> named_ws_ids;
++    for (const PHLWORKSPACE& ws : g_pCompositor->getWorkspacesCopy()) {
++        if (ws == nullptr)
++            continue;
++        if (ws->m_isSpecialWorkspace || ws->m_monitor != monitor) {
++            invalid_ws_ids.insert(ws->m_id);
++        } else if (ws->m_id < 0) {
++            named_ws_ids.push_back(ws->m_id);
++        }
++    }
++    for (const auto& rule : Config::workspaceRuleMgr()->getAllWorkspaceRules()) {
++        const auto rule_mon = g_pCompositor->getMonitorFromString(rule.m_monitor);
++        if (rule_mon && rule_mon->m_id != monitor->m_id)
++            invalid_ws_ids.insert(rule.m_workspaceId);
++    }
++    std::sort(named_ws_ids.begin(), named_ws_ids.end());
++
++    if (base_id < 0) {
++        const auto it = std::find(named_ws_ids.begin(), named_ws_ids.end(), base_id);
++        if (it == named_ws_ids.end())
++            return WORKSPACE_INVALID;
++
++        const ssize_t target_idx = std::distance(named_ws_ids.begin(), it) + step;
++        if (target_idx < 0)
++            return WORKSPACE_INVALID;
++        if (target_idx < static_cast<ssize_t>(named_ws_ids.size()))
++            return named_ws_ids[target_idx];
++
++        ssize_t rem = target_idx - static_cast<ssize_t>(named_ws_ids.size()) + 1;
++        WORKSPACEID cur = 0;
++        while (rem > 0 && cur < INT32_MAX) {
++            ++cur;
++            if (!invalid_ws_ids.contains(cur))
++                --rem;
++        }
++        return rem == 0 ? cur : WORKSPACE_INVALID;
++    }
++
++    if (step > 0) {
++        WORKSPACEID cur = base_id;
++        int rem = step;
++        while (rem > 0 && cur < INT32_MAX) {
++            ++cur;
++            if (!invalid_ws_ids.contains(cur))
++                --rem;
++        }
++        return rem == 0 ? cur : WORKSPACE_INVALID;
++    }
++
++    WORKSPACEID cur = base_id;
++    int rem = -step;
++    while (rem > 0 && cur > 1) {
++        --cur;
++        if (!invalid_ws_ids.contains(cur))
++            --rem;
++    }
++    if (rem == 0)
++        return cur;
++    if (static_cast<size_t>(rem) <= named_ws_ids.size())
++        return named_ws_ids[named_ws_ids.size() - rem];
++    return WORKSPACE_INVALID;
++}
++} // namespace
++
+ void HTLayoutLinear::render() {
+     HTLayoutBase::render();
+     CScopeGuard x([this] { post_render(); });
+@@ -328,55 +490,240 @@
      g_pHyprRenderer->damageMonitor(monitor);
      g_pHyprRenderer->m_renderData.pMonitor->m_blurFBShouldRender = true;
  
@@ -367,6 +485,7 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
 -    );
 -    big_ws->m_visible = true;
 +    rendering_thumbnail_ws = WORKSPACE_INVALID;
++    rendering_neighbor_ws = WORKSPACE_INVALID;
  
      // use pixel size for geometry
      CBox mon_box = {{0, 0}, monitor->m_pixelSize};
@@ -446,6 +565,110 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
 +
 +    const bool apply_zoom =
 +        progress > 0.001f && (cur_scale != 1.f || cur_tx != 0.f || cur_ty != 0.f);
++
++    // Render neighboring workspaces peeking into the zoomed-out margins on the left/right
++    // so they are always visible rather than popping in only once a 3-finger swipe starts.
++    if (apply_zoom && big_ws != nullptr && !big_ws->m_isSpecialWorkspace) {
++        static auto PWORKSPACEGAP = CConfigValue<Config::INTEGER>("general:gaps_workspaces");
++        static auto PSWIPEUSER = CConfigValue<Config::INTEGER>("gestures:workspace_swipe_use_r");
++        const std::string anim_style = big_ws->m_renderOffset->getStyle();
++        const bool vert_anims =
++            anim_style == "slidevert" || anim_style.starts_with("slidefadevert");
++        const float x_distance = static_cast<float>(monitor->m_size.x + *PWORKSPACEGAP);
++
++        if (!vert_anims && x_distance > 0.f) {
++            const Vector2D big_offset = big_ws->m_renderOffset->value();
++            const bool use_r = *PSWIPEUSER != 0;
++
++            std::vector<PHLWORKSPACE> native_workspaces;
++            for (const PHLWORKSPACE& ws : g_pCompositor->getWorkspacesCopy()) {
++                if (ws == nullptr || ws->m_monitor != monitor || ws->m_isSpecialWorkspace)
++                    continue;
++                if (ws == big_ws || ws->m_visible || ws->m_forceRendering
++                    || ws->m_renderOffset->isBeingAnimated() || ws->m_alpha->isBeingAnimated()) {
++                    native_workspaces.push_back(ws);
++                }
++            }
++
++            const float shadow_pad = 64.f;
++            const float vis_min_x = -cur_tx / (cur_scale * monitor->m_scale) - shadow_pad;
++            const float vis_max_x = (mon_w - cur_tx) / (cur_scale * monitor->m_scale) + shadow_pad;
++            const int min_k = std::max(
++                -4,
++                static_cast<int>(std::floor(
++                    (vis_min_x - static_cast<float>(monitor->m_size.x) - big_offset.x) / x_distance
++                )) + 1
++            );
++            const int max_k = std::min(
++                4,
++                static_cast<int>(std::ceil((vis_max_x - big_offset.x) / x_distance)) - 1
++            );
++
++            for (int k = min_k; k <= max_k; ++k) {
++                if (k == 0)
++                    continue;
++
++                const WORKSPACEID neighbor_id =
++                    get_neighbor_workspace_id(monitor, big_ws->m_id, k, use_r);
++                if (neighbor_id == WORKSPACE_INVALID)
++                    continue;
++
++                const PHLWORKSPACE neighbor_ws = g_pCompositor->getWorkspaceByID(neighbor_id);
++                if (neighbor_ws == nullptr || neighbor_ws->m_monitor != monitor
++                    || neighbor_ws->m_isSpecialWorkspace)
++                    continue;
++
++                const Vector2D desired_offset = {
++                    big_offset.x + static_cast<float>(k) * x_distance,
++                    big_offset.y
++                };
++
++                bool skip_slot = false;
++                for (const PHLWORKSPACE& native_ws : native_workspaces) {
++                    if (native_ws == neighbor_ws
++                        || std::abs(native_ws->m_renderOffset->value().x - desired_offset.x)
++                            < x_distance * 0.9f) {
++                        skip_slot = true;
++                        break;
++                    }
++                }
++                if (skip_slot)
++                    continue;
++
++                const Vector2D delta_px =
++                    (desired_offset - neighbor_ws->m_renderOffset->value()) * monitor->m_scale;
++                SRenderModifData neighbor_modif {};
++                neighbor_modif.modifs.emplace_back(
++                    SRenderModifData::eRenderModifType::RMOD_TYPE_TRANSLATE,
++                    Vector2D {cur_tx / cur_scale + delta_px.x, cur_ty / cur_scale + delta_px.y}
++                );
++                neighbor_modif.modifs.emplace_back(
++                    SRenderModifData::eRenderModifType::RMOD_TYPE_SCALE,
++                    cur_scale
++                );
++                g_pHyprRenderer->m_renderPass.add(makeUnique<CRendererHintsPassElement>(
++                    CRendererHintsPassElement::SData {neighbor_modif}
++                ));
++
++                rendering_neighbor_ws = neighbor_id;
++                std::swap(neighbor_ws->m_alpha, static_full_alpha);
++                CScopeGuard restore_neighbor_guard([&] {
++                    std::swap(neighbor_ws->m_alpha, static_full_alpha);
++                    rendering_neighbor_ws = WORKSPACE_INVALID;
++                });
++
++                if (neighbor_ws->m_hasFullscreenWindow)
++                    ((render_workspace_windows_t)render_workspace_windows_fullscreen)(
++                        g_pHyprRenderer.get(), monitor, neighbor_ws, time
++                    );
++                else
++                    ((render_workspace_windows_t)render_workspace_windows)(
++                        g_pHyprRenderer.get(), monitor, neighbor_ws, time
++                    );
++            }
++        }
++    }
++
 +    if (apply_zoom) {
 +        SRenderModifData zoom_modif {};
 +        zoom_modif.modifs.emplace_back(
@@ -510,7 +733,7 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
      rendering_standard_ws = false;
  
      CBox view_box = {
-@@ -385,12 +516,52 @@
+@@ -385,12 +732,52 @@
      };
  
      CRectPassElement::SRectData data;
@@ -564,7 +787,7 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
      CBox global_mon_box = {monitor->m_position, monitor->m_transformedSize};
      for (const auto& [ws_id, ws_layout] : overview_layout) {
          // Could be nullptr, in which we render only layers
-@@ -400,27 +571,46 @@
+@@ -400,27 +787,46 @@
          if (global_box.intersection(global_mon_box).empty())
              continue;
  
@@ -629,9 +852,9 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
      const PHTVIEW cursor_view = ht_manager->get_view_from_cursor();
      if (cursor_view == nullptr)
 diff -ruN a/src/layout/linear.hpp b/src/layout/linear.hpp
---- a/src/layout/linear.hpp	2026-11-22 11:00:07.643889692 +0100
-+++ b/src/layout/linear.hpp	2026-11-22 11:00:07.663157347 +0100
-@@ -9,8 +9,11 @@
+--- a/src/layout/linear.hpp	2026-11-23 15:03:00.380587811 +0100
++++ b/src/layout/linear.hpp	2026-11-23 15:03:00.391042085 +0100
+@@ -9,8 +9,12 @@
      PHLANIMVAR<float> view_offset;
      PHLANIMVAR<float> blur_strength;
      PHLANIMVAR<float> dim_opacity;
@@ -640,10 +863,11 @@ diff -ruN a/src/layout/linear.hpp b/src/layout/linear.hpp
  
      bool rendering_standard_ws;
 +    WORKSPACEID rendering_thumbnail_ws = WORKSPACE_INVALID;
++    WORKSPACEID rendering_neighbor_ws = WORKSPACE_INVALID;
  
    public:
      HTLayoutLinear(VIEWID view_id);
-@@ -21,6 +24,7 @@
+@@ -21,6 +25,7 @@
      virtual CBox calculate_ws_box(int x, int y, HTViewStage stage);
  
      virtual void close_open_lerp(float perc);
@@ -652,21 +876,106 @@ diff -ruN a/src/layout/linear.hpp b/src/layout/linear.hpp
      virtual void on_hide(CallbackFun on_complete);
      virtual void on_move(WORKSPACEID old_id, WORKSPACEID new_id, CallbackFun on_complete);
 diff -ruN a/src/main.cpp b/src/main.cpp
---- a/src/main.cpp	2026-11-22 11:00:07.643889692 +0100
-+++ b/src/main.cpp	2026-11-22 11:00:07.664738035 +0100
-@@ -1,6 +1,11 @@
+--- a/src/main.cpp	2026-11-23 15:03:00.380587811 +0100
++++ b/src/main.cpp	2026-11-23 15:03:00.433295041 +0100
+@@ -1,6 +1,13 @@
  #include <linux/input-event-codes.h>
  
 +#include <algorithm>
  #include <cmath>
 +#include <deque>
 +#include <optional>
++#include <typeinfo>
 +#include <xkbcommon/xkbcommon-keysyms.h>
 +#include <hyprland/src/managers/input/trackpad/TrackpadGestures.hpp>
++#include <hyprland/src/managers/input/UnifiedWorkspaceSwipeGesture.hpp>
  
  #include <hyprland/src/Compositor.hpp>
  #include <hyprland/src/SharedDefs.hpp>
-@@ -519,7 +524,184 @@
+@@ -470,6 +477,82 @@
+     return (*(origIsSolitaryBlocked)is_solitary_blocked_hook->m_original)(thisptr, full);
+ }
+ 
++struct ScopedConfigBoolOverride {
++    bool* bool_ptr = nullptr;
++    Config::INTEGER* int_ptr = nullptr;
++    bool saved_bool = false;
++    Config::INTEGER saved_int = 0;
++
++    ScopedConfigBoolOverride(const std::string& name, bool value) {
++        if (!Config::mgr())
++            return;
++        const auto reply = Config::mgr()->getConfigValue(name);
++        if (reply.dataptr == nullptr || *reply.dataptr == nullptr || reply.type == nullptr)
++            return;
++        if (*reply.type == typeid(bool)) {
++            bool_ptr = static_cast<bool*>(*reply.dataptr);
++            saved_bool = *bool_ptr;
++            *bool_ptr = value;
++        } else if (*reply.type == typeid(Config::INTEGER)) {
++            int_ptr = static_cast<Config::INTEGER*>(*reply.dataptr);
++            saved_int = *int_ptr;
++            *int_ptr = value ? 1 : 0;
++        }
++    }
++
++    ~ScopedConfigBoolOverride() {
++        if (bool_ptr != nullptr)
++            *bool_ptr = saved_bool;
++        else if (int_ptr != nullptr)
++            *int_ptr = saved_int;
++    }
++
++    ScopedConfigBoolOverride(const ScopedConfigBoolOverride&) = delete;
++    ScopedConfigBoolOverride& operator=(const ScopedConfigBoolOverride&) = delete;
++};
++
++static void hook_workspace_swipe_update(void* thisptr, double delta) {
++    bool forever_active = false;
++    std::optional<ScopedConfigBoolOverride> forever_override;
++    std::optional<ScopedConfigBoolOverride> dir_lock_override;
++
++    if (ht_manager != nullptr && Config::mgr()
++        && HTConfig::value<Config::INTEGER>("gestures:workspace_swipe_forever")) {
++        const PHTVIEW cursor_view = ht_manager->get_view_from_cursor();
++        if (cursor_view != nullptr && cursor_view->active && !cursor_view->closing) {
++            forever_active = true;
++            forever_override.emplace("gestures:workspace_swipe_forever", true);
++            dir_lock_override.emplace("gestures:workspace_swipe_direction_lock", false);
++        }
++    }
++
++    ((workspace_swipe_update_t)(workspace_swipe_update_hook->m_original))(thisptr, delta);
++
++    // Upstream Hyprland returns early when swiping into an uncreated/empty workspace,
++    // skipping its `if (*PSWIPEFOREVER) { end(); begin(); }` check. If the active
++    // workspace reached a full workspace-span offset, advance the swipe here so
++    // multi-space swiping continues across empty gaps (e.g. 1..4 -> 5 -> 6).
++    auto* swipe = static_cast<CUnifiedWorkspaceSwipeGesture*>(thisptr);
++    if (forever_active && swipe != nullptr && swipe->isGestureInProgress()) {
++        const PHLMONITOR monitor = g_pCompositor->getMonitorFromCursor();
++        const PHLWORKSPACE ws = monitor ? monitor->m_activeWorkspace : nullptr;
++        if (ws != nullptr && ws->m_renderOffset) {
++            static auto PWORKSPACEGAP = CConfigValue<Config::INTEGER>("general:gaps_workspaces");
++            const std::string anim_style = ws->m_renderOffset->getStyle();
++            const bool vert_anims =
++                anim_style == "slidevert" || anim_style.starts_with("slidefadevert");
++            const double span = (vert_anims ? monitor->m_size.y : monitor->m_size.x)
++                + static_cast<double>(*PWORKSPACEGAP);
++            const double offset =
++                std::abs(vert_anims ? ws->m_renderOffset->value().y : ws->m_renderOffset->value().x);
++            if (span > 0.0 && offset >= span - 0.5) {
++                swipe->end();
++                swipe->begin();
++            }
++        }
++    }
++}
++
+ static void on_mouse_button(IPointer::SButtonEvent e, Event::SCallbackInfo& info) {
+     if (ht_manager == nullptr)
+         return;
+@@ -519,7 +602,184 @@
  static void on_swipe_end(IPointer::SSwipeEndEvent e, Event::SCallbackInfo& info) {
      if (ht_manager == nullptr)
          return;
@@ -852,7 +1161,7 @@ diff -ruN a/src/main.cpp b/src/main.cpp
  }
  
  static void cancel_event(Event::SCallbackInfo& info) {
-@@ -580,6 +762,7 @@
+@@ -580,6 +840,7 @@
      }
  
      ht_manager->refresh_all_grid_caches();
@@ -860,7 +1169,7 @@ diff -ruN a/src/main.cpp b/src/main.cpp
  }
  
  static void init_functions() {
-@@ -669,6 +852,38 @@
+@@ -669,6 +930,38 @@
          fail_exit("No renderWindow");
      render_window = FNS3[0].address;
  
@@ -899,7 +1208,28 @@ diff -ruN a/src/main.cpp b/src/main.cpp
      static auto FNS4 = HyprlandAPI::findFunctionsByName(PHANDLE, "isSolitaryBlocked");
      if (FNS4.empty())
          fail_exit("No isSolitaryBlocked");
-@@ -686,6 +901,7 @@
+@@ -678,6 +971,20 @@
+     Log::logger->log(LOG, "[Hyprtasking] Attempting hook {}", FNS4[0].signature);
+     success = is_solitary_blocked_hook->hook() && success;
+ 
++    static auto FNS_WS_SWIPE = HyprlandAPI::findFunctionsByName(
++        PHANDLE,
++        "_ZN29CUnifiedWorkspaceSwipeGesture6updateEd"
++    );
++    if (FNS_WS_SWIPE.empty())
++        fail_exit("No CUnifiedWorkspaceSwipeGesture::update");
++    workspace_swipe_update_hook = HyprlandAPI::createFunctionHook(
++        PHANDLE,
++        FNS_WS_SWIPE[0].address,
++        (void*)hook_workspace_swipe_update
++    );
++    Log::logger->log(LOG, "[Hyprtasking] Attempting hook {}", FNS_WS_SWIPE[0].signature);
++    success = workspace_swipe_update_hook->hook() && success;
++
+     if (!success)
+         fail_exit("Failed initializing hooks");
+ }
+@@ -686,6 +993,7 @@
      static auto P1 = Event::bus()->m_events.input.mouse.button.listen(on_mouse_button);
      static auto P2 = Event::bus()->m_events.input.mouse.move.listen(on_mouse_move);
      static auto P3 = Event::bus()->m_events.input.mouse.axis.listen(on_mouse_axis);
@@ -907,7 +1237,15 @@ diff -ruN a/src/main.cpp b/src/main.cpp
  
      // TODO: support touch
      static auto P4 = Event::bus()->m_events.input.touch.down.listen([&] (ITouch::SDownEvent e, Event::SCallbackInfo i) { cancel_event(i); } );
-@@ -776,6 +992,10 @@
+@@ -762,6 +1070,7 @@
+     addConfigValue(CIntValue, "gestures:open_fingers", "open fingers", 4);
+     addConfigValue(CFloatValue, "gestures:open_distance", "open distance", 300.0);
+     addConfigValue(CIntValue, "gestures:open_positive", "open positive", 1);
++    addConfigValue(CIntValue, "gestures:workspace_swipe_forever", "workspace swipe forever while overview open", 0);
+ 
+     // grid specific
+     addConfigValue(CIntValue, "grid:rows", "rows", 3);
+@@ -776,6 +1085,10 @@
      addConfigValue(CFloatValue, "linear:height", "height", 300.f);
      addConfigValue(CFloatValue, "linear:scroll_speed", "scroll speed", 1.f);
      addConfigValue(CIntValue, "linear:top", "top", 0);
@@ -918,7 +1256,7 @@ diff -ruN a/src/main.cpp b/src/main.cpp
  
      // HyprlandAPI::reloadConfig();
  }
-@@ -799,6 +1019,7 @@
+@@ -799,6 +1112,7 @@
      register_callbacks();
      init_functions();
      register_monitors();
@@ -926,7 +1264,7 @@ diff -ruN a/src/main.cpp b/src/main.cpp
  
      Log::logger->log(LOG, "[Hyprtasking] Plugin initialized");
  
-@@ -806,6 +1027,8 @@
+@@ -806,6 +1120,8 @@
  }
  
  APICALL EXPORT void PLUGIN_EXIT() {
@@ -936,8 +1274,8 @@ diff -ruN a/src/main.cpp b/src/main.cpp
      // prevent crashes
      ht_manager->hide_all_views();
 diff -ruN a/src/manager.cpp b/src/manager.cpp
---- a/src/manager.cpp	2026-11-22 11:00:07.643889692 +0100
-+++ b/src/manager.cpp	2026-11-22 11:00:07.663797767 +0100
+--- a/src/manager.cpp	2026-11-23 15:03:00.380587811 +0100
++++ b/src/manager.cpp	2026-11-23 15:03:00.392675861 +0100
 @@ -98,11 +98,11 @@
      }
  }
@@ -953,8 +1291,8 @@ diff -ruN a/src/manager.cpp b/src/manager.cpp
  }
  
 diff -ruN a/src/manager.hpp b/src/manager.hpp
---- a/src/manager.hpp	2026-11-22 11:00:07.643889692 +0100
-+++ b/src/manager.hpp	2026-11-22 11:00:07.663643931 +0100
+--- a/src/manager.hpp	2026-11-23 15:03:00.380587811 +0100
++++ b/src/manager.hpp	2026-11-23 15:03:00.393647495 +0100
 @@ -20,7 +20,7 @@
      void reset();
  
@@ -965,8 +1303,8 @@ diff -ruN a/src/manager.hpp b/src/manager.hpp
  
      void refresh_all_grid_caches();
 diff -ruN a/src/overview.cpp b/src/overview.cpp
---- a/src/overview.cpp	2026-11-22 11:00:07.643889692 +0100
-+++ b/src/overview.cpp	2026-11-22 11:00:07.663465309 +0100
+--- a/src/overview.cpp	2026-11-23 15:03:00.380587811 +0100
++++ b/src/overview.cpp	2026-11-23 15:03:00.393675883 +0100
 @@ -44,7 +44,7 @@
      }
  }
@@ -1028,8 +1366,8 @@ diff -ruN a/src/overview.cpp b/src/overview.cpp
      active = true;
      closing = true;
 diff -ruN a/src/overview.hpp b/src/overview.hpp
---- a/src/overview.hpp	2026-11-22 11:00:07.643889692 +0100
-+++ b/src/overview.hpp	2026-11-22 11:00:07.663188926 +0100
+--- a/src/overview.hpp	2026-11-23 15:03:00.380675600 +0100
++++ b/src/overview.hpp	2026-11-23 15:03:00.394733202 +0100
 @@ -26,13 +26,14 @@
  
      SP<HTLayoutBase> layout;
@@ -1048,9 +1386,9 @@ diff -ruN a/src/overview.hpp b/src/overview.hpp
      void move_id(WORKSPACEID ws_id, bool move_window);
      // arg is up, down, left, right;
 diff -ruN a/src/types.hpp b/src/types.hpp
---- a/src/types.hpp	2026-11-22 11:00:07.644103881 +0100
-+++ b/src/types.hpp	2026-11-22 11:00:07.662997520 +0100
-@@ -27,4 +27,20 @@
+--- a/src/types.hpp	2026-11-23 15:03:00.380975943 +0100
++++ b/src/types.hpp	2026-11-23 15:03:00.394863978 +0100
+@@ -27,4 +27,22 @@
      bool standalone
  );
  
@@ -1069,5 +1407,7 @@ diff -ruN a/src/types.hpp b/src/types.hpp
 +    PHLWORKSPACE pWorkspace,
 +    const Time::steady_tp& time
 +);
++
++typedef void (*workspace_swipe_update_t)(void* thisptr, double delta);
 +
  typedef long VIEWID;
