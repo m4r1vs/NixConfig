@@ -1,8 +1,14 @@
 /*
-Waybar custom/hey-computer module script (signal 12, interval 1).
-Hidden when idle; shows thinking (with elapsed seconds), follow-up window open,
-starting, or down state. Clicking while thinking cancels; clicking in the
-follow-up window opens `rofi-ask`.
+Waybar custom/hey-computer module script (replaces custom/os-logo on hosts with
+hey-computer enabled).
+
+Continuous watcher (`watch` subcommand, restarted by Waybar if it exits):
+- Thinking: animates quickly through 6 robot Nerd Font icons (no text, no color)
+- Follow-up window open: shows the robot-chat icon (no text, no color)
+- Otherwise (idle / starting / down): shows the NixOS logo like custom/os-logo
+
+Click actions preserve custom/os-logo when idle (left: rofi search, right: power
+menu), cancel when thinking, and open rofi-ask when the follow-up window is open.
 */
 {
   pkgs,
@@ -25,52 +31,111 @@ in {
     text =
       # bash
       ''
-        refresh_waybar() {
-          pkill -RTMIN+12 -x '\.?waybar(-wrapped)?' || true
+        wake_watcher() {
+          pkill -USR1 -f 'waybar-hey-computer watch' 2>/dev/null || true
+        }
+
+        query_state() {
+          local status_json
+          if status_json=$(${heyComputer} status --json 2>/dev/null); then
+            jq -r '
+              if .running != null then "thinking"
+              elif .follow_up_secs != null then "followup"
+              else "idle" end
+            ' <<<"$status_json" 2>/dev/null || printf 'idle'
+          else
+            printf 'idle'
+          fi
         }
 
         case "''${1-}" in
         cancel)
           ${heyComputer} cancel >/dev/null 2>&1 || true
-          refresh_waybar
+          wake_watcher
           ;;
         click)
-          if status_json=$(${heyComputer} status --json 2>/dev/null) \
-            && jq -e '.running != null' <<<"$status_json" >/dev/null 2>&1; then
+          case "$(query_state)" in
+          thinking)
             ${heyComputer} cancel >/dev/null 2>&1 || true
-            refresh_waybar
-          else
+            wake_watcher
+            ;;
+          followup)
             exec ${scripts.rofi-ask}
+            ;;
+          *)
+            exec ${scripts.rofi-launch} search
+            ;;
+          esac
+          ;;
+        right-click)
+          if [ "$(query_state)" = "thinking" ]; then
+            ${heyComputer} cancel >/dev/null 2>&1 || true
+            wake_watcher
+          else
+            exec ${scripts.rofi-launch} power
           fi
           ;;
-        *)
-          if ! status_json=$(${heyComputer} status --json 2>/dev/null); then
-            echo '{"text":"󱙺 !","class":"down","tooltip":"<b>Hey Computer</b>\nDaemon is not running"}'
+        watch)
+          sleep_pid=""
+          cleanup() {
+            if [ -n "$sleep_pid" ]; then
+              kill "$sleep_pid" 2>/dev/null || true
+            fi
             exit 0
-          fi
-          jq -c '
-            if .running != null then {
-              text: "󱙺 \(.running_secs // 0 | floor)s",
-              class: "thinking",
-              tooltip: "<b>Hey Computer: thinking</b>\nRequest #\(.running) (\(.running_secs // 0 | floor)s)\n\nClick to cancel"
-            } elif .agent == "starting" then {
-              text: "󱙺 …",
-              class: "starting",
-              tooltip: "<b>Hey Computer</b>\nStarting agent…"
-            } elif .agent == "down" then {
-              text: "󱙺 !",
-              class: "down",
-              tooltip: "<b>Hey Computer</b>\nAgent is down"
-            } elif .follow_up_secs != null then {
-              text: "󱙺",
-              class: "followup",
-              tooltip: "<b>Hey Computer: follow-up window</b>\n\(.follow_up_secs | ceil)s left (\(.handled) handled)\n\nClick to ask · Right-click to cancel"
-            } else {
-              text: "",
-              class: "idle",
-              tooltip: "Hey Computer: idle (\(.handled) handled)"
-            } end
-          ' <<<"$status_json"
+          }
+          trap cleanup TERM INT HUP PIPE
+          trap 'if [ -n "$sleep_pid" ]; then kill "$sleep_pid" 2>/dev/null || true; fi' USR1
+
+          frames=("󰚩" "󱚝" "󱚟" "󱚡" "󱚣" "󱜙")
+          frame_idx=0
+          last_line=""
+
+          emit() {
+            if [ "$1" != "$last_line" ]; then
+              printf '%s\n' "$1" || exit 0
+              last_line="$1"
+            fi
+          }
+
+          sleep_interruptible() {
+            sleep "$1" &
+            sleep_pid=$!
+            wait "$sleep_pid" 2>/dev/null || true
+            sleep_pid=""
+          }
+
+          while true; do
+            case "$(query_state)" in
+            thinking)
+              emit "{\"text\":\" ''${frames[$frame_idx]} \",\"class\":\"thinking\",\"tooltip\":\"Hey Computer: thinking (click to cancel)\"}"
+              frame_idx=$(( (frame_idx + 1) % ''${#frames[@]} ))
+              sleep_interruptible 0.18
+              ;;
+            followup)
+              frame_idx=0
+              emit '{"text":" 󱚥 ","class":"followup","tooltip":"Hey Computer: follow-up window (click to ask)"}'
+              sleep_interruptible 0.5
+              ;;
+            *)
+              frame_idx=0
+              emit '{"text":"  ","class":"idle","tooltip":""}'
+              sleep_interruptible 0.5
+              ;;
+            esac
+          done
+          ;;
+        *)
+          case "$(query_state)" in
+          thinking)
+            echo '{"text":" 󱜙 ","class":"thinking","tooltip":"Hey Computer: thinking (click to cancel)"}'
+            ;;
+          followup)
+            echo '{"text":" 󱚥 ","class":"followup","tooltip":"Hey Computer: follow-up window (click to ask)"}'
+            ;;
+          *)
+            echo '{"text":"  ","class":"idle","tooltip":""}'
+            ;;
+          esac
           ;;
         esac
       '';

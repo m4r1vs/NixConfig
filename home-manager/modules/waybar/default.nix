@@ -119,7 +119,11 @@ in {
             "group/os-logo" = {
               orientation = "horizontal";
               modules = [
-                "custom/os-logo"
+                (
+                  if hasHeyComputer
+                  then "custom/hey-computer"
+                  else "custom/os-logo"
+                )
                 "hyprland/window"
               ];
             };
@@ -155,8 +159,7 @@ in {
             "group/tray-and-battery" = {
               orientation = "horizontal";
               modules =
-                optional hasHeyComputer "custom/hey-computer"
-                ++ optional hasNetbird "custom/netbird"
+                optional hasNetbird "custom/netbird"
                 ++ ["custom/weather"]
                 ++ optional host.isDev "custom/github"
                 ++ [
@@ -295,13 +298,12 @@ in {
             "custom/netbird" = mkIf hasNetbird sharedModules."custom/netbird";
 
             "custom/hey-computer" = mkIf hasHeyComputer {
-              exec = "${scripts.waybar-hey-computer}";
+              exec = "${scripts.waybar-hey-computer} watch";
+              restart-interval = 2;
               format = "{}";
-              signal = 12;
-              interval = 1;
-              exec-on-event = false;
+              rotate = 0;
               on-click = "${scripts.waybar-hey-computer} click";
-              on-click-right = "${scripts.waybar-hey-computer} cancel";
+              on-click-right = "${scripts.waybar-hey-computer} right-click";
               return-type = "json";
               tooltip = true;
             };

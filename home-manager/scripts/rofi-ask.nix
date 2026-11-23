@@ -68,7 +68,7 @@ in {
         [ -n "$trimmed" ] || exit 0
 
         printf '%s' "$trimmed" | ${heyComputer} "''${args[@]}"
-        pkill -RTMIN+12 -x '\.?waybar(-wrapped)?' || true
+        pkill -USR1 -f 'waybar-hey-computer watch' 2>/dev/null || true
       '';
   };
 }

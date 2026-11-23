@@ -151,7 +151,7 @@ in {
         bounded=$(printf '%s' "$context" | head -c 200000)
 
         printf '%s\n\n%s' "$chosen" "$bounded" | ${heyComputer} ask --new
-        pkill -RTMIN+12 -x '\.?waybar(-wrapped)?' || true
+        pkill -USR1 -f 'waybar-hey-computer watch' 2>/dev/null || true
       '';
   };
 }
