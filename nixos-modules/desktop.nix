@@ -177,6 +177,53 @@ in {
               "bluez5.a2dp.ldac.quality" = "auto";
             };
           };
+
+          /*
+          Thomann HAD-1 ("Living Room"): Tenor TE7022 USB Audio Class 1 bridge, full-speed (USB 1.1) only.
+          Playback: 16 bit (388 B/ms) or 24 bit (582 B/ms) at 32/44.1/48/96 kHz, no hardware volume.
+          Input: line-in or S/PDIF-in with the same formats.
+
+          The xHCI reserves bandwidth per wMaxPacketSize. 24/96 playback runs fine on its own, but with the input
+          open at 24 bit as well (pavucontrol meters every source) the pair does not fit: playback fails with
+          "Not enough bandwidth" and plays silence. Default to output-only; if the input gets enabled, keep it at
+          16 bit so it takes as little as possible.
+          */
+          extraConfig."52-living-room-dac" = let
+            device = "alsa_card.usb-THOMANN_HAD-1-01";
+          in {
+            "device.profile.priority.rules" = [
+              {
+                matches = [{"device.name" = device;}];
+                actions.update-props.priorities = ["output:analog-stereo"];
+              }
+            ];
+            "monitor.alsa.rules" = [
+              {
+                matches = [{"device.name" = device;}];
+                actions.update-props = {
+                  "device.description" = "Living Room";
+                  "device.nick" = "Living Room";
+                };
+              }
+              {
+                matches = [{"node.name" = "~alsa_output.usb-THOMANN_HAD-1.*";}];
+                actions.update-props = {
+                  "node.description" = "Living Room";
+                  "node.nick" = "Living Room";
+                  "audio.format" = "S24LE"; # packed 24 bit (S24_3LE), the device's only 24-bit format
+                  "audio.rate" = 96000;
+                };
+              }
+              {
+                matches = [{"node.name" = "~alsa_input.usb-THOMANN_HAD-1.*";}];
+                actions.update-props = {
+                  "node.description" = "Living Room Input";
+                  "node.nick" = "Living Room Input";
+                  "audio.format" = "S16LE";
+                };
+              }
+            ];
+          };
         };
       };
 
