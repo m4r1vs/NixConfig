@@ -6,6 +6,7 @@
   imports = [
     ./disks.nix
     ./hardware-configuration.nix
+    ./speaker-eq.nix
   ];
 
   configured = {
@@ -169,6 +170,35 @@
             update-props = {
               "device.disabled" = true;
             };
+          };
+        }
+      ];
+    };
+
+    # Friendly names instead of "Ryzen HD Audio Controller Analog Stereo" / "Radeon High Definition
+    # Audio Controller Digital Stereo (HDMI 2)". The analog sink serves both speakers and the 3.5mm jack.
+    pipewire.wireplumber.extraConfig."51-builtin-audio-names" = {
+      "monitor.alsa.rules" = [
+        {
+          matches = [{"node.name" = "alsa_output.pci-0000_65_00.6.analog-stereo";}];
+          actions.update-props = {
+            "node.description" = "Built-in Audio";
+            "node.nick" = "Built-in Audio";
+          };
+        }
+        {
+          # Any profile of the Radeon HDMI/DP audio controller (hdmi-stereo, -extra1, -extra2, surround, ...)
+          matches = [{"node.name" = "~alsa_output.pci-0000_65_00.1.*";}];
+          actions.update-props = {
+            "node.description" = "Display Audio";
+            "node.nick" = "Display Audio";
+          };
+        }
+        {
+          matches = [{"node.name" = "alsa_input.pci-0000_65_00.6.analog-stereo";}];
+          actions.update-props = {
+            "node.description" = "Built-in Microphone";
+            "node.nick" = "Built-in Microphone";
           };
         }
       ];
