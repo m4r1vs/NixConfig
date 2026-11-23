@@ -115,6 +115,7 @@ in {
 
         lcmd + shift - w : rofi-launch wallpaper
         lcmd + shift - g : rofi-launch gitlab
+        lcmd + shift - x : open-linear-ticket
 
         lcmd - q : yabai -m window --close
         lcmd + shift - q : kill $(osascript -e 'tell application "System Events" to get unix id of first application process whose frontmost is true')

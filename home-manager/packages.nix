@@ -41,6 +41,7 @@ in {
       ]
       ++ lib.optionals isDarwin [
         # Install on MacOS only:
+        (writeShellScriptBin "open-linear-ticket" ''exec ${scripts.open-linear-ticket} "$@"'')
         (writeShellScriptBin "random-album-of-the-day" ''exec ${scripts.random-album-of-the-day} "$@"'')
         (writeShellScriptBin "random-wallpaper" ''exec ${(scripts.random-wallpaper ./wallpaper)} "$@"'')
         (writeShellScriptBin "spotify-like" ''exec ${scripts.spotify-like} "$@"'')

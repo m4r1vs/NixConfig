@@ -1,18 +1,19 @@
 {
-  pkgs,
   scripts,
+  helpers,
   ...
 }: {
-  open-linear-ticket =
-    pkgs.writeShellScript "open-linear-ticket"
-    ''
-      clipboard="$(${pkgs.wl-clipboard}/bin/wl-paste --no-newline)"
+  open-linear-ticket = helpers.mkScript {
+    name = "open-linear-ticket";
+    text = ''
+      clipboard="$(${helpers.clipboard.paste} 2>/dev/null || true)"
 
       if [[ -n "$clipboard" && "$clipboard" =~ ^[^[:space:]]+$ ]]; then
-        ${pkgs.xdg-utils}/bin/xdg-open "https://linear.app/meetovo/issues/$clipboard"
+        ${helpers.openUrl} "https://linear.app/meetovo/issue/$clipboard"
         ${scripts.nixos-notify} "Opening $clipboard in Linear"
       else
         ${scripts.nixos-notify} "Not a Ticket: $clipboard"
       fi
     '';
+  };
 }
