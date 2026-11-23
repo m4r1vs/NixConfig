@@ -10,9 +10,17 @@
 }:
 with lib; let
   cfg = config.programs.configured.hyprland;
-  browsers = config.programs.configured.browser.resolved;
+  browsersCfg = config.programs.configured.browser;
+  browsers = browsersCfg.resolved;
   browser = browsers.default;
   sideBrowser = browsers.side;
+  inherit (browsersCfg) secondaryWorkspace;
+  defaultBrowserApp =
+    findFirst
+    (app: app.match != null && (app.match.initial_class or "") == "^(${browser.windowClass})$" && isInt app.workspace)
+    null
+    cfg.startupApps;
+  pinSecondaryBrowser = browsersCfg.secondaryProfile && secondaryWorkspace != null && defaultBrowserApp != null;
   geminiClass = "${browser.appClassPrefix}-gemini.google.com__-${browsers.personalProfile}";
   npuDictate = lib.getExe config.programs.npu-dictate.package;
   # pamixer stops at 100% unless it is told to boost
@@ -902,6 +910,97 @@ in {
               },
             })
           end
+        ''
+        # Pin the secondary browser profile to its own workspace. Chromium shares
+        # one window class and one process across all profiles in a user data
+        # dir, so a static window rule cannot tell Default and Secondary apart.
+        + lib.optionalString pinSecondaryBrowser
+        # lua
+        ''
+
+          local secondary_browser_ws = ${toString secondaryWorkspace}
+          local secondary_browser_rule = hl.window_rule({
+            name = "secondary-browser",
+            match = {
+              initial_class = "^(${browser.windowClass})$",
+            },
+            workspace = secondary_browser_ws,
+            enabled = false,
+          })
+          local browser_ws_marker = (os.getenv("XDG_RUNTIME_DIR") or "/tmp") .. "/hypr-browser-workspace"
+          local browser_open_early = {}
+
+          local function consume_browser_workspace()
+            local f = io.open(browser_ws_marker, "r")
+            if f == nil then
+              return nil
+            end
+            local line = f:read("*l")
+            f:close()
+            os.remove(browser_ws_marker)
+            if line == nil then
+              return nil
+            end
+            local ws, exp = line:match("^(%d+)%s+(%d+)$")
+            if ws ~= nil and exp ~= nil and os.time() <= tonumber(exp) then
+              return tonumber(ws)
+            end
+            return nil
+          end
+
+          local function is_default_browser(w)
+            if w == nil then
+              return false
+            end
+            local cls = (w.initial_class ~= nil and w.initial_class ~= "" and w.initial_class) or w.class
+            return cls == ${toLua browser.windowClass}
+          end
+
+          hl.on("window.open_early", function(w)
+            if not is_default_browser(w) then
+              return
+            end
+            local target_ws = consume_browser_workspace()
+            if target_ws == nil then
+              local active = hl.get_active_window()
+              if
+                is_default_browser(active)
+                and active.workspace ~= nil
+                and active.workspace.id == secondary_browser_ws
+              then
+                target_ws = secondary_browser_ws
+              end
+            end
+            local is_secondary = target_ws == secondary_browser_ws
+            secondary_browser_rule:set_enabled(is_secondary)
+            if w.address ~= nil then
+              browser_open_early[w.address] = is_secondary
+            end
+          end)
+
+          hl.on("window.open", function(w)
+            if not is_default_browser(w) then
+              return
+            end
+            secondary_browser_rule:set_enabled(false)
+            local is_secondary = nil
+            if w.address ~= nil then
+              is_secondary = browser_open_early[w.address]
+              browser_open_early[w.address] = nil
+            end
+            if is_secondary == nil then
+              is_secondary = consume_browser_workspace() == secondary_browser_ws
+            end
+            if is_secondary and (w.workspace == nil or w.workspace.id ~= secondary_browser_ws) then
+              hl.dispatch(hl.dsp.window.move({ window = w, workspace = secondary_browser_ws }))
+            end
+          end)
+
+          hl.on("window.destroy", function(w)
+            if w ~= nil and w.address ~= nil then
+              browser_open_early[w.address] = nil
+            end
+          end)
         '';
     };
   };

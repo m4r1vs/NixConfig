@@ -341,7 +341,7 @@ in {
             if systemArgs.useWorkProfileByDefault
             then "Work Browser"
             else "Personal Browser";
-          exec = ''${browser.command} --profile-directory=Default %U'';
+          exec = ''${scripts.launch-browser-profile} Default %U'';
           icon =
             if systemArgs.useWorkProfileByDefault
             then browser.icons.work
@@ -356,7 +356,7 @@ in {
             if systemArgs.useWorkProfileByDefault
             then "Personal Browser"
             else "Work Browser";
-          exec = ''${browser.command} --profile-directory=Secondary %U'';
+          exec = ''${scripts.launch-browser-profile} Secondary %U'';
           icon =
             if systemArgs.useWorkProfileByDefault
             then browser.icons.personal

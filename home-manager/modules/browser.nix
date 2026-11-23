@@ -2,6 +2,7 @@
 Which browser a host uses, by role rather than by name:
 
 - default: opens links, gets the launcher entries and lives on workspace 1
+  (its secondary profile, when enabled, lives on workspace 5)
 - side: installed next to the default one and kept on a special workspace (F12)
 
 Desktop entries, window rules and scripts read the `resolved` values below
@@ -98,6 +99,11 @@ in {
         entry, so work and personal browsing stay apart. Which of the two is
         the work one follows systemArgs.useWorkProfileByDefault.
       '';
+    };
+    secondaryWorkspace = mkOption {
+      type = types.nullOr types.int;
+      default = 5;
+      description = "The workspace the secondary browser profile opens on, or null to leave it on the default browser's workspace.";
     };
     flags = mkOption {
       type = types.listOf types.str;
