@@ -38,12 +38,14 @@ in {
         "$schema" = "https://antigravity.google/schemas/v1/settings.json";
         artifactReviewPolicy = "always-proceed";
         editorMode = "vim";
-        enableTerminalSandbox = true;
+        # agy's terminal sandbox fails to start on NixOS (connection reset / missing bash in sandbox PATH),
+        # adding latency on every shell command without providing containment.
+        enableTerminalSandbox = false;
         model = "Gemini 4 Neon (High)";
         notifications = true;
         showFeedbackSurvey = false;
         showTips = false;
-        toolPermission = "proceed-in-sandbox";
+        toolPermission = "request-review";
         vimInsertFirst = true;
       };
     };

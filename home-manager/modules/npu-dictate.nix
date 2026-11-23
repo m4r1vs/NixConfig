@@ -40,6 +40,9 @@ with lib; let
     };
     whatsapp = startupApp "WhatsApp" (match: hasPrefix "^(WhatsApp" (match.initial_title or ""));
     obsidian = startupApp "Obsidian" (match: (match.initial_class or "") == "^(md.obsidian.Obsidian)$");
+    slack = startupApp "Slack" (match: (match.initial_class or "") == "^(slack)$");
+    signal = startupApp "Signal" (match: (match.initial_class or "") == "^(signal)$");
+    spotify = startupApp "Spotify" (match: (match.initial_class or "") == "^(spotify)$");
   };
   voiceCommand = scripts.voice-command {
     inherit apps;
@@ -67,6 +70,16 @@ in {
         "Wetter" or "open github.com" (see the rules below) runs that instead
         of being typed. There is no way to type such a dictation literally.
       '';
+    };
+    voiceCommand = mkOption {
+      type = types.raw;
+      readOnly = true;
+      internal = true;
+      default = {
+        script = voiceCommand;
+        inherit apps;
+      };
+      description = "Instantiated voice-command script and resolved app map, shared with hey-computer.";
     };
   };
 

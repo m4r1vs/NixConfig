@@ -142,12 +142,25 @@ tooltip label {
 #custom-github,
 #custom-notifications,
 #custom-caffeinate,
+#custom-hey-computer,
 #custom-netbird,
 #custom-powermode,
 #cpu,
 #custom-weather {
   font-weight: 600;
   padding: 0px 4px;
+}
+
+#custom-hey-computer.thinking {
+  color: @primary-color;
+}
+
+#custom-hey-computer.followup {
+  color: @secondary-color;
+}
+
+#custom-hey-computer.down {
+  color: #d14d41;
 }
 
 #window {

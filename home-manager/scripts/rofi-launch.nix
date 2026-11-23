@@ -3,8 +3,14 @@
   scripts,
   host,
   lib,
+  config,
+  systemArgs,
   ...
-}: {
+}: let
+  hasHeyComputer =
+    (!host.isDarwin)
+    && (config.home-manager.users.${systemArgs.username}.programs.configured.hey-computer.enable or false);
+in {
   rofi-launch =
     pkgs.writeShellScript "rofi-launch"
     # bash
@@ -50,6 +56,14 @@
           ${scripts.rofi-wifi}
           ;;
       ''}
+        ${lib.optionalString hasHeyComputer ''
+        ask)
+          ${scripts.rofi-ask}
+          ;;
+        ask-about)
+          ${scripts.rofi-ask-about}
+          ;;
+      ''}
         obsidian)
           ${pkgs.rofi}/bin/rofi -modi obsidian:${scripts.rofi-obsidian} -show obsidian -theme-str "entry {placeholder:\"Open Obsidian Note...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}"
           ;;
@@ -63,7 +77,7 @@
           ${scripts.rofi-translate}
           ;;
         *)
-          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|cliphist|powermode|nightlight|obsidian|gitlab|ocr|wifi|translate}"
+          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|cliphist|powermode|nightlight|obsidian|gitlab|ocr|wifi|translate|ask|ask-about}"
           exit 1
           ;;
       esac

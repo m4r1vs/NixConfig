@@ -725,6 +725,15 @@ in {
             # a mouse click) shadows an ordinary release bind, and the stop is never sent.
             (binddrint "v" "Dictate (transcribe)" (exec "${npuDictate} stop"))
           ]
+          ++ lib.optionals (config.programs.configured.npu-dictate.enable && config.programs.configured.hey-computer.enable) [
+            # Reuses the `binddrint "v"` release bind above so no second letter spawns `stop` on release.
+            (bindd "SUPER + ALT + v" "Ask Hey Computer (hold to talk)" (exec "${npuDictate} start --to assistant"))
+          ]
+          ++ lib.optionals config.programs.configured.hey-computer.enable [
+            (bindd "SUPER + a" "Ask Hey Computer" (exec "${scripts.rofi-launch} ask"))
+            (bindd "SUPER + SHIFT + a" "Ask Hey Computer about selection/clipboard/OCR" (exec "${scripts.rofi-launch} ask-about"))
+            (bindd "SUPER + CTRL + a" "Cancel Hey Computer request" (exec "${scripts.waybar-hey-computer} cancel"))
+          ]
           ++ [
             # Allow on lockscreen (locked) and allow repeat (repeating)
             (binddle "XF86AudioRaiseVolume" "Increase volume" (exec volumeUp))

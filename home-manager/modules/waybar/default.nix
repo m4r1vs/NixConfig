@@ -16,6 +16,7 @@ with lib; let
   hasNetbird =
     (osConfig.services.netbird.enable or false)
     || (host.isDarwin && any (b: (b.name or b) == "netbirdio/tap/netbird") (osConfig.homebrew.brews or []));
+  hasHeyComputer = config.programs.configured.hey-computer.enable;
   sharedModules = optionalAttrs hasNetbird {
     "custom/netbird" = {
       exec = "${scripts.netbird-vpn}";
@@ -154,7 +155,8 @@ in {
             "group/tray-and-battery" = {
               orientation = "horizontal";
               modules =
-                optional hasNetbird "custom/netbird"
+                optional hasHeyComputer "custom/hey-computer"
+                ++ optional hasNetbird "custom/netbird"
                 ++ ["custom/weather"]
                 ++ optional host.isDev "custom/github"
                 ++ [
@@ -291,6 +293,18 @@ in {
             };
 
             "custom/netbird" = mkIf hasNetbird sharedModules."custom/netbird";
+
+            "custom/hey-computer" = mkIf hasHeyComputer {
+              exec = "${scripts.waybar-hey-computer}";
+              format = "{}";
+              signal = 12;
+              interval = 1;
+              exec-on-event = false;
+              on-click = "${scripts.waybar-hey-computer} click";
+              on-click-right = "${scripts.waybar-hey-computer} cancel";
+              return-type = "json";
+              tooltip = true;
+            };
 
             "custom/gcal" = {
               exec = "${scripts.waybar-gcal}";
