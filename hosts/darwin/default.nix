@@ -59,7 +59,6 @@ in {
         "finetune" # Music Mixer
         "google-drive" # Cloud storage
         "helium-browser" # Web browser
-        "iriunwebcam" # Use phone as webcam
         "keycastr" # Show keystrokes on screen
         "linearmouse" # Smooth mouse acceleration
         "macs-fan-control" # View and control fan speeds
