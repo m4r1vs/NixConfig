@@ -7,7 +7,6 @@
   configured = {
     nvidia.enable = false;
     laptop.enable = true;
-    mdns.enable = true;
     desktop = {
       enable = true;
       windowManagers = {
@@ -21,7 +20,6 @@
       secureboot = true;
       resolution = "1920x1080";
     };
-    system-sounds.enable = true;
   };
 
   services = {

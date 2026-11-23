@@ -28,7 +28,11 @@
                 type = "luks";
                 name = "cryptroot";
                 passwordFile = "/tmp/secret.key";
-                settings.allowDiscards = true;
+                settings = {
+                  allowDiscards = true;
+                  # Encrypt in the calling thread instead of kcryptd workqueues: faster on SSDs
+                  bypassWorkqueues = true;
+                };
                 content = {
                   type = "btrfs";
                   extraArgs = ["-L" "nixos" "-f"];

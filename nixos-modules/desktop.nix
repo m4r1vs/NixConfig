@@ -83,6 +83,7 @@ in {
     configured = {
       limine.enable = true;
       system-sounds.enable = true;
+      mdns.enable = mkDefault true;
     };
 
     specialisation = {
@@ -247,6 +248,14 @@ in {
       blueman.enable = true;
 
       /*
+      DNS per network link, which NetworkManager feeds. Changing networks swaps
+      the servers, and a VPN only gets the queries for its own domains (split
+      DNS over D-Bus). With openresolv, NetBird takes /etc/resolv.conf over and
+      keeps the nameservers of the network it was started on.
+      */
+      resolved.enable = mkDefault true;
+
+      /*
       Hardware services, on real machines only (the aarch64 desktop is a VM)
       */
 
@@ -336,6 +345,16 @@ in {
         # TCP BBR congestion control with fq pacing
         "net.core.default_qdisc" = "fq";
         "net.ipv4.tcp_congestion_control" = "bbr";
+
+        /*
+        Cap unwritten (dirty) page cache in bytes instead of the default 10%/20%
+        of RAM, which is 1.6/3.2 GiB at 16 GiB and twice that at 32 GiB. A large
+        dirty cache makes copies to slow disks or USB sticks look done while
+        gigabytes are still pending, then stalls every writer while it flushes.
+        256 MiB is a fraction of a second for an SSD
+        */
+        "vm.dirty_background_bytes" = 67108864; # 64 MiB
+        "vm.dirty_bytes" = 268435456; # 256 MiB
       };
       extraModprobeConfig = ''
         # German regulatory domain for Wi-Fi; in the world domain 6 GHz stays off

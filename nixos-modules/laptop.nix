@@ -101,10 +101,15 @@ in {
           "zswap.max_pool_percent=20"
           "zswap.shrinker_enabled=0"
         ];
-      kernel.sysctl = {
-        # Coalesce periodic dirty writebacks (default 500 = 5s) so NVMe stays in deep APST sleep longer
-        "vm.dirty_writeback_centisecs" = 1500;
-      };
+      kernel.sysctl =
+        {
+          # Coalesce periodic dirty writebacks (default 500 = 5s) so NVMe stays in deep APST sleep longer
+          "vm.dirty_writeback_centisecs" = 1500;
+        }
+        // optionalAttrs (config.swapDevices != []) {
+          # No multi-page swap readahead: zswap hands pages back from RAM, so neighbours are not worth it
+          "vm.page-cluster" = 0;
+        };
     };
 
     # Enforce Memory Saver and Battery Saver below threshold in Brave on laptops
@@ -148,6 +153,25 @@ in {
       activates it, and NixOS starts upower on D-Bus activation only
       */
       upower.wantedBy = ["graphical.target"];
+
+      /*
+      Panel power savings (AMD ABM: lower backlight, compensated by contrast) on
+      battery is an opt-in power-profiles-daemon action kept in its state file;
+      without an amdgpu panel it does nothing. Each call makes the daemon
+      restart its drivers, so stay active instead of running again on every
+      rebuild
+      */
+      ppd-panel-power-savings = {
+        description = "Enable power-profiles-daemon panel power savings";
+        wantedBy = ["graphical.target"];
+        wants = ["power-profiles-daemon.service"];
+        after = ["power-profiles-daemon.service"];
+        serviceConfig = {
+          Type = "oneshot";
+          RemainAfterExit = true;
+          ExecStart = "${config.services.power-profiles-daemon.package}/bin/powerprofilesctl configure-action amdgpu_panel_power --enable";
+        };
+      };
 
       # Keep heavy periodic maintenance off battery power
       nix-optimise = mkIf config.nix.optimise.automatic {

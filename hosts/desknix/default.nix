@@ -12,7 +12,6 @@
   configured = {
     nvidia.enable = true;
     razer.enable = true;
-    mdns.enable = true;
     desktop = {
       enable = true;
       windowManagers = {
@@ -34,7 +33,6 @@
       ];
       windowsPartUUID = "bf2df441-4059-45e1-886a-6cf5e8def333";
     };
-    system-sounds.enable = true;
   };
 
   hardware.bluetooth.enable = lib.mkForce false;

@@ -1,8 +1,4 @@
-{
-  config,
-  systemArgs,
-  ...
-}: {
+{systemArgs, ...}: {
   imports = [
     ./disks.nix
     ./hardware-configuration.nix
@@ -12,7 +8,6 @@
   configured = {
     nvidia.enable = false;
     laptop.enable = true;
-    mdns.enable = true;
     desktop = {
       enable = true;
       windowManagers = {
@@ -31,7 +26,6 @@
       volumeKeyId = "b56faa02df4bf493c765b812cf899c19b28aaab916d89dc9ef03e27abb770712";
       resumeOffset = 533760;
     };
-    system-sounds.enable = true;
     /*
     Ryzen AI 9 HX 370 NPU. The server runs whisper-large-v3-turbo, which is
     what npu-dictate (SUPER+v, hold to talk) transcribes against.
@@ -51,7 +45,6 @@
   security.pki.certificateFiles = [./meetovo-dev-ca.crt];
 
   hardware = {
-    enableRedistributableFirmware = true;
     # Uniwill BIOS/EC updates come via the TUXEDO portal, not fwupd/LVFS
     tuxedo-drivers = {
       enable = true;
@@ -82,14 +75,6 @@
       */
       "amdgpu.dcdebugmask=0x400"
     ];
-    kernel.sysctl = {
-      # Cap dirty writeback buffers on 32 GiB RAM (overrides dirty_*_ratio defaults);
-      # the swapfile sits on a 110 TBW QLC drive
-      "vm.dirty_background_bytes" = 67108864; # 64 MiB
-      "vm.dirty_bytes" = 268435456; # 256 MiB
-      # No multi-page swap readahead when backed by zswap/NVMe
-      "vm.page-cluster" = 0;
-    };
   };
 
   systemd = {
@@ -107,23 +92,6 @@
         DevicePolicy = "closed";
         DeviceAllow = ["char-video4linux rw"];
       };
-
-      /*
-      Panel power savings (ABM) on battery is an opt-in power-profiles-daemon
-      action kept in its state file. Each call makes the daemon restart its
-      drivers, so stay active instead of running again on every rebuild
-      */
-      ppd-panel-power-savings = {
-        description = "Enable power-profiles-daemon panel power savings";
-        wantedBy = ["graphical.target"];
-        wants = ["power-profiles-daemon.service"];
-        after = ["power-profiles-daemon.service"];
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          ExecStart = "${config.services.power-profiles-daemon.package}/bin/powerprofilesctl configure-action amdgpu_panel_power --enable";
-        };
-      };
     };
   };
 
@@ -137,18 +105,10 @@
     };
 
     /*
-    Split DNS via D-Bus for NetBird. With NixOS's default openresolv, NetBird
-    takes exclusive ownership of /etc/resolv.conf and caches the original
-    upstream nameservers at `netbird up` time, so switching networks leaves DNS
-    pointing at the previous network's unreachable router until NetBird is
-    cycled.
-    */
-    resolved.enable = true;
-
-    /*
     Work VPN for internal services. The daemon starts on boot; log in once
     with `netbird up` (the wrapped CLI already points at our management
-    server), the peer config then persists in /var/lib/netbird.
+    server), the peer config then persists in /var/lib/netbird. Its split DNS
+    needs systemd-resolved, which desktop.nix turns on.
     */
     netbird = {
       enable = true;
