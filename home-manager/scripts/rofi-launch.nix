@@ -43,6 +43,9 @@ in {
         bluetooth)
           ${scripts.rofi-bluetooth}
           ;;
+        buds)
+          ${scripts.rofi-galaxy-buds}
+          ;;
         cliphist)
           ${scripts.rofi-cliphist}
           ;;
@@ -77,7 +80,7 @@ in {
           ${scripts.rofi-translate}
           ;;
         *)
-          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|cliphist|powermode|nightlight|obsidian|gitlab|ocr|wifi|translate|ask|ask-about}"
+          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|buds|cliphist|powermode|nightlight|obsidian|gitlab|ocr|wifi|translate|ask|ask-about}"
           exit 1
           ;;
       esac

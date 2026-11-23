@@ -159,19 +159,22 @@ in {
         wireplumber = {
           enable = true;
           # Local bluetooth roles: a2dp_source = send audio to speakers,
-          # hfp_ag = use headset microphones. Deliberately omits a2dp_sink
+          # hfp_ag = use headset microphones, bap_sink/bap_source = LE Audio
+          # unicast playback + mic (LC3). Deliberately omits a2dp_sink
           # (receive audio from devices) — speakers that also advertise an
           # Audio Source UUID (e.g. Anker Soundcore Boost) otherwise grab
           # the AVDTP transport in the wrong direction and A2DP playback
           # fails with "Device or resource busy".
+          # Leave bluez5.codecs unset so PipeWire keeps all compiled codecs
+          # enabled (including HFP mSBC and LC3-SWB; a partial whitelist
+          # filters them out and leaves HFP stuck on 8 kHz CVSD).
           extraConfig."51-bluez-roles" = {
             "monitor.bluez.properties" = {
-              "bluez5.roles" = ["a2dp_source" "hfp_ag" "bap_source"];
+              "bluez5.roles" = ["a2dp_source" "hfp_ag" "bap_sink" "bap_source"];
               "bluez5.enable-sbc-xq" = true;
               "bluez5.enable-msbc" = true;
               "bluez5.enable-hw-volume" = true;
               "bluez5.a2dp.ldac.quality" = "auto";
-              "bluez5.codecs" = ["sbc" "sbc_xq" "aac" "ldac" "aptx" "aptx_hd" "lc3"];
             };
           };
         };
@@ -328,9 +331,11 @@ in {
             ControllerMode = "dual";
             FastConnectable = "false";
             Experimental = "true";
+            # Enable Bluetooth ISO sockets so BlueZ's BAP plugin (LE Audio / LC3) can probe
+            KernelExperimental = "6fbaf188-05e0-496a-9885-d6ddfdb4e03e";
           };
           Policy = {AutoEnable = "true";};
-          LE = {EnableAdvMonInterleaveScan = "true";};
+          LE = {EnableAdvMonInterleaveScan = 1;};
         };
       };
     };

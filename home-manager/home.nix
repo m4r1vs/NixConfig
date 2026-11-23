@@ -57,6 +57,7 @@ in {
       docker-darwin.enable = host.isDarwin;
       fastfetch.enable = true;
       fzf.enable = true;
+      galaxy-buds.enable = host.isDev && host.isDesktop && osConfig.services.blueman.enable;
       ghostty.enable = host.isGraphical || host.isWSL;
       git.enable = true;
       helium.enable = usesBrowser "helium";

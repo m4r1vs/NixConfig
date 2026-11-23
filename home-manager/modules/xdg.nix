@@ -510,6 +510,18 @@ in {
           type = "Application";
           categories = ["Settings" "Network"];
         };
+        manage-galaxy-buds = mkIf config.programs.configured.galaxy-buds.enable {
+          name = "Manage Galaxy Buds";
+          genericName = "Connect, ANC, EQ & Audio Codec";
+          comment = "Quick-connect Galaxy Buds4 Pro, switch audio output/input, and control ANC/EQ via GalaxyBudsClient";
+          icon = "audio-headset";
+          exec = "${scripts.rofi-launch} buds";
+          type = "Application";
+          categories = ["AudioVideo" "Audio" "Settings" "Utility"];
+          settings = {
+            Keywords = "bluetooth;headphones;earbuds;samsung;buds;buds4;audio;connect;disconnect;anc;ambient;eq;galaxy;";
+          };
+        };
         rofi-cliphist = {
           name = "Clipboard History";
           genericName = "SUPER+Shift+V";
