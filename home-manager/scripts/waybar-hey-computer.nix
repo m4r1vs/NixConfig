@@ -1,6 +1,6 @@
 /*
 Waybar custom/hey-computer module script (signal 12, interval 1).
-Hidden when idle; shows thinking (with elapsed seconds), follow-up countdown,
+Hidden when idle; shows thinking (with elapsed seconds), follow-up window open,
 starting, or down state. Clicking while thinking cancels; clicking in the
 follow-up window opens `rofi-ask`.
 */
@@ -62,7 +62,7 @@ in {
               class: "down",
               tooltip: "<b>Hey Computer</b>\nAgent is down"
             } elif .follow_up_secs != null then {
-              text: "󱙺 \(.follow_up_secs | ceil)s",
+              text: "󱙺",
               class: "followup",
               tooltip: "<b>Hey Computer: follow-up window</b>\n\(.follow_up_secs | ceil)s left (\(.handled) handled)\n\nClick to ask · Right-click to cancel"
             } else {
