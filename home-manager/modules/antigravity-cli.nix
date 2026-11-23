@@ -45,7 +45,8 @@ in {
         notifications = true;
         showFeedbackSurvey = false;
         showTips = false;
-        toolPermission = "request-review";
+        # Intentional: run tools/commands without prompts unless matched by permissions.ask / permissions.deny.
+        toolPermission = "always-proceed";
         vimInsertFirst = true;
       };
     };
