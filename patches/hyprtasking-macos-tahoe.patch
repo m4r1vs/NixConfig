@@ -1,6 +1,6 @@
 diff -ruN a/src/globals.hpp b/src/globals.hpp
---- a/src/globals.hpp	2026-11-23 15:03:00.380479236 +0100
-+++ b/src/globals.hpp	2026-11-23 15:03:00.388477441 +0100
+--- a/src/globals.hpp	2026-11-23 15:46:23.514361538 +0100
++++ b/src/globals.hpp	2026-11-23 15:46:23.522694698 +0100
 @@ -20,8 +20,13 @@
  inline CFunctionHook* blur_optimizations_hook = nullptr;
  inline CFunctionHook* should_render_window_hook = nullptr;
@@ -16,8 +16,8 @@ diff -ruN a/src/globals.hpp b/src/globals.hpp
  inline std::unique_ptr<HTManager> ht_manager;
  
 diff -ruN a/src/input.cpp b/src/input.cpp
---- a/src/input.cpp	2026-11-23 15:03:00.380479236 +0100
-+++ b/src/input.cpp	2026-11-23 15:03:00.388675774 +0100
+--- a/src/input.cpp	2026-11-23 15:46:23.514361538 +0100
++++ b/src/input.cpp	2026-11-23 15:46:23.523319372 +0100
 @@ -11,57 +11,53 @@
  #include "manager.hpp"
  #include "overview.hpp"
@@ -190,8 +190,8 @@ diff -ruN a/src/input.cpp b/src/input.cpp
  }
  
 diff -ruN a/src/layout/layout_base.hpp b/src/layout/layout_base.hpp
---- a/src/layout/layout_base.hpp	2026-11-23 15:03:00.380587811 +0100
-+++ b/src/layout/layout_base.hpp	2026-11-23 15:03:00.389874835 +0100
+--- a/src/layout/layout_base.hpp	2026-11-23 15:46:23.514466293 +0100
++++ b/src/layout/layout_base.hpp	2026-11-23 15:46:23.523729907 +0100
 @@ -41,6 +41,7 @@
  
      // Warp the show/hide animations to perc (from closed to open)
@@ -201,8 +201,8 @@ diff -ruN a/src/layout/layout_base.hpp b/src/layout/layout_base.hpp
      virtual void on_hide(CallbackFun on_complete = nullptr) = 0;
      virtual void
 diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
---- a/src/layout/linear.cpp	2026-11-23 15:03:00.380587811 +0100
-+++ b/src/layout/linear.cpp	2026-11-23 15:03:00.390334231 +0100
+--- a/src/layout/linear.cpp	2026-11-23 15:46:23.514466293 +0100
++++ b/src/layout/linear.cpp	2026-11-23 15:46:23.565329235 +0100
 @@ -1,6 +1,13 @@
  #include "linear.hpp"
  
@@ -733,7 +733,7 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
      rendering_standard_ws = false;
  
      CBox view_box = {
-@@ -385,12 +732,52 @@
+@@ -385,59 +732,126 @@
      };
  
      CRectPassElement::SRectData data;
@@ -744,59 +744,26 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
 +    data.blurA = blur_strength->value();
      g_pHyprRenderer->m_renderPass.add(makeUnique<CRectPassElement>(data));
  
+-    build_overview_layout(HT_VIEW_ANIMATING);
+-
+-    CBox global_mon_box = {monitor->m_position, monitor->m_transformedSize};
+-    for (const auto& [ws_id, ws_layout] : overview_layout) {
+-        // Could be nullptr, in which we render only layers
+-        const PHLWORKSPACE workspace = g_pCompositor->getWorkspaceByID(ws_id);
 +    const float edge_h = std::max(1.f, std::round(monitor->m_scale));
 +    const float edge_y = linear_top ? (view_box.y + view_box.h - edge_h) : view_box.y;
 +    CRectPassElement::SRectData edge_data;
 +    edge_data.color = CHyprColor(1.f, 1.f, 1.f, 0.16f * progress);
 +    edge_data.box = CBox {{0.f, edge_y}, {(float)monitor->m_transformedSize.x, edge_h}};
 +    g_pHyprRenderer->m_renderPass.add(makeUnique<CRectPassElement>(edge_data));
-+
-     build_overview_layout(HT_VIEW_ANIMATING);
  
-+    const WORKSPACEID hovered_ws = should_manage_mouse()
-+        ? get_ws_id_from_global(g_pInputManager->getMouseCoordsInternal())
-+        : WORKSPACE_INVALID;
-+
-+    // 5. Snapshot workspace flags and render each picker thumbnail at static {0,0}/alpha=1
-+    // without calling startAnimation(), preserving live swipe/slide animations.
-+    struct SavedWSFlags {
-+        PHLWORKSPACE ws;
-+        bool visible;
-+        bool force_rendering;
-+    };
-+    std::vector<SavedWSFlags> saved_ws_flags;
-+    for (PHLWORKSPACE ws : g_pCompositor->getWorkspacesCopy()) {
-+        if (ws == nullptr || ws->m_monitor != monitor || ws->m_isSpecialWorkspace)
-+            continue;
-+        saved_ws_flags.push_back({ws, ws->m_visible, ws->m_forceRendering});
-+        ws->m_visible = false;
-+        ws->m_forceRendering = false;
-+    }
-+
-+    CScopeGuard restore_ws_guard([&] {
-+        rendering_thumbnail_ws = WORKSPACE_INVALID;
-+        for (const auto& entry : saved_ws_flags) {
-+            if (entry.ws == nullptr)
-+                continue;
-+            entry.ws->m_visible = entry.visible;
-+            entry.ws->m_forceRendering = entry.force_rendering;
-+        }
-+        monitor->m_activeWorkspace = start_workspace;
-+    });
-+
-     CBox global_mon_box = {monitor->m_position, monitor->m_transformedSize};
-     for (const auto& [ws_id, ws_layout] : overview_layout) {
-         // Could be nullptr, in which we render only layers
-@@ -400,27 +787,46 @@
-         if (global_box.intersection(global_mon_box).empty())
-             continue;
- 
+-        CBox global_box = {ws_layout.box.pos() + monitor->m_position, ws_layout.box.size()};
+-        if (global_box.intersection(global_mon_box).empty())
+-            continue;
+-
 -        const Config::CGradientValueData border_col = workspace == big_ws ? *ACTIVECOL : *INACTIVECOL;
-+        const bool is_active_ws = workspace == big_ws;
-+        const bool is_hovered_ws = !is_active_ws && ws_id == hovered_ws;
-+        const Config::CGradientValueData border_col =
-+            (is_active_ws || is_hovered_ws) ? *ACTIVECOL : *INACTIVECOL;
-         CBox border_box = ws_layout.box;
+-        CBox border_box = ws_layout.box;
++    build_overview_layout(HT_VIEW_ANIMATING);
  
 -        CBorderPassElement::SBorderData data;
 -        data.box = border_box;
@@ -805,40 +772,8 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
 -        g_pHyprRenderer->m_renderPass.add(makeUnique<CBorderPassElement>(data));
 -
 -        render_workspace_at_box(monitor, workspace, time, ws_layout.box);
-+        CBorderPassElement::SBorderData bdata;
-+        bdata.box = border_box;
-+        bdata.grad1 = border_col;
-+        bdata.borderSize = BORDERSIZE;
-+        bdata.a = is_hovered_ws ? 0.65f : 1.0f;
-+        bdata.round = 0;
-+        bdata.outerRound = std::round(4.f * monitor->m_scale);
-+        bdata.roundingPower = 4.f;
-+        g_pHyprRenderer->m_renderPass.add(makeUnique<CBorderPassElement>(bdata));
-+
-+        const float ws_scale = ws_layout.box.w / monitor->m_transformedSize.x;
-+        CBox render_box = {ws_layout.box.pos() / ws_scale, ws_layout.box.size()};
-+        if (monitor->m_transform % 2 == 1)
-+            std::swap(render_box.w, render_box.h);
-+
-+        rendering_thumbnail_ws = ws_id;
-+        if (workspace != nullptr) {
-+            std::swap(workspace->m_renderOffset, static_zero_offset);
-+            std::swap(workspace->m_alpha, static_full_alpha);
-+            workspace->m_visible = true;
-+            monitor->m_activeWorkspace = workspace;
-+        }
-+
-+        ((render_workspace_t)(render_workspace_hook->m_original))(
-+            g_pHyprRenderer.get(), monitor, workspace, time, render_box
-+        );
-+
-+        if (workspace != nullptr) {
-+            workspace->m_visible = false;
-+            std::swap(workspace->m_renderOffset, static_zero_offset);
-+            std::swap(workspace->m_alpha, static_full_alpha);
-+        }
-     }
- 
+-    }
+-
 -    monitor->m_activeWorkspace = start_workspace;
 -    g_pDesktopAnimationManager->startAnimation(
 -        start_workspace,
@@ -847,13 +782,133 @@ diff -ruN a/src/layout/linear.cpp b/src/layout/linear.cpp
 -        true
 -    );
 -    start_workspace->m_visible = true;
--
++    const WORKSPACEID hovered_ws = should_manage_mouse()
++        ? get_ws_id_from_global(g_pInputManager->getMouseCoordsInternal())
++        : WORKSPACE_INVALID;
++
++    // 5. Snapshot workspace flags and render each picker thumbnail at static {0,0}/alpha=1
++    // without calling startAnimation(), preserving live swipe/slide animations.
++    {
++        struct SavedWSFlags {
++            PHLWORKSPACE ws;
++            bool visible;
++            bool force_rendering;
++        };
++        std::vector<SavedWSFlags> saved_ws_flags;
++        for (PHLWORKSPACE ws : g_pCompositor->getWorkspacesCopy()) {
++            if (ws == nullptr || ws->m_monitor != monitor || ws->m_isSpecialWorkspace)
++                continue;
++            saved_ws_flags.push_back({ws, ws->m_visible, ws->m_forceRendering});
++            ws->m_visible = false;
++            ws->m_forceRendering = false;
++        }
++
++        CScopeGuard restore_ws_guard([&] {
++            rendering_thumbnail_ws = WORKSPACE_INVALID;
++            for (const auto& entry : saved_ws_flags) {
++                if (entry.ws == nullptr)
++                    continue;
++                entry.ws->m_visible = entry.visible;
++                entry.ws->m_forceRendering = entry.force_rendering;
++            }
++            monitor->m_activeWorkspace = start_workspace;
++        });
++
++        CBox global_mon_box = {monitor->m_position, monitor->m_transformedSize};
++        for (const auto& [ws_id, ws_layout] : overview_layout) {
++            // Could be nullptr, in which we render only layers
++            const PHLWORKSPACE workspace = g_pCompositor->getWorkspaceByID(ws_id);
++
++            CBox global_box = {ws_layout.box.pos() + monitor->m_position, ws_layout.box.size()};
++            if (global_box.intersection(global_mon_box).empty())
++                continue;
++
++            const bool is_active_ws = workspace == big_ws;
++            const bool is_hovered_ws = !is_active_ws && ws_id == hovered_ws;
++            const Config::CGradientValueData border_col =
++                (is_active_ws || is_hovered_ws) ? *ACTIVECOL : *INACTIVECOL;
++            CBox border_box = ws_layout.box;
++
++            CBorderPassElement::SBorderData bdata;
++            bdata.box = border_box;
++            bdata.grad1 = border_col;
++            bdata.borderSize = BORDERSIZE;
++            bdata.a = is_hovered_ws ? 0.65f : 1.0f;
++            bdata.round = 0;
++            bdata.outerRound = std::round(4.f * monitor->m_scale);
++            bdata.roundingPower = 4.f;
++            g_pHyprRenderer->m_renderPass.add(makeUnique<CBorderPassElement>(bdata));
++
++            const float ws_scale = ws_layout.box.w / monitor->m_transformedSize.x;
++            CBox render_box = {ws_layout.box.pos() / ws_scale, ws_layout.box.size()};
++            if (monitor->m_transform % 2 == 1)
++                std::swap(render_box.w, render_box.h);
++
++            rendering_thumbnail_ws = ws_id;
++            if (workspace != nullptr) {
++                std::swap(workspace->m_renderOffset, static_zero_offset);
++                std::swap(workspace->m_alpha, static_full_alpha);
++                workspace->m_visible = true;
++                monitor->m_activeWorkspace = workspace;
++            }
++
++            ((render_workspace_t)(render_workspace_hook->m_original))(
++                g_pHyprRenderer.get(), monitor, workspace, time, render_box
++            );
++
++            if (workspace != nullptr) {
++                workspace->m_visible = false;
++                std::swap(workspace->m_renderOffset, static_zero_offset);
++                std::swap(workspace->m_alpha, static_full_alpha);
++            }
++        }
++    }
+ 
      // Render dragged window at mouse cursor
      const PHTVIEW cursor_view = ht_manager->get_view_from_cursor();
-     if (cursor_view == nullptr)
+-    if (cursor_view == nullptr)
+-        return;
+-
+-    const SP<Layout::ITarget> target = g_layoutManager->dragController()->target();
+-    if (target == nullptr)
+-        return;
++    if (cursor_view != nullptr) {
++        const SP<Layout::ITarget> target = g_layoutManager->dragController()->target();
++        const PHLWINDOW dragged_window = target != nullptr ? target->window() : nullptr;
++        if (dragged_window != nullptr) {
++            const Vector2D mouse_coords = g_pInputManager->getMouseCoordsInternal();
++            const CBox window_box = dragged_window->getWindowMainSurfaceBox()
++                                        .translate(-mouse_coords)
++                                        .scale(cursor_view->layout->drag_window_scale())
++                                        .translate(mouse_coords);
++            if (!window_box.intersection(monitor->logicalBox()).empty())
++                render_window_at_box(dragged_window, monitor, time, window_box);
++        }
++    }
+ 
+-    const PHLWINDOW dragged_window = target->window();
+-    if (dragged_window == nullptr)
+-        return;
+-    const Vector2D mouse_coords = g_pInputManager->getMouseCoordsInternal();
+-    const CBox window_box = dragged_window->getWindowMainSurfaceBox()
+-                                .translate(-mouse_coords)
+-                                .scale(cursor_view->layout->drag_window_scale())
+-                                .translate(mouse_coords);
+-    if (!window_box.intersection(monitor->logicalBox()).empty())
+-        render_window_at_box(dragged_window, monitor, time, window_box);
++    // 6. Overlay layers (e.g. swaync notifications) always render on top of the overview strip
++    for (auto const& ls : monitor->m_layerSurfaceLayers[ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY]) {
++        if (auto locked = ls.lock())
++            ((render_layer_t)render_layer)(g_pHyprRenderer.get(), locked, monitor, time, false, false);
++    }
++    for (auto const& ls : monitor->m_layerSurfaceLayers[ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY]) {
++        if (auto locked = ls.lock())
++            ((render_layer_t)render_layer)(g_pHyprRenderer.get(), locked, monitor, time, true, false);
++    }
+ }
 diff -ruN a/src/layout/linear.hpp b/src/layout/linear.hpp
---- a/src/layout/linear.hpp	2026-11-23 15:03:00.380587811 +0100
-+++ b/src/layout/linear.hpp	2026-11-23 15:03:00.391042085 +0100
+--- a/src/layout/linear.hpp	2026-11-23 15:46:23.514466293 +0100
++++ b/src/layout/linear.hpp	2026-11-23 15:46:23.524848602 +0100
 @@ -9,8 +9,12 @@
      PHLANIMVAR<float> view_offset;
      PHLANIMVAR<float> blur_strength;
@@ -876,8 +931,8 @@ diff -ruN a/src/layout/linear.hpp b/src/layout/linear.hpp
      virtual void on_hide(CallbackFun on_complete);
      virtual void on_move(WORKSPACEID old_id, WORKSPACEID new_id, CallbackFun on_complete);
 diff -ruN a/src/main.cpp b/src/main.cpp
---- a/src/main.cpp	2026-11-23 15:03:00.380587811 +0100
-+++ b/src/main.cpp	2026-11-23 15:03:00.433295041 +0100
+--- a/src/main.cpp	2026-11-23 15:46:23.514466293 +0100
++++ b/src/main.cpp	2026-11-23 15:46:23.525819422 +0100
 @@ -1,6 +1,13 @@
  #include <linux/input-event-codes.h>
  
@@ -1274,8 +1329,8 @@ diff -ruN a/src/main.cpp b/src/main.cpp
      // prevent crashes
      ht_manager->hide_all_views();
 diff -ruN a/src/manager.cpp b/src/manager.cpp
---- a/src/manager.cpp	2026-11-23 15:03:00.380587811 +0100
-+++ b/src/manager.cpp	2026-11-23 15:03:00.392675861 +0100
+--- a/src/manager.cpp	2026-11-23 15:46:23.514466293 +0100
++++ b/src/manager.cpp	2026-11-23 15:46:23.526295934 +0100
 @@ -98,11 +98,11 @@
      }
  }
@@ -1291,8 +1346,8 @@ diff -ruN a/src/manager.cpp b/src/manager.cpp
  }
  
 diff -ruN a/src/manager.hpp b/src/manager.hpp
---- a/src/manager.hpp	2026-11-23 15:03:00.380587811 +0100
-+++ b/src/manager.hpp	2026-11-23 15:03:00.393647495 +0100
+--- a/src/manager.hpp	2026-11-23 15:46:23.514466293 +0100
++++ b/src/manager.hpp	2026-11-23 15:46:23.527692582 +0100
 @@ -20,7 +20,7 @@
      void reset();
  
@@ -1303,8 +1358,8 @@ diff -ruN a/src/manager.hpp b/src/manager.hpp
  
      void refresh_all_grid_caches();
 diff -ruN a/src/overview.cpp b/src/overview.cpp
---- a/src/overview.cpp	2026-11-23 15:03:00.380587811 +0100
-+++ b/src/overview.cpp	2026-11-23 15:03:00.393675883 +0100
+--- a/src/overview.cpp	2026-11-23 15:46:23.514466293 +0100
++++ b/src/overview.cpp	2026-11-23 15:46:23.528109990 +0100
 @@ -44,7 +44,7 @@
      }
  }
@@ -1366,8 +1421,8 @@ diff -ruN a/src/overview.cpp b/src/overview.cpp
      active = true;
      closing = true;
 diff -ruN a/src/overview.hpp b/src/overview.hpp
---- a/src/overview.hpp	2026-11-23 15:03:00.380675600 +0100
-+++ b/src/overview.hpp	2026-11-23 15:03:00.394733202 +0100
+--- a/src/overview.hpp	2026-11-23 15:46:23.514466293 +0100
++++ b/src/overview.hpp	2026-11-23 15:46:23.528376828 +0100
 @@ -26,13 +26,14 @@
  
      SP<HTLayoutBase> layout;
@@ -1386,8 +1441,8 @@ diff -ruN a/src/overview.hpp b/src/overview.hpp
      void move_id(WORKSPACEID ws_id, bool move_window);
      // arg is up, down, left, right;
 diff -ruN a/src/types.hpp b/src/types.hpp
---- a/src/types.hpp	2026-11-23 15:03:00.380975943 +0100
-+++ b/src/types.hpp	2026-11-23 15:03:00.394863978 +0100
+--- a/src/types.hpp	2026-11-23 15:46:23.514791890 +0100
++++ b/src/types.hpp	2026-11-23 15:46:23.528484969 +0100
 @@ -27,4 +27,22 @@
      bool standalone
  );
