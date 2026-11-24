@@ -1,7 +1,11 @@
 /*
 Typed Rofi `-modi` front end for hey-computer (`SUPER + a`, `rofi-launch ask`).
 Matches `rofi-calculator`'s minimalist single-bar layout (no initial rows).
-Prefix a prompt with `! ` or `/new ` to force a fresh conversation (`ask --new`).
+Supports composable prefixes in any order:
+- `! ` or `/new `   -> `ask --new` (fresh conversation)
+- `/deep ` or `/d ` -> `ask --profile deep`
+- `/fast `          -> `ask --profile fast`
+- `/bg ` or `/task ` -> `ask --background` (background lane)
 */
 {
   pkgs,
@@ -37,15 +41,25 @@ in {
           placeholder="Ask Computer..."
           if status_json=$(${heyComputer} status --json 2>/dev/null); then
             placeholder=$(jq -r '
-              if .running != null then
-                "Ask Computer (replaces current)..."
-              elif .follow_up_secs != null then
-                "Follow up... (! for new)"
-              elif .agent == "down" then
-                "Ask Computer (offline)..."
-              else
-                "Ask Computer..."
-              end
+              ((.background_running // 0) + (.background_queued // 0)) as $bg_total
+              | (if (.background_running // 0) > 0 and (.background_queued // 0) > 0 then
+                  " [\(.background_running) bg, \(.background_queued) queued]"
+                elif (.background_running // 0) > 0 then
+                  " [\(.background_running) bg]"
+                elif (.background_queued // 0) > 0 then
+                  " [\(.background_queued) queued]"
+                else "" end) as $bg
+              | if .running != null then
+                  "Ask Computer (replaces current)\($bg)..."
+                elif .follow_up_secs != null then
+                  "Follow up\($bg)... (! new, /deep, /bg)"
+                elif .agent == "down" then
+                  "Ask Computer (offline)..."
+                elif $bg_total > 0 then
+                  "Ask Computer\($bg)... (/deep, /bg)"
+                else
+                  "Ask Computer... (/deep, /bg)"
+                end
             ' <<<"$status_json" 2>/dev/null || printf '%s\n' "$placeholder")
           else
             placeholder="Ask Computer (offline)..."
@@ -59,20 +73,46 @@ in {
         [ -n "$trimmed" ] || exit 0
 
         args=(ask)
-        case "$trimmed" in
-        "! "*)
-          args+=(--new)
-          trimmed=''${trimmed#"! "}
-          ;;
-        "/new "*)
-          args+=(--new)
-          trimmed=''${trimmed#"/new "}
-          ;;
-        esac
+        while true; do
+          case "$trimmed" in
+          "! "*)
+            args+=(--new)
+            trimmed=''${trimmed#"! "}
+            ;;
+          "/new "*)
+            args+=(--new)
+            trimmed=''${trimmed#"/new "}
+            ;;
+          "/deep "*)
+            args+=(--profile deep)
+            trimmed=''${trimmed#"/deep "}
+            ;;
+          "/d "*)
+            args+=(--profile deep)
+            trimmed=''${trimmed#"/d "}
+            ;;
+          "/fast "*)
+            args+=(--profile fast)
+            trimmed=''${trimmed#"/fast "}
+            ;;
+          "/bg "*)
+            args+=(--background)
+            trimmed=''${trimmed#"/bg "}
+            ;;
+          "/task "*)
+            args+=(--background)
+            trimmed=''${trimmed#"/task "}
+            ;;
+          *)
+            break
+            ;;
+          esac
+          trimmed=$(printf '%s' "$trimmed" | sed 's/^[[:space:]]*//')
+        done
 
         [ -n "$trimmed" ] || exit 0
 
-        # Suppress stdout so Rofi closes cleanly after submitting
+        # Suppress stdout (including background task IDs) so Rofi closes cleanly
         printf '%s' "$trimmed" | ${heyComputer} "''${args[@]}" >/dev/null 2>&1 || true
         pkill -USR1 -f 'waybar-hey-computer watch' 2>/dev/null || true
       '';

@@ -354,10 +354,32 @@ in {
           gcalcli
         ]);
       skills.extra = [desktopScriptsSkill desktopContextSkill transitSkill] ++ optional hasOpenhue homeLightsSkill;
+      mcp.servers = optionalAttrs (config.programs.configured.mcp.enable && (config.programs.mcp.servers ? nixos)) {
+        inherit (config.programs.mcp.servers) nixos;
+      };
       settings = {
         agent = {
           model = "gemini-4-hydrogen";
           thought_level = "low";
+        };
+        profiles = {
+          fast = {
+            model = "gemini-4-hydrogen";
+            thought_level = "low";
+            max_turn_secs = 300;
+            max_tool_calls = 20;
+          };
+          deep = {
+            model = "gemini-4-neon";
+            thought_level = "high";
+            max_turn_secs = 600;
+            max_tool_calls = 40;
+          };
+        };
+        tasks = {
+          max_concurrent = 1;
+          max_queued = 32;
+          profile = "deep";
         };
         # A follow-up this soon after an answer continues the conversation
         conversation.follow_up_secs = 90;
