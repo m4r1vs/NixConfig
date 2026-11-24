@@ -592,15 +592,15 @@ in {
           categories = ["Utility"];
         };
         rofi-ask = mkIf config.programs.configured.hey-computer.enable {
-          name = "Ask Hey Computer";
+          name = "Ask Computer";
           genericName = "SUPER+A";
-          comment = "Ask Hey Computer via Rofi";
+          comment = "Ask Computer via Rofi";
           icon = "assistant";
           exec = "${scripts.rofi-launch} ask";
           type = "Application";
           categories = ["Utility"];
           settings = {
-            Keywords = "ai;assistant;ask;hey-computer;gemini;prompt;";
+            Keywords = "ai;assistant;ask;computer;hey-computer;gemini;prompt;";
           };
         };
       };

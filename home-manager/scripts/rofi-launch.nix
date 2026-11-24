@@ -64,7 +64,7 @@ in {
       ''}
         ${lib.optionalString hasHeyComputer ''
         ask)
-          ${pkgs.rofi}/bin/rofi -modi ask:${scripts.rofi-ask} -show ask -theme-str "entry {placeholder:\"Ask Hey Computer...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}"
+          ${pkgs.rofi}/bin/rofi -modi ask:${scripts.rofi-ask} -show ask -theme-str "entry {placeholder:\"Ask Computer...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}"
           ;;
       ''}
         obsidian)

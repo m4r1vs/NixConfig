@@ -735,10 +735,10 @@ in {
           ]
           ++ lib.optionals (config.programs.configured.npu-dictate.enable && config.programs.configured.hey-computer.enable) [
             # Reuses the `binddrint "v"` release bind above so no second letter spawns `stop` on release.
-            (bindd "SUPER + ALT + v" "Ask Hey Computer (hold to talk)" (exec "${npuDictate} start --to assistant"))
+            (bindd "SUPER + ALT + v" "Ask Computer (hold to talk)" (exec "${npuDictate} start --to assistant"))
           ]
           ++ lib.optionals config.programs.configured.hey-computer.enable [
-            (bindd "SUPER + a" "Ask Hey Computer" (exec "${scripts.rofi-launch} ask"))
+            (bindd "SUPER + a" "Ask Computer" (exec "${scripts.rofi-launch} ask"))
             (bindd "SUPER + CTRL + a" "Cancel Hey Computer request" (exec "${scripts.waybar-hey-computer} cancel"))
           ]
           ++ [

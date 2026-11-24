@@ -34,21 +34,21 @@ in {
 
         # Initial invocation: emit only the dynamic placeholder (zero rows, like calc)
         if [ "$retv" -eq 0 ]; then
-          placeholder="Ask Hey Computer..."
+          placeholder="Ask Computer..."
           if status_json=$(${heyComputer} status --json 2>/dev/null); then
             placeholder=$(jq -r '
               if .running != null then
-                "Ask Hey Computer (replaces current)..."
+                "Ask Computer (replaces current)..."
               elif .follow_up_secs != null then
                 "Follow up... (! for new)"
               elif .agent == "down" then
-                "Ask Hey Computer (offline)..."
+                "Ask Computer (offline)..."
               else
-                "Ask Hey Computer..."
+                "Ask Computer..."
               end
             ' <<<"$status_json" 2>/dev/null || printf '%s\n' "$placeholder")
           else
-            placeholder="Ask Hey Computer (offline)..."
+            placeholder="Ask Computer (offline)..."
           fi
           set_placeholder "$placeholder"
           exit 0
