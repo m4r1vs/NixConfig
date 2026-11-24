@@ -22,6 +22,7 @@ return {
       { "<leader>h",  group = "Harpoon" },
       { "<leader>u",  group = "UI/UX" },
       { "<leader>m",  group = "Copilot" },
+      { "<leader>d",  group = "Debug",               mode = { "n", "v" } },
     },
   },
   keys = {

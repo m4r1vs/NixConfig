@@ -59,6 +59,7 @@ in {
       typescript
       typescript-language-server
       typstyle
+      vscode-js-debug
       vscode-langservers-extracted
       websocat
       yaml-language-server
