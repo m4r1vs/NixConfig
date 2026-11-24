@@ -38,6 +38,10 @@ with lib; let
         env = {
           WORKSPACE_MCP_CREDENTIALS_DIR = googleWorkspace.credentialsDir;
           GOOGLE_CLIENT_SECRET_PATH = googleWorkspace.clientSecretFile;
+          # Prevent Python's webbrowser.open() on unauthenticated tool calls from
+          # spawning a browser that writes "Opening in existing browser session."
+          # to inherited stdout and corrupts the stdio MCP JSON-RPC pipe.
+          BROWSER = "${pkgs.coreutils}/bin/false";
         };
       };
     };
@@ -65,6 +69,111 @@ with lib; let
     esac
     exec ${pkgs.systemd}/bin/systemd-run --user --scope --quiet --collect -- \
       ${scripts.launch-browser-profile} "$profile" "$@"
+  '';
+
+  googleWorkspacePython = pkgs.python3.withPackages (_: [pkgs.google-workspace-mcp]);
+
+  # Standalone OAuth helper so authenticating an account (personal or work) does
+  # not race hey-computer's 90s ACP session lifetime or stdio MCP pipe.
+  googleWorkspaceAuth = pkgs.writeShellScriptBin "google-workspace-auth" ''
+    set -euo pipefail
+    if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
+      echo "Usage: google-workspace-auth <email> [work|personal]" >&2
+      exit 2
+    fi
+    email="$1"
+    profile_role="''${2:-}"
+    if [ -n "$profile_role" ] && [ "$profile_role" != "work" ] && [ "$profile_role" != "personal" ]; then
+      echo "Usage: google-workspace-auth <email> [work|personal]" >&2
+      exit 2
+    fi
+
+    secret_path=${escapeShellArg googleWorkspace.clientSecretFile}
+    creds_dir=${escapeShellArg googleWorkspace.credentialsDir}
+    if [ ! -f "$secret_path" ]; then
+      echo "Missing Google OAuth Desktop client JSON at: $secret_path" >&2
+      exit 1
+    fi
+    install -d -m 700 "$(dirname "$creds_dir")" "$creds_dir"
+
+    export WORKSPACE_MCP_CREDENTIALS_DIR="$creds_dir"
+    export GOOGLE_CLIENT_SECRET_PATH="$secret_path"
+    export MCP_SINGLE_USER_MODE=1
+    export OAUTHLIB_INSECURE_TRANSPORT=1
+    export BROWSER=${escapeShellArg "${pkgs.coreutils}/bin/false"}
+    export OPEN_BROWSER_CMD=${escapeShellArg (toString openBrowser)}
+    export OPEN_BROWSER_ROLE="$profile_role"
+
+    exec ${googleWorkspacePython}/bin/python3 - "$email" ${concatMapStringsSep " " escapeShellArg googleWorkspace.tools} <<'PY'
+    import asyncio
+    import os
+    import re
+    import subprocess
+    import sys
+    import time
+    from urllib.parse import quote
+
+    from auth.google_auth import start_auth_flow
+    from auth.oauth_callback_server import (
+        cleanup_oauth_callback_server,
+        ensure_stdio_oauth_callback_available,
+    )
+    from auth.oauth_config import get_oauth_redirect_uri, set_transport_mode
+    from auth.scopes import set_enabled_tools
+
+    email = sys.argv[1]
+    tools = sys.argv[2:]
+    creds_dir = os.environ["WORKSPACE_MCP_CREDENTIALS_DIR"]
+    role = os.environ.get("OPEN_BROWSER_ROLE", "")
+    open_browser_cmd = os.environ.get("OPEN_BROWSER_CMD", "")
+
+
+    async def main() -> int:
+        set_transport_mode("stdio")
+        set_enabled_tools(tools)
+
+        target = os.path.join(creds_dir, f"{quote(email, safe='@._-')}.json")
+        before = os.path.getmtime(target) if os.path.exists(target) else 0.0
+
+        ok, err = ensure_stdio_oauth_callback_available()
+        if not ok:
+            print(f"ERROR: Could not start OAuth callback server on localhost:8000: {err}", file=sys.stderr)
+            return 1
+
+        msg = await start_auth_flow(
+            user_google_email=email,
+            service_name="Google Workspace (" + ", ".join(tools) + ")",
+            redirect_uri=get_oauth_redirect_uri(),
+        )
+        match = re.search(r"https://accounts\.google\.com/\S+", msg)
+        url = match.group(0).rstrip(")") if match else None
+
+        if url and role and open_browser_cmd:
+            subprocess.run([open_browser_cmd, role, url], check=False)
+            print(f"Opened {role} browser profile for {email}.", flush=True)
+        if url:
+            print(f"\nAuthorization URL for {email}:\n\n  {url}\n", flush=True)
+        else:
+            print(msg, flush=True)
+
+        print("Waiting up to 10 minutes for http://localhost:8000/oauth2callback ...", flush=True)
+        deadline = time.time() + 600
+        try:
+            while time.time() < deadline:
+                if os.path.exists(target) and os.path.getmtime(target) > before:
+                    os.chmod(target, 0o600)
+                    print(f"Saved credentials (0600) to {target}", flush=True)
+                    await asyncio.sleep(0.5)
+                    return 0
+                await asyncio.sleep(0.5)
+            print("Timed out waiting for OAuth callback.", file=sys.stderr)
+            return 1
+        finally:
+            cleanup_oauth_callback_server()
+
+
+    raise SystemExit(asyncio.run(main()))
+    PY
   '';
 
   # Clean command names on the agent's PATH for the user's own scripts, so
@@ -454,6 +563,19 @@ in {
           (`GOOGLE_CLIENT_SECRET_PATH`), kept outside `/nix/store`.
         '';
       };
+
+      accounts = mkOption {
+        type = types.listOf types.str;
+        default = unique (
+          [systemArgs.git.email]
+          ++ optional systemArgs.useWorkProfileByDefault "marius.niveri@gmail.com"
+        );
+        description = ''
+          Google account emails expected to be used with `google-workspace`
+          (`user_google_email` parameter). Each account has its own `<email>.json`
+          token in `credentialsDir`.
+        '';
+      };
     };
 
     proactive = {
@@ -491,6 +613,8 @@ in {
   };
 
   config = mkIf cfg.enable (optionalAttrs (!isDarwin) {
+    home.packages = optional googleWorkspace.enable googleWorkspaceAuth;
+
     home.activation = optionalAttrs googleWorkspace.enable {
       googleWorkspaceMcpCredDir = hm.dag.entryAfter ["writeBoundary"] ''
         run install -d -m 700 ${escapeShellArg (dirOf googleWorkspace.credentialsDir)}
@@ -622,7 +746,7 @@ in {
           - Prefer the commands in the `desktop-scripts` skill (`voice-command`, `open-browser`, `connect-galaxy-buds`, `GalaxyBudsClient`, `gcalcli`, `nightlight`, `powermode`, `caffeinate`, `toggle-zen`, `darkman`, etc.) over improvising raw `hyprctl` calls.
           - Use the `desktop-context` skill (`desktop-context selection|clipboard|capture|copy|paste`) whenever the user refers to their selection, clipboard, screen, or asks to copy or paste a result; inspect captured PNG paths directly with `read_file`.
           - For live web page inspection or browser automation, use `agy`'s built-in `/browser` subagent (`nodejs`/`npx` are on PATH; attaches to local Chromium/Chrome v144+ when `chrome://inspect/#remote-debugging` is enabled).
-          - Prefer the `google-workspace` MCP tools for Google Calendar (reading, creating, moving, deleting events) and Gmail (searching, reading threads, drafting, sending); use `gcalcli` only as a read-only fallback if `google-workspace` OAuth is not configured yet.
+          - Prefer the `google-workspace` MCP tools for Google Calendar (reading, creating, moving, deleting events) and Gmail (searching, reading threads, drafting, sending)${optionalString (googleWorkspace.enable && googleWorkspace.accounts != []) ''— always pass `user_google_email` (${concatStringsSep ", " (map (a: "`${a}`") googleWorkspace.accounts)}; only accounts with `<email>.json` in `${googleWorkspace.credentialsDir}` are authenticated, so check which credentials exist or pick the matching work/personal account rather than triggering an interactive OAuth prompt mid-turn)''}; use `gcalcli` only as a read-only fallback if `google-workspace` OAuth is not configured yet.
 
           ## Obsidian daily notes & reminders
 
