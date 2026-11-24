@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  pkgs,
   inputs,
   ...
 }:
@@ -12,12 +13,30 @@ in {
   };
   config = mkIf cfg.enable {
     # agy rewrites settings.json as a regular file on UI changes (e.g. model switch),
-    # which otherwise collides with an existing settings.json..hm-backup on activation
+    # which otherwise collides with an existing settings.json..hm-backup on activation.
+    # TODO(home-manager 26.11): replace with `programs.antigravity-cli.mutableSettings = true;` (HM 0e11b7bc).
     home.file.".gemini/antigravity-cli/settings.json".force = true;
 
     programs.antigravity-cli = {
       enable = true;
-      enableMcpIntegration = true;
+      # TODO(home-manager 26.11): re-enable `enableMcpIntegration = true;` and drop `mcpServers`
+      # below once on release-26.11 (fixed upstream in HM a813a041 / 5bcff431). On release-26.05,
+      # `enableMcpIntegration` renames `url` -> `serverUrl` inside `lib.hm.mcp.transformMcpServer`,
+      # which immediately strips `serverUrl` and breaks remote HTTP MCP servers (like Linear).
+      enableMcpIntegration = false;
+      mcpServers = mkIf config.programs.mcp.enable (
+        mapAttrs (
+          name: server:
+            lib.hm.mcp.transformMcpServer {
+              inherit server;
+              extraTransforms = [
+                lib.hm.mcp.addType
+                (lib.hm.mcp.wrapEnvFilesCommand {inherit pkgs name;})
+              ];
+            }
+        )
+        config.programs.mcp.servers
+      );
       skills = {
         # Read from the source tree: referencing the built package forces a
         # bun2nix IFD, which breaks evaluating Linux hosts from darwin.
