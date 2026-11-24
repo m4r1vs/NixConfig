@@ -291,6 +291,10 @@ in {
         };
         # A follow-up this soon after an answer continues the conversation
         conversation.follow_up_secs = 90;
+        context = {
+          time = true;
+          desktop = true;
+        };
         permissions.deny = ["sudo" "su" "doas" "pkexec" "run0" "nixos-rebuild" "rebuild"];
         instructions.extra = ''
           ## Household
