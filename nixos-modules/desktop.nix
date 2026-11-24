@@ -157,73 +157,129 @@ in {
         pulse.enable = true;
         alsa.enable = true;
         alsa.support32Bit = true;
+        # Let the graph follow the stream's rate family (CD/streaming at 44.1k, video at 48k, hi-res at 2x)
+        # instead of resampling everything to 48k. Switches only while idle; devices that lack a rate resample.
+        extraConfig.pipewire."10-clock-rates"."context.properties" = {
+          "default.clock.allowed-rates" = [44100 48000 88200 96000];
+        };
         wireplumber = {
           enable = true;
-          # Local bluetooth roles: a2dp_source = send audio to speakers,
-          # hfp_ag = use headset microphones, bap_sink/bap_source = LE Audio
-          # unicast playback + mic (LC3). Deliberately omits a2dp_sink
-          # (receive audio from devices) — speakers that also advertise an
-          # Audio Source UUID (e.g. Anker Soundcore Boost) otherwise grab
-          # the AVDTP transport in the wrong direction and A2DP playback
-          # fails with "Device or resource busy".
-          # Leave bluez5.codecs unset so PipeWire keeps all compiled codecs
-          # enabled (including HFP mSBC and LC3-SWB; a partial whitelist
-          # filters them out and leaves HFP stuck on 8 kHz CVSD).
-          extraConfig."51-bluez-roles" = {
-            "monitor.bluez.properties" = {
-              "bluez5.roles" = ["a2dp_source" "hfp_ag" "bap_sink" "bap_source"];
-              "bluez5.enable-sbc-xq" = true;
-              "bluez5.enable-msbc" = true;
-              "bluez5.enable-hw-volume" = true;
-              "bluez5.a2dp.ldac.quality" = "auto";
+          extraConfig = {
+            # Local bluetooth roles: a2dp_source = send audio to speakers,
+            # hfp_ag = use headset microphones, bap_sink/bap_source = LE Audio
+            # unicast playback + mic (LC3). Deliberately omits a2dp_sink
+            # (receive audio from devices) — speakers that also advertise an
+            # Audio Source UUID (e.g. Anker Soundcore Boost) otherwise grab
+            # the AVDTP transport in the wrong direction and A2DP playback
+            # fails with "Device or resource busy".
+            # Leave bluez5.codecs unset so PipeWire keeps all compiled codecs
+            # enabled (including HFP mSBC and LC3-SWB; a partial whitelist
+            # filters them out and leaves HFP stuck on 8 kHz CVSD).
+            "51-bluez-roles" = {
+              "monitor.bluez.properties" = {
+                "bluez5.roles" = ["a2dp_source" "hfp_ag" "bap_sink" "bap_source"];
+                "bluez5.enable-sbc-xq" = true;
+                "bluez5.enable-msbc" = true;
+                "bluez5.enable-hw-volume" = true;
+                "bluez5.a2dp.ldac.quality" = "auto";
+              };
             };
-          };
 
-          /*
-          Thomann HAD-1 ("Living Room"): Tenor TE7022 USB Audio Class 1 bridge, full-speed (USB 1.1) only.
-          Playback: 16 bit (388 B/ms) or 24 bit (582 B/ms) at 32/44.1/48/96 kHz, no hardware volume.
-          Input: line-in or S/PDIF-in with the same formats.
+            /*
+            Thomann HAD-1 ("Living Room"): Tenor TE7022 USB Audio Class 1 bridge, full-speed (USB 1.1) only.
+            Playback: 16 bit (388 B/ms) or 24 bit (582 B/ms) at 32/44.1/48/96 kHz, no hardware volume.
+            Input: line-in or S/PDIF-in with the same formats.
 
-          The xHCI reserves bandwidth per wMaxPacketSize. 24/96 playback runs fine on its own, but with the input
-          open at 24 bit as well (pavucontrol meters every source) the pair does not fit: playback fails with
-          "Not enough bandwidth" and plays silence. Default to output-only; if the input gets enabled, keep it at
-          16 bit so it takes as little as possible.
-          */
-          extraConfig."52-living-room-dac" = let
-            device = "alsa_card.usb-THOMANN_HAD-1-01";
-          in {
-            "device.profile.priority.rules" = [
-              {
-                matches = [{"device.name" = device;}];
-                actions.update-props.priorities = ["output:analog-stereo"];
-              }
-            ];
-            "monitor.alsa.rules" = [
-              {
-                matches = [{"device.name" = device;}];
-                actions.update-props = {
-                  "device.description" = "Living Room";
-                  "device.nick" = "Living Room";
-                };
-              }
-              {
-                matches = [{"node.name" = "~alsa_output.usb-THOMANN_HAD-1.*";}];
-                actions.update-props = {
-                  "node.description" = "Living Room";
-                  "node.nick" = "Living Room";
-                  "audio.format" = "S24LE"; # packed 24 bit (S24_3LE), the device's only 24-bit format
-                  "audio.rate" = 96000;
-                };
-              }
-              {
-                matches = [{"node.name" = "~alsa_input.usb-THOMANN_HAD-1.*";}];
-                actions.update-props = {
-                  "node.description" = "Living Room Input";
-                  "node.nick" = "Living Room Input";
-                  "audio.format" = "S16LE";
-                };
-              }
-            ];
+            The xHCI reserves bandwidth per wMaxPacketSize. 24/96 playback runs fine on its own, but with the input
+            open at 24 bit as well (pavucontrol meters every source) the pair does not fit: playback fails with
+            "Not enough bandwidth" and plays silence. Default to output-only; if the input gets enabled, keep it at
+            16 bit so it takes as little as possible.
+            */
+            "52-living-room-dac" = let
+              device = "alsa_card.usb-THOMANN_HAD-1-01";
+            in {
+              "device.profile.priority.rules" = [
+                {
+                  matches = [{"device.name" = device;}];
+                  actions.update-props.priorities = ["output:analog-stereo"];
+                }
+              ];
+              "monitor.alsa.rules" = [
+                {
+                  matches = [{"device.name" = device;}];
+                  actions.update-props = {
+                    "device.description" = "Living Room";
+                    "device.nick" = "Living Room";
+                  };
+                }
+                {
+                  matches = [{"node.name" = "~alsa_output.usb-THOMANN_HAD-1.*";}];
+                  actions.update-props = {
+                    "node.description" = "Living Room";
+                    "node.nick" = "Living Room";
+                    "audio.format" = "S24LE"; # packed 24 bit (S24_3LE), the device's only 24-bit format
+                    "audio.rate" = 96000;
+                  };
+                }
+                {
+                  matches = [{"node.name" = "~alsa_input.usb-THOMANN_HAD-1.*";}];
+                  actions.update-props = {
+                    "node.description" = "Living Room Input";
+                    "node.nick" = "Living Room Input";
+                    "audio.format" = "S16LE";
+                  };
+                }
+              ];
+            };
+
+            /*
+            Cambridge Audio DacMagic 200M ("Desktop Stereo"): USB Audio Class 2, high-speed, asynchronous with a
+            feedback endpoint. Playback only: 24 bit in 32-bit slots (S32_LE, what PipeWire picks by default) or
+            16 bit at 44.1 to 768 kHz, plus native DSD on a separate altset. No Feature Unit, so volume is software.
+            The USB ID database calls it "DacMagic Plus" (shared product ID), hence the rename.
+            */
+            "53-desktop-stereo-dac" = {
+              "monitor.alsa.rules" = [
+                {
+                  matches = [{"device.name" = "alsa_card.usb-CA_CA_DacMagic_200M_2.0-00";}];
+                  actions.update-props = {
+                    "device.description" = "Desktop Stereo";
+                    "device.nick" = "Desktop Stereo";
+                  };
+                }
+                {
+                  matches = [{"node.name" = "~alsa_output.usb-CA_CA_DacMagic_200M_2.0-00.*";}];
+                  actions.update-props = {
+                    "node.description" = "Desktop Stereo";
+                    "node.nick" = "Desktop Stereo";
+                  };
+                }
+              ];
+            };
+
+            /*
+            Anua Mic 900 ("Desktop Microphone"): C-Media USB Audio Class 1 bridge, full-speed. Capture only:
+            16 bit mono at 8 to 48 kHz; 48 kHz is both its maximum and what WebRTC (Meet) runs at natively.
+            Hardware gain -8 to +22.5 dB, mapped onto the PipeWire volume (100% = +22.5 dB).
+            */
+            "54-desktop-microphone" = {
+              "monitor.alsa.rules" = [
+                {
+                  matches = [{"device.name" = "alsa_card.usb-Anua_Mic_900_Anua_Mic_900-00";}];
+                  actions.update-props = {
+                    "device.description" = "Desktop Microphone";
+                    "device.nick" = "Desktop Microphone";
+                  };
+                }
+                {
+                  matches = [{"node.name" = "~alsa_input.usb-Anua_Mic_900_Anua_Mic_900-00.*";}];
+                  actions.update-props = {
+                    "node.description" = "Desktop Microphone";
+                    "node.nick" = "Desktop Microphone";
+                  };
+                }
+              ];
+            };
           };
         };
       };
