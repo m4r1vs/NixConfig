@@ -57,6 +57,7 @@ with lib; let
         spotify-like
         random-album-of-the-day
         switch-kb-layout
+        transit
         ;
     }
     // optionalAttrs host.hasPowerProfiles {
@@ -187,6 +188,35 @@ with lib; let
     - **Copying & pasting back:** When asked to copy or paste (e.g. "summarize my clipboard and paste", "translate my selection and copy"), pipe ONLY the clean final text (no preamble or code fences unless requested) into `desktop-context copy` or `desktop-context paste`, then confirm in one short sentence.
   '';
 
+  transitSkill = pkgs.writeTextDir "transit/SKILL.md" ''
+    ---
+    name: transit
+    description: Queries live HVV (Hamburg U-Bahn, S-Bahn, Bus, Ferry, SEV) and Deutsche Bahn (ICE, IC, RE, RB) departures, delays, platforms, and public transit routes via the `transit` CLI (Transitous / MOTIS 2). Use whenever the user asks about trains, U-Bahn, S-Bahn, buses, ferries, delays, or transit routes.
+    ---
+
+    # Public Transit (`transit`)
+
+    `transit` is on your `PATH` and queries live real-time schedules across HVV and Deutsche Bahn (defaulting ambiguous stop names to Hamburg, 24-hour `Europe/Berlin` local time).
+
+    ## Commands
+
+    ```bash
+    transit departures "<stop>"                              # next 8 live departures (includes nearby SEV/bus stops)
+    transit departures "<stop>" --limit 5 --mode subway      # mode: rail|subway|suburban|bus|ferry|tram
+    transit departures "<stop>" --at 18:30                   # departures starting at 18:30 local time
+    transit route "<from>" "<to>"                            # top 3 real-time itineraries (stops or addresses)
+    transit route "<from>" "<to>" --at 09:00 --arrive-by     # arrive by 09:00 local time
+    transit stops "<query>"                                  # disambiguate stop names and see exact stopIds
+    ```
+
+    ## Rules
+
+    - **Use user memory for implicit home/work origins:** When the user asks "when's the next train/U-Bahn?" or "how do I get to X?" without naming a starting point, use their home station/address from `## User memory` when available.
+    - **Highlight real-time disruptions:** Always mention delays (`+Nm`), cancellations (`CANCELLED`), platform numbers (`Pl.`), and active rail-replacement buses (`SEV`) when present in the output.
+    - **Fail loudly:** If `transit` exits non-zero or finds no departures, report that plainly — never guess timetables.
+    - **Keep voice answers crisp:** Summarize the next 2–3 relevant options with departure time, line, delay, and platform (or arrival time and transfers for routes).
+  '';
+
   homeLightsSkill = pkgs.writeTextDir "home-lights/SKILL.md" ''
     ---
     name: home-lights
@@ -295,6 +325,10 @@ in {
       vault =
         mapNullable (name: "${config.home.homeDirectory}/Documents/${name}")
         (systemArgs.obsidianVault or null);
+      memory.file =
+        if (osConfig.age.secrets or {}) ? hey-computer-memory
+        then osConfig.age.secrets.hey-computer-memory.path
+        else "${config.xdg.configHome}/hey-computer/memory.md";
       # The same Obsidian the desktop starts (hyprland.nix startupApps); the
       # agent drives it through its obsidian-cli
       obsidian.package = pkgs.obsidian;
@@ -319,7 +353,7 @@ in {
           wl-clipboard
           gcalcli
         ]);
-      skills.extra = [desktopScriptsSkill desktopContextSkill] ++ optional hasOpenhue homeLightsSkill;
+      skills.extra = [desktopScriptsSkill desktopContextSkill transitSkill] ++ optional hasOpenhue homeLightsSkill;
       settings = {
         agent = {
           model = "gemini-4-hydrogen";
@@ -366,7 +400,7 @@ in {
 
           - **Hosts:** `worknix`, `nixpad`, `desknix`, `nixner`, `kubenix`, `nixbook`, `yannix`
           - **Projects:** `hey-computer`, `npu-dictate`, `NixConfig`, `hyprland-which-key`, `hyprland-macos-zoom`, `stummumschalterung`, `slidecontrol`, `golazo`, `atai`, `TerraTracker`, `JosisArt`
-          - **Tools & stack:** NixOS, `nix-darwin`, nixpkgs, Home Manager, Hyprland, `hyprctl`, Waybar, Rofi, Ghostty, Neovim, Yazi, Obsidian, Linear, GitLab, NetBird, `gcalcli`, Galaxy Buds, FastFlowLM, Whisper, `agy` (Antigravity CLI), `swaync`, `cliphist`, `hyprsunset`, `hyprlock`, 1Password
+          - **Tools & stack:** NixOS, `nix-darwin`, nixpkgs, Home Manager, Hyprland, `hyprctl`, Waybar, Rofi, Ghostty, Neovim, Yazi, Obsidian, Linear, GitLab, NetBird, `gcalcli`, Galaxy Buds, HVV, U-Bahn, S-Bahn, SEV, Deutschlandticket, FastFlowLM, Whisper, `agy` (Antigravity CLI), `swaync`, `cliphist`, `hyprsunset`, `hyprlock`, 1Password
 
           ## Off-limits
 

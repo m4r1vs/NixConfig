@@ -121,6 +121,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
     };
+    agenix = {
+      # Age-encrypted secrets decrypted to /run/agenix at activation time
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     dark-yazi = {
       # Yazi flavor (dark)
       url = "github:m4r1vs/dark.yazi";
@@ -187,6 +192,7 @@
     # since nixos-modules/desktop.nix defines its option.
     nixosModules =
       [
+        inputs.agenix.nixosModules.default
         inputs.keypress-visualizer.nixosModules.default
       ]
       ++ commonModules;

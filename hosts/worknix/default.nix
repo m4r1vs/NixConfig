@@ -191,6 +191,13 @@
     programs.configured.hyprlock.scaling = 1.25;
   };
 
+  age.secrets.hey-computer-memory = {
+    file = ../../secrets/hey-computer-memory.age;
+    owner = systemArgs.username;
+    group = "users";
+    mode = "0400";
+  };
+
   system = {
     nixos.label = systemArgs.hostname + ".meetovo.de";
   };

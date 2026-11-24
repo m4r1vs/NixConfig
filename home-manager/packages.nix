@@ -1,5 +1,6 @@
 {
   pkgs,
+  inputs,
   scripts,
   host,
   ...
@@ -18,6 +19,9 @@ in {
       ]
       ++ lib.optionals host.isDev [
         # Install on dev machines (desktops, macOS, WSL):
+        age # file encryption (used with agenix)
+        inputs.agenix.packages.${stdenv.hostPlatform.system}.default
+        (writeShellScriptBin "transit" ''exec ${scripts.transit} "$@"'')
         astroterm # show stars in terminal
         gh # GitHub CLI
         golazo # show soccer scores in terminal
