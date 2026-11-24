@@ -204,6 +204,36 @@ in {
       hyprsunset.enable = mkDefault true;
       swaync.enable = true;
     };
+    systemd.user.services = {
+      volume-change-notify = {
+        Unit = {
+          Description = "Notify on default audio sink volume changes";
+          PartOf = ["graphical-session.target"];
+          After = ["graphical-session.target" "pipewire-pulse.service" "swaync.service"];
+        };
+        Service = {
+          ExecStart = "${scripts.volume-change-notify}";
+          Restart = "on-failure";
+          RestartSec = 2;
+        };
+        Install.WantedBy = ["graphical-session.target"];
+      };
+      brightness-change-notify = {
+        Unit = {
+          Description = "Notify on screen backlight brightness changes";
+          PartOf = ["graphical-session.target"];
+          After = ["graphical-session.target" "swaync.service"];
+          # Skipped on desktops without a kernel backlight interface
+          ConditionPathExistsGlob = "/sys/class/backlight/*";
+        };
+        Service = {
+          ExecStart = "${scripts.brightness-change-notify}";
+          Restart = "on-failure";
+          RestartSec = 2;
+        };
+        Install.WantedBy = ["graphical-session.target"];
+      };
+    };
     /*
     Swallowing (misc.enable_swallow below) only finds a terminal that is a
     parent process of the new window, which it is not inside tmux. These take
@@ -591,8 +621,6 @@ in {
                   ${optionalString has1Password "hl.exec_cmd(${toLua "${pkgs._1password-gui}/bin/1password --silent"})"}
                   hl.exec_cmd(${toLua startupCommand})
                   hl.exec_cmd(${toLua "${scripts.firmware-update-check}"})
-                  hl.exec_cmd(${toLua "${scripts.volume-change-notify}"})
-                  hl.exec_cmd(${toLua "${scripts.brightness-change-notify}"})
                   ${optionalString host.hasPowerProfiles "hl.exec_cmd(${toLua "${scripts.powermode} apply"})"}
                   hl.exec_cmd("hyprctl setcursor Bibata-Modern-Ice 20")
                 end'')
