@@ -341,11 +341,11 @@
         "obsidian-skills": "obsidian-skills"
       },
       "locked": {
-        "lastModified": 1795451770,
-        "narHash": "sha256-F+v+xXsI0INXoXWk2dq9eI0Sx2tXJsenbt/XcIHhD38=",
+        "lastModified": 1795513418,
+        "narHash": "sha256-4Idvnwac2TaHb0Bz1YYF21JTGi43XMPpuzvspo8rw0s=",
         "owner": "m4r1vs",
         "repo": "hey-computer",
-        "rev": "c80df700f5b55854cc0ce37a5cac6f1e53586061",
+        "rev": "db25d3f19eae84cf02ed25b889b77ffcb402dc32",
         "type": "github"
       },
       "original": {

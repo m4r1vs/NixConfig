@@ -19,6 +19,7 @@ with lib; let
   hasNetbird = osConfig.services.netbird.enable or false;
   hasNightlight = config.services.configured.hyprsunset.enable;
   hasDarkman = config.services.configured.darkman.enable;
+  hasOpenhue = config.programs.configured.openhue.enable;
 
   # Clean command names on the agent's PATH for the user's own scripts, so
   # SKILL.md stays concise and the agent invokes tested scripts instead of
@@ -50,6 +51,9 @@ with lib; let
     }
     // optionalAttrs hasDarkman {
       darkman = "${pkgs.darkman}/bin/darkman";
+    }
+    // optionalAttrs hasOpenhue {
+      inherit (scripts) hue-lights;
     };
 
   desktopScriptsPkg = pkgs.runCommand "hey-computer-desktop-scripts" {} ''
@@ -147,6 +151,83 @@ with lib; let
     - **Viewing images:** Whenever `capture` or `clipboard` prints `IMAGE_PATH: /path/to/file`, immediately call `read_file` on that path to inspect the image directly (do not run OCR unless asked for raw text extraction), then answer the user's question.
     - **Copying & pasting back:** When asked to copy or paste (e.g. "summarize my clipboard and paste", "translate my selection and copy"), pipe ONLY the clean final text (no preamble or code fences unless requested) into `desktop-context copy` or `desktop-context paste`, then confirm in one short sentence.
   '';
+
+  homeLightsSkill = pkgs.writeTextDir "home-lights/SKILL.md" ''
+    ---
+    name: home-lights
+    description: Maps the user's flat (Marius and roommate Tjark) to Philips Hue rooms, lights, scenes, all-day smart scenes, and English/German aliases, plus the `hue-lights` helper for all-day scenes, all-off, and relative dimming. Always load alongside `openhue` when controlling home lights.
+    ---
+
+    # Home Philips Hue Map
+
+    ## Household & Scope
+
+    - **User:** Marius — *"my room"*, *"my lights"*, *"my desk"* → **`Marius' Room`** only.
+    - **Roommate:** Tjark (*"my mate"*, *"roommate"*, *"Mitbewohner"*) → **`Tjark's Room`**.
+    - **"All lights" / "Alle Lichter":** the entire flat (all 6 rooms).
+
+    ## Rooms, Lights & Scenes
+
+    - **`Marius' Room`** *(my room, bedroom, mein Zimmer)*
+      - Lights:
+        - `Desk` *(desk light / lamp, Schreibtisch, Schreibtischlampe)* — dimmable white only
+        - `Corner` *(corner lamp, floor lamp, Stehlampe, Ecklampe)* — color + CT
+        - `Ceiling` *(ceiling light, main light, Deckenlampe)* — color + CT
+      - Smart scene: `All-day scene`
+      - Scenes: `Relax`, `Energize`, `Nightlight`, `Dreamy dusk`, `Savanna sunset`, `Forest adventure`, `Crocus`, `Ruby romance`
+    - **`Tjark's Room`** *(my mate's room, roommate's room, Tjarks Zimmer)*
+      - Lights: `Ceiling` — dimmable white only
+      - Smart scene: `All-day scene`
+      - Scenes: `Bright`, `Dimmed`, `Nightlight`
+    - **`Living Room`** *(Wohnzimmer)*
+      - Lights: `Ceiling` — dimmable white only
+      - Smart scenes / scenes: none
+    - **`Kitchen`** *(Küche)*
+      - Lights:
+        - `Worktop Light` *(counter, worktop, kitchen strip, Arbeitsplatte)* — color + CT
+        - `Ambient Ceiling` *(kitchen ceiling, Deckenlampe)* — dimmable white only
+      - Smart scenes: `Time Based Cooking` *(cooking / Kochen)*, `Time Based Ambient` *(ambient / chill)*
+      - Scenes: `Daytime Cooking`, `Evening Cooking`, `Nighttime Cooking`, `Daytime Chill`, `Evening Chill`, `Nighttime Chill`, `Full Blast`
+    - **`Bathroom`** *(Bad, Badezimmer)*
+      - Physically **one fixture** made of three bulbs (`Bathroom Spot Left`, `Bathroom Spot Center`, `Bathroom Spot Right` — color + CT). **Always control `Bathroom` as a room**, never individual spots unless explicitly asked.
+      - Smart scene: `All-day scene`
+      - Scenes: `Bathroom Daytime`, `Bathroom Dimmed`, `Bathroom Nighttime`, `Bathroom Blast`, `Blossom`, `Sunset`
+    - **`Hallway`** *(Flur, Gang, Eingang)*
+      - Lights: `Ceiling` — dimmable white only
+      - Smart scene: `All-day scene`
+      - Scenes: `Bright`, `Dimmed`, `Nightlight`
+
+    ## Fast 1-Command Patterns
+
+    ```bash
+    # Turning a room ON -> prefer its All-day smart scene by default (falls back to --on for Living Room)
+    hue-lights smart-scene "Marius' Room"
+    hue-lights smart-scene "Kitchen" "Time Based Cooking"
+    hue-lights smart-scene "Kitchen" "Time Based Ambient"
+
+    # Turning a room OFF
+    openhue set room "Tjark's Room" --off
+    hue-lights all-off                                       # turn off every lit room in the flat
+
+    # Individual lights (always pass --room)
+    openhue set light --room "Marius' Room" "Desk" --on
+    openhue set light --room "Marius' Room" "Desk" --off
+    openhue set light --room "Marius' Room" "Corner" --on --brightness 50 --color warm_white
+
+    # Relative dimming / brightening (default +/-20 if no amount is stated)
+    hue-lights step room "Marius' Room" -20
+    hue-lights step light "Marius' Room" "Desk" +20
+
+    # Regular scenes (always pass --room)
+    openhue set scene --room "Marius' Room" "Relax"
+    ```
+
+    ## Rules
+
+    - When asked simply to turn a **room** on (with no specific brightness, color, or scene), call `hue-lights smart-scene "<Room>"` so rooms with an `All-day scene` turn on with their time-of-day schedule.
+    - When a specific brightness, color, or color temperature is requested for a room, use `openhue set room "<Room>" --on ...` directly.
+    - If a requested room, light, or scene is not listed above (e.g. newly added or renamed on the bridge), query live state with `openhue get rooms`, `openhue get lights`, `openhue get scenes`, or `hue-lights smart-scenes`.
+  '';
 in {
   /*
   The upstream flake only builds for x86_64-linux and aarch64-linux (as with
@@ -182,6 +263,10 @@ in {
       # The same Obsidian the desktop starts (hyprland.nix startupApps); the
       # agent drives it through its obsidian-cli
       obsidian.package = pkgs.obsidian;
+      openhue = mkIf hasOpenhue {
+        enable = true;
+        package = pkgs.openhue-cli;
+      };
       /*
       On top of the module's basics (a shell, coreutils and the text tools,
       curl, jq, notify-send, playerctl, wpctl): hyprctl from the Hyprland the
@@ -198,7 +283,7 @@ in {
           brightnessctl
           wl-clipboard
         ]);
-      skills.extra = [desktopScriptsSkill desktopContextSkill];
+      skills.extra = [desktopScriptsSkill desktopContextSkill] ++ optional hasOpenhue homeLightsSkill;
       settings = {
         agent = {
           model = "gemini-4-hydrogen";
@@ -208,6 +293,11 @@ in {
         conversation.follow_up_secs = 90;
         permissions.deny = ["sudo" "su" "doas" "pkexec" "run0" "nixos-rebuild" "rebuild"];
         instructions.extra = ''
+          ## Household
+
+          - The user is **Marius** ("my room", "my lights", "my desk" refer to `Marius' Room`).
+          - His roommate ("my mate", "roommate", "Mitbewohner") is **Tjark** (`Tjark's Room`).
+
           ## User conventions & locale
 
           - Use metric units (°C, km, m, kg, L) and a 24-hour clock.
@@ -225,7 +315,7 @@ in {
 
           Requests often come from local Whisper STT in German or English. Expect mishearings of these proper nouns and technical terms:
 
-          - **People & work:** Marius Niveri (`m4r1vs`), Meetovo, Linear, GitLab (`gitlab.tools.meetovo.dev`), NetBird
+          - **People & work:** Marius Niveri (`m4r1vs`), Tjark (roommate), Meetovo, Linear, GitLab (`gitlab.tools.meetovo.dev`), NetBird
           - **Hosts:** `worknix`, `nixpad`, `desknix`, `nixner`, `kubenix`, `nixbook`, `yannix`
           - **Projects:** `hey-computer`, `npu-dictate`, `NixConfig`, `hyprland-which-key`, `hyprland-macos-zoom`, `stummumschalterung`, `slidecontrol`, `golazo`, `atai`, `TerraTracker`, `JosisArt`
           - **Tools & stack:** NixOS, nixpkgs, Home Manager, Hyprland, `hyprctl`, Waybar, Rofi, Ghostty, Neovim, Yazi, Obsidian, FastFlowLM, Whisper, `agy` (Antigravity CLI), `swaync`, `cliphist`, `hyprsunset`, `hyprlock`, 1Password
