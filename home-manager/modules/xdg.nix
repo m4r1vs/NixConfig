@@ -553,12 +553,24 @@ in {
           name = "Night Light";
           genericName = "Adjust Color Temperature (Hyprsunset)";
           comment = "Switch solar schedule or pick a custom screen color temperature";
-          icon = "cs-nightlight";
+          icon = "redshift";
           exec = "${scripts.rofi-launch} nightlight";
           type = "Application";
           categories = ["Settings"];
           settings = {
             Keywords = "hyprsunset;night;light;sunset;temperature;warm;kelvin;blue;truetone";
+          };
+        };
+        manage-lights = mkIf config.programs.configured.openhue.enable {
+          name = "Manage Lights";
+          genericName = "Philips Hue Rooms & Scenes";
+          comment = "Control Philips Hue rooms, brightness, all-day schedules, and scenes";
+          icon = "gammastep";
+          exec = "${scripts.rofi-launch} lights";
+          type = "Application";
+          categories = ["Settings" "Utility"];
+          settings = {
+            Keywords = "hue;philips;lights;lamp;room;scene;brightness;smart;home;openhue;";
           };
         };
         rofi-wifi = {

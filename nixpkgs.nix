@@ -197,6 +197,7 @@ in {
           inherit (pkgsUnstable) nerd-fonts;
           inherit (pkgsUnstable) mcp-nixos;
           inherit (pkgsUnstable) opencode;
+          inherit (pkgsUnstable) openhue-cli;
           inherit (pkgsUnstable) swayimg;
           inherit (pkgsUnstable) tlrc;
 

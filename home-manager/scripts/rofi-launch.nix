@@ -55,6 +55,9 @@ in {
         nightlight)
           ${scripts.rofi-nightlight}
           ;;
+        lights)
+          ${pkgs.rofi}/bin/rofi -modi lights:${scripts.rofi-lights} -show lights -theme-str "entry {placeholder:\"Select a room...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 50;}window{padding: 32% 36%;}"
+          ;;
         wifi)
           ${scripts.rofi-wifi}
           ;;
@@ -80,7 +83,7 @@ in {
           ${scripts.rofi-translate}
           ;;
         *)
-          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|buds|cliphist|powermode|nightlight|obsidian|gitlab|ocr|wifi|translate|ask|ask-about}"
+          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|buds|cliphist|powermode|nightlight|lights|obsidian|gitlab|ocr|wifi|translate|ask|ask-about}"
           exit 1
           ;;
       esac

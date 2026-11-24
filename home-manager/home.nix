@@ -80,6 +80,7 @@ in {
       npu-dictate.enable = host.isDesktop && host.hasNpuServer;
       oh-my-posh.enable = true;
       opencode.enable = host.isDev;
+      openhue.enable = host.isDesktop;
       rofi.enable = host.isGraphical;
       spotify-player.enable = host.isGraphical || host.isWSL;
       ssh.enable = true;
