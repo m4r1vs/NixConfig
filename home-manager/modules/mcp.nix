@@ -2,11 +2,67 @@
   lib,
   config,
   pkgs,
+  systemArgs,
   ...
 }:
 with lib; let
   cfg = config.programs.configured.mcp;
-  inherit (cfg) gitlab;
+  inherit (cfg) gitlab slack;
+
+  slackReadonlyTools = [
+    "channels_list"
+    "channels_me"
+    "conversations_history"
+    "conversations_replies"
+    "conversations_search_messages"
+    "conversations_unreads"
+    "users_search"
+    "usergroups_list"
+    "usergroups_me"
+    "saved_list"
+    "attachment_get_data"
+  ];
+  slackModifyTools =
+    slackReadonlyTools
+    ++ [
+      "conversations_add_message"
+      "reactions_add"
+      "reactions_remove"
+      "conversations_mark"
+      "saved_update"
+      "saved_clear_completed"
+    ];
+
+  slackAuthEnv =
+    if slack.authMode == "xoxc"
+    then {
+      SLACK_MCP_XOXC_TOKEN.file = "${slack.tokenDir}/xoxc";
+      SLACK_MCP_XOXD_TOKEN.file = "${slack.tokenDir}/xoxd";
+    }
+    else if slack.authMode == "xoxp"
+    then {
+      SLACK_MCP_XOXP_TOKEN.file = "${slack.tokenDir}/xoxp";
+    }
+    else {
+      SLACK_MCP_XOXB_TOKEN.file = "${slack.tokenDir}/xoxb";
+    };
+
+  slackToolEnv =
+    if slack.permissionMode == "readonly"
+    then {
+      SLACK_MCP_ENABLED_TOOLS = concatStringsSep "," slackReadonlyTools;
+    }
+    else if slack.permissionMode == "modify"
+    then {
+      SLACK_MCP_ENABLED_TOOLS = concatStringsSep "," slackModifyTools;
+      SLACK_MCP_ADD_MESSAGE_TOOL = "true";
+      SLACK_MCP_REACTION_TOOL = "true";
+    }
+    else {
+      SLACK_MCP_ADD_MESSAGE_TOOL = "true";
+      SLACK_MCP_REACTION_TOOL = "true";
+      SLACK_MCP_ATTACHMENT_TOOL = "true";
+    };
 in {
   options.programs.configured.mcp = {
     enable = mkEnableOption "Configuration of Model Context Protocol servers";
@@ -62,14 +118,70 @@ in {
         '';
       };
     };
+
+    slack = {
+      enable = mkOption {
+        type = types.bool;
+        default = systemArgs.useWorkProfileByDefault;
+        description = ''
+          Whether to expose the Slack MCP server (korotovsky/slack-mcp-server).
+          Defaults to `systemArgs.useWorkProfileByDefault` so non-work and
+          downstream hosts do not fail startup when no token files are present.
+        '';
+      };
+
+      authMode = mkOption {
+        type = types.enum ["xoxc" "xoxp" "xoxb"];
+        default = "xoxc";
+        description = ''
+          Slack credential mode:
+          - `xoxc`: browser session token (`xoxc`) + `d` cookie (`xoxd`); requires no Slack app install or workspace admin approval.
+          - `xoxp`: User OAuth token (`xoxp`) from a Slack app.
+          - `xoxb`: Bot token (`xoxb`) from a Slack app (no search or DMs).
+        '';
+      };
+
+      tokenDir = mkOption {
+        type = types.str;
+        default = "${config.xdg.stateHome}/slack-mcp";
+        description = ''
+          Directory (mode 0700) containing mode 0600 token file(s) read at
+          startup by the Home Manager env-file wrapper (`xoxc` + `xoxd`,
+          `xoxp`, or `xoxb` depending on `authMode`).
+        '';
+      };
+
+      permissionMode = mkOption {
+        type = types.enum ["readonly" "modify" "full"];
+        default = "readonly";
+        description = ''
+          Which subset of Slack MCP tools is exposed:
+          - `readonly`: read/search/list/unreads/saved_list/attachments only.
+          - `modify`: adds posting messages, reactions, mark-as-read, and saved items updates.
+          - `full`: all tools including channel join/leave and usergroup management.
+        '';
+      };
+
+      enterpriseTls = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable custom browser-mimicking TLS handshake (`SLACK_MCP_CUSTOM_TLS`) for strict Enterprise Slack workspaces.";
+      };
+    };
   };
 
   config = mkIf cfg.enable {
-    home.activation = mkIf gitlab.enable {
-      gitlabMcpTokenDir = hm.dag.entryAfter ["writeBoundary"] ''
-        run mkdir -p ${escapeShellArg (dirOf gitlab.tokenPath)}
-      '';
-    };
+    home.activation =
+      optionalAttrs gitlab.enable {
+        gitlabMcpTokenDir = hm.dag.entryAfter ["writeBoundary"] ''
+          run mkdir -p ${escapeShellArg (dirOf gitlab.tokenPath)}
+        '';
+      }
+      // optionalAttrs slack.enable {
+        slackMcpTokenDir = hm.dag.entryAfter ["writeBoundary"] ''
+          run install -d -m 700 ${escapeShellArg slack.tokenDir}
+        '';
+      };
 
     programs.mcp = {
       enable = true;
@@ -97,6 +209,19 @@ in {
               GITLAB_OAUTH_REDIRECT_URI = gitlab.redirectUri;
               GITLAB_OAUTH_TOKEN_PATH = gitlab.tokenPath;
             };
+          };
+        }
+        // optionalAttrs slack.enable {
+          slack = {
+            command = getExe pkgs.slack-mcp-server;
+            args = ["--transport" "stdio"];
+            enabled = true;
+            env =
+              slackAuthEnv
+              // slackToolEnv
+              // optionalAttrs slack.enterpriseTls {
+                SLACK_MCP_CUSTOM_TLS = "true";
+              };
           };
         };
     };

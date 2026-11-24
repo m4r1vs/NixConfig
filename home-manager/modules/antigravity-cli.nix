@@ -43,10 +43,14 @@ in {
         hunk = "${inputs.hunk}/packages/hunk/skills/hunk-review/SKILL.md";
       };
       permissions = {
-        allow = [
-          "mcp(gitlab/*)"
-          "mcp(nixos/*)"
-        ];
+        allow =
+          [
+            "mcp(gitlab/*)"
+            "mcp(nixos/*)"
+          ]
+          ++ optionals (config.programs.configured.mcp.enable && config.programs.configured.mcp.slack.enable) [
+            "mcp(slack/*)"
+          ];
         ask = [
           "command(npm test)"
           "command(npm run test:cov)"

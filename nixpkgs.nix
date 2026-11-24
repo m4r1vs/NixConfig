@@ -32,6 +32,41 @@ in {
           golazo = inputs.golazo.packages.${stdenv.hostPlatform.system}.default;
           hyprland-which-key = inputs.hyprland-which-key.packages.${stdenv.hostPlatform.system}.default;
 
+          slack-mcp-server = buildGoModule (finalAttrs: {
+            pname = "slack-mcp-server";
+            version = "1.3.0";
+
+            src = fetchFromGitHub {
+              owner = "korotovsky";
+              repo = "slack-mcp-server";
+              tag = "v${finalAttrs.version}";
+              hash = "sha256-I4f6yKV0BXtaxnqi/XNID+Pwl2mWjSqxIHhb07U7sc4=";
+            };
+
+            vendorHash = "sha256-+uQRODO9oL8mGKBmdghTxE6R9Fz+3GJFVTi17306gT8=";
+
+            subPackages = ["cmd/slack-mcp-server"];
+
+            ldflags = [
+              "-s"
+              "-w"
+              "-X github.com/korotovsky/slack-mcp-server/pkg/version.Version=v${finalAttrs.version}"
+              "-X github.com/korotovsky/slack-mcp-server/pkg/version.CommitHash=4bf92874c9ee7add948117f11cc7e4d92c5ca29c"
+              "-X github.com/korotovsky/slack-mcp-server/pkg/version.BuildTime=1970-01-01T00:00:00Z"
+              "-X github.com/korotovsky/slack-mcp-server/pkg/version.BinaryName=slack-mcp-server"
+            ];
+
+            # Run unit tests only (skip *Integration* tests requiring live Slack credentials)
+            checkFlags = ["-run=.*Unit.*"];
+
+            meta = {
+              description = "Model Context Protocol (MCP) server for Slack workspaces";
+              homepage = "https://github.com/korotovsky/slack-mcp-server";
+              license = lib.licenses.mit;
+              mainProgram = "slack-mcp-server";
+            };
+          });
+
           reforma-fonts = stdenv.mkDerivation {
             name = "Reforma Fonts";
             src = ./assets/fonts/reforma;
