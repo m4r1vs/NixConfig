@@ -12,7 +12,8 @@
 with lib; let
   cfg = config.programs.configured.hey-computer;
   inherit (host) isDarwin;
-  browser = config.programs.configured.browser.resolved.default;
+  browserCfg = config.programs.configured.browser;
+  browser = browserCfg.resolved.default;
   inherit (config.programs.configured.waybar) weatherLocation;
   voiceCmd = config.programs.configured.npu-dictate.voiceCommand;
   appNames = sort lessThan (attrNames voiceCmd.apps);
@@ -20,6 +21,26 @@ with lib; let
   hasNightlight = config.services.configured.hyprsunset.enable;
   hasDarkman = config.services.configured.darkman.enable;
   hasOpenhue = config.programs.configured.openhue.enable;
+  hasGalaxyBuds = config.programs.configured.galaxy-buds.enable;
+
+  # Launches the default browser with the work or personal profile in its own
+  # systemd scope so windows outlive hey-computer daemon restarts.
+  openBrowser = pkgs.writeShellScript "open-browser" ''
+    set -euo pipefail
+    role="''${1:-work}"
+    shift || true
+    case "$role" in
+      work) profile=${escapeShellArg browserCfg.resolved.workProfile} ;;
+      personal) profile=${escapeShellArg browserCfg.resolved.personalProfile} ;;
+      Default|Secondary) profile="$role" ;;
+      *)
+        echo "Usage: open-browser [work|personal|Default|Secondary] [url...]" >&2
+        exit 2
+        ;;
+    esac
+    exec ${pkgs.systemd}/bin/systemd-run --user --scope --quiet --collect -- \
+      ${scripts.launch-browser-profile} "$profile" "$@"
+  '';
 
   # Clean command names on the agent's PATH for the user's own scripts, so
   # SKILL.md stays concise and the agent invokes tested scripts instead of
@@ -27,6 +48,7 @@ with lib; let
   desktopScripts =
     {
       voice-command = voiceCmd.script;
+      open-browser = openBrowser;
       inherit
         (scripts)
         caffeinate
@@ -54,6 +76,10 @@ with lib; let
     }
     // optionalAttrs hasOpenhue {
       inherit (scripts) hue-lights;
+    }
+    // optionalAttrs hasGalaxyBuds {
+      inherit (scripts) connect-galaxy-buds;
+      GalaxyBudsClient = "${pkgs.galaxy-buds-client}/bin/GalaxyBudsClient";
     };
 
   desktopScriptsPkg = pkgs.runCommand "hey-computer-desktop-scripts" {} ''
@@ -84,6 +110,8 @@ with lib; let
     voice-command right            # next workspace on current monitor
     voice-command site <domain>    # open https://<domain> in ${browser.title}
     voice-command weather          # show weather notification for ${weatherLocation}
+    open-browser work [url]        # open ${browser.title} work profile (${browserCfg.resolved.workProfile})
+    open-browser personal [url]    # open ${browser.title} personal profile (${browserCfg.resolved.personalProfile})
     ```
 
     ## Desktop toggles & utilities
@@ -94,6 +122,13 @@ with lib; let
     switch-kb-layout               # cycle keyboard layout (US / DE)
     spotify-like                   # like the currently playing Spotify track
     random-album-of-the-day        # pick a Bandcamp Album of the Day and play it on Spotify
+    gcalcli --nocolor agenda "now" "2 days"   # list upcoming calendar events (also: search, quick, add)
+    ${optionalString hasGalaxyBuds ''
+      connect-galaxy-buds connect    # connect Galaxy Buds and switch PipeWire default audio
+      connect-galaxy-buds disconnect # disconnect Galaxy Buds
+      GalaxyBudsClient device --get-all --json  # read Buds battery / ANC / ambient state
+      GalaxyBudsClient action --list            # list supported ANC/Ambient/EQ action IDs
+      GalaxyBudsClient action --execute <Id>    # execute a Buds action (e.g. ToggleAnc, ToggleAmbient)''}
     ${optionalString hasDarkman ''
       darkman toggle                 # toggle light / dark desktop theme
       darkman set dark               # or: darkman set light | darkman get''}
@@ -282,6 +317,7 @@ in {
           pamixer
           brightnessctl
           wl-clipboard
+          gcalcli
         ]);
       skills.extra = [desktopScriptsSkill desktopContextSkill] ++ optional hasOpenhue homeLightsSkill;
       settings = {
@@ -300,36 +336,37 @@ in {
           ## Tone & style
 
           - Be friendly, concise, and occasionally lightly humorous when it fits.
-          - Never be sycophantic: push back directly and say plainly when Marius is wrong or overlooking something.
+          - Never be sycophantic: push back directly and say plainly when the user is wrong or overlooking something.
           - Niche facts and cross-disciplinary context are welcome when genuinely relevant, while still keeping short voice answers brief.
 
-          ## Household
+          ## Language
 
-          - The user is **Marius** ("my room", "my lights", "my desk" refer to `Marius' Room`).
-          - His roommate ("my mate", "roommate", "Mitbewohner") is **Tjark** (`Tjark's Room`).
+          - Reply in German with English technical terms only when the request is in German.
+          - Otherwise reply in English; use a German word in an English answer only when it genuinely fits better than any English equivalent.
 
           ## User conventions & locale
 
           - Use metric units (°C, km, m, kg, L) and a 24-hour clock.
           - Default location and timezone: ${weatherLocation}, Germany (CET/CEST).
-          - Default browser: ${browser.title} (workspace 1, profile `Default`). Prefer `voice-command browser` or `voice-command site <domain>`, or launch URLs through Hyprland (`hl.dsp.exec_cmd`) rather than as a child of your shell.
+          - Default browser: ${browser.title} (work profile `${browserCfg.resolved.workProfile}`, personal profile `${browserCfg.resolved.personalProfile}`). Prefer `open-browser work|personal [url]`, `voice-command browser`, or `voice-command site <domain>` rather than spawning a browser directly as a child of your shell.
           - Preferred stack & apps: NixOS on desktop, macOS via `nix-darwin` on MacBook, Neovim for editing, Obsidian for notes/journaling, Spotify for music, Google Maps for navigation, Google Workspace (Drive, Docs, Sheets) for documents, and Google Calendar for scheduling.
-          - Prefer the commands in the `desktop-scripts` skill (`voice-command`, `nightlight`, `powermode`, `caffeinate`, `toggle-zen`, `darkman`, etc.) over improvising raw `hyprctl` calls.
+          - Prefer the commands in the `desktop-scripts` skill (`voice-command`, `open-browser`, `connect-galaxy-buds`, `GalaxyBudsClient`, `gcalcli`, `nightlight`, `powermode`, `caffeinate`, `toggle-zen`, `darkman`, etc.) over improvising raw `hyprctl` calls.
           - Use the `desktop-context` skill (`desktop-context selection|clipboard|capture|copy|paste`) whenever the user refers to their selection, clipboard, screen, or asks to copy or paste a result; inspect captured PNG paths directly with `read_file`.
 
-          ## Obsidian daily notes
+          ## Obsidian daily notes & reminders
 
           - Daily notes live at `Journal/YYYY-MM-DD.md` inside the vault (e.g. `Journal/2026-11-23.md`).
-          - When asked to add something to "today's note" or the daily note, determine today's local date, create `Journal/YYYY-MM-DD.md` if it does not exist yet, and append cleanly in standard Obsidian Markdown without overwriting existing content.
+          - An Obsidian plugin automatically carries unticked `- [ ]` checkboxes forward from past daily notes into today's note.
+          - When asked to "remind me to …" or add a todo, append an unticked `- [ ] …` task to today's `Journal/YYYY-MM-DD.md` (creating the file if needed) without overwriting existing content.
+          - When asked to "remind me to … in X days" or for a specific future date, append `- [ ] …` to that target date's `Journal/YYYY-MM-DD.md` instead.
 
           ## Speech-recognition glossary
 
-          Requests often come from local Whisper STT in German or English. Expect mishearings of these proper nouns and technical terms:
+          Requests often come from local Whisper STT in German or English. Expect mishearings of these technical terms and project names:
 
-          - **People & work:** Marius Niveri (`m4r1vs`), Tjark (roommate), Meetovo, Linear, GitLab (`gitlab.tools.meetovo.dev`), NetBird
           - **Hosts:** `worknix`, `nixpad`, `desknix`, `nixner`, `kubenix`, `nixbook`, `yannix`
           - **Projects:** `hey-computer`, `npu-dictate`, `NixConfig`, `hyprland-which-key`, `hyprland-macos-zoom`, `stummumschalterung`, `slidecontrol`, `golazo`, `atai`, `TerraTracker`, `JosisArt`
-          - **Tools & stack:** NixOS, `nix-darwin`, nixpkgs, Home Manager, Hyprland, `hyprctl`, Waybar, Rofi, Ghostty, Neovim, Yazi, Obsidian, FastFlowLM, Whisper, `agy` (Antigravity CLI), `swaync`, `cliphist`, `hyprsunset`, `hyprlock`, 1Password
+          - **Tools & stack:** NixOS, `nix-darwin`, nixpkgs, Home Manager, Hyprland, `hyprctl`, Waybar, Rofi, Ghostty, Neovim, Yazi, Obsidian, Linear, GitLab, NetBird, `gcalcli`, Galaxy Buds, FastFlowLM, Whisper, `agy` (Antigravity CLI), `swaync`, `cliphist`, `hyprsunset`, `hyprlock`, 1Password
 
           ## Off-limits
 
