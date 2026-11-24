@@ -591,6 +591,18 @@ in {
           type = "Application";
           categories = ["Utility"];
         };
+        rofi-ask = mkIf config.programs.configured.hey-computer.enable {
+          name = "Ask Hey Computer";
+          genericName = "SUPER+A";
+          comment = "Ask Hey Computer via Rofi";
+          icon = "assistant";
+          exec = "${scripts.rofi-launch} ask";
+          type = "Application";
+          categories = ["Utility"];
+          settings = {
+            Keywords = "ai;assistant;ask;hey-computer;gemini;prompt;";
+          };
+        };
       };
       portal = {
         enable = true;

@@ -60,7 +60,7 @@ in {
             wake_watcher
             ;;
           followup)
-            exec ${scripts.rofi-ask}
+            exec ${scripts.rofi-launch} ask
             ;;
           *)
             exec ${scripts.rofi-launch} search

@@ -64,10 +64,7 @@ in {
       ''}
         ${lib.optionalString hasHeyComputer ''
         ask)
-          ${scripts.rofi-ask}
-          ;;
-        ask-about)
-          ${scripts.rofi-ask-about}
+          ${pkgs.rofi}/bin/rofi -modi ask:${scripts.rofi-ask} -show ask -theme-str "entry {placeholder:\"Ask Hey Computer...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}"
           ;;
       ''}
         obsidian)
@@ -83,7 +80,7 @@ in {
           ${scripts.rofi-translate}
           ;;
         *)
-          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|buds|cliphist|powermode|nightlight|lights|obsidian|gitlab|ocr|wifi|translate|ask|ask-about}"
+          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|buds|cliphist|powermode|nightlight|lights|obsidian|gitlab|ocr|wifi|translate|ask}"
           exit 1
           ;;
       esac

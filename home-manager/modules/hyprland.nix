@@ -739,7 +739,6 @@ in {
           ]
           ++ lib.optionals config.programs.configured.hey-computer.enable [
             (bindd "SUPER + a" "Ask Hey Computer" (exec "${scripts.rofi-launch} ask"))
-            (bindd "SUPER + SHIFT + a" "Ask Hey Computer about selection/clipboard/OCR" (exec "${scripts.rofi-launch} ask-about"))
             (bindd "SUPER + CTRL + a" "Cancel Hey Computer request" (exec "${scripts.waybar-hey-computer} cancel"))
           ]
           ++ [

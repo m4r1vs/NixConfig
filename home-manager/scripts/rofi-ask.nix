@@ -1,5 +1,6 @@
 /*
-Typed Rofi front end for hey-computer (`SUPER + a`, `rofi-launch ask`).
+Typed Rofi `-modi` front end for hey-computer (`SUPER + a`, `rofi-launch ask`).
+Matches `rofi-calculator`'s minimalist single-bar layout (no initial rows).
 Prefix a prompt with `! ` or `/new ` to force a fresh conversation (`ask --new`).
 */
 {
@@ -19,37 +20,41 @@ in {
       pkgs.gnused
       pkgs.jq
       pkgs.procps
-      pkgs.rofi
     ];
     text =
       # bash
       ''
-        placeholder="Ask Hey Computer..."
-        if status_json=$(${heyComputer} status --json 2>/dev/null); then
-          placeholder=$(jq -r '
-            if .running != null then
-              "Ask Hey Computer (replaces running request)..."
-            elif .follow_up_secs != null then
-              "Follow up (\(.follow_up_secs | ceil)s) — prefix ! for new..."
-            elif .agent == "down" then
-              "Ask Hey Computer (agent down)..."
-            else
-              "Ask Hey Computer..."
-            end
-          ' <<<"$status_json" 2>/dev/null || printf '%s\n' "$placeholder")
-        else
-          placeholder="Ask Hey Computer (daemon not running)..."
+        set_placeholder() {
+          local escaped
+          escaped=$(printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g')
+          printf '\000theme\037entry { placeholder: "%s"; }\n' "$escaped"
+        }
+
+        retv="''${ROFI_RETV:-0}"
+
+        # Initial invocation: emit only the dynamic placeholder (zero rows, like calc)
+        if [ "$retv" -eq 0 ]; then
+          placeholder="Ask Hey Computer..."
+          if status_json=$(${heyComputer} status --json 2>/dev/null); then
+            placeholder=$(jq -r '
+              if .running != null then
+                "Ask Hey Computer (replaces current)..."
+              elif .follow_up_secs != null then
+                "Follow up... (! for new)"
+              elif .agent == "down" then
+                "Ask Hey Computer (offline)..."
+              else
+                "Ask Hey Computer..."
+              end
+            ' <<<"$status_json" 2>/dev/null || printf '%s\n' "$placeholder")
+          else
+            placeholder="Ask Hey Computer (offline)..."
+          fi
+          set_placeholder "$placeholder"
+          exit 0
         fi
 
-        # Escape double quotes and backslashes for rofi -theme-str
-        escaped_placeholder=''${placeholder//\\/\\\\}
-        escaped_placeholder=''${escaped_placeholder//\"/\\\"}
-
-        query=$(rofi -dmenu -i -l 0 -p "Ask" \
-          -theme-str "entry { placeholder: \"$escaped_placeholder\"; } listview { enabled: false; } element-icon { enabled: false; } icon-current-entry { enabled: false; } inputbar { padding: 0 0 0 42; } window { padding: 44% 25%; }" \
-          < /dev/null) || exit 0
-
-        # Trim leading/trailing whitespace
+        query="''${1-}"
         trimmed=$(printf '%s' "$query" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
         [ -n "$trimmed" ] || exit 0
 
@@ -67,7 +72,8 @@ in {
 
         [ -n "$trimmed" ] || exit 0
 
-        printf '%s' "$trimmed" | ${heyComputer} "''${args[@]}"
+        # Suppress stdout so Rofi closes cleanly after submitting
+        printf '%s' "$trimmed" | ${heyComputer} "''${args[@]}" >/dev/null 2>&1 || true
         pkill -USR1 -f 'waybar-hey-computer watch' 2>/dev/null || true
       '';
   };
