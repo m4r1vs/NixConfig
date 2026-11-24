@@ -418,8 +418,8 @@ in {
 
           - Daily notes live at `Journal/YYYY-MM-DD.md` inside the vault (e.g. `Journal/2026-11-23.md`).
           - An Obsidian plugin automatically carries unticked `- [ ]` checkboxes forward from past daily notes into today's note.
-          - When asked to "remind me to …" or add a todo, append an unticked `- [ ] …` task to today's `Journal/YYYY-MM-DD.md` (creating the file if needed) without overwriting existing content.
-          - When asked to "remind me to … in X days" or for a specific future date, append `- [ ] …` to that target date's `Journal/YYYY-MM-DD.md` instead.
+          - When asked to "remind me to …" or add a todo, insert an unticked `- [ ] …` task at the **top** of the task list in today's `Journal/YYYY-MM-DD.md` (after any YAML frontmatter or top heading, creating the file if needed) without overwriting existing content.
+          - When asked to "remind me to … in X days" or for a specific future date, insert `- [ ] …` at the top of the task list in that target date's `Journal/YYYY-MM-DD.md` instead.
 
           ## Speech-recognition glossary
 
