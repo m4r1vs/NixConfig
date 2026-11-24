@@ -354,8 +354,12 @@ in {
           gcalcli
         ]);
       skills.extra = [desktopScriptsSkill desktopContextSkill transitSkill] ++ optional hasOpenhue homeLightsSkill;
-      mcp.servers = optionalAttrs (config.programs.configured.mcp.enable && (config.programs.mcp.servers ? nixos)) {
-        inherit (config.programs.mcp.servers) nixos;
+      mcp = {
+        servers = optionalAttrs config.programs.configured.mcp.enable config.programs.mcp.servers;
+        oauthTokensFile =
+          if config.programs.configured.antigravity-cli.enable
+          then "${config.home.homeDirectory}/.gemini/antigravity-cli/mcp_oauth_tokens.json"
+          else null;
       };
       settings = {
         agent = {
@@ -374,6 +378,7 @@ in {
             thought_level = "high";
             max_turn_secs = 600;
             max_tool_calls = 40;
+            thinking_label = "Pondering Hard…";
           };
         };
         tasks = {

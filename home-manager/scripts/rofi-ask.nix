@@ -41,8 +41,7 @@ in {
           placeholder="Ask Computer..."
           if status_json=$(${heyComputer} status --json 2>/dev/null); then
             placeholder=$(jq -r '
-              ((.background_running // 0) + (.background_queued // 0)) as $bg_total
-              | (if (.background_running // 0) > 0 and (.background_queued // 0) > 0 then
+              (if (.background_running // 0) > 0 and (.background_queued // 0) > 0 then
                   " [\(.background_running) bg, \(.background_queued) queued]"
                 elif (.background_running // 0) > 0 then
                   " [\(.background_running) bg]"
@@ -52,13 +51,11 @@ in {
               | if .running != null then
                   "Ask Computer (replaces current)\($bg)..."
                 elif .follow_up_secs != null then
-                  "Follow up\($bg)... (! new, /deep, /bg)"
+                  "Follow up\($bg)..."
                 elif .agent == "down" then
                   "Ask Computer (offline)..."
-                elif $bg_total > 0 then
-                  "Ask Computer\($bg)... (/deep, /bg)"
                 else
-                  "Ask Computer... (/deep, /bg)"
+                  "Ask Computer\($bg)..."
                 end
             ' <<<"$status_json" 2>/dev/null || printf '%s\n' "$placeholder")
           else
