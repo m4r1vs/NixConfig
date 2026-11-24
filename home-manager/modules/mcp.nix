@@ -7,7 +7,7 @@
 }:
 with lib; let
   cfg = config.programs.configured.mcp;
-  inherit (cfg) gitlab slack;
+  inherit (cfg) gitlab slack googleWorkspace context7;
 
   slackReadonlyTools = [
     "channels_list"
@@ -168,6 +168,65 @@ in {
         description = "Enable custom browser-mimicking TLS handshake (`SLACK_MCP_CUSTOM_TLS`) for strict Enterprise Slack workspaces.";
       };
     };
+
+    googleWorkspace = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = ''
+          Whether to expose the Google Workspace MCP server
+          (taylorwilsdon/google_workspace_mcp) for Google Calendar and Gmail.
+        '';
+      };
+
+      tools = mkOption {
+        type = types.listOf types.str;
+        default = ["gmail" "calendar"];
+        description = "Google Workspace services registered on startup (`--tools`).";
+      };
+
+      toolTier = mkOption {
+        type = types.enum ["core" "extended" "complete"];
+        default = "extended";
+        description = ''
+          Progressive tool tier (`--tool-tier`). `extended` with `["gmail" "calendar"]`
+          enables Calendar read/create/move/delete/freebusy and Gmail
+          search/read/thread/summarize/draft/send/labels while keeping the schema compact.
+        '';
+      };
+
+      singleUser = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Run in single-user mode (`--single-user`) using cached credentials in `credentialsDir`.";
+      };
+
+      credentialsDir = mkOption {
+        type = types.str;
+        default = "${config.xdg.stateHome}/google-workspace-mcp/credentials";
+        description = ''
+          Private (0700) directory storing OAuth refresh/access tokens outside
+          model context and `/nix/store` (`WORKSPACE_MCP_CREDENTIALS_DIR`).
+        '';
+      };
+
+      clientSecretFile = mkOption {
+        type = types.str;
+        default = "${config.xdg.stateHome}/google-workspace-mcp/client_secret.json";
+        description = ''
+          Path to the Google Cloud OAuth Desktop client JSON file
+          (`GOOGLE_CLIENT_SECRET_PATH`), kept outside `/nix/store`.
+        '';
+      };
+    };
+
+    context7 = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Whether to expose the Context7 documentation MCP server (`pkgs.context7-mcp`).";
+      };
+    };
   };
 
   config = mkIf cfg.enable {
@@ -180,6 +239,12 @@ in {
       // optionalAttrs slack.enable {
         slackMcpTokenDir = hm.dag.entryAfter ["writeBoundary"] ''
           run install -d -m 700 ${escapeShellArg slack.tokenDir}
+        '';
+      }
+      // optionalAttrs googleWorkspace.enable {
+        googleWorkspaceMcpCredDir = hm.dag.entryAfter ["writeBoundary"] ''
+          run install -d -m 700 ${escapeShellArg (dirOf googleWorkspace.credentialsDir)}
+          run install -d -m 700 ${escapeShellArg googleWorkspace.credentialsDir}
         '';
       };
 
@@ -195,6 +260,28 @@ in {
           };
           linear = {
             url = "https://mcp.linear.app/mcp";
+          };
+        }
+        // optionalAttrs context7.enable {
+          context7 = {
+            command = getExe pkgs.context7-mcp;
+            enabled = true;
+          };
+        }
+        // optionalAttrs googleWorkspace.enable {
+          google-workspace = {
+            command = getExe pkgs.google-workspace-mcp;
+            args =
+              ["--transport" "stdio"]
+              ++ optional googleWorkspace.singleUser "--single-user"
+              ++ ["--tool-tier" googleWorkspace.toolTier]
+              ++ ["--tools"]
+              ++ googleWorkspace.tools;
+            enabled = true;
+            env = {
+              WORKSPACE_MCP_CREDENTIALS_DIR = googleWorkspace.credentialsDir;
+              GOOGLE_CLIENT_SECRET_PATH = googleWorkspace.clientSecretFile;
+            };
           };
         }
         // optionalAttrs gitlab.enable {

@@ -69,7 +69,7 @@ in {
         trimmed=$(printf '%s' "$query" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
         [ -n "$trimmed" ] || exit 0
 
-        args=(ask)
+        args=(ask --source typed)
         while true; do
           case "$trimmed" in
           "! "*)

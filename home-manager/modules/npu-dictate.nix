@@ -176,7 +176,7 @@ in {
                   "Moin Komputer"
                   "Hey Computa"
                 ];
-                run = [(getExe config.programs.hey-computer.package) "ask"];
+                run = [(getExe config.programs.hey-computer.package) "ask" "--voice"];
               };
             }
             // optionalAttrs (host.windowManager == "hyprland") (

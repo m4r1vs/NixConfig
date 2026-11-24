@@ -50,6 +50,12 @@ in {
           ]
           ++ optionals (config.programs.configured.mcp.enable && config.programs.configured.mcp.slack.enable) [
             "mcp(slack/*)"
+          ]
+          ++ optionals (config.programs.configured.mcp.enable && config.programs.configured.mcp.googleWorkspace.enable) [
+            "mcp(google-workspace/*)"
+          ]
+          ++ optionals (config.programs.configured.mcp.enable && config.programs.configured.mcp.context7.enable) [
+            "mcp(context7/*)"
           ];
         ask = [
           "command(npm test)"

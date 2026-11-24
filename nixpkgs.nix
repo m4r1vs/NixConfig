@@ -67,6 +67,57 @@ in {
             };
           });
 
+          google-workspace-mcp = python3Packages.buildPythonApplication (finalAttrs: {
+            pname = "google-workspace-mcp";
+            version = "1.30.1";
+            pyproject = true;
+
+            src = fetchFromGitHub {
+              owner = "taylorwilsdon";
+              repo = "google_workspace_mcp";
+              tag = "v${finalAttrs.version}";
+              hash = "sha256-VFPDLdno/N3UdznpQQZGtr0PpLGvhA8AqY3lVOQuXW8=";
+            };
+
+            build-system = with python3Packages; [
+              setuptools
+              wheel
+            ];
+
+            pythonRelaxDeps = true;
+
+            dependencies = with python3Packages; [
+              cryptography
+              defusedxml
+              email-validator
+              fastapi
+              fastmcp
+              google-api-python-client
+              google-auth-httplib2
+              google-auth-oauthlib
+              httpx
+              markdown-it-py
+              py-key-value-aio
+              pyjwt
+              pypdf
+              python-dotenv
+              pytz
+              pyyaml
+              tzdata
+              urllib3
+            ];
+
+            # Tests rely on network access and optional GCS/Valkey backends.
+            doCheck = false;
+
+            meta = {
+              description = "Model Context Protocol (MCP) server for Google Workspace (Calendar, Gmail, Drive, Docs, Sheets)";
+              homepage = "https://github.com/taylorwilsdon/google_workspace_mcp";
+              license = lib.licenses.mit;
+              mainProgram = "workspace-mcp";
+            };
+          });
+
           reforma-fonts = stdenv.mkDerivation {
             name = "Reforma Fonts";
             src = ./assets/fonts/reforma;
