@@ -22,10 +22,28 @@ with lib; let
   hasDarkman = config.services.configured.darkman.enable;
   hasOpenhue = config.programs.configured.openhue.enable;
   hasGalaxyBuds = config.programs.configured.galaxy-buds.enable;
-  enabledMcpNames =
-    if config.programs.configured.mcp.enable
-    then attrNames (filterAttrs (_: s: (s.enabled or true) != false && (s.disabled or false) != true) config.programs.mcp.servers)
-    else [];
+  inherit (cfg) googleWorkspace;
+  mcpServers =
+    (optionalAttrs config.programs.configured.mcp.enable config.programs.mcp.servers)
+    // optionalAttrs googleWorkspace.enable {
+      google-workspace = {
+        command = getExe pkgs.google-workspace-mcp;
+        args =
+          ["--transport" "stdio"]
+          ++ optional googleWorkspace.singleUser "--single-user"
+          ++ ["--tool-tier" googleWorkspace.toolTier]
+          ++ ["--tools"]
+          ++ googleWorkspace.tools;
+        enabled = true;
+        env = {
+          WORKSPACE_MCP_CREDENTIALS_DIR = googleWorkspace.credentialsDir;
+          GOOGLE_CLIENT_SECRET_PATH = googleWorkspace.clientSecretFile;
+        };
+      };
+    };
+  enabledMcpNames = attrNames (
+    filterAttrs (_: s: (s.enabled or true) != false && (s.disabled or false) != true) mcpServers
+  );
   # Keep heavy dev-doc MCPs (context7, nixos) off the default `fast` voice profile;
   # `deep` inherits all enabled MCP servers.
   fastMcpServers = filter (name: !(elem name ["context7" "nixos"])) enabledMcpNames;
@@ -386,6 +404,58 @@ in {
       answers "Hey Computer, …" from npu-dictate. The agent runs every
       command that does not need root without asking'';
 
+    googleWorkspace = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = ''
+          Whether to expose the Google Workspace MCP server
+          (taylorwilsdon/google_workspace_mcp) to hey-computer for Google
+          Calendar and Gmail (kept out of the global coding-CLI `mcp.nix` set).
+        '';
+      };
+
+      tools = mkOption {
+        type = types.listOf types.str;
+        default = ["gmail" "calendar"];
+        description = "Google Workspace services registered on startup (`--tools`).";
+      };
+
+      toolTier = mkOption {
+        type = types.enum ["core" "extended" "complete"];
+        default = "extended";
+        description = ''
+          Progressive tool tier (`--tool-tier`). `extended` with `["gmail" "calendar"]`
+          enables Calendar read/create/move/delete/freebusy and Gmail
+          search/read/thread/summarize/draft/send/labels while keeping the schema compact.
+        '';
+      };
+
+      singleUser = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Run in single-user mode (`--single-user`) using cached credentials in `credentialsDir`.";
+      };
+
+      credentialsDir = mkOption {
+        type = types.str;
+        default = "${config.xdg.stateHome}/google-workspace-mcp/credentials";
+        description = ''
+          Private (0700) directory storing OAuth refresh/access tokens outside
+          model context and `/nix/store` (`WORKSPACE_MCP_CREDENTIALS_DIR`).
+        '';
+      };
+
+      clientSecretFile = mkOption {
+        type = types.str;
+        default = "${config.xdg.stateHome}/google-workspace-mcp/client_secret.json";
+        description = ''
+          Path to the Google Cloud OAuth Desktop client JSON file
+          (`GOOGLE_CLIENT_SECRET_PATH`), kept outside `/nix/store`.
+        '';
+      };
+    };
+
     proactive = {
       enable = mkOption {
         type = types.bool;
@@ -421,6 +491,13 @@ in {
   };
 
   config = mkIf cfg.enable (optionalAttrs (!isDarwin) {
+    home.activation = optionalAttrs googleWorkspace.enable {
+      googleWorkspaceMcpCredDir = hm.dag.entryAfter ["writeBoundary"] ''
+        run install -d -m 700 ${escapeShellArg (dirOf googleWorkspace.credentialsDir)}
+        run install -d -m 700 ${escapeShellArg googleWorkspace.credentialsDir}
+      '';
+    };
+
     /*
     The agent is this account without its password: whatever the account may
     do without typing one, the agent may do, without confirmation (see the
@@ -477,7 +554,7 @@ in {
         ]
         ++ optional hasOpenhue homeLightsSkill;
       mcp = {
-        servers = optionalAttrs config.programs.configured.mcp.enable config.programs.mcp.servers;
+        servers = mcpServers;
         oauthTokensFile =
           if config.programs.configured.antigravity-cli.enable
           then "${config.home.homeDirectory}/.gemini/antigravity-cli/mcp_oauth_tokens.json"
