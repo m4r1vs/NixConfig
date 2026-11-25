@@ -23,6 +23,10 @@ with lib; let
   hasOpenhue = config.programs.configured.openhue.enable;
   hasGalaxyBuds = config.programs.configured.galaxy-buds.enable;
   inherit (cfg) googleWorkspace;
+  personalGoogleEmail =
+    if systemArgs.useWorkProfileByDefault
+    then "marius.niveri@gmail.com"
+    else systemArgs.git.email;
   mcpServers =
     (optionalAttrs config.programs.configured.mcp.enable config.programs.mcp.servers)
     // optionalAttrs googleWorkspace.enable {
@@ -32,8 +36,14 @@ with lib; let
           ["--transport" "stdio"]
           ++ optional googleWorkspace.singleUser "--single-user"
           ++ ["--tool-tier" googleWorkspace.toolTier]
-          ++ ["--tools"]
-          ++ googleWorkspace.tools;
+          ++ (
+            if googleWorkspace.permissions != []
+            then ["--permissions"] ++ googleWorkspace.permissions
+            else ["--tools"] ++ googleWorkspace.tools
+          )
+          ++ optionals (googleWorkspace.disabledTools != []) (
+            ["--disabled-tools"] ++ googleWorkspace.disabledTools
+          );
         enabled = true;
         env = {
           WORKSPACE_MCP_CREDENTIALS_DIR = googleWorkspace.credentialsDir;
@@ -67,31 +77,42 @@ with lib; let
       ${scripts.launch-browser-profile} "$profile" "$@"
   '';
 
-  googleWorkspacePython = pkgs.python3.withPackages (_: [pkgs.google-workspace-mcp]);
+  googleWorkspacePython = pkgs.python3.withPackages (_: pkgs.google-workspace-mcp.dependencies);
 
-  # Standalone OAuth helper so authenticating an account (personal or work) does
-  # not race hey-computer's 90s ACP session lifetime or stdio MCP pipe.
+  # Standalone OAuth helper so authenticating or extending scopes for an account
+  # (personal or work) opens the matching browser profile, shows missing scopes,
+  # and verifies the upgraded token has full scopes + refresh_token.
   googleWorkspaceAuth = pkgs.writeShellScriptBin "google-workspace-auth" ''
     set -euo pipefail
     if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
       echo "Usage: google-workspace-auth <email> [work|personal]" >&2
+      echo "       google-workspace-auth --status" >&2
       exit 2
     fi
-    email="$1"
-    profile_role="''${2:-}"
-    if [ -n "$profile_role" ] && [ "$profile_role" != "work" ] && [ "$profile_role" != "personal" ]; then
-      echo "Usage: google-workspace-auth <email> [work|personal]" >&2
-      exit 2
+
+    mode="auth"
+    email=""
+    profile_role=""
+    if [ "$1" = "--status" ]; then
+      mode="status"
+    else
+      email="$1"
+      profile_role="''${2:-}"
+      if [ -n "$profile_role" ] && [ "$profile_role" != "work" ] && [ "$profile_role" != "personal" ]; then
+        echo "Usage: google-workspace-auth <email> [work|personal]" >&2
+        exit 2
+      fi
     fi
 
     secret_path=${escapeShellArg googleWorkspace.clientSecretFile}
     creds_dir=${escapeShellArg googleWorkspace.credentialsDir}
-    if [ ! -f "$secret_path" ]; then
+    if [ "$mode" = "auth" ] && [ ! -f "$secret_path" ]; then
       echo "Missing Google OAuth Desktop client JSON at: $secret_path" >&2
       exit 1
     fi
     install -d -m 700 "$(dirname "$creds_dir")" "$creds_dir"
 
+    export PYTHONPATH=${escapeShellArg "${pkgs.google-workspace-mcp}/${pkgs.python3.sitePackages}"}
     export WORKSPACE_MCP_CREDENTIALS_DIR="$creds_dir"
     export GOOGLE_CLIENT_SECRET_PATH="$secret_path"
     export MCP_SINGLE_USER_MODE=1
@@ -99,9 +120,13 @@ with lib; let
     export BROWSER=${escapeShellArg "${pkgs.coreutils}/bin/false"}
     export OPEN_BROWSER_CMD=${escapeShellArg (toString openBrowser)}
     export OPEN_BROWSER_ROLE="$profile_role"
+    export GW_MODE="$mode"
+    export GW_TOOLS=${escapeShellArg (concatStringsSep " " googleWorkspace.tools)}
+    export GW_PERMISSIONS=${escapeShellArg (concatStringsSep " " googleWorkspace.permissions)}
 
-    exec ${googleWorkspacePython}/bin/python3 - "$email" ${concatMapStringsSep " " escapeShellArg googleWorkspace.tools} <<'PY'
+    exec ${googleWorkspacePython}/bin/python3 - "$email" <<'PY'
     import asyncio
+    import json
     import os
     import re
     import subprocess
@@ -115,21 +140,97 @@ with lib; let
         ensure_stdio_oauth_callback_available,
     )
     from auth.oauth_config import get_oauth_redirect_uri, set_transport_mode
-    from auth.scopes import set_enabled_tools
+    from auth.permissions import parse_permissions_arg, set_permissions
+    from auth.scopes import get_current_scopes, has_required_scopes, set_enabled_tools
 
+    mode = os.environ["GW_MODE"]
     email = sys.argv[1]
-    tools = sys.argv[2:]
     creds_dir = os.environ["WORKSPACE_MCP_CREDENTIALS_DIR"]
     role = os.environ.get("OPEN_BROWSER_ROLE", "")
     open_browser_cmd = os.environ.get("OPEN_BROWSER_CMD", "")
+    perms_spec = [p for p in os.environ.get("GW_PERMISSIONS", "").split() if p]
+    tools = [t for t in os.environ.get("GW_TOOLS", "").split() if t]
 
 
-    async def main() -> int:
+    def configure_scopes() -> tuple[list[str], list[str]]:
         set_transport_mode("stdio")
-        set_enabled_tools(tools)
+        if perms_spec:
+            perms = parse_permissions_arg(perms_spec)
+            set_permissions(perms)
+            services = list(perms.keys())
+        else:
+            services = tools
+        set_enabled_tools(services)
+        return services, get_current_scopes()
 
+
+    def short_scope(scope: str) -> str:
+        prefix = "https://www.googleapis.com/auth/"
+        return scope[len(prefix):] if scope.startswith(prefix) else scope
+
+
+    def missing_scopes_for_file(path: str, required: list[str]) -> tuple[list[str], bool]:
+        if not os.path.exists(path):
+            return list(required), False
+        with open(path, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+        granted = data.get("scopes") or []
+        missing = [s for s in required if not has_required_scopes(granted, [s])]
+        return missing, bool(data.get("refresh_token"))
+
+
+    def run_status() -> int:
+        services, required = configure_scopes()
+        print(f"Configured services: {', '.join(services)} ({len(required)} scopes)")
+        if not os.path.isdir(creds_dir):
+            print(f"No credentials directory at {creds_dir}")
+            return 1
+        files = sorted(
+            f for f in os.listdir(creds_dir)
+            if f.endswith(".json") and f != "oauth_states.json"
+        )
+        if not files:
+            print(f"No account tokens found in {creds_dir}")
+            return 0
+        rc = 0
+        for fname in files:
+            path = os.path.join(creds_dir, fname)
+            missing, has_refresh = missing_scopes_for_file(path, required)
+            if not missing and has_refresh:
+                print(f"  OK       {fname} (all {len(required)} scopes + refresh_token)")
+            else:
+                rc = 1
+                parts = []
+                if missing:
+                    parts.append("missing: " + ", ".join(short_scope(s) for s in missing))
+                if not has_refresh:
+                    parts.append("no refresh_token")
+                print(f"  UPGRADE  {fname} ({'; '.join(parts)})")
+        return rc
+
+
+    async def run_auth() -> int:
+        services, required = configure_scopes()
         target = os.path.join(creds_dir, f"{quote(email, safe='@._-')}.json")
         before = os.path.getmtime(target) if os.path.exists(target) else 0.0
+
+        if os.path.exists(target):
+            missing, has_refresh = missing_scopes_for_file(target, required)
+            if missing:
+                print(
+                    f"Extending OAuth token for {email} — missing {len(missing)} scope(s): "
+                    + ", ".join(short_scope(s) for s in missing),
+                    flush=True,
+                )
+            elif not has_refresh:
+                print(f"Re-authorizing {email} to obtain a refresh_token.", flush=True)
+            else:
+                print(
+                    f"Existing token for {email} already covers all {len(required)} scopes; re-authorizing anyway.",
+                    flush=True,
+                )
+        else:
+            print(f"Authorizing new account {email} for: {', '.join(services)}", flush=True)
 
         ok, err = ensure_stdio_oauth_callback_available()
         if not ok:
@@ -138,7 +239,7 @@ with lib; let
 
         msg = await start_auth_flow(
             user_google_email=email,
-            service_name="Google Workspace (" + ", ".join(tools) + ")",
+            service_name="Google Workspace (" + ", ".join(services) + ")",
             redirect_uri=get_oauth_redirect_uri(),
         )
         match = re.search(r"https://accounts\.google\.com/\S+", msg)
@@ -158,8 +259,23 @@ with lib; let
             while time.time() < deadline:
                 if os.path.exists(target) and os.path.getmtime(target) > before:
                     os.chmod(target, 0o600)
-                    print(f"Saved credentials (0600) to {target}", flush=True)
                     await asyncio.sleep(0.5)
+                    missing_after, has_refresh_after = missing_scopes_for_file(target, required)
+                    print(f"Saved credentials (0600) to {target}", flush=True)
+                    if missing_after:
+                        print(
+                            "WARNING: Partial OAuth grant — still missing scopes: "
+                            + ", ".join(short_scope(s) for s in missing_after),
+                            file=sys.stderr,
+                        )
+                        return 2
+                    if not has_refresh_after:
+                        print(
+                            "WARNING: Saved token has no refresh_token; revoke app access in Google Account settings and re-run.",
+                            file=sys.stderr,
+                        )
+                        return 2
+                    print(f"Verified all {len(required)} scopes and refresh_token for {email}.", flush=True)
                     return 0
                 await asyncio.sleep(0.5)
             print("Timed out waiting for OAuth callback.", file=sys.stderr)
@@ -168,7 +284,9 @@ with lib; let
             cleanup_oauth_callback_server()
 
 
-    raise SystemExit(asyncio.run(main()))
+    if mode == "status":
+        raise SystemExit(run_status())
+    raise SystemExit(asyncio.run(run_auth()))
     PY
   '';
 
@@ -516,23 +634,46 @@ in {
         description = ''
           Whether to expose the Google Workspace MCP server
           (taylorwilsdon/google_workspace_mcp) to hey-computer for Google
-          Calendar and Gmail (kept out of the global coding-CLI `mcp.nix` set).
+          Calendar, Gmail, Contacts, Drive, and Tasks (kept out of the global
+          coding-CLI `mcp.nix` set).
         '';
       };
 
       tools = mkOption {
         type = types.listOf types.str;
-        default = ["gmail" "calendar"];
-        description = "Google Workspace services registered on startup (`--tools`).";
+        default = ["gmail" "calendar" "contacts" "drive" "tasks"];
+        description = ''
+          Google Workspace services registered on startup (`--tools`). Ignored
+          when `permissions` is non-empty.
+        '';
       };
 
       toolTier = mkOption {
         type = types.enum ["core" "extended" "complete"];
-        default = "extended";
+        default = "complete";
         description = ''
-          Progressive tool tier (`--tool-tier`). `extended` with `["gmail" "calendar"]`
-          enables Calendar read/create/move/delete/freebusy and Gmail
-          search/read/thread/summarize/draft/send/labels while keeping the schema compact.
+          Progressive tool tier (`--tool-tier`). `complete` exposes
+          `list_task_lists` for multi-list Google Tasks and
+          `get_gmail_threads_content_batch` for Gmail while lazy MCP loading
+          keeps prompt overhead minimal.
+        '';
+      };
+
+      disabledTools = mkOption {
+        type = types.listOf types.str;
+        default = [];
+        description = ''
+          Optional subtractive list of tool names to disable via
+          `--disabled-tools` (e.g. `["manage_drive_access" "set_drive_file_permissions"]`).
+        '';
+      };
+
+      permissions = mkOption {
+        type = types.listOf types.str;
+        default = [];
+        description = ''
+          Optional granular `service:level` specs passed via `--permissions`
+          (mutually exclusive with `--tools`; replaces `tools` when non-empty).
         '';
       };
 
@@ -742,18 +883,18 @@ in {
           - Prefer the commands in the `desktop-scripts` skill (`voice-command`, `open-browser`, `connect-galaxy-buds`, `GalaxyBudsClient`, `gcalcli`, `nightlight`, `powermode`, `caffeinate`, `toggle-zen`, `darkman`, etc.) over improvising raw `hyprctl` calls.
           - Use the `desktop-context` skill (`desktop-context selection|clipboard|capture|copy|paste`) whenever the user refers to their selection, clipboard, screen, or asks to copy or paste a result; inspect captured PNG paths directly with `read_file`.
           - For live web page inspection or browser automation, use `agy`'s built-in `/browser` subagent (`nodejs`/`npx` are on PATH; attaches to local Chromium/Chrome v144+ when `chrome://inspect/#remote-debugging` is enabled).
-          - Prefer the `google-workspace` MCP tools for Google Calendar (reading, creating, moving, deleting events) and **personal** Gmail (searching, reading threads, drafting, sending)${optionalString (googleWorkspace.enable && googleWorkspace.accounts != []) ''— always pass `user_google_email` (${concatStringsSep ", " (map (a: "`${a}`") googleWorkspace.accounts)}; only accounts with `<email>.json` in `${googleWorkspace.credentialsDir}` are authenticated, so check which credentials exist or pick the matching work/personal account rather than triggering an interactive OAuth prompt mid-turn)''}; use `gcalcli` only as a read-only fallback if `google-workspace` OAuth is not configured yet.${optionalString systemArgs.useWorkProfileByDefault ''
+          - Prefer the `google-workspace` MCP tools for Google Calendar (reading, creating, moving, deleting events), **personal** Gmail (searching, reading threads, drafting, sending), **Google Contacts** (resolving people, emails, phone numbers, and organizations before emailing or scheduling), **Google Drive** (searching, listing, reading, downloading, creating, importing, and managing Drive files; offload large exported files > 16 KB into `$HEY_COMPUTER_ARTIFACTS_DIR` and only mutate, delete, or change sharing permissions when explicitly asked), and **Google Tasks** (always personal `${personalGoogleEmail}`)${optionalString (googleWorkspace.enable && googleWorkspace.accounts != []) ''— always pass `user_google_email` (${concatStringsSep ", " (map (a: "`${a}`") googleWorkspace.accounts)}; only accounts with `<email>.json` in `${googleWorkspace.credentialsDir}` are authenticated, so check which credentials exist or pick the matching work/personal account rather than triggering an interactive OAuth prompt mid-turn; if a newly enabled service reports missing OAuth scopes, pass the consent link cleanly or suggest running `google-workspace-auth <email> <personal|work>`)''}; use `gcalcli` only as a read-only fallback if `google-workspace` OAuth is not configured yet.${optionalString systemArgs.useWorkProfileByDefault ''
             - **Work email (`${systemArgs.git.email}` — Strato Mail via Slack, read-only):** Do **NOT** use Gmail tools for `${systemArgs.git.email}` (Google's Gmail API is enabled on the Workspace account but empty, so Gmail calls silently return no mail). Work email is hosted on Strato Mail and auto-forwarded into Slack DM **`D0BKG91AAAJ`** (user `USLACK` / `@slack` — **not** `@slackbot` / `D0BJAMZETT3`, which is empty).
               - Browse recent work emails: `conversations_history(channel_id="D0BKG91AAAJ", limit="7d")` (or `"1d"`, `"30d"`, `"50"`). Each message's `Text` has `Email, From: <sender>, Subject: <subject>` and `AttachmentIDs` has `Fxxxxxxxxxx (<subject>)`.
               - Search work emails: `conversations_search_messages(filter_in_im_or_mpim="@slack", search_query="<plain keywords>")` (never pass `D0BKG91AAAJ` or `@USLACK` to `filter_in_im_or_mpim`, and do not use `from:` syntax). Search results omit `Text` and `AttachmentIDs`, so hydrate matches with `conversations_replies(channel_id="D0BKG91AAAJ", thread_ts="<MsgID>")`.
               - Read an email body: only after filtering relevant messages by `From`/`Subject` (skip Linear/GitLab/newsletter noise unless asked), call `attachment_get_data(file_id="Fxxxxxxxxxx")` to read the `text/html` body. Slack MCP is read-only and cannot send, reply, archive, or mark work emails read.''}
 
-          ## Obsidian daily notes & reminders
+          ## Obsidian daily notes, reminders & Google Tasks
 
           - Daily notes live at `Journal/YYYY-MM-DD.md` inside the vault (e.g. `Journal/2026-11-23.md`).
           - An Obsidian plugin automatically carries unticked `- [ ]` checkboxes forward from past daily notes into today's note.
-          - When asked to "remind me to …" or add a todo, insert an unticked `- [ ] …` task at the **top** of the task list in today's `Journal/YYYY-MM-DD.md` (after any YAML frontmatter or top heading, creating the file if needed) without overwriting existing content.
-          - When asked to "remind me to … in X days" or for a specific future date, insert `- [ ] …` at the top of the task list in that target date's `Journal/YYYY-MM-DD.md` instead.
+          - **Undated reminders & TODOs → Obsidian:** When asked to "remind me to …" or "add a TODO …" **without** a specific date or time, insert an unticked `- [ ] …` checkbox at the **top** of the task list in today's `Journal/YYYY-MM-DD.md` (after any YAML frontmatter or top heading, creating the file if needed) without overwriting existing content.
+          - **Explicit tasks or dated/timed reminders & TODOs → Personal Google Tasks (`${personalGoogleEmail}`):** When asked to "add a task …", "remind me to … on `<date/datetime/time>`" (or "tomorrow", "in X days", etc.), or "add a todo for the `<Xth>`", create it in **Google Tasks** via `google-workspace` (`manage_task`) on the personal account **`${personalGoogleEmail}`** (never on the work account). Use `list_task_lists` if a specific list name is requested, otherwise use `"@default"`. Pass due dates as RFC 3339 (`YYYY-MM-DDTHH:MM:SSZ`); since Google Tasks stores due dates at day resolution, include any specific clock time in the task title or notes so it is not lost.
 
           ## Speech-recognition glossary
 
