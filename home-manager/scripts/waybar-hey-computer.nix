@@ -46,19 +46,20 @@ in {
                  elif .follow_up_secs != null then "followup"
                  elif ((.background_running // 0) + (.background_queued // 0)) > 0 then "background"
                  else "idle" end),
+                (.agent // "down"),
                 (.running_profile // ""),
                 ((.background_running // 0) | tostring),
                 ((.background_queued // 0) | tostring)
               ] | join("|")
-            ' <<<"$status_json" 2>/dev/null || printf 'idle||0|0'
+            ' <<<"$status_json" 2>/dev/null || printf 'idle|offline||0|0'
           else
-            printf 'idle||0|0'
+            printf 'idle|offline||0|0'
           fi
         }
 
         query_state() {
-          local state _profile _bg_run _bg_queue
-          IFS='|' read -r state _profile _bg_run _bg_queue <<<"$(query_status)"
+          local state _agent _profile _bg_run _bg_queue
+          IFS='|' read -r state _agent _profile _bg_run _bg_queue <<<"$(query_status)"
           printf '%s' "$state"
         }
 
@@ -91,6 +92,9 @@ in {
             ;;
           followup)
             exec ${scripts.rofi-launch} ask
+            ;;
+          background)
+            exec ${scripts.rofi-launch} tasks
             ;;
           *)
             exec ${scripts.rofi-launch} search
@@ -135,7 +139,7 @@ in {
           }
 
           while true; do
-            IFS='|' read -r state profile bg_run bg_queue <<<"$(query_status)"
+            IFS='|' read -r state agent profile bg_run bg_queue <<<"$(query_status)"
             bg_suffix=$(format_bg_suffix "$bg_run" "$bg_queue")
             case "$state" in
             thinking)
@@ -155,25 +159,35 @@ in {
             background)
               frame_idx=0
               if [ "$bg_run" -gt 0 ] && [ "$bg_queue" -gt 0 ]; then
-                tooltip="Ask Computer: $bg_run background task(s), $bg_queue queued"
+                tooltip="Ask Computer: $bg_run background task(s), $bg_queue queued (click for tasks)"
               elif [ "$bg_run" -gt 0 ]; then
-                tooltip="Ask Computer: $bg_run background task(s) running"
+                tooltip="Ask Computer: $bg_run background task(s) running (click for tasks)"
               else
-                tooltip="Ask Computer: $bg_queue background task(s) queued"
+                tooltip="Ask Computer: $bg_queue background task(s) queued (click for tasks)"
               fi
               emit "$(format_json " 󱚣 " "background" "$tooltip")"
               sleep_interruptible 0.5
               ;;
             *)
               frame_idx=0
-              emit '{"text":"  ","class":"idle","tooltip":""}'
+              case "$agent" in
+              starting)
+                emit "$(format_json "  " "idle" "Ask Computer: starting…")"
+                ;;
+              offline|down)
+                emit "$(format_json "  " "idle" "Ask Computer: offline")"
+                ;;
+              *)
+                emit '{"text":"  ","class":"idle","tooltip":""}'
+                ;;
+              esac
               sleep_interruptible 0.5
               ;;
             esac
           done
           ;;
         *)
-          IFS='|' read -r state profile bg_run bg_queue <<<"$(query_status)"
+          IFS='|' read -r state agent profile bg_run bg_queue <<<"$(query_status)"
           bg_suffix=$(format_bg_suffix "$bg_run" "$bg_queue")
           case "$state" in
           thinking)
@@ -188,16 +202,26 @@ in {
             ;;
           background)
             if [ "$bg_run" -gt 0 ] && [ "$bg_queue" -gt 0 ]; then
-              tooltip="Ask Computer: $bg_run background task(s), $bg_queue queued"
+              tooltip="Ask Computer: $bg_run background task(s), $bg_queue queued (click for tasks)"
             elif [ "$bg_run" -gt 0 ]; then
-              tooltip="Ask Computer: $bg_run background task(s) running"
+              tooltip="Ask Computer: $bg_run background task(s) running (click for tasks)"
             else
-              tooltip="Ask Computer: $bg_queue background task(s) queued"
+              tooltip="Ask Computer: $bg_queue background task(s) queued (click for tasks)"
             fi
             format_json " 󱚣 " "background" "$tooltip"
             ;;
           *)
-            echo '{"text":"  ","class":"idle","tooltip":""}'
+            case "$agent" in
+            starting)
+              format_json "  " "idle" "Ask Computer: starting…"
+              ;;
+            offline|down)
+              format_json "  " "idle" "Ask Computer: offline"
+              ;;
+            *)
+              echo '{"text":"  ","class":"idle","tooltip":""}'
+              ;;
+            esac
             ;;
           esac
           ;;

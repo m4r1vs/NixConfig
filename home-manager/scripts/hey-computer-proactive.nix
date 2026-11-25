@@ -1,21 +1,19 @@
-/*
-Shell-gated proactive automation for hey-computer (#26):
-- `location`: classifies current environment as `work`, `home`, or `other`
-  using connected monitor descriptions/models (`hyprctl monitors -j`) and
-  optional user-local `~/.config/hey-computer/locations.json` rules (IP prefix,
-  default gateway, Wi-Fi SSID, or monitor substrings — keeping private IPs and
-  network names out of git).
-- `morning-digest`: once-per-day post-wake digest gated on unlocked session,
-  online network, ready daemon, and daily stamp file; asks hey-computer in the
-  background (`-b -p deep --suppress-token HEARTBEAT_OK`) to write today's brief
-  to `Journal/YYYY-MM-DD.md` and/or notify.
-- `pre-daily`: workday 09:56 pre-standup brief gated on unlocked session,
-  work/home location (or work schedule override), network, and ready daemon.
-- Split failure routing: clean no-ops (`HEARTBEAT_OK` / skipped pre-checks)
-  stay silent; hard errors (daemon down, non-zero exit, failed task) append to
-  `$XDG_STATE_HOME/hey-computer/proactive/failures.log` and emit a rate-limited
-  failure alert (at most once per 4 hours per check).
-*/
+# Shell-gated proactive automation for hey-computer (#26):
+# - `location`: classifies current environment as `work`, `home`, or `other`
+#   using connected monitor descriptions/models (`hyprctl monitors -j`) and
+#   optional user-local `~/.config/hey-computer/locations.json` rules (IP prefix,
+#   default gateway, or monitor substrings — keeping private IPs and network names
+#   out of git).
+# - `collect-morning-digest`: fast 0-token pre-collector for hey-computer's native
+#   `[scheduler.jobs.morning-digest]` cron (`*/5 5-14 * * *`). Queries
+#   `hey-computer schedule show morning-digest --json` (`last_run_at`,
+#   `last_status`): exits 0 with empty stdout when today already succeeded/suppressed,
+#   when within a 15-minute failure retry cooldown, or while locked/offline;
+#   otherwise prints `date` + `location` so the scheduler wakes the agent.
+# - `collect-pre-daily`: fast 0-token pre-collector for `[scheduler.jobs.pre-daily]`
+#   (`weekdays 09:56`). Exits 0 with empty stdout while locked/offline or away from
+#   work/home; otherwise prints `date` + `location`.
+# - `morning-digest` / `pre-daily`: manual CLI runners retained for ad-hoc testing.
 {
   pkgs,
   lib,
@@ -230,9 +228,68 @@ in {
           run_and_wait_task "pre-daily" "$stamp" "$today" "$prompt" || exit 1
         }
 
+        collect_morning_digest() {
+          local today stamp sched_json last_run_at last_status last_date now_ms
+          today=$(date +%Y-%m-%d)
+          stamp="$STATE_DIR/morning-digest.last"
+
+          # Honour legacy stamp file on same-day upgrades.
+          if [ -f "$stamp" ] && [ "$(cat "$stamp" 2>/dev/null || true)" = "$today" ]; then
+            exit 0
+          fi
+
+          if sched_json=$(${heyComputer} schedule show morning-digest --json 2>/dev/null); then
+            last_run_at=$(jq -r '.last_run_at // 0' <<<"$sched_json" 2>/dev/null || printf '0')
+            last_status=$(jq -r '.last_status // ""' <<<"$sched_json" 2>/dev/null || true)
+            if [[ "$last_run_at" =~ ^[0-9]+$ ]] && [ "$last_run_at" -gt 0 ]; then
+              last_date=$(date -d "@$((last_run_at / 1000))" +%Y-%m-%d 2>/dev/null || true)
+              if [ "$last_date" = "$today" ] && { [ "$last_status" = "ok" ] || [ "$last_status" = "suppressed" ]; }; then
+                exit 0
+              fi
+              if [ "$last_status" = "failed" ]; then
+                now_ms=$(( $(date +%s) * 1000 ))
+                if [ $((now_ms - last_run_at)) -lt 900000 ]; then
+                  exit 0
+                fi
+              fi
+            fi
+          fi
+
+          session_unlocked || exit 0
+          network_online || exit 0
+
+          printf 'date: %s\nlocation: %s\n' "$today" "$(classify_location)"
+        }
+
+        collect_pre_daily() {
+          local today stamp loc
+          today=$(date +%Y-%m-%d)
+          stamp="$STATE_DIR/pre-daily.last"
+
+          if [ -f "$stamp" ] && [ "$(cat "$stamp" 2>/dev/null || true)" = "$today" ]; then
+            exit 0
+          fi
+
+          session_unlocked || exit 0
+          network_online || exit 0
+
+          loc=$(classify_location)
+          if [ -f "$CONFIG_FILE" ] && [ "$loc" = "other" ]; then
+            exit 0
+          fi
+
+          printf 'date: %s\nlocation: %s\n' "$today" "$loc"
+        }
+
         case "''${1-}" in
         location)
           classify_location
+          ;;
+        collect-morning-digest)
+          collect_morning_digest
+          ;;
+        collect-pre-daily)
+          collect_pre_daily
           ;;
         morning-digest)
           run_morning_digest
@@ -241,7 +298,7 @@ in {
           run_pre_daily
           ;;
         *)
-          echo "Usage: hey-computer-proactive <location|morning-digest|pre-daily>" >&2
+          echo "Usage: hey-computer-proactive <location|collect-morning-digest|collect-pre-daily|morning-digest|pre-daily>" >&2
           exit 2
           ;;
         esac

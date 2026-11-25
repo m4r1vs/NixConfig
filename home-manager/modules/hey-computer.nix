@@ -398,9 +398,12 @@ with lib; let
     caffeinate toggle              # toggle sleep/idle inhibition (Waybar icon updates immediately)
     toggle-zen                     # toggle zen mode (hides/shows Waybar and toggles swaync DND)
     switch-kb-layout               # cycle keyboard layout (US / DE)
+    pamixer --get-volume-human     # current volume% or "muted" (matches desktop volume keys)
+    pamixer -i 5                   # volume +5% (or: pamixer -d 5 | pamixer --set-volume <0-100> | pamixer -t)
+    brightnessctl -m               # screen brightness info; adjust: brightnessctl set +10% | 10%- | 50%
     spotify-like                   # like the currently playing Spotify track
     random-album-of-the-day        # pick a Bandcamp Album of the Day and play it on Spotify
-    gcalcli --nocolor agenda "now" "2 days"   # list upcoming calendar events (also: search, quick, add)
+    gcalcli --nocolor agenda "now" "2 days"   # read-only fallback only if google-workspace MCP is unavailable
     ${optionalString hasGalaxyBuds ''
       connect-galaxy-buds connect    # connect Galaxy Buds and switch PipeWire default audio
       connect-galaxy-buds disconnect # disconnect Galaxy Buds
@@ -759,30 +762,30 @@ in {
         type = types.bool;
         default = true;
         description = ''
-          Shell-gated systemd user timers (morning digest and pre-daily standup
-          brief) that run cheap local pre-checks before waking hey-computer with
-          `--suppress-token HEARTBEAT_OK` and route hard failures to a log +
-          rate-limited alert.
+          Seeded native scheduler jobs (`morning-digest` and `pre-daily`) gated
+          by `hey-computer-proactive` shell pre-collector scripts so clean skips
+          (`HEARTBEAT_OK` or locked/offline desktop) cost 0 tokens and hard
+          failures surface via `failure_deliver = "notify"`.
         '';
       };
 
       morningDigest.enable = mkOption {
         type = types.bool;
         default = true;
-        description = "Run the once-per-day post-wake morning digest timer.";
+        description = "Seed the once-per-day post-wake `morning-digest` scheduler job.";
       };
 
       preDaily = {
         enable = mkOption {
           type = types.bool;
           default = systemArgs.useWorkProfileByDefault;
-          description = "Run the workday pre-daily standup brief timer (10:00 daily).";
+          description = "Seed the workday `pre-daily` standup brief scheduler job (10:00 daily).";
         };
 
-        time = mkOption {
+        schedule = mkOption {
           type = types.str;
-          default = "Mon..Fri *-*-* 09:56:00";
-          description = "systemd OnCalendar expression for the pre-daily brief.";
+          default = "weekdays 09:56";
+          description = "hey-computer schedule expression (5-field cron or human spec) for `pre-daily`.";
         };
       };
     };
@@ -813,10 +816,17 @@ in {
       vault =
         mapNullable (name: "${config.home.homeDirectory}/Documents/${name}")
         (systemArgs.obsidianVault or null);
-      memory.file =
-        if (osConfig.age.secrets or {}) ? hey-computer-memory
-        then osConfig.age.secrets.hey-computer-memory.path
-        else "${config.xdg.configHome}/hey-computer/memory.md";
+      memory = {
+        file =
+          if (osConfig.age.secrets or {}) ? hey-computer-memory
+          then osConfig.age.secrets.hey-computer-memory.path
+          else "${config.xdg.configHome}/hey-computer/memory.md";
+        # Pair a mutable local memory file alongside read-only agenix memory so
+        # durable user facts ("remember that ...") can still be persisted.
+        extraFiles =
+          optional ((osConfig.age.secrets or {}) ? hey-computer-memory)
+          "${config.xdg.stateHome}/hey-computer/memory.md";
+      };
       # The same Obsidian the desktop starts (hyprland.nix startupApps); the
       # agent drives it through its obsidian-cli
       obsidian.package = pkgs.obsidian;
@@ -870,7 +880,7 @@ in {
             model = "gemini-4-hydrogen";
             thought_level = "low";
             max_turn_secs = 300;
-            max_tool_calls = 20;
+            max_tool_calls = 30;
             mcp_servers = fastMcpServers;
           };
           deep = {
@@ -893,6 +903,30 @@ in {
           max_concurrent = 1;
           max_queued = 32;
           profile = "deep";
+        };
+        scheduler = {
+          enabled = true;
+          jobs =
+            optionalAttrs (cfg.proactive.enable && cfg.proactive.morningDigest.enable) {
+              morning-digest = {
+                schedule = "*/5 5-14 * * *";
+                script = "${scripts.hey-computer-proactive} collect-morning-digest";
+                profile = "deep";
+                suppress_token = "HEARTBEAT_OK";
+                failure_deliver = "notify";
+                prompt = "Morning digest for the `date` and `location` in `<script_output>`. Check today's Google Calendar events, important unread personal Gmail messages (${personalGoogleEmail}) since last evening${optionalString systemArgs.useWorkProfileByDefault ", recent non-noise forwarded work emails in Slack DM D0BKG91AAAJ (never Gmail for ${systemArgs.git.email})"}, and any urgent Slack/Linear mentions if available. Append a concise '## Morning Brief' section to today's daily note `Journal/<date>.md` (creating it cleanly if needed) and reply with a short 2-3 sentence spoken-style summary. If nothing at all is on the calendar and there are no notable messages or mentions, reply with exactly HEARTBEAT_OK.";
+              };
+            }
+            // optionalAttrs (cfg.proactive.enable && cfg.proactive.preDaily.enable) {
+              pre-daily = {
+                schedule = cfg.proactive.preDaily.schedule;
+                script = "${scripts.hey-computer-proactive} collect-pre-daily";
+                profile = "deep";
+                suppress_token = "HEARTBEAT_OK";
+                failure_deliver = "notify";
+                prompt = "Pre-daily standup brief (10:00 daily, using `date` and `location` from `<script_output>`). First check today's Google Calendar: if I am out of office / on vacation or there is no 10:00 daily today, reply with exactly HEARTBEAT_OK. Otherwise, summarize in 3-5 concise bullets: (1) my active Linear issues / recent GitLab MR updates from yesterday, (2) any relevant Slack mentions since yesterday afternoon, and (3) what is on today's schedule after the daily.";
+              };
+            };
         };
         # A follow-up this soon after an answer continues the conversation
         conversation.follow_up_secs = 90;
@@ -947,7 +981,8 @@ in {
 
           - Never run `rebuild`, `nixos-rebuild`, `nh`, or `home-manager switch`.
           - Never modify, create, or delete files in `${host.flakePath}` (the system configuration checkout). Reading files there is fine when asked.
-          - Never push to git remotes or force-push unless the request explicitly asks for it.
+          - Never push to git remotes or force-push unless the request explicitly asks for it.${optionalString ((osConfig.age.secrets or {}) ? hey-computer-memory) ''
+              - Base memory at `${osConfig.age.secrets.hey-computer-memory.path}` is read-only (agenix); when asked to remember durable facts or preferences across restarts, append/edit `${config.xdg.stateHome}/hey-computer/memory.md` instead.''}
         '';
       };
     };
@@ -959,74 +994,19 @@ in {
     timeout, while delaying agy's warm start until the keyring is unlocked so
     it does not trigger a hidden gcr-prompter behind hyprlock and time out.
     */
-    systemd.user.services = mkMerge [
-      {
-        hey-computer.Service.ExecStart = mkForce (
-          toString (pkgs.writeShellScript "hey-computer-daemon" ''
-            trap 'exit 0' TERM INT
-            until ${pkgs.dbus}/bin/dbus-send --print-reply --dest=org.freedesktop.secrets \
-              /org/freedesktop/secrets/aliases/default \
-              org.freedesktop.DBus.Properties.Get \
-              string:org.freedesktop.Secret.Collection \
-              string:Locked 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q "boolean false"; do
-              sleep 0.5 &
-              wait $! || exit 0
-            done
-            exec ${getExe config.programs.hey-computer.package} daemon
-          '')
-        );
-      }
-      (mkIf (cfg.proactive.enable && cfg.proactive.morningDigest.enable) {
-        hey-computer-morning-digest = {
-          Unit = {
-            Description = "hey-computer shell-gated morning digest";
-            After = ["graphical-session.target" "hey-computer.service"];
-          };
-          Service = {
-            Type = "oneshot";
-            ExecStart = "${scripts.hey-computer-proactive} morning-digest";
-          };
-        };
-      })
-      (mkIf (cfg.proactive.enable && cfg.proactive.preDaily.enable) {
-        hey-computer-pre-daily = {
-          Unit = {
-            Description = "hey-computer shell-gated pre-daily standup brief";
-            After = ["graphical-session.target" "hey-computer.service"];
-          };
-          Service = {
-            Type = "oneshot";
-            ExecStart = "${scripts.hey-computer-proactive} pre-daily";
-          };
-        };
-      })
-    ];
-
-    systemd.user.timers = mkMerge [
-      (mkIf (cfg.proactive.enable && cfg.proactive.morningDigest.enable) {
-        hey-computer-morning-digest = {
-          Unit.Description = "Trigger hey-computer morning digest once per day after wake";
-          Timer = {
-            # Cheap shell pre-check exits in ~2 ms once today's stamp file exists;
-            # polling every 5 minutes across morning/midday catches both cold boot
-            # and resume from overnight suspend.
-            OnStartupSec = "2min";
-            OnCalendar = "*-*-* 05..14:00/5:00";
-            Persistent = false;
-          };
-          Install.WantedBy = ["graphical-session.target"];
-        };
-      })
-      (mkIf (cfg.proactive.enable && cfg.proactive.preDaily.enable) {
-        hey-computer-pre-daily = {
-          Unit.Description = "Trigger hey-computer pre-daily standup brief";
-          Timer = {
-            OnCalendar = cfg.proactive.preDaily.time;
-            Persistent = false;
-          };
-          Install.WantedBy = ["graphical-session.target"];
-        };
-      })
-    ];
+    systemd.user.services.hey-computer.Service.ExecStart = mkForce (
+      toString (pkgs.writeShellScript "hey-computer-daemon" ''
+        trap 'exit 0' TERM INT
+        until ${pkgs.dbus}/bin/dbus-send --print-reply --dest=org.freedesktop.secrets \
+          /org/freedesktop/secrets/aliases/default \
+          org.freedesktop.DBus.Properties.Get \
+          string:org.freedesktop.Secret.Collection \
+          string:Locked 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q "boolean false"; do
+          sleep 0.5 &
+          wait $! || exit 0
+        done
+        exec ${getExe config.programs.hey-computer.package} daemon
+      '')
+    );
   });
 }

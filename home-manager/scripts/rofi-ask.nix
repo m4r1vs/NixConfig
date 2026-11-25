@@ -49,7 +49,7 @@ in {
                   " [\(.background_queued) queued]"
                 else "" end) as $bg
               | if .running != null then
-                  "Ask Computer (replaces current)\($bg)..."
+                  "Ask Computer (replaces current, or /bg)\($bg)..."
                 elif .follow_up_secs != null then
                   "Follow up\($bg)..."
                 elif .agent == "down" then

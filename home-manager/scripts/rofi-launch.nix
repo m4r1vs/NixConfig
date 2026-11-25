@@ -66,6 +66,9 @@ in {
         ask)
           ${pkgs.rofi}/bin/rofi -modi ask:${scripts.rofi-ask} -show ask -theme-str "entry {placeholder:\"Ask Computer...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}"
           ;;
+        tasks)
+          ${pkgs.rofi}/bin/rofi -modi tasks:${scripts.rofi-hey-computer-tasks} -show tasks -theme-str "entry {placeholder:\"Background Tasks...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}window{padding: 32% 34%;}"
+          ;;
       ''}
         obsidian)
           ${pkgs.rofi}/bin/rofi -modi obsidian:${scripts.rofi-obsidian} -show obsidian -theme-str "entry {placeholder:\"Open Obsidian Note...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}"
@@ -80,7 +83,7 @@ in {
           ${scripts.rofi-translate}
           ;;
         *)
-          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|buds|cliphist|powermode|nightlight|lights|obsidian|gitlab|ocr|wifi|translate|ask}"
+          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|buds|cliphist|powermode|nightlight|lights|obsidian|gitlab|ocr|wifi|translate|ask|tasks}"
           exit 1
           ;;
       esac
