@@ -696,8 +696,8 @@ in {
           deep = {
             model = "gemini-4-neon";
             thought_level = "high";
-            max_turn_secs = 600;
-            max_tool_calls = 40;
+            max_turn_secs = 900;
+            max_tool_calls = 200;
             thinking_label = "Pondering Hard…";
           };
         };
@@ -742,7 +742,11 @@ in {
           - Prefer the commands in the `desktop-scripts` skill (`voice-command`, `open-browser`, `connect-galaxy-buds`, `GalaxyBudsClient`, `gcalcli`, `nightlight`, `powermode`, `caffeinate`, `toggle-zen`, `darkman`, etc.) over improvising raw `hyprctl` calls.
           - Use the `desktop-context` skill (`desktop-context selection|clipboard|capture|copy|paste`) whenever the user refers to their selection, clipboard, screen, or asks to copy or paste a result; inspect captured PNG paths directly with `read_file`.
           - For live web page inspection or browser automation, use `agy`'s built-in `/browser` subagent (`nodejs`/`npx` are on PATH; attaches to local Chromium/Chrome v144+ when `chrome://inspect/#remote-debugging` is enabled).
-          - Prefer the `google-workspace` MCP tools for Google Calendar (reading, creating, moving, deleting events) and Gmail (searching, reading threads, drafting, sending)${optionalString (googleWorkspace.enable && googleWorkspace.accounts != []) ''— always pass `user_google_email` (${concatStringsSep ", " (map (a: "`${a}`") googleWorkspace.accounts)}; only accounts with `<email>.json` in `${googleWorkspace.credentialsDir}` are authenticated, so check which credentials exist or pick the matching work/personal account rather than triggering an interactive OAuth prompt mid-turn)''}; use `gcalcli` only as a read-only fallback if `google-workspace` OAuth is not configured yet.
+          - Prefer the `google-workspace` MCP tools for Google Calendar (reading, creating, moving, deleting events) and **personal** Gmail (searching, reading threads, drafting, sending)${optionalString (googleWorkspace.enable && googleWorkspace.accounts != []) ''— always pass `user_google_email` (${concatStringsSep ", " (map (a: "`${a}`") googleWorkspace.accounts)}; only accounts with `<email>.json` in `${googleWorkspace.credentialsDir}` are authenticated, so check which credentials exist or pick the matching work/personal account rather than triggering an interactive OAuth prompt mid-turn)''}; use `gcalcli` only as a read-only fallback if `google-workspace` OAuth is not configured yet.${optionalString systemArgs.useWorkProfileByDefault ''
+            - **Work email (`${systemArgs.git.email}` — Strato Mail via Slack, read-only):** Do **NOT** use Gmail tools for `${systemArgs.git.email}` (Google's Gmail API is enabled on the Workspace account but empty, so Gmail calls silently return no mail). Work email is hosted on Strato Mail and auto-forwarded into Slack DM **`D0BKG91AAAJ`** (user `USLACK` / `@slack` — **not** `@slackbot` / `D0BJAMZETT3`, which is empty).
+              - Browse recent work emails: `conversations_history(channel_id="D0BKG91AAAJ", limit="7d")` (or `"1d"`, `"30d"`, `"50"`). Each message's `Text` has `Email, From: <sender>, Subject: <subject>` and `AttachmentIDs` has `Fxxxxxxxxxx (<subject>)`.
+              - Search work emails: `conversations_search_messages(filter_in_im_or_mpim="@slack", search_query="<plain keywords>")` (never pass `D0BKG91AAAJ` or `@USLACK` to `filter_in_im_or_mpim`, and do not use `from:` syntax). Search results omit `Text` and `AttachmentIDs`, so hydrate matches with `conversations_replies(channel_id="D0BKG91AAAJ", thread_ts="<MsgID>")`.
+              - Read an email body: only after filtering relevant messages by `From`/`Subject` (skip Linear/GitLab/newsletter noise unless asked), call `attachment_get_data(file_id="Fxxxxxxxxxx")` to read the `text/html` body. Slack MCP is read-only and cannot send, reply, archive, or mark work emails read.''}
 
           ## Obsidian daily notes & reminders
 

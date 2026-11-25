@@ -147,7 +147,11 @@ in {
           fi
 
           loc=$(classify_location)
-          prompt="Morning digest for $today (detected location: $loc). Check today's Google Calendar events, important unread Gmail messages since last evening, and any urgent Slack/Linear mentions if available. Append a concise '## Morning Brief' section to today's daily note Journal/$today.md (creating it cleanly if needed) and reply with a short 2-3 sentence spoken-style summary. If nothing at all is on the calendar and there are no notable messages or mentions, reply with exactly HEARTBEAT_OK."
+          prompt="Morning digest for $today (detected location: $loc). Check today's Google Calendar events, important unread personal Gmail messages (${
+          if systemArgs.useWorkProfileByDefault
+          then "marius.niveri@gmail.com"
+          else systemArgs.git.email
+        }) since last evening${lib.optionalString systemArgs.useWorkProfileByDefault ", recent non-noise forwarded work emails in Slack DM D0BKG91AAAJ (never Gmail for ${systemArgs.git.email})"}, and any urgent Slack/Linear mentions if available. Append a concise '## Morning Brief' section to today's daily note Journal/$today.md (creating it cleanly if needed) and reply with a short 2-3 sentence spoken-style summary. If nothing at all is on the calendar and there are no notable messages or mentions, reply with exactly HEARTBEAT_OK."
 
           if ${heyComputer} ask --background --profile deep --suppress-token HEARTBEAT_OK "$prompt" >/dev/null 2>&1; then
             printf '%s\n' "$today" > "$stamp"
