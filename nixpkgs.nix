@@ -84,6 +84,81 @@ in {
               wheel
             ];
 
+            # In stdio mode, Python's webbrowser.open() spawns xdg-open via
+            # BackgroundBrowser without redirecting stdout/stderr, so browsers
+            # like Chromium/Brave write "Opening in existing browser session."
+            # directly onto the MCP JSON-RPC stdout pipe, crashing the server
+            # and killing its localhost:8000 OAuth callback listener before the
+            # browser redirects. Launch the browser with stdin/stdout/stderr
+            # attached to DEVNULL instead.
+            postPatch = ''
+              python3 - <<'PY'
+              from pathlib import Path
+
+              path = Path("auth/google_auth.py")
+              src = path.read_text(encoding="utf-8")
+
+              helper = """
+              def _open_browser_stdio_safe(url: str) -> bool:
+                  \"\"\"Open a URL without letting the browser inherit stdio MCP pipes.\"\"\"
+                  import shlex
+                  import shutil
+                  import subprocess
+                  import sys
+
+                  candidates: list[list[str]] = []
+                  env_browser = os.environ.get("BROWSER", "")
+                  for entry in env_browser.split(os.pathsep):
+                      entry = entry.strip()
+                      if not entry:
+                          continue
+                      parts = shlex.split(entry)
+                      if not parts:
+                          continue
+                      if any("%s" in p for p in parts):
+                          candidates.append([p.replace("%s", url) for p in parts])
+                      else:
+                          candidates.append([*parts, url])
+                  if not candidates:
+                      if sys.platform == "darwin" and shutil.which("open"):
+                          candidates.append(["open", url])
+                      elif shutil.which("xdg-open"):
+                          candidates.append(["xdg-open", url])
+                  for cmd in candidates:
+                      try:
+                          proc = subprocess.Popen(
+                              cmd,
+                              stdin=subprocess.DEVNULL,
+                              stdout=subprocess.DEVNULL,
+                              stderr=subprocess.DEVNULL,
+                              close_fds=True,
+                              start_new_session=True,
+                          )
+                          try:
+                              if proc.wait(timeout=0.05) != 0:
+                                  continue
+                          except subprocess.TimeoutExpired:
+                              pass
+                          return True
+                      except OSError:
+                          continue
+                  return False
+
+
+              async def start_auth_flow("""
+
+              anchor = "async def start_auth_flow("
+              call_old = "browser_opened = await asyncio.to_thread(webbrowser.open, auth_url)"
+              call_new = "browser_opened = await asyncio.to_thread(_open_browser_stdio_safe, auth_url)"
+
+              assert anchor in src, "start_auth_flow anchor missing"
+              assert call_old in src, "webbrowser.open call missing"
+              src = src.replace(anchor, helper.lstrip("\n"), 1)
+              src = src.replace(call_old, call_new, 1)
+              path.write_text(src, encoding="utf-8")
+              PY
+            '';
+
             pythonRelaxDeps = true;
 
             dependencies = with python3Packages; [

@@ -38,10 +38,6 @@ with lib; let
         env = {
           WORKSPACE_MCP_CREDENTIALS_DIR = googleWorkspace.credentialsDir;
           GOOGLE_CLIENT_SECRET_PATH = googleWorkspace.clientSecretFile;
-          # Prevent Python's webbrowser.open() on unauthenticated tool calls from
-          # spawning a browser that writes "Opening in existing browser session."
-          # to inherited stdout and corrupts the stdio MCP JSON-RPC pipe.
-          BROWSER = "${pkgs.coreutils}/bin/false";
         };
       };
     };
