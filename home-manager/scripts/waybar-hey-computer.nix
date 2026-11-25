@@ -3,14 +3,15 @@ Waybar custom/hey-computer module script (replaces custom/os-logo on hosts with
 hey-computer enabled).
 
 Continuous watcher (`watch` subcommand, restarted by Waybar if it exits):
-- Thinking: animates quickly through 6 robot Nerd Font icons (no text, no color)
+- Thinking / speaking: animates quickly through robot Nerd Font icons (no text, no color)
 - Follow-up window open: shows the robot-chat icon (no text, no color)
 - Background tasks active while foreground is idle: shows a steady robot icon
   with background task count in tooltip
 - Otherwise (idle / starting / down): shows the NixOS logo like custom/os-logo
 
-Click actions preserve custom/os-logo when idle (left: rofi search, right: power
-menu), cancel when thinking, and open rofi-ask when the follow-up window is open.
+Click actions preserve custom/os-logo when idle (left: rofi search, middle:
+toggle spoken voice answers, right: power menu), cancel when thinking or
+speaking, and open rofi-ask when the follow-up window is open.
 */
 {
   pkgs,
@@ -28,6 +29,7 @@ in {
     runtimeInputs = [
       pkgs.coreutils
       pkgs.jq
+      pkgs.libnotify
       pkgs.procps
     ];
     text =
@@ -43,35 +45,41 @@ in {
             jq -r '
               [
                 (if .running != null then "thinking"
+                 elif (.speaking // false) then "speaking"
                  elif .follow_up_secs != null then "followup"
                  elif ((.background_running // 0) + (.background_queued // 0)) > 0 then "background"
                  else "idle" end),
                 (.agent // "down"),
                 (.running_profile // ""),
                 ((.background_running // 0) | tostring),
-                ((.background_queued // 0) | tostring)
+                ((.background_queued // 0) | tostring),
+                (if (.speak // false) then "1" else "0" end)
               ] | join("|")
-            ' <<<"$status_json" 2>/dev/null || printf 'idle|offline||0|0'
+            ' <<<"$status_json" 2>/dev/null || printf 'idle|offline||0|0|0'
           else
-            printf 'idle|offline||0|0'
+            printf 'idle|offline||0|0|0'
           fi
         }
 
         query_state() {
-          local state _agent _profile _bg_run _bg_queue
-          IFS='|' read -r state _agent _profile _bg_run _bg_queue <<<"$(query_status)"
+          local state _agent _profile _bg_run _bg_queue _speak
+          IFS='|' read -r state _agent _profile _bg_run _bg_queue _speak <<<"$(query_status)"
           printf '%s' "$state"
         }
 
         format_bg_suffix() {
-          local bg_run="$1" bg_queue="$2"
+          local bg_run="$1" bg_queue="$2" speak="$3" out=""
           if [ "$bg_run" -gt 0 ] && [ "$bg_queue" -gt 0 ]; then
-            printf ' • %s bg, %s queued' "$bg_run" "$bg_queue"
+            out=" • ''${bg_run} bg, ''${bg_queue} queued"
           elif [ "$bg_run" -gt 0 ]; then
-            printf ' • %s bg' "$bg_run"
+            out=" • ''${bg_run} bg"
           elif [ "$bg_queue" -gt 0 ]; then
-            printf ' • %s queued' "$bg_queue"
+            out=" • ''${bg_queue} queued"
           fi
+          if [ "$speak" = "1" ]; then
+            out="''${out} • speak on"
+          fi
+          printf '%s' "$out"
         }
 
         format_json() {
@@ -84,9 +92,26 @@ in {
           ${heyComputer} cancel >/dev/null 2>&1 || true
           wake_watcher
           ;;
+        quiet-speech)
+          if [ "$(query_state)" = "speaking" ]; then
+            ${heyComputer} cancel >/dev/null 2>&1 || true
+            wake_watcher
+          fi
+          ;;
+        toggle-speak)
+          if speak_json=$(${heyComputer} speak toggle --json 2>/dev/null); then
+            enabled=$(jq -r '.enabled // false' <<<"$speak_json" 2>/dev/null || printf 'false')
+            if [ "$enabled" = "true" ]; then
+              notify-send --app-name=hey-computer --urgency=low --expire-time=2500 "Ask Computer" "Spoken voice answers: ON" || true
+            else
+              notify-send --app-name=hey-computer --urgency=low --expire-time=2500 "Ask Computer" "Spoken voice answers: OFF" || true
+            fi
+          fi
+          wake_watcher
+          ;;
         click)
           case "$(query_state)" in
-          thinking)
+          thinking | speaking)
             ${heyComputer} cancel >/dev/null 2>&1 || true
             wake_watcher
             ;;
@@ -102,12 +127,15 @@ in {
           esac
           ;;
         right-click)
-          if [ "$(query_state)" = "thinking" ]; then
+          case "$(query_state)" in
+          thinking | speaking)
             ${heyComputer} cancel >/dev/null 2>&1 || true
             wake_watcher
-          else
+            ;;
+          *)
             exec ${scripts.rofi-launch} power
-          fi
+            ;;
+          esac
           ;;
         watch)
           sleep_pid=""
@@ -139,8 +167,8 @@ in {
           }
 
           while true; do
-            IFS='|' read -r state agent profile bg_run bg_queue <<<"$(query_status)"
-            bg_suffix=$(format_bg_suffix "$bg_run" "$bg_queue")
+            IFS='|' read -r state agent profile bg_run bg_queue speak <<<"$(query_status)"
+            bg_suffix=$(format_bg_suffix "$bg_run" "$bg_queue" "$speak")
             case "$state" in
             thinking)
               profile_tag=""
@@ -148,8 +176,12 @@ in {
                 profile_tag=" ($profile)"
               fi
               emit "$(format_json " ''${frames[$frame_idx]} " "thinking" "Ask Computer: thinking''${profile_tag}''${bg_suffix} (click to cancel)")"
-              frame_idx=$(( (frame_idx + 1) % ''${#frames[@]} ))
+              frame_idx=$(((frame_idx + 1) % ''${#frames[@]}))
               sleep_interruptible 0.18
+              ;;
+            speaking)
+              emit "$(format_json " 󰕾 " "speaking" "Ask Computer: speaking''${bg_suffix} (click to stop)")"
+              sleep_interruptible 0.3
               ;;
             followup)
               frame_idx=0
@@ -174,11 +206,15 @@ in {
               starting)
                 emit "$(format_json "  " "idle" "Ask Computer: starting…")"
                 ;;
-              offline|down)
+              offline | down)
                 emit "$(format_json "  " "idle" "Ask Computer: offline")"
                 ;;
               *)
-                emit '{"text":"  ","class":"idle","tooltip":""}'
+                if [ "$speak" = "1" ]; then
+                  emit "$(format_json "  " "idle" "Ask Computer: spoken answers ON (middle-click to mute)")"
+                else
+                  emit '{"text":"  ","class":"idle","tooltip":""}'
+                fi
                 ;;
               esac
               sleep_interruptible 0.5
@@ -187,8 +223,8 @@ in {
           done
           ;;
         *)
-          IFS='|' read -r state agent profile bg_run bg_queue <<<"$(query_status)"
-          bg_suffix=$(format_bg_suffix "$bg_run" "$bg_queue")
+          IFS='|' read -r state agent profile bg_run bg_queue speak <<<"$(query_status)"
+          bg_suffix=$(format_bg_suffix "$bg_run" "$bg_queue" "$speak")
           case "$state" in
           thinking)
             profile_tag=""
@@ -196,6 +232,9 @@ in {
               profile_tag=" ($profile)"
             fi
             format_json " 󱜙 " "thinking" "Ask Computer: thinking''${profile_tag}''${bg_suffix} (click to cancel)"
+            ;;
+          speaking)
+            format_json " 󰕾 " "speaking" "Ask Computer: speaking''${bg_suffix} (click to stop)"
             ;;
           followup)
             format_json " 󱚥 " "followup" "Ask Computer: follow-up window''${bg_suffix} (click to ask)"
@@ -215,11 +254,15 @@ in {
             starting)
               format_json "  " "idle" "Ask Computer: starting…"
               ;;
-            offline|down)
+            offline | down)
               format_json "  " "idle" "Ask Computer: offline"
               ;;
             *)
-              echo '{"text":"  ","class":"idle","tooltip":""}'
+              if [ "$speak" = "1" ]; then
+                format_json "  " "idle" "Ask Computer: spoken answers ON (middle-click to mute)"
+              else
+                echo '{"text":"  ","class":"idle","tooltip":""}'
+              fi
               ;;
             esac
             ;;

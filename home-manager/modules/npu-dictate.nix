@@ -178,6 +178,31 @@ in {
                 ];
                 run = [(getExe config.programs.hey-computer.package) "ask" "--voice"];
               };
+              speak_on = {
+                phrases = [
+                  "Spoken answers on"
+                  "Voice answers on"
+                  "Sprachausgabe an"
+                  "Sprachausgabe ein"
+                ];
+                run = [(getExe config.programs.hey-computer.package) "speak" "on"];
+              };
+              speak_off = {
+                phrases = [
+                  "Spoken answers off"
+                  "Voice answers off"
+                  "Sprachausgabe aus"
+                ];
+                run = [(getExe config.programs.hey-computer.package) "speak" "off"];
+              };
+              speak_toggle = {
+                phrases = [
+                  "Toggle spoken answers"
+                  "Toggle voice answers"
+                  "Sprachausgabe umschalten"
+                ];
+                run = [(getExe config.programs.hey-computer.package) "speak" "toggle"];
+              };
             }
             // optionalAttrs (host.windowManager == "hyprland") (
               {

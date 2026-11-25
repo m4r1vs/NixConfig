@@ -64,7 +64,7 @@ in {
       ''}
         ${lib.optionalString hasHeyComputer ''
         ask)
-          ${pkgs.rofi}/bin/rofi -modi ask:${scripts.rofi-ask} -show ask -theme-str "entry {placeholder:\"Ask Computer...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}"
+          HEY_COMPUTER_REPLY_TO="''${2:-}" ${pkgs.rofi}/bin/rofi -modi ask:${scripts.rofi-ask} -show ask -theme-str "entry {placeholder:\"Ask Computer...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}"
           ;;
         tasks)
           ${pkgs.rofi}/bin/rofi -modi tasks:${scripts.rofi-hey-computer-tasks} -show tasks -theme-str "entry {placeholder:\"Background Tasks...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}window{padding: 32% 34%;}"

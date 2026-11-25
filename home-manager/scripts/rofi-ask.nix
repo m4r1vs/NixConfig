@@ -35,11 +35,14 @@ in {
         }
 
         retv="''${ROFI_RETV:-0}"
+        reply_to="''${HEY_COMPUTER_REPLY_TO:-}"
 
         # Initial invocation: emit only the dynamic placeholder (zero rows, like calc)
         if [ "$retv" -eq 0 ]; then
           placeholder="Ask Computer..."
-          if status_json=$(${heyComputer} status --json 2>/dev/null); then
+          if [ -n "$reply_to" ]; then
+            placeholder="Reply to #''${reply_to}..."
+          elif status_json=$(${heyComputer} status --json 2>/dev/null); then
             placeholder=$(jq -r '
               (if (.background_running // 0) > 0 and (.background_queued // 0) > 0 then
                   " [\(.background_running) bg, \(.background_queued) queued]"
@@ -69,15 +72,31 @@ in {
         trimmed=$(printf '%s' "$query" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
         [ -n "$trimmed" ] || exit 0
 
+        case "$trimmed" in
+        "/speak" | "/tts")
+          ${heyComputer} speak toggle >/dev/null 2>&1 || true
+          pkill -USR1 -f 'waybar-hey-computer watch' 2>/dev/null || true
+          exit 0
+          ;;
+        "/distill")
+          nohup ${heyComputer} distill </dev/null >/dev/null 2>&1 &
+          pkill -USR1 -f 'waybar-hey-computer watch' 2>/dev/null || true
+          exit 0
+          ;;
+        esac
+
         args=(ask --source typed)
+        explicit_new=0
         while true; do
           case "$trimmed" in
           "! "*)
             args+=(--new)
+            explicit_new=1
             trimmed=''${trimmed#"! "}
             ;;
           "/new "*)
             args+=(--new)
+            explicit_new=1
             trimmed=''${trimmed#"/new "}
             ;;
           "/deep "*)
@@ -106,6 +125,10 @@ in {
           esac
           trimmed=$(printf '%s' "$trimmed" | sed 's/^[[:space:]]*//')
         done
+
+        if [ -n "$reply_to" ] && [ "$explicit_new" -eq 0 ]; then
+          args+=(--reply-to "$reply_to")
+        fi
 
         [ -n "$trimmed" ] || exit 0
 

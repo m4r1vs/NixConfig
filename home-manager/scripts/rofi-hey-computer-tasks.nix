@@ -40,6 +40,14 @@ in {
           printf '\000no-custom\037true\n'
           set_placeholder "Background Tasks..."
           printf '󰚩  Ask Computer…\000info\037ask\n'
+          local speak_label="OFF"
+          if speak_json=$(${heyComputer} speak status --json 2>/dev/null); then
+            if [ "$(jq -r '.enabled // false' <<<"$speak_json" 2>/dev/null)" = "true" ]; then
+              speak_label="ON"
+            fi
+          fi
+          printf '󰕾  Spoken voice answers: %s  (Enter to toggle)\000info\037toggle-speak\n' "$speak_label"
+          printf '󰧑  Distill recent memory & skills…\000info\037distill\n'
 
           local tasks_json
           if ! tasks_json=$(${heyComputer} tasks list --all --limit 12 --json 2>/dev/null); then
@@ -81,6 +89,16 @@ in {
         case "$info" in
         ask)
           nohup ${pkgs.rofi}/bin/rofi -modi ask:${scripts.rofi-ask} -show ask -theme-str 'entry {placeholder:"Ask Computer...";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}' </dev/null >/dev/null 2>&1 &
+          exit 0
+          ;;
+        toggle-speak)
+          ${heyComputer} speak toggle >/dev/null 2>&1 || true
+          wake_watcher
+          render_menu
+          exit 0
+          ;;
+        distill)
+          nohup ${heyComputer} distill </dev/null >/dev/null 2>&1 &
           exit 0
           ;;
         cancel:*)

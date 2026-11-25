@@ -60,6 +60,49 @@ with lib; let
   # `deep` inherits all enabled MCP servers.
   fastMcpServers = filter (name: !(elem name ["context7" "nixos"])) enabledMcpNames;
 
+  mkPiperVoice = {
+    name,
+    onnxUrl,
+    onnxHash,
+    jsonUrl,
+    jsonHash,
+  }: let
+    onnx = pkgs.fetchurl {
+      url = onnxUrl;
+      hash = onnxHash;
+    };
+    jsonCfg = pkgs.fetchurl {
+      url = jsonUrl;
+      hash = jsonHash;
+    };
+  in
+    pkgs.linkFarm "piper-voice-${name}" [
+      {
+        name = "${name}.onnx";
+        path = onnx;
+      }
+      {
+        name = "${name}.onnx.json";
+        path = jsonCfg;
+      }
+    ];
+
+  piperVoiceEn = mkPiperVoice {
+    name = "en_US-lessac-medium";
+    onnxUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx";
+    onnxHash = "sha256-Xv4J5pkCGHgnr2RuGm6dJp3udp+Yd9F7FrG0buqvAZ8=";
+    jsonUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json";
+    jsonHash = "sha256-7+GcQXvtBV8taZCCSMa6ZQ+hNbyGiw5quz2hgdq2kKA=";
+  };
+
+  piperVoiceDe = mkPiperVoice {
+    name = "de_DE-thorsten-high";
+    onnxUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx";
+    onnxHash = "sha256-nfHEPGEUnvmznmGOK4YfvkHh/OqTkLLaxi6HYVc+pPE=";
+    jsonUrl = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx.json";
+    jsonHash = "sha256-bec0RE5MP54zt+vidG28GbcehfYT55xlrPYjIAuZp2o=";
+  };
+
   # Launches the default browser with the work or personal profile in its own
   # systemd scope so windows outlive hey-computer daemon restarts.
   openBrowser = pkgs.writeShellScript "open-browser" ''
@@ -398,6 +441,7 @@ with lib; let
     caffeinate toggle              # toggle sleep/idle inhibition (Waybar icon updates immediately)
     toggle-zen                     # toggle zen mode (hides/shows Waybar and toggles swaync DND)
     switch-kb-layout               # cycle keyboard layout (US / DE)
+    hey-computer speak on          # enable spoken TTS answers for voice requests (or: off | toggle | status)
     pamixer --get-volume-human     # current volume% or "muted" (matches desktop volume keys)
     pamixer -i 5                   # volume +5% (or: pamixer -d 5 | pamixer --set-volume <0-100> | pamixer -t)
     brightnessctl -m               # screen brightness info; adjust: brightnessctl set +10% | 10%- | 50%
@@ -788,6 +832,38 @@ in {
           description = "hey-computer schedule expression (5-field cron or human spec) for `pre-daily`.";
         };
       };
+
+      weeklyDistill = {
+        enable = mkOption {
+          type = types.bool;
+          default = true;
+          description = "Seed a weekly Sunday 18:00 `hey-computer distill --background` review job.";
+        };
+
+        schedule = mkOption {
+          type = types.str;
+          default = "sun 18:00";
+          description = "hey-computer schedule expression for weekly memory & skill distillation.";
+        };
+      };
+    };
+
+    speak = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = ''
+          Configure local EN/DE Piper streaming TTS (`programs.hey-computer.speak`),
+          starting muted by default (`defaultOn = false`) and toggleable via Waybar
+          middle-click, Rofi `/speak`, or voice command.
+        '';
+      };
+
+      defaultOn = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Initial spoken-answer state before runtime `hey-computer speak toggle`.";
+      };
     };
   };
 
@@ -833,6 +909,14 @@ in {
       openhue = mkIf hasOpenhue {
         enable = true;
         package = pkgs.openhue-cli;
+      };
+      speak = mkIf cfg.speak.enable {
+        enable = true;
+        defaultOn = cfg.speak.defaultOn;
+        voiceOnly = true;
+        mediaDuck = "pause";
+        voiceEn = "${piperVoiceEn}/en_US-lessac-medium.onnx";
+        voiceDe = "${piperVoiceDe}/de_DE-thorsten-high.onnx";
       };
       /*
       On top of the module's basics (a shell, coreutils and the text tools,
@@ -926,8 +1010,17 @@ in {
                 failure_deliver = "notify";
                 prompt = "Pre-daily standup brief (10:00 daily, using `date` and `location` from `<script_output>`). First check today's Google Calendar: if I am out of office / on vacation or there is no 10:00 daily today, reply with exactly HEARTBEAT_OK. Otherwise, summarize in 3-5 concise bullets: (1) my active Linear issues / recent GitLab MR updates from yesterday, (2) any relevant Slack mentions since yesterday afternoon, and (3) what is on today's schedule after the daily.";
               };
+            }
+            // optionalAttrs (cfg.proactive.enable && cfg.proactive.weeklyDistill.enable) {
+              weekly-distill = {
+                schedule = cfg.proactive.weeklyDistill.schedule;
+                script = "${getExe config.programs.hey-computer.package} distill --since 7d --background >/dev/null";
+                no_agent = true;
+                failure_deliver = "notify";
+              };
             };
         };
+        present.reply_command = ["${scripts.rofi-launch}" "ask" "{id}"];
         # A follow-up this soon after an answer continues the conversation
         conversation.follow_up_secs = 90;
         context = {

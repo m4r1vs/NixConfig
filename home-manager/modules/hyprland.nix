@@ -563,8 +563,8 @@ in {
               workspace = "special:obsidian_nvim silent";
             }
           ]
-          # hey-computer's long answers (Marker, app id set by its viewer
-          # command): a column for reading, over whatever is open
+          # hey-computer's answer viewer (hey-computer-viewer, app_id =
+          # hey-computer.answer): a column for reading, over whatever is open
           ++ optionals config.programs.configured.hey-computer.enable [
             {
               match.initial_class = "^(hey-computer\\.answer)$";
@@ -762,8 +762,9 @@ in {
             (binddrint "v" "Dictate (transcribe)" (exec "${npuDictate} stop"))
           ]
           ++ lib.optionals (config.programs.configured.npu-dictate.enable && config.programs.configured.hey-computer.enable) [
-            # Reuses the `binddrint "v"` release bind above so no second letter spawns `stop` on release.
-            (bindd "SUPER + ALT + v" "Ask Computer (hold to talk)" (exec "${npuDictate} start --to assistant"))
+            # Reuses the `binddrint "v"` release bind above so no second letter spawns `stop` on release;
+            # `quiet-speech` stops any ongoing TTS playback immediately on key press.
+            (bindd "SUPER + ALT + v" "Ask Computer (hold to talk)" (exec "${scripts.waybar-hey-computer} quiet-speech; ${npuDictate} start --to assistant"))
           ]
           ++ lib.optionals config.programs.configured.hey-computer.enable [
             (bindd "SUPER + a" "Ask Computer" (exec "${scripts.rofi-launch} ask"))

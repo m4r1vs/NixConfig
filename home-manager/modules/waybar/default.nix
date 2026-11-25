@@ -303,6 +303,7 @@ in {
               format = "{}";
               rotate = 0;
               on-click = "${scripts.waybar-hey-computer} click";
+              on-click-middle = "${scripts.waybar-hey-computer} toggle-speak";
               on-click-right = "${scripts.waybar-hey-computer} right-click";
               return-type = "json";
               tooltip = true;
