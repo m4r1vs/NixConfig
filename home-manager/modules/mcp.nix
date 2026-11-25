@@ -182,7 +182,7 @@ in {
     home.activation =
       optionalAttrs gitlab.enable {
         gitlabMcpTokenDir = hm.dag.entryAfter ["writeBoundary"] ''
-          run mkdir -p ${escapeShellArg (dirOf gitlab.tokenPath)}
+          run install -d -m 700 ${escapeShellArg (dirOf gitlab.tokenPath)}
         '';
       }
       // optionalAttrs slack.enable {

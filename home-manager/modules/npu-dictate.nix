@@ -266,8 +266,11 @@ in {
 
     # Debug level logs every start/stop the daemon receives, including the ones
     # it ignores, which is what shows whether a key release ever reached it.
-    systemd.user.services.npu-dictate.Service.Environment = [
-      "RUST_LOG=npu_dictate=debug,info"
-    ];
+    systemd.user.services.npu-dictate = {
+      Unit.X-Restart-Triggers = ["${config.xdg.configFile."npu-dictate/config.toml".source}"];
+      Service.Environment = [
+        "RUST_LOG=npu_dictate=debug,info"
+      ];
+    };
   });
 }

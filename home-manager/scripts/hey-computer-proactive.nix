@@ -72,14 +72,21 @@ in {
           if pgrep -x hyprlock >/dev/null 2>&1; then
             return 1
           fi
-          if dbus-send --print-reply --dest=org.freedesktop.secrets \
+          dbus-send --print-reply --dest=org.freedesktop.secrets \
             /org/freedesktop/secrets/aliases/default \
             org.freedesktop.DBus.Properties.Get \
             string:org.freedesktop.Secret.Collection \
-            string:Locked 2>/dev/null | grep -q "boolean true"; then
-            return 1
+            string:Locked 2>/dev/null | grep -q "boolean false"
+        }
+
+        use_live_hyprland_instance() {
+          local instances sig
+          instances=$(hyprctl instances -j 2>/dev/null) || return 0
+          sig=$(jq -r --arg sig "''${HYPRLAND_INSTANCE_SIGNATURE:-}" --arg wl "''${WAYLAND_DISPLAY:-}" \
+            '(map(select(.instance == $sig)) + map(select(.wl_socket == $wl)) + .)[0].instance // empty' <<<"$instances" 2>/dev/null || true)
+          if [ -n "$sig" ]; then
+            export HYPRLAND_INSTANCE_SIGNATURE="$sig"
           fi
-          return 0
         }
 
         network_online() {
@@ -95,36 +102,75 @@ in {
         }
 
         classify_location() {
-          local monitors_json="" ips="" gateways=""
+          use_live_hyprland_instance
+          local monitors_json="" ips="" gateways="" rules_json='{"work":{"monitors":["LS27D70xE","HK2YA02261"]},"home":{"monitors":["27GL850","912NTVSCD959"]}}'
           monitors_json=$(hyprctl monitors -j 2>/dev/null || printf '[]')
           ips=$(ip -4 -o addr show scope global 2>/dev/null | jq -Rsc 'split("\n") | map(select(length > 0))' || printf '[]')
           gateways=$(ip -4 route show default 2>/dev/null | jq -Rsc 'split("\n") | map(select(length > 0))' || printf '[]')
 
           if [ -f "$CONFIG_FILE" ]; then
-            local matched
-            matched=$(jq -r \
-              --argjson monitors "$monitors_json" \
-              --argjson ips "$ips" \
-              --argjson gateways "$gateways" '
-              def any_match($haystacks; $needles):
-                ($needles // []) as $ns |
-                if ($ns | length) == 0 then false
-                else any($haystacks[]; . as $h | any($ns[]; . as $n | ($n | length) > 0 and ($h | ascii_downcase | contains($n | ascii_downcase))))
-                end;
-              ($monitors | map([.name, .description, .make, .model, .serial] | map(select(. != null)) | join(" "))) as $mon_strs |
-              if (any_match($ips; .work.ip_prefixes) or any_match($gateways; .work.gateways) or any_match($mon_strs; .work.monitors)) then
-                "work"
-              elif (any_match($ips; .home.ip_prefixes) or any_match($gateways; .home.gateways) or any_match($mon_strs; .home.monitors)) then
-                "home"
-              else
-                "other"
-              end
-            ' "$CONFIG_FILE" 2>/dev/null || printf 'other')
-            printf '%s\n' "$matched"
-            return 0
+            rules_json=$(jq -c --argjson base "$rules_json" '$base * .' "$CONFIG_FILE" 2>/dev/null || printf '%s' "$rules_json")
           fi
 
-          printf 'other\n'
+          jq -rn \
+            --argjson rules "$rules_json" \
+            --argjson monitors "$monitors_json" \
+            --argjson ips "$ips" \
+            --argjson gateways "$gateways" '
+            def any_match($haystacks; $needles):
+              ($needles // []) as $ns |
+              if ($ns | length) == 0 then false
+              else any($haystacks[]; . as $h | any($ns[]; . as $n | ($n | length) > 0 and ($h | ascii_downcase | contains($n | ascii_downcase))))
+              end;
+            ($monitors | map([.name, .description, .make, .model, .serial] | map(select(. != null)) | join(" "))) as $mon_strs |
+            if (any_match($ips; $rules.work.ip_prefixes) or any_match($gateways; $rules.work.gateways) or any_match($mon_strs; $rules.work.monitors)) then
+              "work"
+            elif (any_match($ips; $rules.home.ip_prefixes) or any_match($gateways; $rules.home.gateways) or any_match($mon_strs; $rules.home.monitors)) then
+              "home"
+            else
+              "other"
+            end
+          ' 2>/dev/null || printf 'other\n'
+        }
+
+        run_and_wait_task() {
+          local check="$1"
+          local stamp="$2"
+          local today="$3"
+          local prompt="$4"
+          local task_id task_json status err_msg deadline
+
+          if ! task_id=$(${heyComputer} ask --background --profile deep --suppress-token HEARTBEAT_OK "$prompt" 2>/dev/null) \
+            || ! [[ "$task_id" =~ ^[0-9]+$ ]]; then
+            log_failure "$check" "failed to submit $check task to hey-computer."
+            return 1
+          fi
+
+          # Wait up to 20 minutes for the queued/running background task to
+          # reach a terminal status so `.last` is only stamped on real success
+          # and execution errors (such as LimitReached) land in failures.log.
+          deadline=$(( $(date +%s) + 1200 ))
+          while [ "$(date +%s)" -lt "$deadline" ]; do
+            sleep 2
+            if ! task_json=$(${heyComputer} tasks show "$task_id" --json 2>/dev/null); then
+              continue
+            fi
+            status=$(jq -r '.status // ""' <<<"$task_json" 2>/dev/null || true)
+            case "$status" in
+            completed|suppressed)
+              printf '%s\n' "$today" > "$stamp"
+              return 0
+              ;;
+            failed|cancelled)
+              err_msg=$(jq -r '.error_message // .fail_reason // "task failed"' <<<"$task_json" 2>/dev/null || printf 'task failed')
+              log_failure "$check" "task #$task_id $status: $err_msg"
+              return 1
+              ;;
+            esac
+          done
+
+          log_failure "$check" "timed out waiting for background task #$task_id"
+          return 1
         }
 
         run_morning_digest() {
@@ -153,12 +199,7 @@ in {
           else systemArgs.git.email
         }) since last evening${lib.optionalString systemArgs.useWorkProfileByDefault ", recent non-noise forwarded work emails in Slack DM D0BKG91AAAJ (never Gmail for ${systemArgs.git.email})"}, and any urgent Slack/Linear mentions if available. Append a concise '## Morning Brief' section to today's daily note Journal/$today.md (creating it cleanly if needed) and reply with a short 2-3 sentence spoken-style summary. If nothing at all is on the calendar and there are no notable messages or mentions, reply with exactly HEARTBEAT_OK."
 
-          if ${heyComputer} ask --background --profile deep --suppress-token HEARTBEAT_OK "$prompt" >/dev/null 2>&1; then
-            printf '%s\n' "$today" > "$stamp"
-          else
-            log_failure "morning-digest" "failed to submit morning digest task to hey-computer."
-            exit 1
-          fi
+          run_and_wait_task "morning-digest" "$stamp" "$today" "$prompt" || exit 1
         }
 
         run_pre_daily() {
@@ -186,12 +227,7 @@ in {
 
           prompt="Pre-daily standup brief (10:00 daily, $today, location: $loc). First check today's Google Calendar: if I am out of office / on vacation or there is no 10:00 daily today, reply with exactly HEARTBEAT_OK. Otherwise, summarize in 3-5 concise bullets: (1) my active Linear issues / recent GitLab MR updates from yesterday, (2) any relevant Slack mentions since yesterday afternoon, and (3) what is on today's schedule after the daily."
 
-          if ${heyComputer} ask --background --profile deep --suppress-token HEARTBEAT_OK "$prompt" >/dev/null 2>&1; then
-            printf '%s\n' "$today" > "$stamp"
-          else
-            log_failure "pre-daily" "failed to submit pre-daily brief task to hey-computer."
-            exit 1
-          fi
+          run_and_wait_task "pre-daily" "$stamp" "$today" "$prompt" || exit 1
         }
 
         case "''${1-}" in

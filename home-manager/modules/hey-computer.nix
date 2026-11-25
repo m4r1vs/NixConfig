@@ -48,6 +48,8 @@ with lib; let
         env = {
           WORKSPACE_MCP_CREDENTIALS_DIR = googleWorkspace.credentialsDir;
           GOOGLE_CLIENT_SECRET_PATH = googleWorkspace.clientSecretFile;
+          WORKSPACE_MCP_PORT = toString googleWorkspace.port;
+          WORKSPACE_MCP_RESOLVED_PORT = "1";
         };
       };
     };
@@ -129,10 +131,21 @@ with lib; let
     import json
     import os
     import re
+    import socket
     import subprocess
     import sys
     import time
-    from urllib.parse import quote
+    from urllib.parse import quote, unquote
+
+    # Bind an ephemeral loopback port before importing `auth.*` so this CLI
+    # helper always runs its own isolated OAuth callback server (with the newly
+    # configured scopes and its own PKCE state) instead of colliding with or
+    # delegating to a running `workspace-mcp` daemon child.
+    if os.environ.get("GW_MODE") == "auth":
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as _sock:
+            _sock.bind(("127.0.0.1", 0))
+            os.environ["WORKSPACE_MCP_PORT"] = str(_sock.getsockname()[1])
+            os.environ["WORKSPACE_MCP_RESOLVED_PORT"] = "1"
 
     from auth.google_auth import start_auth_flow
     from auth.oauth_callback_server import (
@@ -253,15 +266,31 @@ with lib; let
         else:
             print(msg, flush=True)
 
-        print("Waiting up to 10 minutes for http://localhost:8000/oauth2callback ...", flush=True)
+        redirect_uri = get_oauth_redirect_uri()
+        print(f"Waiting up to 10 minutes for {redirect_uri} ...", flush=True)
         deadline = time.time() + 600
+        want_lower = email.strip().lower()
         try:
             while time.time() < deadline:
+                matched_path = None
                 if os.path.exists(target) and os.path.getmtime(target) > before:
-                    os.chmod(target, 0o600)
+                    matched_path = target
+                elif os.path.isdir(creds_dir):
+                    for fname in os.listdir(creds_dir):
+                        if not fname.endswith(".json") or fname == "oauth_states.json":
+                            continue
+                        cand = os.path.join(creds_dir, fname)
+                        if os.path.getmtime(cand) <= before:
+                            continue
+                        stem = unquote(fname[:-5]).strip().lower()
+                        if stem == want_lower:
+                            matched_path = cand
+                            break
+                if matched_path:
+                    os.chmod(matched_path, 0o600)
                     await asyncio.sleep(0.5)
-                    missing_after, has_refresh_after = missing_scopes_for_file(target, required)
-                    print(f"Saved credentials (0600) to {target}", flush=True)
+                    missing_after, has_refresh_after = missing_scopes_for_file(matched_path, required)
+                    print(f"Saved credentials (0600) to {matched_path}", flush=True)
                     if missing_after:
                         print(
                             "WARNING: Partial OAuth grant — still missing scopes: "
@@ -681,6 +710,16 @@ in {
         type = types.bool;
         default = true;
         description = "Run in single-user mode (`--single-user`) using cached credentials in `credentialsDir`.";
+      };
+
+      port = mkOption {
+        type = types.port;
+        default = 18765;
+        description = ''
+          Local loopback port used by `google-workspace-mcp`'s OAuth/attachment
+          helper server (`WORKSPACE_MCP_PORT`), kept off port 8000 so local
+          development servers never collide with it.
+        '';
       };
 
       credentialsDir = mkOption {
