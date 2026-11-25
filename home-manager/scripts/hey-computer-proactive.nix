@@ -1,4 +1,4 @@
-# Shell-gated proactive automation for hey-computer (#26):
+# Shell-gated proactive automation for hey-computer (#26, #33, #34):
 # - `location`: classifies current environment as `work`, `home`, or `other`
 #   using connected monitor descriptions/models (`hyprctl monitors -j`) and
 #   optional user-local `~/.config/hey-computer/locations.json` rules (IP prefix,
@@ -7,18 +7,23 @@
 # - `weather [location]`: fetches today's Open-Meteo daily forecast using VPN-safe
 #   coordinates, persists 14 days atomically in `weather-history.json`, and emits
 #   a deterministic day-over-day delta (`changed`, `unchanged`, or `unavailable`).
+# - `workday [--refresh] [--cached-only] [--json|--quiet]`: deterministic 0-token
+#   workday detector backed by a 30-minute TTL cache in `$STATE_DIR/workday.json`
+#   (mode `0600`). Resolves `day_off` in 0 ms when work mode is disabled or on
+#   weekends, and queries personal Google Calendar (`events.list`) on weekdays
+#   for `"Arbeit"` minus out-of-office / all-day absence overrides.
 # - `collect-morning-digest`: fast 0-token pre-collector for hey-computer's native
 #   `[scheduler.jobs.morning-digest]` cron (`*/5 5-14 * * *`). Queries
 #   `hey-computer schedule show morning-digest --json` (`last_run_at`,
 #   `last_status`): exits 0 with empty stdout when today already succeeded/suppressed,
 #   when within a 15-minute failure retry cooldown, or while locked/offline
 #   (bypassed when `HEY_COMPUTER_SCHEDULE_MANUAL=1`); otherwise prints `date`,
-#   `location`, and the deterministic `weather_*` block so the scheduler wakes
-#   the agent.
+#   `location`, `workday_*`, and the deterministic `weather_*` block so the
+#   scheduler wakes the agent.
 # - `collect-pre-daily`: fast 0-token pre-collector for `[scheduler.jobs.pre-daily]`
-#   (`weekdays 09:56`). Exits 0 with empty stdout while locked/offline or away from
-#   work/home (bypassed when `HEY_COMPUTER_SCHEDULE_MANUAL=1`); otherwise prints
-#   `date` + `location`.
+#   (`weekdays 09:56`). Exits 0 with empty stdout while locked/offline, away from
+#   work/home, or on a `day_off` (bypassed when `HEY_COMPUTER_SCHEDULE_MANUAL=1`);
+#   otherwise prints `date`, `location`, and `workday_*`.
 # - `morning-digest` / `pre-daily`: manual CLI runners retained for ad-hoc testing.
 {
   pkgs,
@@ -29,32 +34,436 @@
   ...
 }: let
   hmCfg = config.home-manager.users.${systemArgs.username};
+  hcCfg = hmCfg.programs.configured.hey-computer;
   heyComputer = lib.getExe hmCfg.programs.hey-computer.package;
   defaultCity = hmCfg.programs.configured.waybar.weatherLocation or "Hamburg";
   defaultLat = toString (hmCfg.services.configured.darkman.latitude or 53.54);
   defaultLon = toString (hmCfg.services.configured.darkman.longitude or 9.98);
+  workEnabled = hcCfg.work.enable or (systemArgs.useWorkProfileByDefault or false);
   personalGoogleEmail =
-    if systemArgs.useWorkProfileByDefault
-    then "marius.niveri@gmail.com"
-    else systemArgs.git.email;
-  morningDigestPromptFile = pkgs.writeText "morning-digest-prompt.txt" ''
-    Prepare today's Morning Brief using the `date`, `location`, and `weather_*` fields in `<untrusted_collector_output>`.
+    hcCfg.personalEmail
+    or (
+      if (systemArgs.useWorkProfileByDefault or false)
+      then "marius.niveri@gmail.com"
+      else systemArgs.git.email
+    );
+  workGoogleEmail =
+    hcCfg.work.email
+    or (
+      if (systemArgs.useWorkProfileByDefault or false)
+      then systemArgs.git.email
+      else "marius@meetovo.de"
+    );
+  workSlackEmailDmChannel = hcCfg.work.slackEmailDmChannel or "D0BKG91AAAJ";
+  googleCredsDir =
+    hcCfg.googleWorkspace.credentialsDir
+    or "${hmCfg.xdg.stateHome}/google-workspace-mcp/credentials";
+  googleWorkspacePython = pkgs.python3.withPackages (_: pkgs.google-workspace-mcp.dependencies);
+  googleWorkspaceSitePackages = "${pkgs.google-workspace-mcp}/${pkgs.python3.sitePackages}";
 
-    Gather context:
-    - Today's Google Calendar events (24-hour times).
-    - Important unread personal Gmail messages (${personalGoogleEmail}) since last evening${lib.optionalString systemArgs.useWorkProfileByDefault ", recent non-noise forwarded work emails in Slack DM D0BKG91AAAJ (never Gmail for ${systemArgs.git.email})"}, and any urgent Slack or Linear mentions if available.
-    - Any overdue or due-today personal Google Tasks (${personalGoogleEmail}) and open items in today's `Journal/<date>.md` if it already exists.
+  workdayCheckScript = pkgs.writeText "hey-computer-workday.py" ''
+    import json
+    import logging
+    import os
+    import re
+    import sys
+    import tempfile
+    import time
+    from datetime import date, datetime, timedelta
+    from zoneinfo import ZoneInfo
 
-    If nothing at all is on today's calendar and there are no notable messages, mentions, or due tasks, reply with exactly `HEARTBEAT_OK` and do not modify the daily note.
+    import requests
+    from google.auth.transport.requests import Request as GoogleAuthRequest
 
-    Otherwise, write and reply with the full editorial Markdown brief directly (never a 2-sentence summary):
-    1. Start with `# Morning Brief — <Weekday>, <D Month>` (e.g. `# Morning Brief — Wednesday, 25 November`).
-    2. Immediately below the H1, write a single plain-prose opening paragraph of 3–4 sentences (~50–80 words) beginning with a normal capitalized letter — never a bullet list, blockquote, emoji, quotation mark, bold/italic marker, or code span first (this paragraph renders with a Reforma 1969 editorial drop cap).
-    3. Opening cadence: warm, observant, lightly poetic editorial prose that notices the real shape and rhythm of the day ahead (open stretches, meeting clusters, transitions). No exclamation marks, and never use clichés such as "tapestry", "symphony", "whispers", "gentle reminder", or "embrace the day".
-    4. Weather rule (strict): ONLY if `weather_status: changed` in `<untrusted_collector_output>`, weave `weather_today` and the concrete shift from `weather_delta` naturally into the opening paragraph. If `weather_status` is `unchanged`, `unavailable`, or absent, omit weather completely and silently — do not mention forecasts, temperatures, sky conditions, or that weather is unchanged.
-    5. Below the opening paragraph, include crisp, scannable `##` sections (`## Schedule`, `## Mail & Messages`, `## Tasks & Focus` as applicable) with 24-hour `HH:MM` times, concrete senders, and concise items. Omit any empty section.
-    6. Widget restraint: call `show_widget` (`calendar_agenda`) at most once, and only when today has 3 or more timed events or a scheduling conflict.
-    7. Idempotent daily-note sync: update today's `Journal/<date>.md` in the Obsidian vault. Create the file cleanly if needed, or if a `## Morning Brief` section already exists, replace it in place (up to the next `## ` heading or EOF) without duplicating on re-runs and without disturbing frontmatter, existing `- [ ]` tasks, or other notes. Inside `Journal/<date>.md`, nest the brief under `## Morning Brief` using `###` subheadings.
+    logging.getLogger("auth").setLevel(logging.CRITICAL)
+
+    ARBEIT_RE = re.compile(r"^arbeit(?:\b|[\s:–—-]|$)", re.IGNORECASE)
+    ABSENCE_RE = re.compile(
+        r"(?i)(?:^frei$|\b(?:"
+        r"urlaub|vacation|pto|time\s+off|day\s+off|freier?\s+tag|"
+        r"gleittag|flex\s+day|sonderurlaub|überstundenabbau|"
+        r"out\s+of\s+office|ooo|abwesend|krank|krankmeldung|"
+        r"sick(?:\s+day|\s+leave)?|feiertag|public\s+holiday|bank\s+holiday"
+        r")\b)"
+    )
+
+
+    class _TimeoutSession(requests.Session):
+        def __init__(self, timeout: float = 5.0) -> None:
+            super().__init__()
+            self._timeout = timeout
+
+        def request(self, *args, **kwargs):
+            kwargs.setdefault("timeout", self._timeout)
+            return super().request(*args, **kwargs)
+
+
+    def get_local_tz():
+        tz_name = os.environ.get("WORKDAY_TZ") or os.environ.get("TZ") or "Europe/Berlin"
+        try:
+            return ZoneInfo(tz_name)
+        except Exception:
+            return datetime.now().astimezone().tzinfo
+
+
+    def write_json_atomic(path: str, payload: dict) -> None:
+        parent = os.path.dirname(path) or "."
+        os.makedirs(parent, mode=0o700, exist_ok=True)
+        fd, tmp_path = tempfile.mkstemp(dir=parent, prefix=".tmp-workday-")
+        try:
+            os.chmod(tmp_path, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump(payload, fh, ensure_ascii=False)
+                fh.write("\n")
+            os.replace(tmp_path, path)
+        except Exception:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise
+
+
+    def _parse_iso_dt(raw: str, tz) -> datetime:
+        dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=tz)
+        return dt.astimezone(tz)
+
+
+    def _is_declined_by_self(event: dict) -> bool:
+        for att in event.get("attendees") or []:
+            if isinstance(att, dict) and att.get("self") is True and att.get("responseStatus") == "declined":
+                return True
+        return False
+
+
+    def evaluate_events(
+        events: list[dict],
+        today: date,
+        tz=None,
+        checked_at: int | None = None,
+    ) -> dict:
+        if tz is None:
+            tz = get_local_tz()
+        if checked_at is None:
+            checked_at = int(time.time())
+
+        today_str = today.isoformat()
+        if today.isoweekday() in (6, 7):
+            return {
+                "date": today_str,
+                "checked_at": checked_at,
+                "status": "day_off",
+                "is_workday": False,
+                "workday": False,
+                "reason": "weekend",
+                "arbeit_event": None,
+                "override_event": None,
+            }
+
+        day_start = datetime(today.year, today.month, today.day, 0, 0, 0, tzinfo=tz)
+        next_day = today + timedelta(days=1)
+        day_end = datetime(next_day.year, next_day.month, next_day.day, 0, 0, 0, tzinfo=tz)
+        work_win_start = datetime(today.year, today.month, today.day, 8, 0, 0, tzinfo=tz)
+        work_win_end = datetime(today.year, today.month, today.day, 18, 0, 0, tzinfo=tz)
+
+        arbeit_label: str | None = None
+        arbeit_windows: list[tuple[datetime, datetime]] = []
+        ooo_candidates: list[tuple[str, datetime, datetime]] = []
+        all_day_override: str | None = None
+
+        for ev in events:
+            if not isinstance(ev, dict):
+                continue
+            if ev.get("status") == "cancelled":
+                continue
+            if _is_declined_by_self(ev):
+                continue
+
+            start = ev.get("start") or {}
+            end = ev.get("end") or {}
+            summary = (ev.get("summary") or "").strip()
+            event_type = ev.get("eventType") or "default"
+
+            is_all_day = "date" in start and "dateTime" not in start
+            if is_all_day:
+                try:
+                    start_date = date.fromisoformat(start["date"])
+                    end_date = (
+                        date.fromisoformat(end["date"])
+                        if "date" in end
+                        else start_date + timedelta(days=1)
+                    )
+                except (TypeError, ValueError):
+                    continue
+                if not (start_date <= today < end_date):
+                    continue
+                ev_start = day_start
+                ev_end = day_end
+                label = summary or "Out of office"
+            elif "dateTime" in start:
+                try:
+                    ev_start = _parse_iso_dt(start["dateTime"], tz)
+                    ev_end = (
+                        _parse_iso_dt(end["dateTime"], tz)
+                        if "dateTime" in end
+                        else ev_start
+                    )
+                except (TypeError, ValueError):
+                    continue
+                if ev_end == ev_start:
+                    if not (day_start <= ev_start < day_end):
+                        continue
+                elif not (ev_end > day_start and ev_start < day_end):
+                    continue
+                time_span = f"{ev_start.strftime('%H:%M')}–{ev_end.strftime('%H:%M')}"
+                label = f"{summary} ({time_span})" if summary else f"Out of office ({time_span})"
+            else:
+                continue
+
+            if event_type == "outOfOffice":
+                ooo_candidates.append((label, ev_start, ev_end))
+
+            if is_all_day and summary and ABSENCE_RE.search(summary):
+                if all_day_override is None:
+                    all_day_override = summary
+
+            if summary and ARBEIT_RE.match(summary):
+                if arbeit_label is None:
+                    arbeit_label = label
+                arbeit_windows.append((ev_start, ev_end))
+
+        override_label: str | None = None
+        for label, ooo_start, ooo_end in ooo_candidates:
+            win_overlap = (
+                min(ooo_end, work_win_end) - max(ooo_start, work_win_start)
+            ).total_seconds()
+            overlaps_arbeit = any(
+                ooo_end > a_start and ooo_start < a_end
+                for a_start, a_end in arbeit_windows
+            )
+            if win_overlap >= 4 * 3600 or overlaps_arbeit:
+                override_label = label
+                break
+
+        if override_label is None and all_day_override is not None:
+            override_label = all_day_override
+
+        if arbeit_label is None:
+            return {
+                "date": today_str,
+                "checked_at": checked_at,
+                "status": "day_off",
+                "is_workday": False,
+                "workday": False,
+                "reason": "no_arbeit_event",
+                "arbeit_event": None,
+                "override_event": override_label,
+            }
+
+        if override_label is not None:
+            return {
+                "date": today_str,
+                "checked_at": checked_at,
+                "status": "day_off",
+                "is_workday": False,
+                "workday": False,
+                "reason": "vacation_override",
+                "arbeit_event": arbeit_label,
+                "override_event": override_label,
+            }
+
+        return {
+            "date": today_str,
+            "checked_at": checked_at,
+            "status": "workday",
+            "is_workday": True,
+            "workday": True,
+            "reason": "arbeit_scheduled",
+            "arbeit_event": arbeit_label,
+            "override_event": None,
+        }
+
+
+    def _unknown_result(today_str: str, checked_at: int, reason: str) -> dict:
+        return {
+            "date": today_str,
+            "checked_at": checked_at,
+            "status": "unknown",
+            "is_workday": True,
+            "workday": True,
+            "reason": reason,
+            "arbeit_event": None,
+            "override_event": None,
+        }
+
+
+    def _store_credentials_atomic(creds_path: str, creds) -> None:
+        creds_data = {
+            "token": creds.token,
+            "refresh_token": creds.refresh_token,
+            "token_uri": creds.token_uri,
+            "client_id": creds.client_id,
+            "client_secret": creds.client_secret,
+            "scopes": list(creds.scopes) if creds.scopes is not None else None,
+            "expiry": creds.expiry.isoformat() if creds.expiry else None,
+        }
+        write_json_atomic(creds_path, creds_data)
+
+
+    def check_calendar_workday(email: str, creds_dir: str, today: date, cache_path: str) -> dict:
+        tz = get_local_tz()
+        now = int(time.time())
+        today_str = today.isoformat()
+
+        if today.isoweekday() in (6, 7):
+            result = evaluate_events([], today, tz=tz, checked_at=now)
+            write_json_atomic(cache_path, result)
+            return result
+
+        if not creds_dir or not os.path.isdir(creds_dir):
+            result = _unknown_result(today_str, now, "missing_credentials")
+            write_json_atomic(cache_path, result)
+            return result
+
+        try:
+            from auth.credential_store import LocalDirectoryCredentialStore
+
+            store = LocalDirectoryCredentialStore(creds_dir)
+            creds = store.get_credential(email)
+        except Exception:
+            result = _unknown_result(today_str, now, "missing_credentials")
+            write_json_atomic(cache_path, result)
+            return result
+
+        if creds is None:
+            result = _unknown_result(today_str, now, "missing_credentials")
+            write_json_atomic(cache_path, result)
+            return result
+
+        if not creds.valid:
+            if creds.expired and creds.refresh_token:
+                try:
+                    creds.refresh(GoogleAuthRequest(session=_TimeoutSession(timeout=5.0)))
+                    creds_path = store._get_credential_path(email)
+                    _store_credentials_atomic(creds_path, creds)
+                except Exception:
+                    result = _unknown_result(today_str, now, "api_error")
+                    write_json_atomic(cache_path, result)
+                    return result
+            else:
+                result = _unknown_result(today_str, now, "missing_credentials")
+                write_json_atomic(cache_path, result)
+                return result
+
+        day_start = datetime(today.year, today.month, today.day, 0, 0, 0, tzinfo=tz)
+        next_day = today + timedelta(days=1)
+        day_end = datetime(next_day.year, next_day.month, next_day.day, 0, 0, 0, tzinfo=tz)
+
+        try:
+            resp = requests.get(
+                "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+                headers={"Authorization": f"Bearer {creds.token}"},
+                params={
+                    "singleEvents": "true",
+                    "timeMin": day_start.isoformat(),
+                    "timeMax": day_end.isoformat(),
+                    "maxResults": "100",
+                    "orderBy": "startTime",
+                },
+                timeout=5,
+            )
+            resp.raise_for_status()
+            payload = resp.json()
+            items = payload.get("items") or []
+            if not isinstance(items, list):
+                raise ValueError("Calendar API returned non-list items")
+        except Exception:
+            result = _unknown_result(today_str, now, "api_error")
+            write_json_atomic(cache_path, result)
+            return result
+
+        result = evaluate_events(items, today, tz=tz, checked_at=now)
+        write_json_atomic(cache_path, result)
+        return result
+
+
+    def main() -> int:
+        if len(sys.argv) != 5:
+            sys.stderr.write("Usage: hey-computer-workday.py <email> <creds_dir> <YYYY-MM-DD> <cache_path>\n")
+            return 2
+        email, creds_dir, today_str, cache_path = sys.argv[1:5]
+        today = date.fromisoformat(today_str)
+        result = check_calendar_workday(email, creds_dir, today, cache_path)
+        sys.stdout.write(json.dumps(result, ensure_ascii=False) + "\n")
+        return 0
+
+
+    if __name__ == "__main__":
+        raise SystemExit(main())
+  '';
+
+  morningDigestPromptFile = pkgs.writeText "morning-digest-prompt.txt" (
+    if workEnabled
+    then ''
+      Prepare today's Morning Brief using the `date`, `location`, `workday_*`, and `weather_*` fields in `<untrusted_collector_output>`.
+
+      Step 1 — Determine Workday vs. Day Off BEFORE calling any work tools:
+      - Read `workday_status` in `<untrusted_collector_output>`:
+        - `workday_status: day_off` → Today is a **Weekend / Day Off** (personal-only mode).
+        - `workday_status: workday` → Today is a **Working Day** (personal + work mode).
+        - `workday_status: unknown` (or absent) → Query **personal** Google Calendar (`${personalGoogleEmail}`) for today FIRST before touching any work tool. Treat today as a **Working Day** ONLY if today is Mon–Fri, has an `"Arbeit"` event on `${personalGoogleEmail}`, and has no all-day vacation / out-of-office override; otherwise treat today as a **Weekend / Day Off**.
+
+      Step 2 — Gather context strictly according to the mode:
+      - **Always (Personal):**
+        - Today's personal Google Calendar events (`${personalGoogleEmail}`, 24-hour times).
+        - Important unread personal Gmail messages (`${personalGoogleEmail}`) since last evening.
+        - Overdue or due-today personal Google Tasks (`${personalGoogleEmail}`) and open `- [ ]` items in today's `Journal/<date>.md` if it already exists.
+      - **ONLY on a Working Day (strictly SKIP on Weekends / Days Off — do NOT call `slack`, `linear`, `gitlab`, or query `${workGoogleEmail}`):**
+        - Today's work Google Calendar events (`${workGoogleEmail}`, 24-hour times).
+        - Recent non-noise forwarded work emails in Slack DM `${workSlackEmailDmChannel}` (never Gmail for `${workGoogleEmail}`).
+        - Urgent Slack mentions/DMs, active Linear mentions/blockers, and GitLab MRs needing attention (reviews requested, failed pipelines, or new threads).
+
+      If nothing at all is on today's relevant calendar(s) and there are no notable messages, mentions, or due tasks, reply with exactly `HEARTBEAT_OK` and do not modify the daily note.
+
+      Otherwise, write and reply with the full editorial Markdown brief directly (never a 2-sentence summary):
+      1. Start with `# Morning Brief — <Weekday>, <D Month>` (e.g. `# Morning Brief — Wednesday, 25 November`).
+      2. Immediately below the H1, write a single plain-prose opening paragraph of 3–4 sentences (~50–80 words) beginning with a normal capitalized letter — never a bullet list, blockquote, emoji, quotation mark, bold/italic marker, or code span first (this paragraph renders with a Reforma 1969 editorial drop cap). On days off, let the prose reflect an unhurried off-work day without mentioning skipped work tools.
+      3. Opening cadence: warm, observant, lightly poetic editorial prose that notices the real shape and rhythm of the day ahead (open stretches, meeting clusters, transitions). No exclamation marks, and never use clichés such as "tapestry", "symphony", "whispers", "gentle reminder", or "embrace the day".
+      4. Weather rule (strict): ONLY if `weather_status: changed` in `<untrusted_collector_output>`, weave `weather_today` and the concrete shift from `weather_delta` naturally into the opening paragraph. If `weather_status` is `unchanged`, `unavailable`, or absent, omit weather completely and silently — do not mention forecasts, temperatures, sky conditions, or that weather is unchanged.
+      5. Below the opening paragraph, include crisp, scannable `##` sections (`## Schedule`, `## Mail & Messages`, `## Work & Reviews`, `## Tasks & Focus` as applicable; omit `## Work & Reviews` and any empty section on days off) with 24-hour `HH:MM` times, concrete senders, and concise items.
+      6. Widget restraint: call `show_widget` (`calendar_agenda`) at most once, and only when today has 3 or more timed events or a scheduling conflict.
+      7. Idempotent daily-note sync: update today's `Journal/<date>.md` in the Obsidian vault. Create the file cleanly if needed, or if a `## Morning Brief` section already exists, replace it in place (up to the next `## ` heading or EOF) without duplicating on re-runs and without disturbing frontmatter, existing `- [ ]` tasks, or other notes. Inside `Journal/<date>.md`, nest the brief under `## Morning Brief` using `###` subheadings.
+    ''
+    else ''
+      Prepare today's Morning Brief using the `date`, `location`, `workday_*`, and `weather_*` fields in `<untrusted_collector_output>`.
+
+      Gather context (personal-only mode):
+      - Today's personal Google Calendar events (`${personalGoogleEmail}`, 24-hour times).
+      - Important unread personal Gmail messages (`${personalGoogleEmail}`) since last evening.
+      - Overdue or due-today personal Google Tasks (`${personalGoogleEmail}`) and open `- [ ]` items in today's `Journal/<date>.md` if it already exists.
+
+      If nothing at all is on today's calendar and there are no notable messages or due tasks, reply with exactly `HEARTBEAT_OK` and do not modify the daily note.
+
+      Otherwise, write and reply with the full editorial Markdown brief directly (never a 2-sentence summary):
+      1. Start with `# Morning Brief — <Weekday>, <D Month>` (e.g. `# Morning Brief — Wednesday, 25 November`).
+      2. Immediately below the H1, write a single plain-prose opening paragraph of 3–4 sentences (~50–80 words) beginning with a normal capitalized letter — never a bullet list, blockquote, emoji, quotation mark, bold/italic marker, or code span first (this paragraph renders with a Reforma 1969 editorial drop cap).
+      3. Opening cadence: warm, observant, lightly poetic editorial prose that notices the real shape and rhythm of the day ahead (open stretches, meeting clusters, transitions). No exclamation marks, and never use clichés such as "tapestry", "symphony", "whispers", "gentle reminder", or "embrace the day".
+      4. Weather rule (strict): ONLY if `weather_status: changed` in `<untrusted_collector_output>`, weave `weather_today` and the concrete shift from `weather_delta` naturally into the opening paragraph. If `weather_status` is `unchanged`, `unavailable`, or absent, omit weather completely and silently — do not mention forecasts, temperatures, sky conditions, or that weather is unchanged.
+      5. Below the opening paragraph, include crisp, scannable `##` sections (`## Schedule`, `## Mail & Messages`, `## Tasks & Focus` as applicable) with 24-hour `HH:MM` times, concrete senders, and concise items. Omit any empty section.
+      6. Widget restraint: call `show_widget` (`calendar_agenda`) at most once, and only when today has 3 or more timed events or a scheduling conflict.
+      7. Idempotent daily-note sync: update today's `Journal/<date>.md` in the Obsidian vault. Create the file cleanly if needed, or if a `## Morning Brief` section already exists, replace it in place (up to the next `## ` heading or EOF) without duplicating on re-runs and without disturbing frontmatter, existing `- [ ]` tasks, or other notes. Inside `Journal/<date>.md`, nest the brief under `## Morning Brief` using `###` subheadings.
+    ''
+  );
+
+  preDailyPromptFile = pkgs.writeText "pre-daily-prompt.txt" ''
+    Pre-daily standup brief (10:00 daily, using `date`, `location`, and `workday_*` from `<untrusted_collector_output>`).
+    1. Day-off gate (check FIRST before any work tools):
+       - If `workday_status: day_off` in `<untrusted_collector_output>`, reply immediately with exactly `HEARTBEAT_OK` without calling any tools.
+       - If `workday_status` is `unknown` or absent, query ONLY personal Google Calendar (`${personalGoogleEmail}`) for today first: if today is not Mon–Fri, has no `"Arbeit"` event, or has an all-day vacation / out-of-office override, reply immediately with exactly `HEARTBEAT_OK` without calling Slack, Linear, GitLab, or work Google Calendar.
+    2. Next check work Google Calendar (`${workGoogleEmail}`) for today: if I am out of office or there is no 10:00 daily meeting today, reply with exactly `HEARTBEAT_OK`.
+    3. Otherwise, summarize in 3–5 concise bullets: (1) my active Linear issues and recent GitLab MR updates since yesterday, (2) relevant Slack mentions since yesterday afternoon, and (3) what is on today's schedule after the daily.
   '';
 in {
   hey-computer-proactive = helpers.mkScript {
@@ -78,9 +487,19 @@ in {
         FAIL_LOG="$STATE_DIR/failures.log"
         WEATHER_HISTORY="$STATE_DIR/weather-history.json"
         WEATHER_GEOCACHE="$STATE_DIR/weather-geocache.json"
+        WORKDAY_CACHE="$STATE_DIR/workday.json"
         DEFAULT_WEATHER_CITY=${lib.escapeShellArg defaultCity}
         DEFAULT_WEATHER_LAT=${lib.escapeShellArg defaultLat}
         DEFAULT_WEATHER_LON=${lib.escapeShellArg defaultLon}
+        WORK_ENABLED=${lib.escapeShellArg (
+          if workEnabled
+          then "1"
+          else "0"
+        )}
+        PERSONAL_GOOGLE_EMAIL=${lib.escapeShellArg personalGoogleEmail}
+        GOOGLE_CREDS_DIR=${lib.escapeShellArg googleCredsDir}
+        WORKDAY_TTL_SECS=1800
+        WORKDAY_UNKNOWN_TTL_SECS=120
         ALERT_COOLDOWN_SECS=14400 # 4 hours
 
         install -d -m 700 "$STATE_DIR"
@@ -148,7 +567,7 @@ in {
           local status_json agent
           status_json=$(${heyComputer} status --json 2>/dev/null) || return 1
           agent=$(jq -r '.agent // "down"' <<<"$status_json" 2>/dev/null || printf 'down')
-          [ "$agent" != "down" ]
+          [ "$agent" != "down" ] && [ "$agent" != "locked" ]
         }
 
         classify_location() {
@@ -552,8 +971,186 @@ in {
           evaluate_weather_delta "$history_json" "$today" "$yesterday"
         }
 
+        make_workday_json() {
+          local today="$1"
+          local checked_at="$2"
+          local status="$3"
+          local is_workday="$4"
+          local reason="$5"
+          jq -cn \
+            --arg date "$today" \
+            --argjson checked_at "$checked_at" \
+            --arg status "$status" \
+            --argjson is_workday "$is_workday" \
+            --arg reason "$reason" \
+            '{
+              date: $date,
+              checked_at: $checked_at,
+              status: $status,
+              is_workday: $is_workday,
+              workday: $is_workday,
+              reason: $reason,
+              arbeit_event: null,
+              override_event: null
+            }'
+        }
+
+        cache_matches_static_day_off() {
+          local today="$1"
+          local reason="$2"
+          [ -f "$WORKDAY_CACHE" ] || return 1
+          jq -e --arg date "$today" --arg reason "$reason" '
+            type == "object"
+            and .date == $date
+            and .status == "day_off"
+            and .is_workday == false
+            and .workday == false
+            and .reason == $reason
+          ' "$WORKDAY_CACHE" >/dev/null 2>&1
+        }
+
+        resolve_workday() {
+          local refresh="''${1:-0}"
+          local cached_only="''${2:-0}"
+          local today now dow out
+
+          today=$(date +%Y-%m-%d)
+          now=$(date +%s)
+
+          if [ "$WORK_ENABLED" != "1" ]; then
+            if cache_matches_static_day_off "$today" "work_disabled"; then
+              jq -c '.' "$WORKDAY_CACHE"
+              return 0
+            fi
+            out=$(make_workday_json "$today" "$now" "day_off" "false" "work_disabled")
+            write_json_atomic "$WORKDAY_CACHE" "$out" || true
+            printf '%s\n' "$out"
+            return 0
+          fi
+
+          dow=$(date +%u)
+          if [ "$dow" -eq 6 ] || [ "$dow" -eq 7 ]; then
+            if cache_matches_static_day_off "$today" "weekend"; then
+              jq -c '.' "$WORKDAY_CACHE"
+              return 0
+            fi
+            out=$(make_workday_json "$today" "$now" "day_off" "false" "weekend")
+            write_json_atomic "$WORKDAY_CACHE" "$out" || true
+            printf '%s\n' "$out"
+            return 0
+          fi
+
+          if [ "$refresh" != "1" ] && [ -f "$WORKDAY_CACHE" ]; then
+            local meta=() c_date="" c_checked_at="" c_status=""
+            mapfile -t meta < <(
+              jq -r '
+                select(type == "object")
+                | (.date // ""),
+                  ((.checked_at // 0) | tostring),
+                  (.status // "")
+              ' "$WORKDAY_CACHE" 2>/dev/null || true
+            )
+            c_date="''${meta[0]:-}"
+            c_checked_at="''${meta[1]:-}"
+            c_status="''${meta[2]:-}"
+            if [ "$c_date" = "$today" ]; then
+              if [ "$cached_only" = "1" ]; then
+                jq -c '.' "$WORKDAY_CACHE"
+                return 0
+              fi
+              if [[ "$c_checked_at" =~ ^[0-9]+$ ]]; then
+                local age=$((now - c_checked_at))
+                if { [ "$c_status" = "workday" ] || [ "$c_status" = "day_off" ]; } && [ "$age" -lt "$WORKDAY_TTL_SECS" ]; then
+                  jq -c '.' "$WORKDAY_CACHE"
+                  return 0
+                fi
+                if [ "$c_status" = "unknown" ] && [ "$age" -lt "$WORKDAY_UNKNOWN_TTL_SECS" ]; then
+                  jq -c '.' "$WORKDAY_CACHE"
+                  return 0
+                fi
+              fi
+            fi
+          fi
+
+          if [ "$cached_only" = "1" ]; then
+            make_workday_json "$today" "$now" "unknown" "true" "cache_miss"
+            return 0
+          fi
+
+          if out=$(PYTHONPATH=${lib.escapeShellArg googleWorkspaceSitePackages} \
+            ${googleWorkspacePython}/bin/python3 ${workdayCheckScript} \
+            "$PERSONAL_GOOGLE_EMAIL" "$GOOGLE_CREDS_DIR" "$today" "$WORKDAY_CACHE" 2>/dev/null) \
+            && [ -n "$out" ]; then
+            printf '%s\n' "$out"
+            return 0
+          fi
+
+          out=$(make_workday_json "$today" "$now" "unknown" "true" "api_error")
+          write_json_atomic "$WORKDAY_CACHE" "$out" || true
+          printf '%s\n' "$out"
+        }
+
+        format_workday_block() {
+          local workday_json="$1"
+          jq -r '
+            (.status // "unknown") as $st
+            | (.reason // "unknown") as $rsn
+            | (if $st == "workday" and ((.arbeit_event // "") != "") then
+                 "\($rsn) (\(.arbeit_event))"
+               elif $st == "day_off" and ((.override_event // "") != "") then
+                 "\($rsn) (\(.override_event))"
+               else
+                 $rsn
+               end) as $detail
+            | "workday_status: \($st)\nworkday_reason: \($detail)"
+          ' <<<"$workday_json" 2>/dev/null || printf 'workday_status: unknown\nworkday_reason: api_error\n'
+        }
+
+        cmd_workday() {
+          local refresh=0 cached_only=0 mode="text" workday_json status
+          while [ "$#" -gt 0 ]; do
+            case "$1" in
+            --refresh)
+              refresh=1
+              ;;
+            --cached-only)
+              cached_only=1
+              ;;
+            --json)
+              mode="json"
+              ;;
+            --quiet)
+              mode="quiet"
+              ;;
+            *)
+              echo "Usage: hey-computer-proactive workday [--refresh] [--cached-only] [--json|--quiet]" >&2
+              exit 2
+              ;;
+            esac
+            shift
+          done
+
+          workday_json=$(resolve_workday "$refresh" "$cached_only")
+          case "$mode" in
+          json)
+            printf '%s\n' "$workday_json"
+            ;;
+          quiet)
+            status=$(jq -r '.status // "unknown"' <<<"$workday_json" 2>/dev/null || printf 'unknown')
+            case "$status" in
+            workday) return 0 ;;
+            day_off) return 1 ;;
+            *) return 2 ;;
+            esac
+            ;;
+          *)
+            format_workday_block "$workday_json"
+            ;;
+          esac
+        }
+
         run_morning_digest() {
-          local today stamp loc weather_block base_prompt prompt manual
+          local today stamp loc workday_json workday_block weather_block base_prompt prompt manual
           today=$(date +%Y-%m-%d)
           stamp="$STATE_DIR/morning-digest.last"
           manual="''${HEY_COMPUTER_SCHEDULE_MANUAL:-0}"
@@ -575,29 +1172,40 @@ in {
           fi
 
           loc=$(classify_location)
+          workday_json=$(resolve_workday "$manual" 0)
+          workday_block=$(format_workday_block "$workday_json")
           weather_block=$(collect_weather_delta "$loc" "$today")
           base_prompt=$(cat ${morningDigestPromptFile})
-          printf -v prompt '%s\n\n<untrusted_collector_output>\ndate: %s\nlocation: %s\n%s\n</untrusted_collector_output>' \
-            "$base_prompt" "$today" "$loc" "$weather_block"
+          printf -v prompt '%s\n\n<untrusted_collector_output>\ndate: %s\nlocation: %s\n%s\n%s\n</untrusted_collector_output>' \
+            "$base_prompt" "$today" "$loc" "$workday_block" "$weather_block"
 
           run_and_wait_task "morning-digest" "$stamp" "$today" "$prompt" || exit 1
         }
 
         run_pre_daily() {
-          local today stamp loc prompt
+          local today stamp loc workday_json workday_status workday_block base_prompt prompt manual
           today=$(date +%Y-%m-%d)
           stamp="$STATE_DIR/pre-daily.last"
+          manual="''${HEY_COMPUTER_SCHEDULE_MANUAL:-0}"
 
-          if [ -f "$stamp" ] && [ "$(cat "$stamp" 2>/dev/null || true)" = "$today" ]; then
-            exit 0
+          if [ "$manual" != "1" ]; then
+            if [ -f "$stamp" ] && [ "$(cat "$stamp" 2>/dev/null || true)" = "$today" ]; then
+              exit 0
+            fi
+
+            session_unlocked || exit 0
+            network_online || exit 0
           fi
-
-          session_unlocked || exit 0
-          network_online || exit 0
 
           loc=$(classify_location)
           # If the user configured location rules and is neither at work nor home, skip quietly.
-          if [ -f "$CONFIG_FILE" ] && [ "$loc" = "other" ]; then
+          if [ "$manual" != "1" ] && [ -f "$CONFIG_FILE" ] && [ "$loc" = "other" ]; then
+            exit 0
+          fi
+
+          workday_json=$(resolve_workday "$manual" 0)
+          workday_status=$(jq -r '.status // "unknown"' <<<"$workday_json" 2>/dev/null || printf 'unknown')
+          if [ "$manual" != "1" ] && [ "$workday_status" = "day_off" ]; then
             exit 0
           fi
 
@@ -606,13 +1214,16 @@ in {
             exit 1
           fi
 
-          prompt="Pre-daily standup brief (10:00 daily, $today, location: $loc). First check today's Google Calendar: if I am out of office / on vacation or there is no 10:00 daily today, reply with exactly HEARTBEAT_OK. Otherwise, summarize in 3-5 concise bullets: (1) my active Linear issues / recent GitLab MR updates from yesterday, (2) any relevant Slack mentions since yesterday afternoon, and (3) what is on today's schedule after the daily."
+          workday_block=$(format_workday_block "$workday_json")
+          base_prompt=$(cat ${preDailyPromptFile})
+          printf -v prompt '%s\n\n<untrusted_collector_output>\ndate: %s\nlocation: %s\n%s\n</untrusted_collector_output>' \
+            "$base_prompt" "$today" "$loc" "$workday_block"
 
           run_and_wait_task "pre-daily" "$stamp" "$today" "$prompt" || exit 1
         }
 
         collect_morning_digest() {
-          local today stamp sched_json last_run_at last_status last_date now_ms loc manual
+          local today stamp sched_json last_run_at last_status last_date now_ms loc manual workday_json
           today=$(date +%Y-%m-%d)
           stamp="$STATE_DIR/morning-digest.last"
           manual="''${HEY_COMPUTER_SCHEDULE_MANUAL:-0}"
@@ -645,12 +1256,14 @@ in {
           fi
 
           loc=$(classify_location)
+          workday_json=$(resolve_workday "$manual" 0)
           printf 'date: %s\nlocation: %s\n' "$today" "$loc"
+          format_workday_block "$workday_json"
           collect_weather_delta "$loc" "$today"
         }
 
         collect_pre_daily() {
-          local today stamp loc manual
+          local today stamp loc manual workday_json workday_status
           today=$(date +%Y-%m-%d)
           stamp="$STATE_DIR/pre-daily.last"
           manual="''${HEY_COMPUTER_SCHEDULE_MANUAL:-0}"
@@ -669,7 +1282,14 @@ in {
             exit 0
           fi
 
+          workday_json=$(resolve_workday "$manual" 0)
+          workday_status=$(jq -r '.status // "unknown"' <<<"$workday_json" 2>/dev/null || printf 'unknown')
+          if [ "$manual" != "1" ] && [ "$workday_status" = "day_off" ]; then
+            exit 0
+          fi
+
           printf 'date: %s\nlocation: %s\n' "$today" "$loc"
+          format_workday_block "$workday_json"
         }
 
         case "''${1-}" in
@@ -682,6 +1302,10 @@ in {
             loc=$(classify_location)
           fi
           collect_weather_delta "$loc" "$(date +%Y-%m-%d)"
+          ;;
+        workday)
+          shift
+          cmd_workday "$@"
           ;;
         collect-morning-digest)
           collect_morning_digest
@@ -696,7 +1320,7 @@ in {
           run_pre_daily
           ;;
         *)
-          echo "Usage: hey-computer-proactive <location|weather|collect-morning-digest|collect-pre-daily|morning-digest|pre-daily>" >&2
+          echo "Usage: hey-computer-proactive <location|weather|workday|collect-morning-digest|collect-pre-daily|morning-digest|pre-daily>" >&2
           exit 2
           ;;
         esac

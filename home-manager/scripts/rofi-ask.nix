@@ -55,6 +55,10 @@ in {
                   "Ask Computer (replaces current, or /bg)\($bg)..."
                 elif .follow_up_secs != null then
                   "Follow up\($bg)..."
+                elif .agent == "locked" then
+                  "Ask Computer (keyring locked)\($bg)..."
+                elif .agent == "starting" then
+                  "Ask Computer (starting…)\($bg)..."
                 elif .agent == "down" then
                   "Ask Computer (offline)..."
                 else

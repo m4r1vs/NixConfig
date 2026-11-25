@@ -18,6 +18,45 @@ with lib; let
 in {
   options.services.configured.swaync = {
     enable = mkEnableOption "Sway Notification-Center";
+
+    holdForHeyComputer = mkOption {
+      type = types.bool;
+      default = config.programs.configured.hey-computer.enable or false;
+      description = ''
+        Enable the SwayNC hold-and-enrich pipeline (`hc-hold-enabled`) so
+        normal-urgency notifications are briefly checked by `hey-computer`
+        before rendering.
+      '';
+    };
+
+    holdMaxSeconds = mkOption {
+      type = types.int;
+      default = 60;
+      description = ''
+        Maximum number of seconds SwayNC holds a notification waiting for
+        `hey-computer` before failing open to the raw notification.
+      '';
+    };
+
+    holdApps = mkOption {
+      type = types.listOf types.str;
+      default = [];
+      description = ''
+        Case-insensitive regexes matched against `app_name` or `desktop_entry`
+        to hold. Empty holds all non-excluded normal-urgency notifications,
+        relying on fast deterministic filters in SwayNC and `hey-computer`.
+      '';
+    };
+
+    holdExcludeApps = mkOption {
+      type = types.listOf types.str;
+      default = ["^${systemArgs.hostname}$"];
+      description = ''
+        Case-insensitive regexes matched against `app_name` or `desktop_entry`
+        to exclude from holding (defaults to excluding host-origin
+        `nixos-notify` alerts such as screenshots and Wi-Fi warnings).
+      '';
+    };
   };
   config = mkIf cfg.enable {
     home.file.".theme/swaync/style-light.css".text =
@@ -60,6 +99,12 @@ in {
         notification-icon-size = 64;
         notification-body-image-height = 100;
         notification-body-image-width = 200;
+        hc-hold-enabled = cfg.holdForHeyComputer;
+        hc-hold-max-seconds = cfg.holdMaxSeconds;
+        hc-hold-apps = cfg.holdApps;
+        hc-hold-exclude-apps = cfg.holdExcludeApps;
+        script-continue-on-match = true;
+        script-fail-notify = false;
         widgets = [
           "title"
           "dnd"
@@ -79,10 +124,12 @@ in {
           sounds_normal = {
             exec = makeSound;
             urgency = "Normal";
+            skip-on-dnd = true;
           };
           sounds_critical = {
             exec = makeSound;
             urgency = "Critical";
+            skip-on-dnd = true;
           };
         };
       };

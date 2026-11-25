@@ -23,10 +23,10 @@ with lib; let
   hasOpenhue = config.programs.configured.openhue.enable;
   hasGalaxyBuds = config.programs.configured.galaxy-buds.enable;
   inherit (cfg) googleWorkspace;
-  personalGoogleEmail =
-    if systemArgs.useWorkProfileByDefault
-    then "marius.niveri@gmail.com"
-    else systemArgs.git.email;
+  personalGoogleEmail = cfg.personalEmail;
+  workEnabled = cfg.work.enable;
+  workGoogleEmail = cfg.work.email;
+  workSlackEmailDmChannel = cfg.work.slackEmailDmChannel;
   mcpServers =
     (optionalAttrs config.programs.configured.mcp.enable config.programs.mcp.servers)
     // optionalAttrs googleWorkspace.enable {
@@ -703,6 +703,45 @@ in {
       answers "Hey Computer, …" from npu-dictate. The agent runs every
       command that does not need root without asking'';
 
+    personalEmail = mkOption {
+      type = types.str;
+      default =
+        if systemArgs.useWorkProfileByDefault
+        then "marius.niveri@gmail.com"
+        else systemArgs.git.email;
+      description = ''
+        Personal Google account email used for personal Calendar, Gmail, Tasks,
+        and weekday `"Arbeit"` workday detection.
+      '';
+    };
+
+    work = {
+      enable = mkOption {
+        type = types.bool;
+        default = systemArgs.useWorkProfileByDefault;
+        description = ''
+          Enable unified work + personal mode in the single `hey-computer`
+          daemon (work Google Calendar/Drive, Slack MCP, Linear, GitLab,
+          pre-daily standup brief, and workday-gated morning brief).
+        '';
+      };
+
+      email = mkOption {
+        type = types.str;
+        default =
+          if systemArgs.useWorkProfileByDefault
+          then systemArgs.git.email
+          else "marius@meetovo.de";
+        description = "Work Google Workspace email address when unified work mode is enabled.";
+      };
+
+      slackEmailDmChannel = mkOption {
+        type = types.str;
+        default = "D0BKG91AAAJ";
+        description = "Slack DM channel ID receiving forwarded work emails (Strato Mail via `@slack`).";
+      };
+    };
+
     googleWorkspace = {
       enable = mkOption {
         type = types.bool;
@@ -789,10 +828,7 @@ in {
 
       accounts = mkOption {
         type = types.listOf types.str;
-        default = unique (
-          [systemArgs.git.email]
-          ++ optional systemArgs.useWorkProfileByDefault "marius.niveri@gmail.com"
-        );
+        default = unique ([cfg.personalEmail] ++ optional cfg.work.enable cfg.work.email);
         description = ''
           Google account emails expected to be used with `google-workspace`
           (`user_google_email` parameter). Each account has its own `<email>.json`
@@ -822,7 +858,7 @@ in {
       preDaily = {
         enable = mkOption {
           type = types.bool;
-          default = systemArgs.useWorkProfileByDefault;
+          default = cfg.work.enable;
           description = "Seed the workday `pre-daily` standup brief scheduler job (10:00 daily).";
         };
 
@@ -865,10 +901,91 @@ in {
         description = "Initial spoken-answer state before runtime `hey-computer speak toggle`.";
       };
     };
+
+    notifications = {
+      enable = mkEnableOption ''
+        reactive notification enrichment and read-only reply drafting
+        (`settings.notifications`) paired with SwayNC hold-and-enrich'';
+
+      profile = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Optional profile for restricted notification turns (null uses fast/default).";
+      };
+
+      quietStart = mkOption {
+        type = types.str;
+        default = "";
+        example = "22:00";
+        description = "Optional local quiet-hours start (`HH:MM`).";
+      };
+
+      quietEnd = mkOption {
+        type = types.str;
+        default = "";
+        example = "08:00";
+        description = "Optional local quiet-hours end (`HH:MM`).";
+      };
+
+      sendersFile = mkOption {
+        type = types.str;
+        default = "${config.xdg.configHome}/hey-computer/notification-senders.json";
+        description = ''
+          Private JSON/TOML file outside `/nix/store` holding `allow_senders`,
+          `deny_senders`, and `known_groups` so personal contacts never enter git.
+        '';
+      };
+
+      workdayFile = mkOption {
+        type = types.str;
+        default = "${config.xdg.stateHome}/hey-computer/proactive/workday.json";
+        description = ''
+          Workday status JSON cache written by `hey-computer-proactive workday`
+          to suppress `work_only = true` apps on weekends and days off.
+        '';
+      };
+
+      apps = mkOption {
+        type = types.attrsOf (types.attrsOf types.anything);
+        default = {
+          whatsapp = {
+            match_apps = ["whatsapp" "whatsapp-electron" "zapzap" "wasistlos"];
+            allow_groups = false;
+            work_only = false;
+          };
+          signal = {
+            match_apps = ["signal" "signal-desktop"];
+            allow_groups = false;
+            work_only = false;
+          };
+        };
+        description = ''
+          Per-channel notification allowlist (`settings.notifications.apps`).
+          WhatsApp and Signal remain strictly read-only (Copy/Edit/Dismiss only).
+        '';
+      };
+
+      extraSettings = mkOption {
+        type = types.attrsOf types.anything;
+        default = {};
+        description = "Additional raw `settings.notifications` keys merged into config.toml.";
+      };
+    };
+
+    messengerBridge = mkOption {
+      type = types.attrsOf types.anything;
+      default = {};
+      description = ''
+        Pass-through attributes forwarded to `programs.hey-computer.messengerBridge`
+        (read-only WhatsApp/Signal context bridge; disabled by default).
+      '';
+    };
   };
 
   config = mkIf cfg.enable (optionalAttrs (!isDarwin) {
     home.packages = optional googleWorkspace.enable googleWorkspaceAuth;
+
+    programs.configured.mcp.slack.enable = mkIf cfg.work.enable (mkDefault true);
 
     home.activation = optionalAttrs googleWorkspace.enable {
       googleWorkspaceMcpCredDir = hm.dag.entryAfter ["writeBoundary"] ''
@@ -954,6 +1071,12 @@ in {
           then "${config.home.homeDirectory}/.gemini/antigravity-cli/mcp_oauth_tokens.json"
           else null;
       };
+      toolIcons.enable = true;
+      notifications = mkIf cfg.notifications.enable {
+        enable = true;
+        inherit (cfg.notifications) profile quietStart quietEnd sendersFile workdayFile apps;
+      };
+      messengerBridge = mkIf (cfg.messengerBridge != {}) cfg.messengerBridge;
       settings = {
         agent = {
           model = "gemini-4-hydrogen";
@@ -998,25 +1121,57 @@ in {
                 profile = "deep";
                 suppress_token = "HEARTBEAT_OK";
                 failure_deliver = "notify";
-                prompt = ''
-                  Prepare today's Morning Brief using the `date`, `location`, and `weather_*` fields in `<untrusted_collector_output>`.
+                prompt =
+                  if workEnabled
+                  then ''
+                    Prepare today's Morning Brief using the `date`, `location`, `workday_*`, and `weather_*` fields in `<untrusted_collector_output>`.
 
-                  Gather context:
-                  - Today's Google Calendar events (24-hour times).
-                  - Important unread personal Gmail messages (${personalGoogleEmail}) since last evening${optionalString systemArgs.useWorkProfileByDefault ", recent non-noise forwarded work emails in Slack DM D0BKG91AAAJ (never Gmail for ${systemArgs.git.email})"}, and any urgent Slack or Linear mentions if available.
-                  - Any overdue or due-today personal Google Tasks (${personalGoogleEmail}) and open items in today's `Journal/<date>.md` if it already exists.
+                    Step 1 — Determine Workday vs. Day Off BEFORE calling any work tools:
+                    - Read `workday_status` in `<untrusted_collector_output>`:
+                      - `workday_status: day_off` → Today is a **Weekend / Day Off** (personal-only mode).
+                      - `workday_status: workday` → Today is a **Working Day** (personal + work mode).
+                      - `workday_status: unknown` (or absent) → Query **personal** Google Calendar (`${personalGoogleEmail}`) for today FIRST before touching any work tool. Treat today as a **Working Day** ONLY if today is Mon–Fri, has an `"Arbeit"` event on `${personalGoogleEmail}`, and has no all-day vacation / out-of-office override; otherwise treat today as a **Weekend / Day Off**.
 
-                  If nothing at all is on today's calendar and there are no notable messages, mentions, or due tasks, reply with exactly `HEARTBEAT_OK` and do not modify the daily note.
+                    Step 2 — Gather context strictly according to the mode:
+                    - **Always (Personal):**
+                      - Today's personal Google Calendar events (`${personalGoogleEmail}`, 24-hour times).
+                      - Important unread personal Gmail messages (`${personalGoogleEmail}`) since last evening.
+                      - Overdue or due-today personal Google Tasks (`${personalGoogleEmail}`) and open `- [ ]` items in today's `Journal/<date>.md` if it already exists.
+                    - **ONLY on a Working Day (strictly SKIP on Weekends / Days Off — do NOT call `slack`, `linear`, `gitlab`, or query `${workGoogleEmail}`):**
+                      - Today's work Google Calendar events (`${workGoogleEmail}`, 24-hour times).
+                      - Recent non-noise forwarded work emails in Slack DM `${workSlackEmailDmChannel}` (never Gmail for `${workGoogleEmail}`).
+                      - Urgent Slack mentions/DMs, active Linear mentions/blockers, and GitLab MRs needing attention (reviews requested, failed pipelines, or new threads).
 
-                  Otherwise, write and reply with the full editorial Markdown brief directly (never a 2-sentence summary):
-                  1. Start with `# Morning Brief — <Weekday>, <D Month>` (e.g. `# Morning Brief — Wednesday, 25 November`).
-                  2. Immediately below the H1, write a single plain-prose opening paragraph of 3–4 sentences (~50–80 words) beginning with a normal capitalized letter — never a bullet list, blockquote, emoji, quotation mark, bold/italic marker, or code span first (this paragraph renders with a Reforma 1969 editorial drop cap).
-                  3. Opening cadence: warm, observant, lightly poetic editorial prose that notices the real shape and rhythm of the day ahead (open stretches, meeting clusters, transitions). No exclamation marks, and never use clichés such as "tapestry", "symphony", "whispers", "gentle reminder", or "embrace the day".
-                  4. Weather rule (strict): ONLY if `weather_status: changed` in `<untrusted_collector_output>`, weave `weather_today` and the concrete shift from `weather_delta` naturally into the opening paragraph. If `weather_status` is `unchanged`, `unavailable`, or absent, omit weather completely and silently — do not mention forecasts, temperatures, sky conditions, or that weather is unchanged.
-                  5. Below the opening paragraph, include crisp, scannable `##` sections (`## Schedule`, `## Mail & Messages`, `## Tasks & Focus` as applicable) with 24-hour `HH:MM` times, concrete senders, and concise items. Omit any empty section.
-                  6. Widget restraint: call `show_widget` (`calendar_agenda`) at most once, and only when today has 3 or more timed events or a scheduling conflict.
-                  7. Idempotent daily-note sync: update today's `Journal/<date>.md` in the Obsidian vault. Create the file cleanly if needed, or if a `## Morning Brief` section already exists, replace it in place (up to the next `## ` heading or EOF) without duplicating on re-runs and without disturbing frontmatter, existing `- [ ]` tasks, or other notes. Inside `Journal/<date>.md`, nest the brief under `## Morning Brief` using `###` subheadings.
-                '';
+                    If nothing at all is on today's relevant calendar(s) and there are no notable messages, mentions, or due tasks, reply with exactly `HEARTBEAT_OK` and do not modify the daily note.
+
+                    Otherwise, write and reply with the full editorial Markdown brief directly (never a 2-sentence summary):
+                    1. Start with `# Morning Brief — <Weekday>, <D Month>` (e.g. `# Morning Brief — Wednesday, 25 November`).
+                    2. Immediately below the H1, write a single plain-prose opening paragraph of 3–4 sentences (~50–80 words) beginning with a normal capitalized letter — never a bullet list, blockquote, emoji, quotation mark, bold/italic marker, or code span first (this paragraph renders with a Reforma 1969 editorial drop cap). On days off, let the prose reflect an unhurried off-work day without mentioning skipped work tools.
+                    3. Opening cadence: warm, observant, lightly poetic editorial prose that notices the real shape and rhythm of the day ahead (open stretches, meeting clusters, transitions). No exclamation marks, and never use clichés such as "tapestry", "symphony", "whispers", "gentle reminder", or "embrace the day".
+                    4. Weather rule (strict): ONLY if `weather_status: changed` in `<untrusted_collector_output>`, weave `weather_today` and the concrete shift from `weather_delta` naturally into the opening paragraph. If `weather_status` is `unchanged`, `unavailable`, or absent, omit weather completely and silently — do not mention forecasts, temperatures, sky conditions, or that weather is unchanged.
+                    5. Below the opening paragraph, include crisp, scannable `##` sections (`## Schedule`, `## Mail & Messages`, `## Work & Reviews`, `## Tasks & Focus` as applicable; omit `## Work & Reviews` and any empty section on days off) with 24-hour `HH:MM` times, concrete senders, and concise items.
+                    6. Widget restraint: call `show_widget` (`calendar_agenda`) at most once, and only when today has 3 or more timed events or a scheduling conflict.
+                    7. Idempotent daily-note sync: update today's `Journal/<date>.md` in the Obsidian vault. Create the file cleanly if needed, or if a `## Morning Brief` section already exists, replace it in place (up to the next `## ` heading or EOF) without duplicating on re-runs and without disturbing frontmatter, existing `- [ ]` tasks, or other notes. Inside `Journal/<date>.md`, nest the brief under `## Morning Brief` using `###` subheadings.
+                  ''
+                  else ''
+                    Prepare today's Morning Brief using the `date`, `location`, `workday_*`, and `weather_*` fields in `<untrusted_collector_output>`.
+
+                    Gather context (personal-only mode):
+                    - Today's personal Google Calendar events (`${personalGoogleEmail}`, 24-hour times).
+                    - Important unread personal Gmail messages (`${personalGoogleEmail}`) since last evening.
+                    - Overdue or due-today personal Google Tasks (`${personalGoogleEmail}`) and open `- [ ]` items in today's `Journal/<date>.md` if it already exists.
+
+                    If nothing at all is on today's calendar and there are no notable messages or due tasks, reply with exactly `HEARTBEAT_OK` and do not modify the daily note.
+
+                    Otherwise, write and reply with the full editorial Markdown brief directly (never a 2-sentence summary):
+                    1. Start with `# Morning Brief — <Weekday>, <D Month>` (e.g. `# Morning Brief — Wednesday, 25 November`).
+                    2. Immediately below the H1, write a single plain-prose opening paragraph of 3–4 sentences (~50–80 words) beginning with a normal capitalized letter — never a bullet list, blockquote, emoji, quotation mark, bold/italic marker, or code span first (this paragraph renders with a Reforma 1969 editorial drop cap).
+                    3. Opening cadence: warm, observant, lightly poetic editorial prose that notices the real shape and rhythm of the day ahead (open stretches, meeting clusters, transitions). No exclamation marks, and never use clichés such as "tapestry", "symphony", "whispers", "gentle reminder", or "embrace the day".
+                    4. Weather rule (strict): ONLY if `weather_status: changed` in `<untrusted_collector_output>`, weave `weather_today` and the concrete shift from `weather_delta` naturally into the opening paragraph. If `weather_status` is `unchanged`, `unavailable`, or absent, omit weather completely and silently — do not mention forecasts, temperatures, sky conditions, or that weather is unchanged.
+                    5. Below the opening paragraph, include crisp, scannable `##` sections (`## Schedule`, `## Mail & Messages`, `## Tasks & Focus` as applicable) with 24-hour `HH:MM` times, concrete senders, and concise items. Omit any empty section.
+                    6. Widget restraint: call `show_widget` (`calendar_agenda`) at most once, and only when today has 3 or more timed events or a scheduling conflict.
+                    7. Idempotent daily-note sync: update today's `Journal/<date>.md` in the Obsidian vault. Create the file cleanly if needed, or if a `## Morning Brief` section already exists, replace it in place (up to the next `## ` heading or EOF) without duplicating on re-runs and without disturbing frontmatter, existing `- [ ]` tasks, or other notes. Inside `Journal/<date>.md`, nest the brief under `## Morning Brief` using `###` subheadings.
+                  '';
               };
             }
             // optionalAttrs (cfg.proactive.enable && cfg.proactive.preDaily.enable) {
@@ -1026,7 +1181,14 @@ in {
                 profile = "deep";
                 suppress_token = "HEARTBEAT_OK";
                 failure_deliver = "notify";
-                prompt = "Pre-daily standup brief (10:00 daily, using `date` and `location` from `<untrusted_collector_output>`). First check today's Google Calendar: if I am out of office / on vacation or there is no 10:00 daily today, reply with exactly HEARTBEAT_OK. Otherwise, summarize in 3-5 concise bullets: (1) my active Linear issues / recent GitLab MR updates from yesterday, (2) any relevant Slack mentions since yesterday afternoon, and (3) what is on today's schedule after the daily.";
+                prompt = ''
+                  Pre-daily standup brief (10:00 daily, using `date`, `location`, and `workday_*` from `<untrusted_collector_output>`).
+                  1. Day-off gate (check FIRST before any work tools):
+                     - If `workday_status: day_off` in `<untrusted_collector_output>`, reply immediately with exactly `HEARTBEAT_OK` without calling any tools.
+                     - If `workday_status` is `unknown` or absent, query ONLY personal Google Calendar (`${personalGoogleEmail}`) for today first: if today is not Mon–Fri, has no `"Arbeit"` event, or has an all-day vacation / out-of-office override, reply immediately with exactly `HEARTBEAT_OK` without calling Slack, Linear, GitLab, or work Google Calendar.
+                  2. Next check work Google Calendar (`${workGoogleEmail}`) for today: if I am out of office or there is no 10:00 daily meeting today, reply with exactly `HEARTBEAT_OK`.
+                  3. Otherwise, summarize in 3–5 concise bullets: (1) my active Linear issues and recent GitLab MR updates since yesterday, (2) relevant Slack mentions since yesterday afternoon, and (3) what is on today's schedule after the daily.
+                '';
               };
             }
             // optionalAttrs (cfg.proactive.enable && cfg.proactive.weeklyDistill.enable) {
@@ -1039,6 +1201,7 @@ in {
             };
         };
         present.reply_command = ["${scripts.rofi-launch}" "ask" "{id}"];
+        notifications = mkIf (cfg.notifications.enable && cfg.notifications.extraSettings != {}) cfg.notifications.extraSettings;
         # A follow-up this soon after an answer continues the conversation
         conversation.follow_up_secs = 90;
         context = {
@@ -1067,11 +1230,17 @@ in {
           - Prefer the commands in the `desktop-scripts` skill (`voice-command`, `open-browser`, `connect-galaxy-buds`, `GalaxyBudsClient`, `gcalcli`, `nightlight`, `powermode`, `caffeinate`, `toggle-zen`, `darkman`, etc.) over improvising raw `hyprctl` calls.
           - Use the `desktop-context` skill (`desktop-context selection|clipboard|capture|copy|paste`) whenever the user refers to their selection, clipboard, screen, or asks to copy or paste a result; inspect captured PNG paths directly with `read_file`.
           - For live web page inspection or browser automation, use `agy`'s built-in `/browser` subagent (`nodejs`/`npx` are on PATH; attaches to local Chromium/Chrome v144+ when `chrome://inspect/#remote-debugging` is enabled).
-          - Prefer the `google-workspace` MCP tools for Google Calendar (reading, creating, moving, deleting events), **personal** Gmail (searching, reading threads, drafting, sending), **Google Contacts** (resolving people, emails, phone numbers, and organizations before emailing or scheduling), **Google Drive** (searching, listing, reading, downloading, creating, importing, and managing Drive files; offload large exported files > 16 KB into `$HEY_COMPUTER_ARTIFACTS_DIR` and only mutate, delete, or change sharing permissions when explicitly asked), and **Google Tasks** (always personal `${personalGoogleEmail}`)${optionalString (googleWorkspace.enable && googleWorkspace.accounts != []) ''— always pass `user_google_email` (${concatStringsSep ", " (map (a: "`${a}`") googleWorkspace.accounts)}; only accounts with `<email>.json` in `${googleWorkspace.credentialsDir}` are authenticated, so check which credentials exist or pick the matching work/personal account rather than triggering an interactive OAuth prompt mid-turn; if a newly enabled service reports missing OAuth scopes, pass the consent link cleanly or suggest running `google-workspace-auth <email> <personal|work>`)''}; use `gcalcli` only as a read-only fallback if `google-workspace` OAuth is not configured yet.${optionalString systemArgs.useWorkProfileByDefault ''
-            - **Work email (`${systemArgs.git.email}` — Strato Mail via Slack, read-only):** Do **NOT** use Gmail tools for `${systemArgs.git.email}` (Google's Gmail API is enabled on the Workspace account but empty, so Gmail calls silently return no mail). Work email is hosted on Strato Mail and auto-forwarded into Slack DM **`D0BKG91AAAJ`** (user `USLACK` / `@slack` — **not** `@slackbot` / `D0BJAMZETT3`, which is empty).
-              - Browse recent work emails: `conversations_history(channel_id="D0BKG91AAAJ", limit="7d")` (or `"1d"`, `"30d"`, `"50"`). Each message's `Text` has `Email, From: <sender>, Subject: <subject>` and `AttachmentIDs` has `Fxxxxxxxxxx (<subject>)`.
-              - Search work emails: `conversations_search_messages(filter_in_im_or_mpim="@slack", search_query="<plain keywords>")` (never pass `D0BKG91AAAJ` or `@USLACK` to `filter_in_im_or_mpim`, and do not use `from:` syntax). Search results omit `Text` and `AttachmentIDs`, so hydrate matches with `conversations_replies(channel_id="D0BKG91AAAJ", thread_ts="<MsgID>")`.
-              - Read an email body: only after filtering relevant messages by `From`/`Subject` (skip Linear/GitLab/newsletter noise unless asked), call `attachment_get_data(file_id="Fxxxxxxxxxx")` to read the `text/html` body. Slack MCP is read-only and cannot send, reply, archive, or mark work emails read.''}
+          - Prefer the `google-workspace` MCP tools for Google Calendar (reading, creating, moving, deleting events), **personal** Gmail (searching, reading threads, drafting, sending), **Google Contacts** (resolving people, emails, phone numbers, and organizations before emailing or scheduling), **Google Drive** (searching, listing, reading, downloading, creating, importing, and managing Drive files; offload large exported files > 16 KB into `$HEY_COMPUTER_ARTIFACTS_DIR` and only mutate, delete, or change sharing permissions when explicitly asked), and **Google Tasks** (always personal `${personalGoogleEmail}`)${optionalString (googleWorkspace.enable && googleWorkspace.accounts != []) ''— always pass `user_google_email` (${concatStringsSep ", " (map (a: "`${a}`") googleWorkspace.accounts)}; only accounts with `<email>.json` in `${googleWorkspace.credentialsDir}` are authenticated, so check which credentials exist or pick the matching work/personal account rather than triggering an interactive OAuth prompt mid-turn; if a newly enabled service reports missing OAuth scopes, pass the consent link cleanly or suggest running `google-workspace-auth <email> <personal|work>`)''}; use `gcalcli` only as a read-only fallback if `google-workspace` OAuth is not configured yet.${optionalString workEnabled ''
+              - **Work email (`${workGoogleEmail}` — Strato Mail via Slack, read-only):** Do **NOT** use Gmail tools for `${workGoogleEmail}` (Google's Gmail API is enabled on the Workspace account but empty, so Gmail calls silently return no mail). Work email is hosted on Strato Mail and auto-forwarded into Slack DM **`${workSlackEmailDmChannel}`** (user `USLACK` / `@slack` — **not** `@slackbot` / `D0BJAMZETT3`, which is empty).
+                - Browse recent work emails: `conversations_history(channel_id="${workSlackEmailDmChannel}", limit="7d")` (or `"1d"`, `"30d"`, `"50"`). Each message's `Text` has `Email, From: <sender>, Subject: <subject>` and `AttachmentIDs` has `Fxxxxxxxxxx (<subject>)`.
+                - Search work emails: `conversations_search_messages(filter_in_im_or_mpim="@slack", search_query="<plain keywords>")` (never pass `${workSlackEmailDmChannel}` or `@USLACK` to `filter_in_im_or_mpim`, and do not use `from:` syntax). Search results omit `Text` and `AttachmentIDs`, so hydrate matches with `conversations_replies(channel_id="${workSlackEmailDmChannel}", thread_ts="<MsgID>")`.
+                - Read an email body: only after filtering relevant messages by `From`/`Subject` (skip Linear/GitLab/newsletter noise unless asked), call `attachment_get_data(file_id="Fxxxxxxxxxx")` to read the `text/html` body. Slack MCP is read-only and cannot send, reply, archive, or mark work emails read.
+
+            ## Unified Work & Personal Context
+
+            - **Work tools:** Linear (read/write), GitLab (`gitlab.tools.meetovo.dev`, read/write without extra confirmation prompts while still never merging or pushing unless explicitly requested), Slack (read-only + forwarded work email in DM `${workSlackEmailDmChannel}`), and work Google Calendar & Drive (`${workGoogleEmail}`).
+            - **Personal tools:** Personal Google Workspace (`${personalGoogleEmail}` — Gmail, Calendar, Contacts, Drive, Tasks), GitHub (`gh`), Philips Hue (`openhue` / `home-lights`), and the Obsidian vault.
+            - **Workday boundary:** On weekends or weekdays without an `"Arbeit"` event on `${personalGoogleEmail}` (or with an all-day vacation / out-of-office override), broad prompts like "what's on today" or "catch me up" stay personal-only unless the user explicitly asks about work, Slack, Linear, GitLab, or work calendar.''}
 
           ## Obsidian daily notes, reminders & Google Tasks
 
@@ -1097,27 +1266,5 @@ in {
         '';
       };
     };
-
-    /*
-    Greetd autologin reaches graphical-session.target before hyprlock unlocks
-    GNOME Keyring. Waiting in an ExecStart wrapper (rather than ExecStartPre)
-    lets systemd mark the Type=simple unit active right away with no startup
-    timeout, while delaying agy's warm start until the keyring is unlocked so
-    it does not trigger a hidden gcr-prompter behind hyprlock and time out.
-    */
-    systemd.user.services.hey-computer.Service.ExecStart = mkForce (
-      toString (pkgs.writeShellScript "hey-computer-daemon" ''
-        trap 'exit 0' TERM INT
-        until ${pkgs.dbus}/bin/dbus-send --print-reply --dest=org.freedesktop.secrets \
-          /org/freedesktop/secrets/aliases/default \
-          org.freedesktop.DBus.Properties.Get \
-          string:org.freedesktop.Secret.Collection \
-          string:Locked 2>/dev/null | ${pkgs.gnugrep}/bin/grep -q "boolean false"; do
-          sleep 0.5 &
-          wait $! || exit 0
-        done
-        exec ${getExe config.programs.hey-computer.package} daemon
-      '')
-    );
   });
 }

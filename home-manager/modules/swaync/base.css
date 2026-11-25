@@ -484,3 +484,314 @@ slider {
 .widget-backlight .KB {
   padding-bottom: 1rem;
 }
+
+/* Inline reply & hey-computer hold-and-enrich drawer (floating + control center) */
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  .inline-reply,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  .inline-reply {
+  margin-top: 6px;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  entry.inline-reply-entry,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  entry.inline-reply-entry,
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  entry.hc-draft-entry,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  entry.hc-draft-entry {
+  background-color: alpha(@foreground-clr, 0.08);
+  color: @foreground-clr;
+  caret-color: @foreground-clr;
+  border: 1px solid alpha(@foreground-clr, 0.18);
+  border-radius: 5px;
+  padding: 6px 9px;
+  min-height: 1.6em;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  entry.inline-reply-entry:focus-within,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  entry.inline-reply-entry:focus-within,
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  entry.hc-draft-entry:focus-within,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  entry.hc-draft-entry:focus-within {
+  border-color: @primary-clr;
+  background-color: alpha(@foreground-clr, 0.12);
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  entry.inline-reply-entry
+  > text,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  entry.inline-reply-entry
+  > text,
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  entry.hc-draft-entry
+  > text,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  entry.hc-draft-entry
+  > text {
+  color: @foreground-clr;
+  caret-color: @foreground-clr;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  entry.inline-reply-entry
+  > text
+  > selection,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  entry.inline-reply-entry
+  > text
+  > selection,
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  entry.hc-draft-entry
+  > text
+  > selection,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  entry.hc-draft-entry
+  > text
+  > selection {
+  background-color: @primary-clr;
+  color: @foreground-clr;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  entry.inline-reply-entry
+  > text
+  > placeholder,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  entry.inline-reply-entry
+  > text
+  > placeholder,
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  entry.hc-draft-entry
+  > text
+  > placeholder,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  entry.hc-draft-entry
+  > text
+  > placeholder {
+  color: alpha(@foreground-clr, 0.5);
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  button.inline-reply-button,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  button.inline-reply-button {
+  margin-left: 6px;
+  background-color: @primary-clr;
+  color: @foreground-clr;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  button.inline-reply-button:hover,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  button.inline-reply-button:hover {
+  background-color: alpha(@primary-clr, 0.85);
+  color: @foreground-clr;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  button.inline-reply-button:active,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  button.inline-reply-button:active {
+  background-color: alpha(@primary-clr, 0.7);
+  color: @foreground-clr;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  button.inline-reply-button:disabled,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  button.inline-reply-button:disabled {
+  opacity: 0.45;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  .hc-enrichment,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  .hc-enrichment {
+  margin: 4px 7px 7px 7px;
+  padding: 8px 0 2px 0;
+  border-top: 1px solid alpha(@foreground-clr, 0.14);
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  .hc-context-note,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  .hc-context-note {
+  font-size: 13px;
+  font-weight: 500;
+  color: @foreground-clr;
+  opacity: 0.85;
+  margin-bottom: 2px;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  .hc-draft-actions,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  .hc-draft-actions {
+  margin-top: 4px;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  .hc-draft-action,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  .hc-draft-action {
+  background-color: @primary-clr;
+  color: @foreground-clr;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  .hc-draft-action:hover,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  .hc-draft-action:hover {
+  background-color: alpha(@primary-clr, 0.85);
+  color: @foreground-clr;
+}
+
+.floating-notifications.background
+  .notification-row
+  .notification-background
+  .notification
+  .hc-draft-action:active,
+.control-center
+  .notification-row
+  .notification-background
+  .notification
+  .hc-draft-action:active {
+  background-color: alpha(@primary-clr, 0.7);
+  color: @foreground-clr;
+}

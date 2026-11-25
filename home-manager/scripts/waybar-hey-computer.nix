@@ -7,7 +7,7 @@ Continuous watcher (`watch` subcommand, restarted by Waybar if it exits):
 - Follow-up window open: shows the robot-chat icon (no text, no color)
 - Background tasks active while foreground is idle: shows a steady robot icon
   with background task count in tooltip
-- Otherwise (idle / starting / down): shows the NixOS logo like custom/os-logo
+- Otherwise (idle / locked / starting / down): shows the NixOS logo like custom/os-logo
 
 Click actions preserve custom/os-logo when idle (left: rofi search, middle:
 toggle spoken voice answers, right: power menu), cancel when thinking or
@@ -203,6 +203,9 @@ in {
             *)
               frame_idx=0
               case "$agent" in
+              locked)
+                emit "$(format_json "  " "idle" "Ask Computer: keyring locked''${bg_suffix}")"
+                ;;
               starting)
                 emit "$(format_json "  " "idle" "Ask Computer: starting…")"
                 ;;
@@ -251,6 +254,9 @@ in {
             ;;
           *)
             case "$agent" in
+            locked)
+              format_json "  " "idle" "Ask Computer: keyring locked''${bg_suffix}"
+              ;;
             starting)
               format_json "  " "idle" "Ask Computer: starting…"
               ;;
