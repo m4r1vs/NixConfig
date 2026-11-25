@@ -603,6 +603,30 @@ in {
             Keywords = "ai;assistant;ask;computer;hey-computer;gemini;prompt;";
           };
         };
+        rofi-ask-history = mkIf config.programs.configured.hey-computer.enable {
+          name = "Ask Computer History";
+          genericName = "SUPER+Shift+A";
+          comment = "Browse Ask Computer conversations and manage active background tasks";
+          icon = "gnome-activity-journal";
+          exec = "${scripts.rofi-launch} history";
+          type = "Application";
+          categories = ["Utility"];
+          settings = {
+            Keywords = "ai;assistant;ask;computer;hey-computer;history;chats;conversations;tasks;recall;";
+          };
+        };
+        rofi-ask-schedules = mkIf config.programs.configured.hey-computer.enable {
+          name = "Ask Computer Schedules";
+          genericName = "Morning Brief & Scheduled Actions";
+          comment = "Inspect, run, pause, or remove Ask Computer scheduled actions";
+          icon = "gnome-schedule";
+          exec = "${scripts.rofi-launch} schedules";
+          type = "Application";
+          categories = ["Utility" "Settings"];
+          settings = {
+            Keywords = "ai;assistant;ask;computer;hey-computer;schedule;schedules;morning;brief;digest;cron;reminders;";
+          };
+        };
       };
       portal = {
         enable = true;

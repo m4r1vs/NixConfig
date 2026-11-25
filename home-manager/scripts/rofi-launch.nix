@@ -66,8 +66,11 @@ in {
         ask)
           HEY_COMPUTER_REPLY_TO="''${2:-}" ${pkgs.rofi}/bin/rofi -modi ask:${scripts.rofi-ask} -show ask -theme-str "entry {placeholder:\"Ask Computer...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}"
           ;;
-        tasks)
-          ${pkgs.rofi}/bin/rofi -modi tasks:${scripts.rofi-hey-computer-tasks} -show tasks -theme-str "entry {placeholder:\"Background Tasks...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}window{padding: 32% 34%;}"
+        history | tasks)
+          ${pkgs.rofi}/bin/rofi -i -kb-custom-1 "Alt+r" -kb-custom-2 "Alt+c" -kb-custom-3 "Alt+x" -kb-custom-4 "Alt+m" -modi history:${scripts.rofi-hey-computer-history} -show history -theme-str "entry {placeholder:\"Ask Computer History...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}window{padding: 24% 22%;}"
+          ;;
+        schedules)
+          ${pkgs.rofi}/bin/rofi -i -kb-custom-1 "Alt+r" -kb-custom-2 "Alt+p" -kb-custom-3 "Alt+x" -kb-custom-4 "Alt+m" -modi schedules:${scripts.rofi-hey-computer-schedules} -show schedules -theme-str "entry {placeholder:\"Scheduled Actions...\";}element-icon{enabled:false;}icon-current-entry{enabled:false;}inputbar{padding: 0 0 0 42;}window{padding: 24% 22%;}"
           ;;
       ''}
         obsidian)
@@ -83,7 +86,7 @@ in {
           ${scripts.rofi-translate}
           ;;
         *)
-          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|buds|cliphist|powermode|nightlight|lights|obsidian|gitlab|ocr|wifi|translate|ask|tasks}"
+          echo "Usage: $0 {ssh|search|emoji|calc|wallpaper|power|bluetooth|buds|cliphist|powermode|nightlight|lights|obsidian|gitlab|ocr|wifi|translate|ask|history|tasks|schedules}"
           exit 1
           ;;
       esac

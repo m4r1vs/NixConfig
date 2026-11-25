@@ -998,7 +998,25 @@ in {
                 profile = "deep";
                 suppress_token = "HEARTBEAT_OK";
                 failure_deliver = "notify";
-                prompt = "Morning digest for the `date` and `location` in `<script_output>`. Check today's Google Calendar events, important unread personal Gmail messages (${personalGoogleEmail}) since last evening${optionalString systemArgs.useWorkProfileByDefault ", recent non-noise forwarded work emails in Slack DM D0BKG91AAAJ (never Gmail for ${systemArgs.git.email})"}, and any urgent Slack/Linear mentions if available. Append a concise '## Morning Brief' section to today's daily note `Journal/<date>.md` (creating it cleanly if needed) and reply with a short 2-3 sentence spoken-style summary. If nothing at all is on the calendar and there are no notable messages or mentions, reply with exactly HEARTBEAT_OK.";
+                prompt = ''
+                  Prepare today's Morning Brief using the `date`, `location`, and `weather_*` fields in `<untrusted_collector_output>`.
+
+                  Gather context:
+                  - Today's Google Calendar events (24-hour times).
+                  - Important unread personal Gmail messages (${personalGoogleEmail}) since last evening${optionalString systemArgs.useWorkProfileByDefault ", recent non-noise forwarded work emails in Slack DM D0BKG91AAAJ (never Gmail for ${systemArgs.git.email})"}, and any urgent Slack or Linear mentions if available.
+                  - Any overdue or due-today personal Google Tasks (${personalGoogleEmail}) and open items in today's `Journal/<date>.md` if it already exists.
+
+                  If nothing at all is on today's calendar and there are no notable messages, mentions, or due tasks, reply with exactly `HEARTBEAT_OK` and do not modify the daily note.
+
+                  Otherwise, write and reply with the full editorial Markdown brief directly (never a 2-sentence summary):
+                  1. Start with `# Morning Brief — <Weekday>, <D Month>` (e.g. `# Morning Brief — Wednesday, 25 November`).
+                  2. Immediately below the H1, write a single plain-prose opening paragraph of 3–4 sentences (~50–80 words) beginning with a normal capitalized letter — never a bullet list, blockquote, emoji, quotation mark, bold/italic marker, or code span first (this paragraph renders with a Reforma 1969 editorial drop cap).
+                  3. Opening cadence: warm, observant, lightly poetic editorial prose that notices the real shape and rhythm of the day ahead (open stretches, meeting clusters, transitions). No exclamation marks, and never use clichés such as "tapestry", "symphony", "whispers", "gentle reminder", or "embrace the day".
+                  4. Weather rule (strict): ONLY if `weather_status: changed` in `<untrusted_collector_output>`, weave `weather_today` and the concrete shift from `weather_delta` naturally into the opening paragraph. If `weather_status` is `unchanged`, `unavailable`, or absent, omit weather completely and silently — do not mention forecasts, temperatures, sky conditions, or that weather is unchanged.
+                  5. Below the opening paragraph, include crisp, scannable `##` sections (`## Schedule`, `## Mail & Messages`, `## Tasks & Focus` as applicable) with 24-hour `HH:MM` times, concrete senders, and concise items. Omit any empty section.
+                  6. Widget restraint: call `show_widget` (`calendar_agenda`) at most once, and only when today has 3 or more timed events or a scheduling conflict.
+                  7. Idempotent daily-note sync: update today's `Journal/<date>.md` in the Obsidian vault. Create the file cleanly if needed, or if a `## Morning Brief` section already exists, replace it in place (up to the next `## ` heading or EOF) without duplicating on re-runs and without disturbing frontmatter, existing `- [ ]` tasks, or other notes. Inside `Journal/<date>.md`, nest the brief under `## Morning Brief` using `###` subheadings.
+                '';
               };
             }
             // optionalAttrs (cfg.proactive.enable && cfg.proactive.preDaily.enable) {
@@ -1008,7 +1026,7 @@ in {
                 profile = "deep";
                 suppress_token = "HEARTBEAT_OK";
                 failure_deliver = "notify";
-                prompt = "Pre-daily standup brief (10:00 daily, using `date` and `location` from `<script_output>`). First check today's Google Calendar: if I am out of office / on vacation or there is no 10:00 daily today, reply with exactly HEARTBEAT_OK. Otherwise, summarize in 3-5 concise bullets: (1) my active Linear issues / recent GitLab MR updates from yesterday, (2) any relevant Slack mentions since yesterday afternoon, and (3) what is on today's schedule after the daily.";
+                prompt = "Pre-daily standup brief (10:00 daily, using `date` and `location` from `<untrusted_collector_output>`). First check today's Google Calendar: if I am out of office / on vacation or there is no 10:00 daily today, reply with exactly HEARTBEAT_OK. Otherwise, summarize in 3-5 concise bullets: (1) my active Linear issues / recent GitLab MR updates from yesterday, (2) any relevant Slack mentions since yesterday afternoon, and (3) what is on today's schedule after the daily.";
               };
             }
             // optionalAttrs (cfg.proactive.enable && cfg.proactive.weeklyDistill.enable) {

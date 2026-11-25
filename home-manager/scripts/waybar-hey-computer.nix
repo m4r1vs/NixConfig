@@ -119,7 +119,7 @@ in {
             exec ${scripts.rofi-launch} ask
             ;;
           background)
-            exec ${scripts.rofi-launch} tasks
+            exec ${scripts.rofi-launch} history
             ;;
           *)
             exec ${scripts.rofi-launch} search
@@ -191,11 +191,11 @@ in {
             background)
               frame_idx=0
               if [ "$bg_run" -gt 0 ] && [ "$bg_queue" -gt 0 ]; then
-                tooltip="Ask Computer: $bg_run background task(s), $bg_queue queued (click for tasks)"
+                tooltip="Ask Computer: $bg_run background task(s), $bg_queue queued (click for tasks & history)"
               elif [ "$bg_run" -gt 0 ]; then
-                tooltip="Ask Computer: $bg_run background task(s) running (click for tasks)"
+                tooltip="Ask Computer: $bg_run background task(s) running (click for tasks & history)"
               else
-                tooltip="Ask Computer: $bg_queue background task(s) queued (click for tasks)"
+                tooltip="Ask Computer: $bg_queue background task(s) queued (click for tasks & history)"
               fi
               emit "$(format_json " 󱚣 " "background" "$tooltip")"
               sleep_interruptible 0.5
@@ -241,11 +241,11 @@ in {
             ;;
           background)
             if [ "$bg_run" -gt 0 ] && [ "$bg_queue" -gt 0 ]; then
-              tooltip="Ask Computer: $bg_run background task(s), $bg_queue queued (click for tasks)"
+              tooltip="Ask Computer: $bg_run background task(s), $bg_queue queued (click for tasks & history)"
             elif [ "$bg_run" -gt 0 ]; then
-              tooltip="Ask Computer: $bg_run background task(s) running (click for tasks)"
+              tooltip="Ask Computer: $bg_run background task(s) running (click for tasks & history)"
             else
-              tooltip="Ask Computer: $bg_queue background task(s) queued (click for tasks)"
+              tooltip="Ask Computer: $bg_queue background task(s) queued (click for tasks & history)"
             fi
             format_json " 󱚣 " "background" "$tooltip"
             ;;
