@@ -19,6 +19,7 @@ with lib; let
   appNames = sort lessThan (attrNames voiceCmd.apps);
   hasNetbird = osConfig.services.netbird.enable or false;
   hasSwaync = config.services.configured.swaync.enable;
+  ageSecrets = osConfig.age.secrets or {};
   hasNightlight = config.services.configured.hyprsunset.enable;
   hasDarkman = config.services.configured.darkman.enable;
   hasOpenhue = config.programs.configured.openhue.enable;
@@ -826,7 +827,10 @@ in {
 
       clientSecretFile = mkOption {
         type = types.str;
-        default = "${config.xdg.stateHome}/google-workspace-mcp/client_secret.json";
+        default =
+          if ageSecrets ? google-workspace-client-secret
+          then ageSecrets.google-workspace-client-secret.path
+          else "${config.xdg.stateHome}/google-workspace-mcp/client_secret.json";
         description = ''
           Path to the Google Cloud OAuth Desktop client JSON file
           (`GOOGLE_CLIENT_SECRET_PATH`), kept outside `/nix/store`.
@@ -910,9 +914,14 @@ in {
     };
 
     notifications = {
-      enable = mkEnableOption ''
-        reactive notification enrichment and read-only reply drafting
-        (`settings.notifications`) paired with SwayNC hold-and-enrich'';
+      enable = mkOption {
+        type = types.bool;
+        default = hasSwaync && (ageSecrets ? hey-computer-notification-senders);
+        description = ''
+          Enable reactive notification enrichment and read-only reply drafting
+          (`settings.notifications`) paired with SwayNC hold-and-enrich.
+        '';
+      };
 
       profile = mkOption {
         type = types.nullOr types.str;
@@ -936,7 +945,10 @@ in {
 
       sendersFile = mkOption {
         type = types.str;
-        default = "${config.xdg.configHome}/hey-computer/notification-senders.json";
+        default =
+          if ageSecrets ? hey-computer-notification-senders
+          then ageSecrets.hey-computer-notification-senders.path
+          else "${config.xdg.configHome}/hey-computer/notification-senders.json";
         description = ''
           Private JSON/TOML file outside `/nix/store` holding `allow_senders`,
           `deny_senders`, and `known_groups` so personal contacts never enter git.
@@ -981,10 +993,33 @@ in {
 
     messengerBridge = mkOption {
       type = types.attrsOf types.anything;
-      default = {};
+      default = optionalAttrs ((ageSecrets ? hey-computer-whatsapp-allow) || (ageSecrets ? hey-computer-signal-allow)) {
+        enable = true;
+        extraBindReadOnlyPaths = ["/run/agenix" "/run/agenix.d"];
+        settings =
+          optionalAttrs (ageSecrets ? hey-computer-whatsapp-allow) {
+            whatsapp = {
+              enabled = true;
+              self_chat = true;
+              allow_from_file = ageSecrets.hey-computer-whatsapp-allow.path;
+            };
+          }
+          // optionalAttrs (ageSecrets ? hey-computer-signal-allow) {
+            signal =
+              {
+                enabled = true;
+                self_chat = true;
+                allow_from_file = ageSecrets.hey-computer-signal-allow.path;
+              }
+              // optionalAttrs (ageSecrets ? hey-computer-signal-account) {
+                account_file = ageSecrets.hey-computer-signal-account.path;
+              };
+          };
+      };
       description = ''
         Pass-through attributes forwarded to `programs.hey-computer.messengerBridge`
-        (read-only WhatsApp/Signal context bridge; disabled by default).
+        (read-only WhatsApp/Signal context bridge; enabled automatically when
+        messenger allowlist agenix secrets are present on the host).
       '';
     };
   };

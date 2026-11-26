@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  osConfig,
   pkgs,
   systemArgs,
   ...
@@ -8,6 +9,7 @@
 with lib; let
   cfg = config.programs.configured.mcp;
   inherit (cfg) gitlab slack context7;
+  ageSecrets = osConfig.age.secrets or {};
 
   slackReadonlyTools = [
     "channels_list"
@@ -36,8 +38,14 @@ with lib; let
   slackAuthEnv =
     if slack.authMode == "xoxc"
     then {
-      SLACK_MCP_XOXC_TOKEN.file = "${slack.tokenDir}/xoxc";
-      SLACK_MCP_XOXD_TOKEN.file = "${slack.tokenDir}/xoxd";
+      SLACK_MCP_XOXC_TOKEN.file =
+        if ageSecrets ? slack-mcp-xoxc
+        then ageSecrets.slack-mcp-xoxc.path
+        else "${slack.tokenDir}/xoxc";
+      SLACK_MCP_XOXD_TOKEN.file =
+        if ageSecrets ? slack-mcp-xoxd
+        then ageSecrets.slack-mcp-xoxd.path
+        else "${slack.tokenDir}/xoxd";
     }
     else if slack.authMode == "xoxp"
     then {

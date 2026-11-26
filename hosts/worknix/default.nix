@@ -191,11 +191,22 @@
     programs.configured.hyprlock.scaling = 1.25;
   };
 
-  age.secrets.hey-computer-memory = {
-    file = ../../secrets/hey-computer-memory.age;
-    owner = systemArgs.username;
-    group = "users";
-    mode = "0400";
+  age.secrets = let
+    userSecret = file: {
+      inherit file;
+      owner = systemArgs.username;
+      group = "users";
+      mode = "0400";
+    };
+  in {
+    hey-computer-memory = userSecret ../../secrets/hey-computer-memory.age;
+    hey-computer-notification-senders = userSecret ../../secrets/hey-computer-notification-senders.age;
+    hey-computer-whatsapp-allow = userSecret ../../secrets/hey-computer-whatsapp-allow.age;
+    hey-computer-signal-allow = userSecret ../../secrets/hey-computer-signal-allow.age;
+    hey-computer-signal-account = userSecret ../../secrets/hey-computer-signal-account.age;
+    google-workspace-client-secret = userSecret ../../secrets/google-workspace-client-secret.age;
+    slack-mcp-xoxc = userSecret ../../secrets/slack-mcp-xoxc.age;
+    slack-mcp-xoxd = userSecret ../../secrets/slack-mcp-xoxd.age;
   };
 
   system = {

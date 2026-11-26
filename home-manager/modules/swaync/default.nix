@@ -78,6 +78,10 @@ in {
         @import url("${builtins.path {path = ./base.css;}}");
       '';
 
+    systemd.user.services.swaync.Unit.X-Restart-Triggers = [
+      "${pkgs.swaynotificationcenter}"
+    ];
+
     services.swaync = {
       enable = true;
       package = pkgs.swaynotificationcenter;
