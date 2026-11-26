@@ -375,6 +375,7 @@ with lib; let
         (scripts)
         caffeinate
         desktop-context
+        hey-computer-proactive
         toggle-zen
         spotify-like
         random-album-of-the-day
@@ -1233,6 +1234,13 @@ in {
           max_queued = 32;
           profile = "deep";
         };
+        subagents = {
+          enabled = true;
+          profile = "fast";
+          max_concurrent = 4;
+          max_turn_secs = 120;
+          max_tool_calls = 30;
+        };
         scheduler = {
           enabled = true;
           jobs =
@@ -1243,57 +1251,7 @@ in {
                 profile = "deep";
                 suppress_token = "HEARTBEAT_OK";
                 failure_deliver = "notify";
-                prompt =
-                  if workEnabled
-                  then ''
-                    Prepare today's Morning Brief using the `date`, `location`, `workday_*`, and `weather_*` fields in `<untrusted_collector_output>`.
-
-                    Step 1 — Determine Workday vs. Day Off BEFORE calling any work tools:
-                    - Read `workday_status` in `<untrusted_collector_output>`:
-                      - `workday_status: day_off` → Today is a **Weekend / Day Off** (personal-only mode).
-                      - `workday_status: workday` → Today is a **Working Day** (personal + work mode).
-                      - `workday_status: unknown` (or absent) → Query **personal** Google Calendar (`${personalGoogleEmail}`) for today FIRST before touching any work tool. Treat today as a **Working Day** ONLY if today is Mon–Fri, has an `"Arbeit"` event on `${personalGoogleEmail}`, and has no all-day vacation / out-of-office override; otherwise treat today as a **Weekend / Day Off**.
-
-                    Step 2 — Gather context strictly according to the mode:
-                    - **Always (Personal):**
-                      - Today's personal Google Calendar events (`${personalGoogleEmail}`, 24-hour times).
-                      - Important unread personal Gmail messages (`${personalGoogleEmail}`) since last evening.
-                      - Overdue or due-today personal Google Tasks (`${personalGoogleEmail}`) and open `- [ ]` items in today's `Journal/<date>.md` if it already exists.
-                    - **ONLY on a Working Day (strictly SKIP on Weekends / Days Off — do NOT call `slack`, `linear`, `gitlab`, or query `${workGoogleEmail}`):**
-                      - Today's work Google Calendar events (`${workGoogleEmail}`, 24-hour times).
-                      - Recent non-noise forwarded work emails in Slack DM `${workSlackEmailDmChannel}` (never Gmail for `${workGoogleEmail}`).
-                      - Urgent Slack mentions/DMs, active Linear mentions/blockers, and GitLab MRs needing attention (reviews requested, failed pipelines, or new threads).
-
-                    If nothing at all is on today's relevant calendar(s) and there are no notable messages, mentions, or due tasks, reply with exactly `HEARTBEAT_OK` and do not modify the daily note.
-
-                    Otherwise, write and reply with the full editorial Markdown brief directly (never a 2-sentence summary):
-                    1. Start with `# Morning Brief — <Weekday>, <D Month>` (e.g. `# Morning Brief — Wednesday, 25 November`).
-                    2. Immediately below the H1, write a single plain-prose opening paragraph of 3–4 sentences (~50–80 words) beginning with a normal capitalized letter — never a bullet list, blockquote, emoji, quotation mark, bold/italic marker, or code span first (this paragraph renders with a Reforma 1969 editorial drop cap). On days off, let the prose reflect an unhurried off-work day without mentioning skipped work tools.
-                    3. Opening cadence: warm, observant, lightly poetic editorial prose that notices the real shape and rhythm of the day ahead (open stretches, meeting clusters, transitions). No exclamation marks, and never use clichés such as "tapestry", "symphony", "whispers", "gentle reminder", or "embrace the day".
-                    4. Weather rule (strict): ONLY if `weather_status: changed` in `<untrusted_collector_output>`, weave `weather_today` and the concrete shift from `weather_delta` naturally into the opening paragraph. If `weather_status` is `unchanged`, `unavailable`, or absent, omit weather completely and silently — do not mention forecasts, temperatures, sky conditions, or that weather is unchanged.
-                    5. Below the opening paragraph, include crisp, scannable `##` sections (`## Schedule`, `## Mail & Messages`, `## Work & Reviews`, `## Tasks & Focus` as applicable; omit `## Work & Reviews` and any empty section on days off) with 24-hour `HH:MM` times, concrete senders, and concise items.
-                    6. Widget restraint: call `show_widget` (`calendar_agenda`) at most once, and only when today has 3 or more timed events or a scheduling conflict.
-                    7. Idempotent daily-note sync: update today's `Journal/<date>.md` in the Obsidian vault. Create the file cleanly if needed, or if a `## Morning Brief` section already exists, replace it in place (up to the next `## ` heading or EOF) without duplicating on re-runs and without disturbing frontmatter, existing `- [ ]` tasks, or other notes. Inside `Journal/<date>.md`, nest the brief under `## Morning Brief` using `###` subheadings.
-                  ''
-                  else ''
-                    Prepare today's Morning Brief using the `date`, `location`, `workday_*`, and `weather_*` fields in `<untrusted_collector_output>`.
-
-                    Gather context (personal-only mode):
-                    - Today's personal Google Calendar events (`${personalGoogleEmail}`, 24-hour times).
-                    - Important unread personal Gmail messages (`${personalGoogleEmail}`) since last evening.
-                    - Overdue or due-today personal Google Tasks (`${personalGoogleEmail}`) and open `- [ ]` items in today's `Journal/<date>.md` if it already exists.
-
-                    If nothing at all is on today's calendar and there are no notable messages or due tasks, reply with exactly `HEARTBEAT_OK` and do not modify the daily note.
-
-                    Otherwise, write and reply with the full editorial Markdown brief directly (never a 2-sentence summary):
-                    1. Start with `# Morning Brief — <Weekday>, <D Month>` (e.g. `# Morning Brief — Wednesday, 25 November`).
-                    2. Immediately below the H1, write a single plain-prose opening paragraph of 3–4 sentences (~50–80 words) beginning with a normal capitalized letter — never a bullet list, blockquote, emoji, quotation mark, bold/italic marker, or code span first (this paragraph renders with a Reforma 1969 editorial drop cap).
-                    3. Opening cadence: warm, observant, lightly poetic editorial prose that notices the real shape and rhythm of the day ahead (open stretches, meeting clusters, transitions). No exclamation marks, and never use clichés such as "tapestry", "symphony", "whispers", "gentle reminder", or "embrace the day".
-                    4. Weather rule (strict): ONLY if `weather_status: changed` in `<untrusted_collector_output>`, weave `weather_today` and the concrete shift from `weather_delta` naturally into the opening paragraph. If `weather_status` is `unchanged`, `unavailable`, or absent, omit weather completely and silently — do not mention forecasts, temperatures, sky conditions, or that weather is unchanged.
-                    5. Below the opening paragraph, include crisp, scannable `##` sections (`## Schedule`, `## Mail & Messages`, `## Tasks & Focus` as applicable) with 24-hour `HH:MM` times, concrete senders, and concise items. Omit any empty section.
-                    6. Widget restraint: call `show_widget` (`calendar_agenda`) at most once, and only when today has 3 or more timed events or a scheduling conflict.
-                    7. Idempotent daily-note sync: update today's `Journal/<date>.md` in the Obsidian vault. Create the file cleanly if needed, or if a `## Morning Brief` section already exists, replace it in place (up to the next `## ` heading or EOF) without duplicating on re-runs and without disturbing frontmatter, existing `- [ ]` tasks, or other notes. Inside `Journal/<date>.md`, nest the brief under `## Morning Brief` using `###` subheadings.
-                  '';
+                prompt = cfg.proactive.prompts.morningDigest;
               };
             }
             // optionalAttrs (cfg.proactive.enable && cfg.proactive.preDaily.enable) {
@@ -1303,14 +1261,7 @@ in {
                 profile = "deep";
                 suppress_token = "HEARTBEAT_OK";
                 failure_deliver = "notify";
-                prompt = ''
-                  Pre-daily standup brief (10:00 daily, using `date`, `location`, and `workday_*` from `<untrusted_collector_output>`).
-                  1. Day-off gate (check FIRST before any work tools):
-                     - If `workday_status: day_off` in `<untrusted_collector_output>`, reply immediately with exactly `HEARTBEAT_OK` without calling any tools.
-                     - If `workday_status` is `unknown` or absent, query ONLY personal Google Calendar (`${personalGoogleEmail}`) for today first: if today is not Mon–Fri, has no `"Arbeit"` event, or has an all-day vacation / out-of-office override, reply immediately with exactly `HEARTBEAT_OK` without calling Slack, Linear, GitLab, or work Google Calendar.
-                  2. Next check work Google Calendar (`${workGoogleEmail}`) for today: if I am out of office or there is no 10:00 daily meeting today, reply with exactly `HEARTBEAT_OK`.
-                  3. Otherwise, summarize in 3–5 concise bullets: (1) my active Linear issues and recent GitLab MR updates since yesterday, (2) relevant Slack mentions since yesterday afternoon, and (3) what is on today's schedule after the daily.
-                '';
+                prompt = cfg.proactive.prompts.preDaily;
               };
             }
             // optionalAttrs (cfg.proactive.enable && cfg.proactive.weeklyDistill.enable) {
@@ -1367,9 +1318,16 @@ in {
           ## Obsidian daily notes, reminders & Google Tasks
 
           - Daily notes live at `Journal/YYYY-MM-DD.md` inside the vault (e.g. `Journal/2026-11-23.md`).
-          - An Obsidian plugin automatically carries unticked `- [ ]` checkboxes forward from past daily notes into today's note.
-          - **Undated reminders & TODOs → Obsidian:** When asked to "remind me to …" or "add a TODO …" **without** a specific date or time, insert an unticked `- [ ] …` checkbox at the **top** of the task list in today's `Journal/YYYY-MM-DD.md` (after any YAML frontmatter or top heading, creating the file if needed) without overwriting existing content.
+          - Actual daily-note layout: YAML frontmatter (`journal: Journal`, `journal-date: YYYY-MM-DD`), followed directly by top-level `- [ ]` checkboxes and indented `- [ ]` sub-TODOs — there is **no** `# TODOs` or `# Gedanken` heading (`obsidian-rollover-daily-todos` automatically carries unticked `- [ ]` checkboxes forward into the top task list on file creation), followed by `## Day Plan` (written only when a day plan is activated) and `## Morning Brief`.
+          - **Undated reminders & TODOs → Obsidian:** When asked to "remind me to …" or "add a TODO …" **without** a specific date or time, insert an unticked `- [ ] …` checkbox at the **top** of the task list in today's `Journal/YYYY-MM-DD.md` (immediately after YAML frontmatter, creating the file cleanly if needed) without overwriting existing content or inventing a `# TODOs` heading.
           - **Explicit tasks or dated/timed reminders & TODOs → Personal Google Tasks (`${personalGoogleEmail}`):** When asked to "add a task …", "remind me to … on `<date/datetime/time>`" (or "tomorrow", "in X days", etc.), or "add a todo for the `<Xth>`", create it in **Google Tasks** via `google-workspace` (`manage_task`) on the personal account **`${personalGoogleEmail}`** (never on the work account). Use `list_task_lists` if a specific list name is requested, otherwise use `"@default"`. Pass due dates as RFC 3339 (`YYYY-MM-DDTHH:MM:SSZ`); since Google Tasks stores due dates at day resolution, include any specific clock time in the task title or notes so it is not lost.
+
+          ## Day Planning (`plan my day` / `re-plan my afternoon`)
+
+          - When the user asks to `"plan my day"`, `"re-plan my afternoon"`, or adjust today's plan, follow the `day-plan` skill (propose first with a single `day_plan` widget and zero plan side effects, iterate cleanly in chat respecting any `[Live Day Plan UI selections: …]` suffix, and enact only after confirmation).
+          - **Calendar routing for Day Plan blocks:**${optionalString workEnabled " Work focus blocks go on `${workGoogleEmail}` marked **busy (`opaque`)** with a `Focus: ` prefix, staying strictly inside today's `work_windows` (from `hey-computer-proactive workday` / collector output);"} personal blocks go on `${personalGoogleEmail}`. Tag created blocks with `[hey-computer:day-plan:YYYY-MM-DD:<id>]` in the description for idempotent updates and mid-day moves.
+          - **Reply drafting (strictly read-only):** Reply nudges and `Draft Reply` actions are **strictly read-only** — draft concise replies in chat matching the thread's language (DE/EN) and **never auto-send** WhatsApp, Signal, Slack, or email messages without explicit user instruction.
+          - **Check-in pre-collector:** When activating a plan with progress check-ins, always register dated one-shot jobs (`--schedule "at YYYY-MM-DD HH:MM"`, never bare `at HH:MM`) gated with `--script "hey-computer-proactive collect-day-plan-checkin <slot>"` and `--suppress-token HEARTBEAT_OK` so locked/offline sessions, live meetings (ignoring `Arbeit` and `Focus:` blocks), and already-completed plans defer or skip at 0 tokens.
 
           ## Speech-recognition glossary
 

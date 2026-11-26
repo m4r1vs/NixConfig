@@ -1,4 +1,4 @@
-# Shell-gated proactive automation for hey-computer (#26, #33, #34):
+# Shell-gated proactive automation for hey-computer (#26, #33, #34, plan-my-day):
 # - `location`: classifies current environment as `work`, `home`, or `other`
 #   using connected monitor descriptions/models (`hyprctl monitors -j`) and
 #   optional user-local `~/.config/hey-computer/locations.json` rules (IP prefix,
@@ -8,10 +8,11 @@
 #   coordinates, persists 14 days atomically in `weather-history.json`, and emits
 #   a deterministic day-over-day delta (`changed`, `unchanged`, or `unavailable`).
 # - `workday [--refresh] [--cached-only] [--json|--quiet]`: deterministic 0-token
-#   workday detector backed by a 30-minute TTL cache in `$STATE_DIR/workday.json`
-#   (mode `0600`). Resolves `day_off` in 0 ms when work mode is disabled or on
-#   weekends, and queries personal Google Calendar (`events.list`) on weekdays
-#   for `"Arbeit"` minus out-of-office / all-day absence overrides.
+#   multi-signal 3-calendar workday & StandUp detector backed by a 30-minute TTL
+#   cache in `$STATE_DIR/workday.json` (mode `0600`). Queries personal primary,
+#   work primary, and `de.german#holiday@group.v.calendar.google.com` via
+#   `LocalDirectoryCredentialStore`, emitting `work_windows`, `work_minutes`,
+#   `work_mode`, `standup_status`, and `standup_window`.
 # - `collect-morning-digest`: fast 0-token pre-collector for hey-computer's native
 #   `[scheduler.jobs.morning-digest]` cron (`*/5 5-14 * * *`). Queries
 #   `hey-computer schedule show morning-digest --json` (`last_run_at`,
@@ -21,12 +22,21 @@
 #   succeeded/suppressed/is active, when within a 15-minute failure retry
 #   cooldown, or while locked/offline (bypassed when
 #   `HEY_COMPUTER_SCHEDULE_MANUAL=1`); otherwise prints `date`, `location`,
-#   `workday_*`, and the deterministic `weather_*` block so the scheduler wakes
-#   the agent.
+#   `workday_*` / `work_*` / `standup_*`, and the deterministic `weather_*` block
+#   so the scheduler wakes the agent.
 # - `collect-pre-daily`: fast 0-token pre-collector for `[scheduler.jobs.pre-daily]`
 #   (`weekdays 09:56`). Exits 0 with empty stdout while locked/offline, away from
-#   work/home, or on a `day_off` (bypassed when `HEY_COMPUTER_SCHEDULE_MANUAL=1`);
-#   otherwise prints `date`, `location`, and `workday_*`.
+#   work/home, on a `day_off`, or when `standup_status` is `declined`/`none`
+#   (bypassed when `HEY_COMPUTER_SCHEDULE_MANUAL=1`); appends `active_roter_faden`
+#   and `active_plan_tasks` when `$STATE_DIR/day-plan-$today.json` has
+#   `pre_daily_sync == true`.
+# - `collect-day-plan-checkin [slot_id]`: 0-token pre-collector gate for dynamic
+#   day-plan reassessment check-ins. Requires `$STATE_DIR/day-plan-$today.json`,
+#   defers `in 20m` (<= 2 times, before 18:00 local) if locked/offline or in a
+#   live dual-calendar meeting (excluding `Arbeit`, `Focus:`, and day-plan blocks),
+#   skips at 0 tokens if all `planned_items` are already ticked off in
+#   `Journal/$today.md`, and otherwise prints structured key-values to wake the
+#   reassessment turn.
 # - `morning-digest` / `pre-daily`: manual CLI runners retained for ad-hoc testing.
 {
   pkgs,
@@ -57,7 +67,10 @@
       then systemArgs.git.email
       else "marius@meetovo.de"
     );
-  workSlackEmailDmChannel = hcCfg.work.slackEmailDmChannel or "D0BKG91AAAJ";
+  vaultDir =
+    if (systemArgs.obsidianVault or null) != null
+    then "${hmCfg.home.homeDirectory}/Documents/${systemArgs.obsidianVault}"
+    else "";
   googleCredsDir =
     hcCfg.googleWorkspace.credentialsDir
     or "${hmCfg.xdg.stateHome}/google-workspace-mcp/credentials";
@@ -73,6 +86,7 @@
     import tempfile
     import time
     from datetime import date, datetime, timedelta
+    from urllib.parse import quote
     from zoneinfo import ZoneInfo
 
     import requests
@@ -80,11 +94,20 @@
 
     logging.getLogger("auth").setLevel(logging.CRITICAL)
 
+    HOLIDAY_CALENDAR_ID = "de.german#holiday@group.v.calendar.google.com"
+    DAY_PLAN_TAG = "[hey-computer:day-plan:"
+
     ARBEIT_RE = re.compile(r"^arbeit(?:\b|[\s:–—-]|$)", re.IGNORECASE)
+    HEIMATBUERO_RE = re.compile(
+        r"(?:heimatb[uü]ro|home\s*-?\s*office|remote|\bwfh\b)",
+        re.IGNORECASE,
+    )
+    STANDUP_RE = re.compile(r"\b(?:stand[\s-]?up|daily)\b", re.IGNORECASE)
+    FOCUS_RE = re.compile(r"^focus:", re.IGNORECASE)
     ABSENCE_RE = re.compile(
         r"(?i)(?:^frei$|\b(?:"
         r"urlaub|vacation|pto|time\s+off|day\s+off|freier?\s+tag|"
-        r"gleittag|flex\s+day|sonderurlaub|überstundenabbau|"
+        r"gleittag|flex\s+day|sonderurlaub|überstundenabbau|elternzeit|"
         r"out\s+of\s+office|ooo|abwesend|krank|krankmeldung|"
         r"sick(?:\s+day|\s+leave)?|feiertag|public\s+holiday|bank\s+holiday"
         r")\b)"
@@ -134,11 +157,412 @@
         return dt.astimezone(tz)
 
 
-    def _is_declined_by_self(event: dict) -> bool:
+    def _self_response_status(event: dict) -> str | None:
         for att in event.get("attendees") or []:
-            if isinstance(att, dict) and att.get("self") is True and att.get("responseStatus") == "declined":
-                return True
+            if isinstance(att, dict) and att.get("self") is True:
+                status = att.get("responseStatus")
+                if isinstance(status, str) and status:
+                    return status
+        return None
+
+
+    def _is_declined_by_self(event: dict) -> bool:
+        return _self_response_status(event) == "declined"
+
+
+    def _is_transparent(event: dict) -> bool:
+        return (event.get("transparency") or "opaque").strip().lower() == "transparent"
+
+
+    def _event_span_for_day(
+        event: dict,
+        today: date,
+        day_start: datetime,
+        day_end: datetime,
+        tz,
+    ) -> tuple[bool, datetime, datetime] | None:
+        start = event.get("start") or {}
+        end = event.get("end") or {}
+        is_all_day = "date" in start and "dateTime" not in start
+        if is_all_day:
+            try:
+                start_date = date.fromisoformat(start["date"])
+                end_date = (
+                    date.fromisoformat(end["date"])
+                    if "date" in end
+                    else start_date + timedelta(days=1)
+                )
+            except (TypeError, ValueError):
+                return None
+            if not (start_date <= today < end_date):
+                return None
+            return True, day_start, day_end
+
+        if "dateTime" in start:
+            try:
+                ev_start = _parse_iso_dt(start["dateTime"], tz)
+                ev_end = (
+                    _parse_iso_dt(end["dateTime"], tz)
+                    if "dateTime" in end
+                    else ev_start
+                )
+            except (TypeError, ValueError):
+                return None
+            if ev_end == ev_start:
+                if not (day_start <= ev_start < day_end):
+                    return None
+            elif not (ev_end > day_start and ev_start < day_end):
+                return None
+            return False, ev_start, ev_end
+
+        return None
+
+
+    def _merge_windows(
+        windows: list[tuple[datetime, datetime]],
+        day_start: datetime,
+        day_end: datetime,
+    ) -> list[tuple[datetime, datetime]]:
+        clamped: list[tuple[datetime, datetime]] = []
+        for s, e in windows:
+            cs = max(s, day_start)
+            ce = min(e, day_end)
+            if ce > cs:
+                clamped.append((cs, ce))
+        if not clamped:
+            return []
+        clamped.sort(key=lambda w: (w[0], w[1]))
+        merged = [clamped[0]]
+        for s, e in clamped[1:]:
+            prev_s, prev_e = merged[-1]
+            if s <= prev_e:
+                merged[-1] = (prev_s, max(prev_e, e))
+            else:
+                merged.append((s, e))
+        return merged
+
+
+    def _fmt_window(start: datetime, end: datetime) -> str:
+        return f"{start.strftime('%H:%M')}–{end.strftime('%H:%M')}"
+
+
+    def is_hamburg_legal_holiday(
+        event: dict,
+        today: date,
+        tz=None,
+    ) -> bool:
+        if not isinstance(event, dict) or event.get("status") == "cancelled":
+            return False
+        if tz is None:
+            tz = get_local_tz()
+        day_start = datetime(today.year, today.month, today.day, 0, 0, 0, tzinfo=tz)
+        next_day = today + timedelta(days=1)
+        day_end = datetime(next_day.year, next_day.month, next_day.day, 0, 0, 0, tzinfo=tz)
+        if _event_span_for_day(event, today, day_start, day_end, tz) is None:
+            return False
+
+        desc = (event.get("description") or "").strip().lower()
+        if not desc:
+            return False
+        if "halbtägiger feiertag" in desc or "halbtaegiger feiertag" in desc:
+            return False
+        if "gesetzlicher feiertag" in desc:
+            return True
+        if "feiertag in" in desc and "hamburg" in desc:
+            return True
         return False
+
+
+    def _build_result(
+        *,
+        today_str: str,
+        checked_at: int,
+        status: str,
+        is_workday: bool,
+        reason: str,
+        arbeit_event: str | None = None,
+        override_event: str | None = None,
+        work_windows: str | None = None,
+        work_minutes: int = 0,
+        work_mode: str | None = None,
+        standup_status: str = "none",
+        standup_window: str | None = None,
+    ) -> dict:
+        return {
+            "date": today_str,
+            "checked_at": checked_at,
+            "status": status,
+            "is_workday": is_workday,
+            "workday": is_workday,
+            "reason": reason,
+            "arbeit_event": arbeit_event,
+            "override_event": override_event,
+            "work_windows": work_windows,
+            "work_minutes": work_minutes,
+            "work_mode": work_mode,
+            "standup_status": standup_status,
+            "standup_window": standup_window,
+        }
+
+
+    def evaluate_calendars(
+        personal_events: list[dict],
+        work_events: list[dict],
+        holiday_events: list[dict],
+        today: date,
+        tz=None,
+        checked_at: int | None = None,
+        work_enabled: bool = True,
+        work_calendar_ok: bool = True,
+    ) -> dict:
+        if tz is None:
+            tz = get_local_tz()
+        if checked_at is None:
+            checked_at = int(time.time())
+
+        today_str = today.isoformat()
+        if not work_enabled:
+            return _build_result(
+                today_str=today_str,
+                checked_at=checked_at,
+                status="day_off",
+                is_workday=False,
+                reason="work_disabled",
+                standup_status="none",
+            )
+
+        if today.isoweekday() in (6, 7):
+            return _build_result(
+                today_str=today_str,
+                checked_at=checked_at,
+                status="day_off",
+                is_workday=False,
+                reason="weekend",
+                standup_status="none",
+            )
+
+        day_start = datetime(today.year, today.month, today.day, 0, 0, 0, tzinfo=tz)
+        next_day = today + timedelta(days=1)
+        day_end = datetime(next_day.year, next_day.month, next_day.day, 0, 0, 0, tzinfo=tz)
+
+        arbeit_summary: str | None = None
+        arbeit_raw_windows: list[tuple[datetime, datetime]] = []
+        is_heimatbuero = False
+        ooo_candidates: list[tuple[str, datetime, datetime]] = []
+        all_day_override: str | None = None
+        personal_timed_other: list[tuple[datetime, datetime]] = []
+
+        for ev in personal_events or []:
+            if not isinstance(ev, dict) or ev.get("status") == "cancelled":
+                continue
+            if _is_declined_by_self(ev):
+                continue
+
+            span = _event_span_for_day(ev, today, day_start, day_end, tz)
+            if span is None:
+                continue
+            is_all_day, ev_start, ev_end = span
+            summary = (ev.get("summary") or "").strip()
+            location = (ev.get("location") or "").strip()
+            desc = ev.get("description") or ""
+            event_type = ev.get("eventType") or "default"
+
+            if is_all_day:
+                label = summary or "Out of office"
+            else:
+                time_span = _fmt_window(ev_start, ev_end)
+                label = f"{summary} ({time_span})" if summary else f"Out of office ({time_span})"
+
+            if event_type == "outOfOffice":
+                ooo_candidates.append((label, ev_start, ev_end))
+
+            if is_all_day and not _is_transparent(ev) and summary and ABSENCE_RE.search(summary):
+                if all_day_override is None:
+                    all_day_override = summary
+
+            if not is_all_day and summary and ARBEIT_RE.match(summary):
+                if arbeit_summary is None:
+                    arbeit_summary = summary
+                arbeit_raw_windows.append((ev_start, ev_end))
+                if HEIMATBUERO_RE.search(summary) or HEIMATBUERO_RE.search(location):
+                    is_heimatbuero = True
+            elif (
+                not is_all_day
+                and event_type not in ("outOfOffice", "workingLocation", "focusTime", "birthday")
+                and not FOCUS_RE.match(summary)
+                and DAY_PLAN_TAG not in desc
+            ):
+                personal_timed_other.append((ev_start, ev_end))
+
+        merged_arbeit = _merge_windows(arbeit_raw_windows, day_start, day_end)
+        work_windows = (
+            ", ".join(_fmt_window(s, e) for s, e in merged_arbeit)
+            if merged_arbeit
+            else None
+        )
+        work_minutes = int(
+            round(sum((e - s).total_seconds() for s, e in merged_arbeit) / 60.0)
+        )
+        work_mode = (
+            ("heimatbuero" if is_heimatbuero else "office")
+            if merged_arbeit
+            else None
+        )
+        arbeit_event = (
+            f"{arbeit_summary or 'Arbeit'} ({work_windows})"
+            if merged_arbeit and work_windows
+            else None
+        )
+
+        # Inspect work primary calendar for StandUp, OOO/absence, and other meetings.
+        standup_candidates: list[tuple[str, datetime, datetime, str]] = []
+        other_work_meetings: list[str] = []
+
+        for ev in work_events or []:
+            if not isinstance(ev, dict) or ev.get("status") == "cancelled":
+                continue
+
+            span = _event_span_for_day(ev, today, day_start, day_end, tz)
+            if span is None:
+                continue
+            is_all_day, ev_start, ev_end = span
+            summary = (ev.get("summary") or "").strip()
+            desc = ev.get("description") or ""
+            event_type = ev.get("eventType") or "default"
+            self_status = _self_response_status(ev)
+
+            if not is_all_day and summary and STANDUP_RE.search(summary):
+                st = self_status or "accepted"
+                label = f"{summary} ({_fmt_window(ev_start, ev_end)})"
+                standup_candidates.append((st, ev_start, ev_end, label))
+                continue
+
+            if self_status == "declined":
+                continue
+
+            if is_all_day:
+                label = summary or "Out of office"
+            else:
+                time_span = _fmt_window(ev_start, ev_end)
+                label = f"{summary} ({time_span})" if summary else f"Out of office ({time_span})"
+
+            if event_type == "outOfOffice":
+                ooo_candidates.append((label, ev_start, ev_end))
+                continue
+
+            if is_all_day and not _is_transparent(ev) and summary and ABSENCE_RE.search(summary):
+                if all_day_override is None:
+                    all_day_override = summary
+                continue
+
+            if (
+                not is_all_day
+                and event_type not in ("workingLocation", "focusTime", "birthday")
+                and not FOCUS_RE.match(summary)
+                and DAY_PLAN_TAG not in desc
+            ):
+                attendees = [a for a in (ev.get("attendees") or []) if isinstance(a, dict)]
+                if len(attendees) > 1 or self_status == "accepted":
+                    other_work_meetings.append(label)
+
+        standup_status = "none" if work_calendar_ok else "unknown"
+        standup_window: str | None = None
+        standup_span: tuple[datetime, datetime] | None = None
+        standup_label: str | None = None
+        if standup_candidates:
+            chosen = next(
+                (c for c in standup_candidates if c[0] != "declined"),
+                standup_candidates[0],
+            )
+            standup_status, s_start, s_end, standup_label = chosen
+            standup_span = (s_start, s_end)
+            standup_window = _fmt_window(s_start, s_end)
+
+        common = dict(
+            today_str=today_str,
+            checked_at=checked_at,
+            arbeit_event=arbeit_event,
+            work_windows=work_windows,
+            work_minutes=work_minutes,
+            work_mode=work_mode,
+            standup_status=standup_status,
+            standup_window=standup_window,
+        )
+
+        # Signal 2: Official Hamburg legal holiday.
+        for ev in holiday_events or []:
+            if is_hamburg_legal_holiday(ev, today, tz=tz):
+                holiday_name = (ev.get("summary") or "Public holiday").strip()
+                return _build_result(
+                    status="day_off",
+                    is_workday=False,
+                    reason="public_holiday",
+                    override_event=holiday_name,
+                    **common,
+                )
+
+        # Signal 3: OOO or non-transparent all-day absence override on either calendar.
+        override_label: str | None = None
+        for label, ooo_start, ooo_end in ooo_candidates:
+            clamped_secs = (min(ooo_end, day_end) - max(ooo_start, day_start)).total_seconds()
+            overlaps_arbeit = any(
+                ooo_end > a_start and ooo_start < a_end
+                for a_start, a_end in merged_arbeit
+            )
+            overlaps_standup = (
+                standup_span is not None
+                and ooo_end > standup_span[0]
+                and ooo_start < standup_span[1]
+            )
+            if clamped_secs >= 3 * 3600 or overlaps_arbeit or overlaps_standup:
+                override_label = label
+                break
+
+        if override_label is None and all_day_override is not None:
+            override_label = all_day_override
+
+        if override_label is not None:
+            return _build_result(
+                status="day_off",
+                is_workday=False,
+                reason="vacation_override",
+                override_event=override_label,
+                **common,
+            )
+
+        # Signal 4: No timed Arbeit event on personal calendar.
+        if not merged_arbeit:
+            return _build_result(
+                status="day_off",
+                is_workday=False,
+                reason="no_arbeit_event",
+                override_event=None,
+                **common,
+            )
+
+        # Signal 5: Declined recurring StandUp with zero other work meetings
+        # and zero overlapping non-Arbeit timed personal events.
+        if standup_status == "declined" and standup_span is not None:
+            has_overlapping_personal = any(
+                p_end > standup_span[0] and p_start < standup_span[1]
+                for p_start, p_end in personal_timed_other
+            )
+            if not other_work_meetings and not has_overlapping_personal:
+                return _build_result(
+                    status="day_off",
+                    is_workday=False,
+                    reason="standup_declined",
+                    override_event=standup_label,
+                    **common,
+                )
+
+        return _build_result(
+            status="workday",
+            is_workday=True,
+            reason="arbeit_scheduled",
+            override_event=None,
+            **common,
+        )
 
 
     def evaluate_events(
@@ -147,159 +571,27 @@
         tz=None,
         checked_at: int | None = None,
     ) -> dict:
-        if tz is None:
-            tz = get_local_tz()
-        if checked_at is None:
-            checked_at = int(time.time())
-
-        today_str = today.isoformat()
-        if today.isoweekday() in (6, 7):
-            return {
-                "date": today_str,
-                "checked_at": checked_at,
-                "status": "day_off",
-                "is_workday": False,
-                "workday": False,
-                "reason": "weekend",
-                "arbeit_event": None,
-                "override_event": None,
-            }
-
-        day_start = datetime(today.year, today.month, today.day, 0, 0, 0, tzinfo=tz)
-        next_day = today + timedelta(days=1)
-        day_end = datetime(next_day.year, next_day.month, next_day.day, 0, 0, 0, tzinfo=tz)
-        work_win_start = datetime(today.year, today.month, today.day, 8, 0, 0, tzinfo=tz)
-        work_win_end = datetime(today.year, today.month, today.day, 18, 0, 0, tzinfo=tz)
-
-        arbeit_label: str | None = None
-        arbeit_windows: list[tuple[datetime, datetime]] = []
-        ooo_candidates: list[tuple[str, datetime, datetime]] = []
-        all_day_override: str | None = None
-
-        for ev in events:
-            if not isinstance(ev, dict):
-                continue
-            if ev.get("status") == "cancelled":
-                continue
-            if _is_declined_by_self(ev):
-                continue
-
-            start = ev.get("start") or {}
-            end = ev.get("end") or {}
-            summary = (ev.get("summary") or "").strip()
-            event_type = ev.get("eventType") or "default"
-
-            is_all_day = "date" in start and "dateTime" not in start
-            if is_all_day:
-                try:
-                    start_date = date.fromisoformat(start["date"])
-                    end_date = (
-                        date.fromisoformat(end["date"])
-                        if "date" in end
-                        else start_date + timedelta(days=1)
-                    )
-                except (TypeError, ValueError):
-                    continue
-                if not (start_date <= today < end_date):
-                    continue
-                ev_start = day_start
-                ev_end = day_end
-                label = summary or "Out of office"
-            elif "dateTime" in start:
-                try:
-                    ev_start = _parse_iso_dt(start["dateTime"], tz)
-                    ev_end = (
-                        _parse_iso_dt(end["dateTime"], tz)
-                        if "dateTime" in end
-                        else ev_start
-                    )
-                except (TypeError, ValueError):
-                    continue
-                if ev_end == ev_start:
-                    if not (day_start <= ev_start < day_end):
-                        continue
-                elif not (ev_end > day_start and ev_start < day_end):
-                    continue
-                time_span = f"{ev_start.strftime('%H:%M')}–{ev_end.strftime('%H:%M')}"
-                label = f"{summary} ({time_span})" if summary else f"Out of office ({time_span})"
-            else:
-                continue
-
-            if event_type == "outOfOffice":
-                ooo_candidates.append((label, ev_start, ev_end))
-
-            if is_all_day and summary and ABSENCE_RE.search(summary):
-                if all_day_override is None:
-                    all_day_override = summary
-
-            if summary and ARBEIT_RE.match(summary):
-                if arbeit_label is None:
-                    arbeit_label = label
-                arbeit_windows.append((ev_start, ev_end))
-
-        override_label: str | None = None
-        for label, ooo_start, ooo_end in ooo_candidates:
-            win_overlap = (
-                min(ooo_end, work_win_end) - max(ooo_start, work_win_start)
-            ).total_seconds()
-            overlaps_arbeit = any(
-                ooo_end > a_start and ooo_start < a_end
-                for a_start, a_end in arbeit_windows
-            )
-            if win_overlap >= 4 * 3600 or overlaps_arbeit:
-                override_label = label
-                break
-
-        if override_label is None and all_day_override is not None:
-            override_label = all_day_override
-
-        if arbeit_label is None:
-            return {
-                "date": today_str,
-                "checked_at": checked_at,
-                "status": "day_off",
-                "is_workday": False,
-                "workday": False,
-                "reason": "no_arbeit_event",
-                "arbeit_event": None,
-                "override_event": override_label,
-            }
-
-        if override_label is not None:
-            return {
-                "date": today_str,
-                "checked_at": checked_at,
-                "status": "day_off",
-                "is_workday": False,
-                "workday": False,
-                "reason": "vacation_override",
-                "arbeit_event": arbeit_label,
-                "override_event": override_label,
-            }
-
-        return {
-            "date": today_str,
-            "checked_at": checked_at,
-            "status": "workday",
-            "is_workday": True,
-            "workday": True,
-            "reason": "arbeit_scheduled",
-            "arbeit_event": arbeit_label,
-            "override_event": None,
-        }
+        return evaluate_calendars(
+            personal_events=events,
+            work_events=[],
+            holiday_events=[],
+            today=today,
+            tz=tz,
+            checked_at=checked_at,
+            work_enabled=True,
+            work_calendar_ok=False,
+        )
 
 
     def _unknown_result(today_str: str, checked_at: int, reason: str) -> dict:
-        return {
-            "date": today_str,
-            "checked_at": checked_at,
-            "status": "unknown",
-            "is_workday": True,
-            "workday": True,
-            "reason": reason,
-            "arbeit_event": None,
-            "override_event": None,
-        }
+        return _build_result(
+            today_str=today_str,
+            checked_at=checked_at,
+            status="unknown",
+            is_workday=True,
+            reason=reason,
+            standup_status="unknown",
+        )
 
 
     def _store_credentials_atomic(creds_path: str, creds) -> None:
@@ -315,36 +607,15 @@
         write_json_atomic(creds_path, creds_data)
 
 
-    def check_calendar_workday(email: str, creds_dir: str, today: date, cache_path: str) -> dict:
-        tz = get_local_tz()
-        now = int(time.time())
-        today_str = today.isoformat()
-
-        if today.isoweekday() in (6, 7):
-            result = evaluate_events([], today, tz=tz, checked_at=now)
-            write_json_atomic(cache_path, result)
-            return result
-
-        if not creds_dir or not os.path.isdir(creds_dir):
-            result = _unknown_result(today_str, now, "missing_credentials")
-            write_json_atomic(cache_path, result)
-            return result
-
+    def _load_valid_creds(store, email: str):
+        if not email:
+            return None, "missing_credentials"
         try:
-            from auth.credential_store import LocalDirectoryCredentialStore
-
-            store = LocalDirectoryCredentialStore(creds_dir)
             creds = store.get_credential(email)
         except Exception:
-            result = _unknown_result(today_str, now, "missing_credentials")
-            write_json_atomic(cache_path, result)
-            return result
-
+            return None, "missing_credentials"
         if creds is None:
-            result = _unknown_result(today_str, now, "missing_credentials")
-            write_json_atomic(cache_path, result)
-            return result
-
+            return None, "missing_credentials"
         if not creds.valid:
             if creds.expired and creds.refresh_token:
                 try:
@@ -352,21 +623,17 @@
                     creds_path = store._get_credential_path(email)
                     _store_credentials_atomic(creds_path, creds)
                 except Exception:
-                    result = _unknown_result(today_str, now, "api_error")
-                    write_json_atomic(cache_path, result)
-                    return result
+                    return None, "api_error"
             else:
-                result = _unknown_result(today_str, now, "missing_credentials")
-                write_json_atomic(cache_path, result)
-                return result
+                return None, "missing_credentials"
+        return creds, None
 
-        day_start = datetime(today.year, today.month, today.day, 0, 0, 0, tzinfo=tz)
-        next_day = today + timedelta(days=1)
-        day_end = datetime(next_day.year, next_day.month, next_day.day, 0, 0, 0, tzinfo=tz)
 
+    def _fetch_calendar_events(creds, calendar_id: str, day_start: datetime, day_end: datetime) -> list[dict] | None:
+        encoded_id = quote(calendar_id, safe="")
         try:
             resp = requests.get(
-                "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+                f"https://www.googleapis.com/calendar/v3/calendars/{encoded_id}/events",
                 headers={"Authorization": f"Bearer {creds.token}"},
                 params={
                     "singleEvents": "true",
@@ -381,24 +648,126 @@
             payload = resp.json()
             items = payload.get("items") or []
             if not isinstance(items, list):
-                raise ValueError("Calendar API returned non-list items")
+                return None
+            return items
         except Exception:
+            return None
+
+
+    def check_calendar_workday(
+        personal_email: str,
+        work_email: str,
+        creds_dir: str,
+        today: date,
+        cache_path: str,
+        work_enabled: bool = True,
+    ) -> dict:
+        tz = get_local_tz()
+        now = int(time.time())
+        today_str = today.isoformat()
+
+        if not work_enabled or today.isoweekday() in (6, 7):
+            result = evaluate_calendars(
+                [], [], [], today, tz=tz, checked_at=now, work_enabled=work_enabled
+            )
+            write_json_atomic(cache_path, result)
+            return result
+
+        if not creds_dir or not os.path.isdir(creds_dir):
+            result = _unknown_result(today_str, now, "missing_credentials")
+            write_json_atomic(cache_path, result)
+            return result
+
+        try:
+            from auth.credential_store import LocalDirectoryCredentialStore
+
+            store = LocalDirectoryCredentialStore(creds_dir)
+        except Exception:
+            result = _unknown_result(today_str, now, "missing_credentials")
+            write_json_atomic(cache_path, result)
+            return result
+
+        personal_creds, personal_err = _load_valid_creds(store, personal_email)
+        if personal_creds is None:
+            result = _unknown_result(today_str, now, personal_err or "missing_credentials")
+            write_json_atomic(cache_path, result)
+            return result
+
+        day_start = datetime(today.year, today.month, today.day, 0, 0, 0, tzinfo=tz)
+        next_day = today + timedelta(days=1)
+        day_end = datetime(next_day.year, next_day.month, next_day.day, 0, 0, 0, tzinfo=tz)
+
+        personal_items = _fetch_calendar_events(personal_creds, "primary", day_start, day_end)
+        if personal_items is None:
             result = _unknown_result(today_str, now, "api_error")
             write_json_atomic(cache_path, result)
             return result
 
-        result = evaluate_events(items, today, tz=tz, checked_at=now)
+        work_items: list[dict] = []
+        work_calendar_ok = False
+        work_creds = None
+        if work_email:
+            work_creds, _ = _load_valid_creds(store, work_email)
+            if work_creds is not None:
+                fetched_work = _fetch_calendar_events(work_creds, "primary", day_start, day_end)
+                if fetched_work is not None:
+                    work_items = fetched_work
+                    work_calendar_ok = True
+
+        holiday_items: list[dict] = []
+        if work_creds is not None:
+            fetched_holidays = _fetch_calendar_events(
+                work_creds, HOLIDAY_CALENDAR_ID, day_start, day_end
+            )
+            if fetched_holidays is not None:
+                holiday_items = fetched_holidays
+            else:
+                fetched_holidays = _fetch_calendar_events(
+                    personal_creds, HOLIDAY_CALENDAR_ID, day_start, day_end
+                )
+                if fetched_holidays is not None:
+                    holiday_items = fetched_holidays
+        else:
+            fetched_holidays = _fetch_calendar_events(
+                personal_creds, HOLIDAY_CALENDAR_ID, day_start, day_end
+            )
+            if fetched_holidays is not None:
+                holiday_items = fetched_holidays
+
+        result = evaluate_calendars(
+            personal_events=personal_items,
+            work_events=work_items,
+            holiday_events=holiday_items,
+            today=today,
+            tz=tz,
+            checked_at=now,
+            work_enabled=work_enabled,
+            work_calendar_ok=work_calendar_ok,
+        )
         write_json_atomic(cache_path, result)
         return result
 
 
     def main() -> int:
-        if len(sys.argv) != 5:
-            sys.stderr.write("Usage: hey-computer-workday.py <email> <creds_dir> <YYYY-MM-DD> <cache_path>\n")
+        if len(sys.argv) == 5:
+            personal_email, creds_dir, today_str, cache_path = sys.argv[1:5]
+            work_email = ""
+        elif len(sys.argv) == 6:
+            personal_email, work_email, creds_dir, today_str, cache_path = sys.argv[1:6]
+        else:
+            sys.stderr.write(
+                "Usage: hey-computer-workday.py <personal_email> [work_email] <creds_dir> <YYYY-MM-DD> <cache_path>\n"
+            )
             return 2
-        email, creds_dir, today_str, cache_path = sys.argv[1:5]
         today = date.fromisoformat(today_str)
-        result = check_calendar_workday(email, creds_dir, today, cache_path)
+        result = check_calendar_workday(
+            personal_email=personal_email,
+            work_email=work_email,
+            creds_dir=creds_dir,
+            today=today,
+            cache_path=cache_path,
+            work_enabled=True,
+        )
         sys.stdout.write(json.dumps(result, ensure_ascii=False) + "\n")
         return 0
 
@@ -407,67 +776,396 @@
         raise SystemExit(main())
   '';
 
-  morningDigestPromptFile = pkgs.writeText "morning-digest-prompt.txt" (
-    if workEnabled
-    then ''
-      Prepare today's Morning Brief using the `date`, `location`, `workday_*`, and `weather_*` fields in `<untrusted_collector_output>`.
+  checkinGateScript = pkgs.writeText "hey-computer-checkin-gate.py" ''
+    import json
+    import logging
+    import os
+    import re
+    import sys
+    import tempfile
+    from datetime import datetime, timedelta
+    from zoneinfo import ZoneInfo
 
-      Step 1 — Determine Workday vs. Day Off BEFORE calling any work tools:
-      - Read `workday_status` in `<untrusted_collector_output>`:
-        - `workday_status: day_off` → Today is a **Weekend / Day Off** (personal-only mode).
-        - `workday_status: workday` → Today is a **Working Day** (personal + work mode).
-        - `workday_status: unknown` (or absent) → Query **personal** Google Calendar (`${personalGoogleEmail}`) for today FIRST before touching any work tool. Treat today as a **Working Day** ONLY if today is Mon–Fri, has an `"Arbeit"` event on `${personalGoogleEmail}`, and has no all-day vacation / out-of-office override; otherwise treat today as a **Weekend / Day Off**.
+    logging.getLogger("auth").setLevel(logging.CRITICAL)
 
-      Step 2 — Gather context strictly according to the mode:
-      - **Always (Personal):**
-        - Today's personal Google Calendar events (`${personalGoogleEmail}`, 24-hour times).
-        - Important unread personal Gmail messages (`${personalGoogleEmail}`) since last evening.
-        - Overdue or due-today personal Google Tasks (`${personalGoogleEmail}`) and open `- [ ]` items in today's `Journal/<date>.md` if it already exists.
-      - **ONLY on a Working Day (strictly SKIP on Weekends / Days Off — do NOT call `slack`, `linear`, `gitlab`, or query `${workGoogleEmail}`):**
-        - Today's work Google Calendar events (`${workGoogleEmail}`, 24-hour times).
-        - Recent non-noise forwarded work emails in Slack DM `${workSlackEmailDmChannel}` (never Gmail for `${workGoogleEmail}`).
-        - Urgent Slack mentions/DMs, active Linear mentions/blockers, and GitLab MRs needing attention (reviews requested, failed pipelines, or new threads).
+    DAY_PLAN_TAG = "[hey-computer:day-plan:"
+    ARBEIT_RE = re.compile(r"^arbeit(?:\b|[\s:–—-]|$)", re.IGNORECASE)
+    FOCUS_RE = re.compile(r"^focus:", re.IGNORECASE)
+    UNTICKED_RE = re.compile(r"^\s*[-*]\s+\[\s\]\s+(.+?)\s*$")
+    CHECKBOX_PREFIX_RE = re.compile(r"^\s*[-*]\s+\[[ xX]\]\s+")
 
-      If nothing at all is on today's relevant calendar(s) and there are no notable messages, mentions, or due tasks, reply with exactly `HEARTBEAT_OK` and do not modify the daily note.
 
-      Otherwise, write and reply with the full editorial Markdown brief directly (never a 2-sentence summary):
-      1. Start with `# Morning Brief — <Weekday>, <D Month>` (e.g. `# Morning Brief — Wednesday, 25 November`).
-      2. Immediately below the H1, write a single plain-prose opening paragraph of 3–4 sentences (~50–80 words) beginning with a normal capitalized letter — never a bullet list, blockquote, emoji, quotation mark, bold/italic marker, or code span first (this paragraph renders with a Reforma 1969 editorial drop cap). On days off, let the prose reflect an unhurried off-work day without mentioning skipped work tools.
-      3. Opening cadence: warm, observant, lightly poetic editorial prose that notices the real shape and rhythm of the day ahead (open stretches, meeting clusters, transitions). No exclamation marks, and never use clichés such as "tapestry", "symphony", "whispers", "gentle reminder", or "embrace the day".
-      4. Weather rule (strict): ONLY if `weather_status: changed` in `<untrusted_collector_output>`, weave `weather_today` and the concrete shift from `weather_delta` naturally into the opening paragraph. If `weather_status` is `unchanged`, `unavailable`, or absent, omit weather completely and silently — do not mention forecasts, temperatures, sky conditions, or that weather is unchanged.
-      5. Below the opening paragraph, include crisp, scannable `##` sections (`## Schedule`, `## Mail & Messages`, `## Work & Reviews`, `## Tasks & Focus` as applicable; omit `## Work & Reviews` and any empty section on days off) with 24-hour `HH:MM` times, concrete senders, and concise items.
-      6. Widget restraint: call `show_widget` (`calendar_agenda`) at most once, and only when today has 3 or more timed events or a scheduling conflict.
-      7. Idempotent daily-note sync: update today's `Journal/<date>.md` in the Obsidian vault. Create the file cleanly if needed, or if a `## Morning Brief` section already exists, replace it in place (up to the next `## ` heading or EOF) without duplicating on re-runs and without disturbing frontmatter, existing `- [ ]` tasks, or other notes. Inside `Journal/<date>.md`, nest the brief under `## Morning Brief` using `###` subheadings.
-    ''
-    else ''
-      Prepare today's Morning Brief using the `date`, `location`, `workday_*`, and `weather_*` fields in `<untrusted_collector_output>`.
+    def get_local_tz():
+        tz_name = os.environ.get("WORKDAY_TZ") or os.environ.get("TZ") or "Europe/Berlin"
+        try:
+            return ZoneInfo(tz_name)
+        except Exception:
+            return datetime.now().astimezone().tzinfo
 
-      Gather context (personal-only mode):
-      - Today's personal Google Calendar events (`${personalGoogleEmail}`, 24-hour times).
-      - Important unread personal Gmail messages (`${personalGoogleEmail}`) since last evening.
-      - Overdue or due-today personal Google Tasks (`${personalGoogleEmail}`) and open `- [ ]` items in today's `Journal/<date>.md` if it already exists.
 
-      If nothing at all is on today's calendar and there are no notable messages or due tasks, reply with exactly `HEARTBEAT_OK` and do not modify the daily note.
+    def _parse_iso_dt(raw: str, tz) -> datetime:
+        dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=tz)
+        return dt.astimezone(tz)
 
-      Otherwise, write and reply with the full editorial Markdown brief directly (never a 2-sentence summary):
-      1. Start with `# Morning Brief — <Weekday>, <D Month>` (e.g. `# Morning Brief — Wednesday, 25 November`).
-      2. Immediately below the H1, write a single plain-prose opening paragraph of 3–4 sentences (~50–80 words) beginning with a normal capitalized letter — never a bullet list, blockquote, emoji, quotation mark, bold/italic marker, or code span first (this paragraph renders with a Reforma 1969 editorial drop cap).
-      3. Opening cadence: warm, observant, lightly poetic editorial prose that notices the real shape and rhythm of the day ahead (open stretches, meeting clusters, transitions). No exclamation marks, and never use clichés such as "tapestry", "symphony", "whispers", "gentle reminder", or "embrace the day".
-      4. Weather rule (strict): ONLY if `weather_status: changed` in `<untrusted_collector_output>`, weave `weather_today` and the concrete shift from `weather_delta` naturally into the opening paragraph. If `weather_status` is `unchanged`, `unavailable`, or absent, omit weather completely and silently — do not mention forecasts, temperatures, sky conditions, or that weather is unchanged.
-      5. Below the opening paragraph, include crisp, scannable `##` sections (`## Schedule`, `## Mail & Messages`, `## Tasks & Focus` as applicable) with 24-hour `HH:MM` times, concrete senders, and concise items. Omit any empty section.
-      6. Widget restraint: call `show_widget` (`calendar_agenda`) at most once, and only when today has 3 or more timed events or a scheduling conflict.
-      7. Idempotent daily-note sync: update today's `Journal/<date>.md` in the Obsidian vault. Create the file cleanly if needed, or if a `## Morning Brief` section already exists, replace it in place (up to the next `## ` heading or EOF) without duplicating on re-runs and without disturbing frontmatter, existing `- [ ]` tasks, or other notes. Inside `Journal/<date>.md`, nest the brief under `## Morning Brief` using `###` subheadings.
-    ''
-  );
 
-  preDailyPromptFile = pkgs.writeText "pre-daily-prompt.txt" ''
-    Pre-daily standup brief (10:00 daily, using `date`, `location`, and `workday_*` from `<untrusted_collector_output>`).
-    1. Day-off gate (check FIRST before any work tools):
-       - If `workday_status: day_off` in `<untrusted_collector_output>`, reply immediately with exactly `HEARTBEAT_OK` without calling any tools.
-       - If `workday_status` is `unknown` or absent, query ONLY personal Google Calendar (`${personalGoogleEmail}`) for today first: if today is not Mon–Fri, has no `"Arbeit"` event, or has an all-day vacation / out-of-office override, reply immediately with exactly `HEARTBEAT_OK` without calling Slack, Linear, GitLab, or work Google Calendar.
-    2. Next check work Google Calendar (`${workGoogleEmail}`) for today: if I am out of office or there is no 10:00 daily meeting today, reply with exactly `HEARTBEAT_OK`.
-    3. Otherwise, summarize in 3–5 concise bullets: (1) my active Linear issues and recent GitLab MR updates since yesterday, (2) relevant Slack mentions since yesterday afternoon, and (3) what is on today's schedule after the daily.
+    def _is_declined_by_self(event: dict) -> bool:
+        for att in event.get("attendees") or []:
+            if isinstance(att, dict) and att.get("self") is True and att.get("responseStatus") == "declined":
+                return True
+        return False
+
+
+    def _write_json_atomic(path: str, payload: dict) -> None:
+        parent = os.path.dirname(path) or "."
+        os.makedirs(parent, mode=0o700, exist_ok=True)
+        fd, tmp_path = tempfile.mkstemp(dir=parent, prefix=".tmp-checkin-")
+        try:
+            os.chmod(tmp_path, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                json.dump(payload, fh, ensure_ascii=False)
+                fh.write("\n")
+            os.replace(tmp_path, path)
+        except Exception:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise
+
+
+    def extract_excluded_event_ids(plan_data: dict) -> set[str]:
+        raw = plan_data.get("calendar_event_ids") if isinstance(plan_data, dict) else None
+        ids: set[str] = set()
+        if isinstance(raw, list):
+            for entry in raw:
+                if isinstance(entry, str) and entry.strip():
+                    ids.add(entry.strip())
+                elif isinstance(entry, dict):
+                    for key in ("event_id", "id"):
+                        val = entry.get(key)
+                        if isinstance(val, str) and val.strip():
+                            ids.add(val.strip())
+        elif isinstance(raw, dict):
+            for val in raw.values():
+                if isinstance(val, str) and val.strip():
+                    ids.add(val.strip())
+                elif isinstance(val, dict):
+                    for key in ("event_id", "id"):
+                        nested = val.get(key)
+                        if isinstance(nested, str) and nested.strip():
+                            ids.add(nested.strip())
+        return ids
+
+
+    def is_live_meeting_event(
+        event: dict,
+        now: datetime,
+        tz,
+        excluded_event_ids: set[str],
+    ) -> str | None:
+        if not isinstance(event, dict):
+            return None
+        if event.get("status") == "cancelled":
+            return None
+        if _is_declined_by_self(event):
+            return None
+        if (event.get("transparency") or "opaque").strip().lower() == "transparent":
+            return None
+        if (event.get("eventType") or "default") == "workingLocation":
+            return None
+
+        start = event.get("start") or {}
+        end = event.get("end") or {}
+        if "dateTime" not in start:
+            return None
+
+        try:
+            ev_start = _parse_iso_dt(start["dateTime"], tz)
+            ev_end = (
+                _parse_iso_dt(end["dateTime"], tz)
+                if "dateTime" in end
+                else ev_start
+            )
+        except (TypeError, ValueError):
+            return None
+
+        if not (ev_start <= now < ev_end):
+            return None
+
+        ev_id = event.get("id")
+        if isinstance(ev_id, str) and ev_id.strip() in excluded_event_ids:
+            return None
+
+        summary = (event.get("summary") or "").strip()
+        desc = event.get("description") or ""
+        if summary and ARBEIT_RE.match(summary):
+            return None
+        if summary and FOCUS_RE.match(summary):
+            return None
+        if DAY_PLAN_TAG in desc:
+            return None
+
+        return summary or "Meeting"
+
+
+    def find_live_meeting(
+        personal_events: list[dict],
+        work_events: list[dict],
+        now: datetime,
+        tz,
+        excluded_event_ids: set[str] | None = None,
+    ) -> str | None:
+        excluded = excluded_event_ids or set()
+        for ev in list(work_events or []) + list(personal_events or []):
+            matched = is_live_meeting_event(ev, now, tz, excluded)
+            if matched is not None:
+                return matched
+        return None
+
+
+    def _normalize_task_text(text: str) -> str:
+        stripped = CHECKBOX_PREFIX_RE.sub("", text).strip()
+        return re.sub(r"\s+", " ", stripped).lower()
+
+
+    def _clean_task_display(item) -> str:
+        if isinstance(item, str):
+            raw = item
+        elif isinstance(item, dict):
+            raw = item.get("text") or item.get("title") or ""
+        else:
+            raw = ""
+        return CHECKBOX_PREFIX_RE.sub("", str(raw)).strip()
+
+
+    def find_remaining_planned_items(
+        planned_items: list,
+        daily_note_text: str | None,
+    ) -> list[str]:
+        cleaned: list[str] = []
+        for item in planned_items or []:
+            text = _clean_task_display(item)
+            if text:
+                cleaned.append(text)
+        if not cleaned:
+            return []
+        if daily_note_text is None:
+            return cleaned
+
+        unticked_norms: list[str] = []
+        for line in daily_note_text.splitlines():
+            m = UNTICKED_RE.match(line)
+            if m:
+                norm = _normalize_task_text(m.group(1))
+                if norm:
+                    unticked_norms.append(norm)
+
+        unticked_set = set(unticked_norms)
+        remaining: list[str] = []
+        for item in cleaned:
+            norm_item = _normalize_task_text(item)
+            if not norm_item:
+                continue
+            if norm_item in unticked_set or any(norm_item in u for u in unticked_norms):
+                remaining.append(item)
+        return remaining
+
+
+    def evaluate_checkin_gate(
+        plan_data: dict,
+        daily_note_text: str | None,
+        personal_events: list[dict],
+        work_events: list[dict],
+        now: datetime,
+        tz=None,
+        skip_meeting_check: bool = False,
+    ) -> dict:
+        if tz is None:
+            tz = get_local_tz()
+        if not skip_meeting_check:
+            excluded = extract_excluded_event_ids(plan_data)
+            meeting = find_live_meeting(personal_events, work_events, now, tz, excluded)
+            if meeting is not None:
+                return {
+                    "action": "defer",
+                    "reason": "in_meeting",
+                    "meeting": meeting,
+                    "remaining_planned_items": [],
+                }
+
+        remaining = find_remaining_planned_items(
+            plan_data.get("planned_items") or [],
+            daily_note_text,
+        )
+        if not remaining:
+            return {
+                "action": "skip",
+                "reason": "all_planned_done",
+                "meeting": None,
+                "remaining_planned_items": [],
+            }
+        return {
+            "action": "run",
+            "reason": "remaining_items",
+            "meeting": None,
+            "remaining_planned_items": remaining,
+        }
+
+
+    def _load_valid_creds(store, email: str):
+        if not email:
+            return None
+        try:
+            creds = store.get_credential(email)
+        except Exception:
+            return None
+        if creds is None:
+            return None
+        if not creds.valid:
+            if creds.expired and creds.refresh_token:
+                try:
+                    import requests
+                    from google.auth.transport.requests import Request as GoogleAuthRequest
+
+                    class _TimeoutSession(requests.Session):
+                        def __init__(self, timeout: float = 5.0) -> None:
+                            super().__init__()
+                            self._timeout = timeout
+
+                        def request(self, *args, **kwargs):
+                            kwargs.setdefault("timeout", self._timeout)
+                            return super().request(*args, **kwargs)
+
+                    creds.refresh(GoogleAuthRequest(session=_TimeoutSession(timeout=5.0)))
+                    creds_path = store._get_credential_path(email)
+                    _write_json_atomic(
+                        creds_path,
+                        {
+                            "token": creds.token,
+                            "refresh_token": creds.refresh_token,
+                            "token_uri": creds.token_uri,
+                            "client_id": creds.client_id,
+                            "client_secret": creds.client_secret,
+                            "scopes": list(creds.scopes) if creds.scopes is not None else None,
+                            "expiry": creds.expiry.isoformat() if creds.expiry else None,
+                        },
+                    )
+                except Exception:
+                    return None
+            else:
+                return None
+        return creds
+
+
+    def _fetch_primary_events(creds, day_start: datetime, day_end: datetime) -> list[dict]:
+        if creds is None:
+            return []
+        try:
+            import requests
+
+            resp = requests.get(
+                "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+                headers={"Authorization": f"Bearer {creds.token}"},
+                params={
+                    "singleEvents": "true",
+                    "timeMin": day_start.isoformat(),
+                    "timeMax": day_end.isoformat(),
+                    "maxResults": "100",
+                    "orderBy": "startTime",
+                },
+                timeout=5,
+            )
+            resp.raise_for_status()
+            items = resp.json().get("items") or []
+            return items if isinstance(items, list) else []
+        except Exception:
+            return []
+
+
+    def main() -> int:
+        if len(sys.argv) != 7:
+            sys.stderr.write(
+                "Usage: hey-computer-checkin-gate.py <personal_email> <work_email> <creds_dir> <plan_file> <daily_note_path> <skip_meeting_check>\n"
+            )
+            return 2
+
+        personal_email, work_email, creds_dir, plan_file, daily_note_path, skip_flag = sys.argv[1:7]
+        skip_meeting_check = skip_flag == "1"
+        tz = get_local_tz()
+        now_override = os.environ.get("CHECKIN_NOW_ISO", "").strip()
+        now = _parse_iso_dt(now_override, tz) if now_override else datetime.now(tz)
+
+        try:
+            with open(plan_file, "r", encoding="utf-8") as fh:
+                plan_data = json.load(fh)
+            if not isinstance(plan_data, dict):
+                plan_data = {}
+        except Exception:
+            sys.stdout.write(
+                json.dumps(
+                    {
+                        "action": "skip",
+                        "reason": "missing_plan",
+                        "meeting": None,
+                        "remaining_planned_items": [],
+                    }
+                )
+                + "\n"
+            )
+            return 0
+
+        daily_note_text: str | None = None
+        if daily_note_path and os.path.isfile(daily_note_path):
+            try:
+                with open(daily_note_path, "r", encoding="utf-8") as fh:
+                    daily_note_text = fh.read()
+            except Exception:
+                daily_note_text = None
+
+        personal_events: list[dict] = []
+        work_events: list[dict] = []
+        if not skip_meeting_check and creds_dir and os.path.isdir(creds_dir):
+            try:
+                from auth.credential_store import LocalDirectoryCredentialStore
+
+                store = LocalDirectoryCredentialStore(creds_dir)
+                day_start = datetime(now.year, now.month, now.day, 0, 0, 0, tzinfo=tz)
+                day_end = day_start + timedelta(days=1)
+                if work_email:
+                    work_events = _fetch_primary_events(
+                        _load_valid_creds(store, work_email), day_start, day_end
+                    )
+                if personal_email:
+                    personal_events = _fetch_primary_events(
+                        _load_valid_creds(store, personal_email), day_start, day_end
+                    )
+            except Exception:
+                pass
+
+        result = evaluate_checkin_gate(
+            plan_data=plan_data,
+            daily_note_text=daily_note_text,
+            personal_events=personal_events,
+            work_events=work_events,
+            now=now,
+            tz=tz,
+            skip_meeting_check=skip_meeting_check,
+        )
+        sys.stdout.write(json.dumps(result, ensure_ascii=False) + "\n")
+        return 0
+
+
+    if __name__ == "__main__":
+        raise SystemExit(main())
   '';
+
+  morningDigestPromptFile =
+    pkgs.writeText "morning-digest-prompt.txt" hcCfg.proactive.prompts.morningDigest;
+
+  preDailyPromptFile =
+    pkgs.writeText "pre-daily-prompt.txt" hcCfg.proactive.prompts.preDaily;
 in {
   hey-computer-proactive = helpers.mkScript {
     name = "hey-computer-proactive";
@@ -500,7 +1198,16 @@ in {
           else "0"
         )}
         PERSONAL_GOOGLE_EMAIL=${lib.escapeShellArg personalGoogleEmail}
+        WORK_GOOGLE_EMAIL=${lib.escapeShellArg (
+          if workEnabled
+          then workGoogleEmail
+          else ""
+        )}
         GOOGLE_CREDS_DIR=${lib.escapeShellArg googleCredsDir}
+        DEFAULT_VAULT_DIR=${lib.escapeShellArg vaultDir}
+        VAULT_DIR="''${HEY_COMPUTER_VAULT_DIR:-$DEFAULT_VAULT_DIR}"
+        DEFAULT_HEY_COMPUTER_BIN=${lib.escapeShellArg heyComputer}
+        HEY_COMPUTER_BIN="''${HEY_COMPUTER_BIN:-$DEFAULT_HEY_COMPUTER_BIN}"
         WORKDAY_TTL_SECS=1800
         WORKDAY_UNKNOWN_TTL_SECS=120
         ALERT_COOLDOWN_SECS=14400 # 4 hours
@@ -980,12 +1687,14 @@ in {
           local status="$3"
           local is_workday="$4"
           local reason="$5"
+          local standup_status="''${6:-none}"
           jq -cn \
             --arg date "$today" \
             --argjson checked_at "$checked_at" \
             --arg status "$status" \
             --argjson is_workday "$is_workday" \
             --arg reason "$reason" \
+            --arg standup_status "$standup_status" \
             '{
               date: $date,
               checked_at: $checked_at,
@@ -994,7 +1703,12 @@ in {
               workday: $is_workday,
               reason: $reason,
               arbeit_event: null,
-              override_event: null
+              override_event: null,
+              work_windows: null,
+              work_minutes: 0,
+              work_mode: null,
+              standup_status: $standup_status,
+              standup_window: null
             }'
         }
 
@@ -1009,6 +1723,7 @@ in {
             and .is_workday == false
             and .workday == false
             and .reason == $reason
+            and has("standup_status")
           ' "$WORKDAY_CACHE" >/dev/null 2>&1
         }
 
@@ -1025,7 +1740,7 @@ in {
               jq -c '.' "$WORKDAY_CACHE"
               return 0
             fi
-            out=$(make_workday_json "$today" "$now" "day_off" "false" "work_disabled")
+            out=$(make_workday_json "$today" "$now" "day_off" "false" "work_disabled" "none")
             write_json_atomic "$WORKDAY_CACHE" "$out" || true
             printf '%s\n' "$out"
             return 0
@@ -1037,26 +1752,28 @@ in {
               jq -c '.' "$WORKDAY_CACHE"
               return 0
             fi
-            out=$(make_workday_json "$today" "$now" "day_off" "false" "weekend")
+            out=$(make_workday_json "$today" "$now" "day_off" "false" "weekend" "none")
             write_json_atomic "$WORKDAY_CACHE" "$out" || true
             printf '%s\n' "$out"
             return 0
           fi
 
           if [ "$refresh" != "1" ] && [ -f "$WORKDAY_CACHE" ]; then
-            local meta=() c_date="" c_checked_at="" c_status=""
+            local meta=() c_date="" c_checked_at="" c_status="" c_has_v2=""
             mapfile -t meta < <(
               jq -r '
                 select(type == "object")
                 | (.date // ""),
                   ((.checked_at // 0) | tostring),
-                  (.status // "")
+                  (.status // ""),
+                  (if has("standup_status") then "1" else "0" end)
               ' "$WORKDAY_CACHE" 2>/dev/null || true
             )
             c_date="''${meta[0]:-}"
             c_checked_at="''${meta[1]:-}"
             c_status="''${meta[2]:-}"
-            if [ "$c_date" = "$today" ]; then
+            c_has_v2="''${meta[3]:-0}"
+            if [ "$c_date" = "$today" ] && [ "$c_has_v2" = "1" ]; then
               if [ "$cached_only" = "1" ]; then
                 jq -c '.' "$WORKDAY_CACHE"
                 return 0
@@ -1076,19 +1793,19 @@ in {
           fi
 
           if [ "$cached_only" = "1" ]; then
-            make_workday_json "$today" "$now" "unknown" "true" "cache_miss"
+            make_workday_json "$today" "$now" "unknown" "true" "cache_miss" "unknown"
             return 0
           fi
 
           if out=$(PYTHONPATH=${lib.escapeShellArg googleWorkspaceSitePackages} \
             ${googleWorkspacePython}/bin/python3 ${workdayCheckScript} \
-            "$PERSONAL_GOOGLE_EMAIL" "$GOOGLE_CREDS_DIR" "$today" "$WORKDAY_CACHE" 2>/dev/null) \
+            "$PERSONAL_GOOGLE_EMAIL" "$WORK_GOOGLE_EMAIL" "$GOOGLE_CREDS_DIR" "$today" "$WORKDAY_CACHE" 2>/dev/null) \
             && [ -n "$out" ]; then
             printf '%s\n' "$out"
             return 0
           fi
 
-          out=$(make_workday_json "$today" "$now" "unknown" "true" "api_error")
+          out=$(make_workday_json "$today" "$now" "unknown" "true" "api_error" "unknown")
           write_json_atomic "$WORKDAY_CACHE" "$out" || true
           printf '%s\n' "$out"
         }
@@ -1105,8 +1822,47 @@ in {
                else
                  $rsn
                end) as $detail
-            | "workday_status: \($st)\nworkday_reason: \($detail)"
-          ' <<<"$workday_json" 2>/dev/null || printf 'workday_status: unknown\nworkday_reason: api_error\n'
+            | "workday_status: \($st)\n"
+              + "workday_reason: \($detail)\n"
+              + "arbeit_event: \(.arbeit_event // "none")\n"
+              + "work_windows: \(.work_windows // "none")\n"
+              + "work_minutes: \((.work_minutes // 0) | tostring)\n"
+              + "work_mode: \(.work_mode // "none")\n"
+              + "standup_status: \(.standup_status // "none")\n"
+              + "standup_window: \(.standup_window // "none")"
+          ' <<<"$workday_json" 2>/dev/null || printf 'workday_status: unknown\nworkday_reason: api_error\narbeit_event: none\nwork_windows: none\nwork_minutes: 0\nwork_mode: none\nstandup_status: unknown\nstandup_window: none\n'
+        }
+
+        format_pre_daily_plan_context() {
+          local today="$1"
+          local plan_file="$STATE_DIR/day-plan-$today.json"
+          [ -f "$plan_file" ] || return 0
+          jq -r --arg today "$today" '
+            select(
+              type == "object"
+              and ((.date // $today) == $today)
+              and (
+                .pre_daily_sync == true
+                or ((.pre_daily_sync | type) == "object" and .pre_daily_sync.enabled == true)
+              )
+            )
+            | ((.roter_faden // .roterFaden // "") | tostring | gsub("[\r\n]+"; " ")) as $rf
+            | (
+                (.planned_items // [])
+                | if type == "array" then
+                    map(
+                      if type == "string" then .
+                      elif type == "object" then (.text // .title // "")
+                      else ""
+                      end
+                    )
+                    | map(gsub("[\r\n]+"; " ") | select(length > 0))
+                  else []
+                  end
+              ) as $tasks
+            | (if ($rf | length) > 0 then "active_roter_faden: \($rf)\n" else "" end)
+              + (if ($tasks | length) > 0 then "active_plan_tasks: \($tasks | join("; "))\n" else "" end)
+          ' "$plan_file" 2>/dev/null || true
         }
 
         cmd_workday() {
@@ -1186,7 +1942,7 @@ in {
         }
 
         run_pre_daily() {
-          local today stamp loc workday_json workday_status workday_block base_prompt prompt manual
+          local today stamp loc workday_json workday_status standup_status workday_block plan_block base_prompt prompt manual
           today=$(date +%Y-%m-%d)
           stamp="$STATE_DIR/pre-daily.last"
           manual="''${HEY_COMPUTER_SCHEDULE_MANUAL:-0}"
@@ -1208,7 +1964,8 @@ in {
 
           workday_json=$(resolve_workday "$manual" 0)
           workday_status=$(jq -r '.status // "unknown"' <<<"$workday_json" 2>/dev/null || printf 'unknown')
-          if [ "$manual" != "1" ] && [ "$workday_status" = "day_off" ]; then
+          standup_status=$(jq -r '.standup_status // "unknown"' <<<"$workday_json" 2>/dev/null || printf 'unknown')
+          if [ "$manual" != "1" ] && { [ "$workday_status" = "day_off" ] || [ "$standup_status" = "declined" ] || [ "$standup_status" = "none" ]; }; then
             exit 0
           fi
 
@@ -1218,9 +1975,15 @@ in {
           fi
 
           workday_block=$(format_workday_block "$workday_json")
+          plan_block=$(format_pre_daily_plan_context "$today")
           base_prompt=$(cat ${preDailyPromptFile})
-          printf -v prompt '%s\n\n<untrusted_collector_output>\ndate: %s\nlocation: %s\n%s\n</untrusted_collector_output>' \
-            "$base_prompt" "$today" "$loc" "$workday_block"
+          if [ -n "$plan_block" ]; then
+            printf -v prompt '%s\n\n<untrusted_collector_output>\ndate: %s\nlocation: %s\n%s\n%s\n</untrusted_collector_output>' \
+              "$base_prompt" "$today" "$loc" "$workday_block" "$plan_block"
+          else
+            printf -v prompt '%s\n\n<untrusted_collector_output>\ndate: %s\nlocation: %s\n%s\n</untrusted_collector_output>' \
+              "$base_prompt" "$today" "$loc" "$workday_block"
+          fi
 
           run_and_wait_task "pre-daily" "$stamp" "$today" "$prompt" || exit 1
         }
@@ -1320,7 +2083,7 @@ in {
         }
 
         collect_pre_daily() {
-          local today stamp loc manual workday_json workday_status
+          local today stamp loc manual workday_json workday_status standup_status plan_block
           today=$(date +%Y-%m-%d)
           stamp="$STATE_DIR/pre-daily.last"
           manual="''${HEY_COMPUTER_SCHEDULE_MANUAL:-0}"
@@ -1341,12 +2104,129 @@ in {
 
           workday_json=$(resolve_workday "$manual" 0)
           workday_status=$(jq -r '.status // "unknown"' <<<"$workday_json" 2>/dev/null || printf 'unknown')
-          if [ "$manual" != "1" ] && [ "$workday_status" = "day_off" ]; then
+          standup_status=$(jq -r '.standup_status // "unknown"' <<<"$workday_json" 2>/dev/null || printf 'unknown')
+          if [ "$manual" != "1" ] && { [ "$workday_status" = "day_off" ] || [ "$standup_status" = "declined" ] || [ "$standup_status" = "none" ]; }; then
             exit 0
           fi
 
           printf 'date: %s\nlocation: %s\n' "$today" "$loc"
           format_workday_block "$workday_json"
+          plan_block=$(format_pre_daily_plan_context "$today")
+          if [ -n "$plan_block" ]; then
+            printf '%s\n' "$plan_block"
+          fi
+        }
+
+        defer_day_plan_checkin() {
+          local today="$1"
+          local slot_id="$2"
+          local defer_file="$STATE_DIR/day-plan-deferrals-$today.json"
+          local now_hour now_min now_mins defer_json current_count next_count updated_json job_name
+
+          if [ -n "''${CHECKIN_NOW_ISO:-}" ]; then
+            now_hour=$(date -d "$CHECKIN_NOW_ISO" +%H 2>/dev/null || date +%H)
+            now_min=$(date -d "$CHECKIN_NOW_ISO" +%M 2>/dev/null || date +%M)
+          else
+            now_hour=$(date +%H)
+            now_min=$(date +%M)
+          fi
+          now_mins=$(( 10#$now_hour * 60 + 10#$now_min ))
+
+          # Never defer past 18:00 local time.
+          if [ $((now_mins + 20)) -ge 1080 ]; then
+            return 0
+          fi
+
+          defer_json="{}"
+          if [ -f "$defer_file" ]; then
+            defer_json=$(jq -c 'if type == "object" then . else {} end' "$defer_file" 2>/dev/null || printf '{}')
+          fi
+
+          current_count=$(jq -r --arg slot "$slot_id" '(.[$slot] // 0) | tonumber? // 0 | floor' <<<"$defer_json" 2>/dev/null || printf '0')
+          if ! [[ "$current_count" =~ ^[0-9]+$ ]] || [ "$current_count" -ge 2 ]; then
+            return 0
+          fi
+
+          next_count=$((current_count + 1))
+          if updated_json=$(jq -c --arg slot "$slot_id" --argjson count "$next_count" '. + {($slot): $count}' <<<"$defer_json" 2>/dev/null); then
+            write_json_atomic "$defer_file" "$updated_json" || true
+          fi
+
+          job_name="''${HEY_COMPUTER_SCHEDULE_NAME:-day-plan-checkin-$slot_id}"
+          "$HEY_COMPUTER_BIN" schedule edit "$job_name" --schedule "in 20m" >/dev/null 2>&1 || true
+          return 0
+        }
+
+        collect_day_plan_checkin() {
+          local slot_id="''${1:-checkin}"
+          local today manual plan_file daily_note gate_json gate_action workday_json workday_status work_windows roter_faden remaining_block
+
+          if [ -n "''${CHECKIN_NOW_ISO:-}" ]; then
+            today=$(date -d "$CHECKIN_NOW_ISO" +%Y-%m-%d 2>/dev/null || date +%Y-%m-%d)
+          else
+            today=$(date +%Y-%m-%d)
+          fi
+          manual="''${HEY_COMPUTER_SCHEDULE_MANUAL:-0}"
+          plan_file="$STATE_DIR/day-plan-$today.json"
+
+          # Gate 1: Require today's active day-plan state snapshot.
+          if [ ! -f "$plan_file" ] || ! jq -e --arg today "$today" 'type == "object" and ((.date // $today) == $today)' "$plan_file" >/dev/null 2>&1; then
+            exit 0
+          fi
+
+          # Gate 2: Session unlocked + network online (unless manual).
+          if [ "$manual" != "1" ]; then
+            if ! session_unlocked || ! network_online; then
+              defer_day_plan_checkin "$today" "$slot_id"
+              exit 0
+            fi
+          fi
+
+          # Gates 3 & 4: Dual-calendar live-meeting check + planned_items completion check.
+          daily_note=""
+          if [ -n "$VAULT_DIR" ]; then
+            daily_note="$VAULT_DIR/Journal/$today.md"
+          fi
+          gate_json=$(PYTHONPATH=${lib.escapeShellArg googleWorkspaceSitePackages} \
+            ${googleWorkspacePython}/bin/python3 ${checkinGateScript} \
+            "$PERSONAL_GOOGLE_EMAIL" "$WORK_GOOGLE_EMAIL" "$GOOGLE_CREDS_DIR" \
+            "$plan_file" "$daily_note" "$manual" 2>/dev/null || true)
+
+          if [ -z "$gate_json" ] || ! jq -e 'type == "object"' >/dev/null 2>&1 <<<"$gate_json"; then
+            exit 0
+          fi
+
+          gate_action=$(jq -r '.action // "skip"' <<<"$gate_json" 2>/dev/null || printf 'skip')
+          case "$gate_action" in
+          defer)
+            if [ "$manual" != "1" ]; then
+              defer_day_plan_checkin "$today" "$slot_id"
+            fi
+            exit 0
+            ;;
+          skip)
+            exit 0
+            ;;
+          run)
+            ;;
+          *)
+            exit 0
+            ;;
+          esac
+
+          # Gate 5: Emit structured reassessment payload.
+          workday_json=$(resolve_workday 0 0)
+          workday_status=$(jq -r '.status // "unknown"' <<<"$workday_json" 2>/dev/null || printf 'unknown')
+          work_windows=$(jq -r '.work_windows // "none"' <<<"$workday_json" 2>/dev/null || printf 'none')
+          roter_faden=$(jq -r '(.roter_faden // .roterFaden // "") | tostring | gsub("[\r\n]+"; " ")' "$plan_file" 2>/dev/null || true)
+          remaining_block=$(jq -r '(.remaining_planned_items // []) | map("- [ ] " + (. | tostring | gsub("[\r\n]+"; " "))) | join("\n")' <<<"$gate_json" 2>/dev/null || true)
+
+          printf 'date: %s\n' "$today"
+          printf 'slot_id: %s\n' "$slot_id"
+          printf 'workday_status: %s\n' "$workday_status"
+          printf 'work_windows: %s\n' "$work_windows"
+          printf 'roter_faden: %s\n' "''${roter_faden:-none}"
+          printf 'remaining_planned_items:\n%s\n' "$remaining_block"
         }
 
         case "''${1-}" in
@@ -1370,6 +2250,9 @@ in {
         collect-pre-daily)
           collect_pre_daily
           ;;
+        collect-day-plan-checkin)
+          collect_day_plan_checkin "''${2:-checkin}"
+          ;;
         morning-digest)
           run_morning_digest
           ;;
@@ -1377,7 +2260,7 @@ in {
           run_pre_daily
           ;;
         *)
-          echo "Usage: hey-computer-proactive <location|weather|workday|collect-morning-digest|collect-pre-daily|morning-digest|pre-daily>" >&2
+          echo "Usage: hey-computer-proactive <location|weather|workday|collect-morning-digest|collect-pre-daily|collect-day-plan-checkin|morning-digest|pre-daily>" >&2
           exit 2
           ;;
         esac
