@@ -1154,7 +1154,7 @@ in {
           triage_non_voice = true;
         };
         tasks = {
-          max_concurrent = 1;
+          max_concurrent = 2;
           max_queued = 32;
           profile = "deep";
         };

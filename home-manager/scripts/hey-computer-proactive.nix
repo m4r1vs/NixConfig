@@ -15,11 +15,14 @@
 # - `collect-morning-digest`: fast 0-token pre-collector for hey-computer's native
 #   `[scheduler.jobs.morning-digest]` cron (`*/5 5-14 * * *`). Queries
 #   `hey-computer schedule show morning-digest --json` (`last_run_at`,
-#   `last_status`): exits 0 with empty stdout when today already succeeded/suppressed,
-#   when within a 15-minute failure retry cooldown, or while locked/offline
-#   (bypassed when `HEY_COMPUTER_SCHEDULE_MANUAL=1`); otherwise prints `date`,
-#   `location`, `workday_*`, and the deterministic `weather_*` block so the
-#   scheduler wakes the agent.
+#   `last_status`, and `recent_turns[]`) with fail-closed fallback to
+#   scheduler-injected `HEY_COMPUTER_SCHEDULE_*` env vars: exits 0 with empty
+#   stdout when state cannot be verified, when today already
+#   succeeded/suppressed/is active, when within a 15-minute failure retry
+#   cooldown, or while locked/offline (bypassed when
+#   `HEY_COMPUTER_SCHEDULE_MANUAL=1`); otherwise prints `date`, `location`,
+#   `workday_*`, and the deterministic `weather_*` block so the scheduler wakes
+#   the agent.
 # - `collect-pre-daily`: fast 0-token pre-collector for `[scheduler.jobs.pre-daily]`
 #   (`weekdays 09:56`). Exits 0 with empty stdout while locked/offline, away from
 #   work/home, or on a `day_off` (bypassed when `HEY_COMPUTER_SCHEDULE_MANUAL=1`);
@@ -1223,7 +1226,7 @@ in {
         }
 
         collect_morning_digest() {
-          local today stamp sched_json last_run_at last_status last_date now_ms loc manual workday_json
+          local today stamp sched_json should_skip last_run_at last_status last_date now_ms loc manual workday_json
           today=$(date +%Y-%m-%d)
           stamp="$STATE_DIR/morning-digest.last"
           manual="''${HEY_COMPUTER_SCHEDULE_MANUAL:-0}"
@@ -1234,21 +1237,75 @@ in {
               exit 0
             fi
 
-            if sched_json=$(${heyComputer} schedule show morning-digest --json 2>/dev/null); then
-              last_run_at=$(jq -r '.last_run_at // 0' <<<"$sched_json" 2>/dev/null || printf '0')
-              last_status=$(jq -r '.last_status // ""' <<<"$sched_json" 2>/dev/null || true)
+            now_ms=$(( $(date +%s) * 1000 ))
+            sched_json=$(${heyComputer} schedule show morning-digest --json 2>/dev/null || true)
+
+            if jq -e 'type == "object"' >/dev/null 2>&1 <<<"$sched_json"; then
+              # Suppress if top-level last_run_at is today with status ok/suppressed,
+              # if any recent turn created today is completed/suppressed/running/queued,
+              # or if a failed run (top-level or today's recent turn) is within the
+              # 15-minute (900000 ms) retry cooldown. Fail closed on jq errors.
+              should_skip=$(jq -r --arg today "$today" --argjson now_ms "$now_ms" '
+                def is_today($ms):
+                  ($ms | type == "number")
+                  and ($ms > 0)
+                  and ((($ms / 1000) | floor | strflocaltime("%Y-%m-%d")) == $today);
+                def turn_is_today:
+                  if (.created_at_ms | type == "number") and (.created_at_ms > 0) then
+                    is_today(.created_at_ms)
+                  else
+                    (.created_local | type == "string") and (.created_local | startswith($today))
+                  end;
+
+                (
+                  is_today(.last_run_at)
+                  and (.last_status == "ok" or .last_status == "suppressed")
+                )
+                or (
+                  (.last_status == "failed")
+                  and (.last_run_at | type == "number")
+                  and (.last_run_at > 0)
+                  and (($now_ms - .last_run_at) < 900000)
+                )
+                or (
+                  (.recent_turns | if type == "array" then . else [] end)
+                  | any(
+                      (type == "object")
+                      and turn_is_today
+                      and (
+                        (.status | IN("completed", "suppressed", "running", "queued"))
+                        or (
+                          .status == "failed"
+                          and (
+                            (.finished_at_ms // .created_at_ms)
+                            | (type == "number") and (. > 0) and (($now_ms - .) < 900000)
+                          )
+                        )
+                      )
+                    )
+                )
+              ' <<<"$sched_json" 2>/dev/null || printf 'error')
+              if [ "$should_skip" != "false" ]; then
+                exit 0
+              fi
+            elif [ -n "''${HEY_COMPUTER_SCHEDULE_ID:-}" ]; then
+              # Fail-closed fallback to scheduler-injected env vars when `schedule show`
+              # is unavailable (e.g. transient config/store issue during rebuild).
+              last_run_at="''${HEY_COMPUTER_SCHEDULE_LAST_RUN_AT:-0}"
+              last_status="''${HEY_COMPUTER_SCHEDULE_LAST_STATUS:-}"
               if [[ "$last_run_at" =~ ^[0-9]+$ ]] && [ "$last_run_at" -gt 0 ]; then
                 last_date=$(date -d "@$((last_run_at / 1000))" +%Y-%m-%d 2>/dev/null || true)
                 if [ "$last_date" = "$today" ] && { [ "$last_status" = "ok" ] || [ "$last_status" = "suppressed" ]; }; then
                   exit 0
                 fi
-                if [ "$last_status" = "failed" ]; then
-                  now_ms=$(( $(date +%s) * 1000 ))
-                  if [ $((now_ms - last_run_at)) -lt 900000 ]; then
-                    exit 0
-                  fi
+                if [ "$last_status" = "failed" ] && [ $((now_ms - last_run_at)) -lt 900000 ]; then
+                  exit 0
                 fi
               fi
+            else
+              # Fail closed: never trigger an unwanted LLM brief if schedule state
+              # cannot be verified from either `schedule show` or scheduler env vars.
+              exit 0
             fi
 
             session_unlocked || exit 0
