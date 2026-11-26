@@ -995,12 +995,15 @@ in {
       type = types.attrsOf types.anything;
       default = optionalAttrs ((ageSecrets ? hey-computer-whatsapp-allow) || (ageSecrets ? hey-computer-signal-allow)) {
         enable = true;
+        signalDesktopDir = "${config.xdg.configHome}/Signal";
         extraBindReadOnlyPaths = ["/run/agenix" "/run/agenix.d"];
         settings =
           optionalAttrs (ageSecrets ? hey-computer-whatsapp-allow) {
             whatsapp = {
               enabled = true;
               self_chat = true;
+              sync_full_history = true;
+              groups_enabled = true;
               allow_from_file = ageSecrets.hey-computer-whatsapp-allow.path;
             };
           }
@@ -1009,6 +1012,7 @@ in {
               {
                 enabled = true;
                 self_chat = true;
+                groups_enabled = true;
                 allow_from_file = ageSecrets.hey-computer-signal-allow.path;
               }
               // optionalAttrs (ageSecrets ? hey-computer-signal-account) {
@@ -1282,7 +1286,7 @@ in {
             ## Unified Work & Personal Context
 
             - **Work tools:** Linear (read/write), GitLab (`gitlab.tools.meetovo.dev`, read/write without extra confirmation prompts while still never merging or pushing unless explicitly requested), Slack (read-only + forwarded work email in DM `${workSlackEmailDmChannel}`), and work Google Calendar & Drive (`${workGoogleEmail}`).
-            - **Personal tools:** Personal Google Workspace (`${personalGoogleEmail}` — Gmail, Calendar, Contacts, Drive, Tasks), GitHub (`gh`), Philips Hue (`openhue` / `home-lights`), and the Obsidian vault.
+            - **Personal tools:** Personal Google Workspace (`${personalGoogleEmail}` — Gmail, Calendar, Contacts, Drive, Tasks), WhatsApp & Signal 1:1 and group history (`messenger` skill via `hey-computer-bridge`, strictly read-only), GitHub (`gh`), Philips Hue (`openhue` / `home-lights`), and the Obsidian vault.
             - **Workday boundary:** On weekends or weekdays without an `"Arbeit"` event on `${personalGoogleEmail}` (or with an all-day vacation / out-of-office override), broad prompts like "what's on today" or "catch me up" stay personal-only unless the user explicitly asks about work, Slack, Linear, GitLab, or work calendar.''}
 
           ## Obsidian daily notes, reminders & Google Tasks
