@@ -18,6 +18,7 @@ with lib; let
   voiceCmd = config.programs.configured.npu-dictate.voiceCommand;
   appNames = sort lessThan (attrNames voiceCmd.apps);
   hasNetbird = osConfig.services.netbird.enable or false;
+  hasSwaync = config.services.configured.swaync.enable;
   hasNightlight = config.services.configured.hyprsunset.enable;
   hasDarkman = config.services.configured.darkman.enable;
   hasOpenhue = config.programs.configured.openhue.enable;
@@ -448,6 +449,12 @@ with lib; let
     spotify-like                   # like the currently playing Spotify track
     random-album-of-the-day        # pick a Bandcamp Album of the Day and play it on Spotify
     gcalcli --nocolor agenda "now" "2 days"   # read-only fallback only if google-workspace MCP is unavailable
+    ${optionalString hasSwaync ''
+      swaync-client -sw --latest-notification   # read latest notification as JSON (falls back to recent history; null if none)
+      swaync-client -sw --list-notifications    # read all active Control Center / popup notifications as JSON
+      swaync-client -sw --history 20            # read active + recently dismissed/expired notifications as JSON
+      swaync-client -sw --action-id <id> [act]  # invoke a notification's default or named action by ID
+      swaync-client -sw --close-id <id>         # dismiss a notification by ID (or: --close-latest | -C)''}
     ${optionalString hasGalaxyBuds ''
       connect-galaxy-buds connect    # connect Galaxy Buds and switch PipeWire default audio
       connect-galaxy-buds disconnect # disconnect Galaxy Buds
@@ -1045,6 +1052,7 @@ in {
       */
       extraPackages =
         [desktopScriptsPkg]
+        ++ optional hasSwaync config.services.swaync.package
         ++ (with pkgs; [
           hyprland
           pamixer

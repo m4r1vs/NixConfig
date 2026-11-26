@@ -399,13 +399,13 @@ in {
           Own Forks
           */
 
-          # Hold-and-enrich notifications for hey-computer + DND sound fix
+          # Hold-and-enrich notifications, JSON notification queries, and DND sound fix
           swaynotificationcenter = prev.swaynotificationcenter.overrideAttrs {
             src = fetchFromGitHub {
               owner = "m4r1vs";
               repo = "SwayNotificationCenter";
-              rev = "89bce1555d2368eb1b5532744699587a322fd8f9";
-              hash = "sha256-cmZQmtPwc2TzGQ5uLsCzqTTjRSkM2FmhNFxNKk/8Pl0=";
+              rev = "fd78cd95055fcaf9421120d577dd572a97734e35";
+              hash = "sha256-ti7rhviWV3Y8JiRseUFs2sz4319xJzPBnPb9oRIBDpY=";
             };
           };
 
