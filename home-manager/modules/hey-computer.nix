@@ -929,6 +929,12 @@ in {
         description = "Ultra-fast binary triage profile (`true`/`false` gate deciding whether a notification warrants enrichment).";
       };
 
+      triageTimeoutSecs = mkOption {
+        type = types.number;
+        default = 10.0;
+        description = "Wall-clock cap in seconds for the Stage 1 binary notification triage turn.";
+      };
+
       profile = mkOption {
         type = types.nullOr types.str;
         default = "notify-enrich";
@@ -1164,6 +1170,7 @@ in {
         inherit
           (cfg.notifications)
           triageProfile
+          triageTimeoutSecs
           profile
           maxHoldSecs
           maxToolCalls
@@ -1219,6 +1226,7 @@ in {
           auto_background = true;
           escalate_on_failure = true;
           triage_non_voice = true;
+          triage_timeout_secs = 8;
         };
         tasks = {
           max_concurrent = 2;
