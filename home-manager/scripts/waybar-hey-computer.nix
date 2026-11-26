@@ -102,9 +102,9 @@ in {
           if speak_json=$(${heyComputer} speak toggle --json 2>/dev/null); then
             enabled=$(jq -r '.enabled // false' <<<"$speak_json" 2>/dev/null || printf 'false')
             if [ "$enabled" = "true" ]; then
-              notify-send --app-name=hey-computer --urgency=low --expire-time=2500 "Ask Computer" "Spoken voice answers: ON" || true
+              notify-send -e --app-name=hey-computer --urgency=low --expire-time=2500 "Ask Computer" "Spoken voice answers: ON" || true
             else
-              notify-send --app-name=hey-computer --urgency=low --expire-time=2500 "Ask Computer" "Spoken voice answers: OFF" || true
+              notify-send -e --app-name=hey-computer --urgency=low --expire-time=2500 "Ask Computer" "Spoken voice answers: OFF" || true
             fi
           fi
           wake_watcher
@@ -197,7 +197,7 @@ in {
               else
                 tooltip="Ask Computer: $bg_queue background task(s) queued (click for tasks & history)"
               fi
-              emit "$(format_json " 󱚣 " "background" "$tooltip")"
+              emit "$(format_json " 󱚣 " "bg-tasks" "$tooltip")"
               sleep_interruptible 0.5
               ;;
             *)
@@ -250,7 +250,7 @@ in {
             else
               tooltip="Ask Computer: $bg_queue background task(s) queued (click for tasks & history)"
             fi
-            format_json " 󱚣 " "background" "$tooltip"
+            format_json " 󱚣 " "bg-tasks" "$tooltip"
             ;;
           *)
             case "$agent" in

@@ -923,10 +923,40 @@ in {
         '';
       };
 
+      triageProfile = mkOption {
+        type = types.nullOr types.str;
+        default = "notify-triage";
+        description = "Ultra-fast binary triage profile (`true`/`false` gate deciding whether a notification warrants enrichment).";
+      };
+
       profile = mkOption {
         type = types.nullOr types.str;
-        default = null;
-        description = "Optional profile for restricted notification turns (null uses fast/default).";
+        default = "notify-enrich";
+        description = "Profile for Stage 2 restricted notification context & reply turns.";
+      };
+
+      maxHoldSecs = mkOption {
+        type = types.number;
+        default = 25;
+        description = "Maximum seconds SwayNC holds a matched notification waiting for 2-stage triage + enrichment.";
+      };
+
+      maxToolCalls = mkOption {
+        type = types.ints.unsigned;
+        default = 6;
+        description = "Maximum read-only tool calls per Stage 2 restricted notification turn.";
+      };
+
+      allowedMcpTools = mkOption {
+        type = types.listOf types.str;
+        default = optionals googleWorkspace.enable [
+          "google-workspace/get_events"
+          "google-workspace/list_calendars"
+          "google-workspace/list_tasks"
+          "google-workspace/list_task_lists"
+          "google-workspace/search_contacts"
+        ];
+        description = "Strictly read-only `server/tool` MCP subset allowed on Stage 2 notification enrichment turns.";
       };
 
       quietStart = mkOption {
@@ -1121,7 +1151,19 @@ in {
       toolIcons.enable = true;
       notifications = mkIf cfg.notifications.enable {
         enable = true;
-        inherit (cfg.notifications) profile quietStart quietEnd sendersFile workdayFile apps;
+        inherit
+          (cfg.notifications)
+          triageProfile
+          profile
+          maxHoldSecs
+          maxToolCalls
+          allowedMcpTools
+          quietStart
+          quietEnd
+          sendersFile
+          workdayFile
+          apps
+          ;
       };
       messengerBridge = mkIf (cfg.messengerBridge != {}) cfg.messengerBridge;
       settings = {
@@ -1136,6 +1178,18 @@ in {
             max_turn_secs = 300;
             max_tool_calls = 30;
             mcp_servers = fastMcpServers;
+          };
+          notify-triage = {
+            model = "gemini-3.8-flash";
+            thought_level = "low";
+            mcp_servers = [];
+          };
+          notify-enrich = {
+            model = "gemini-4-hydrogen";
+            thought_level = "medium";
+            max_turn_secs = 25;
+            max_tool_calls = 6;
+            mcp_servers = optional googleWorkspace.enable "google-workspace";
           };
           deep = {
             model = "gemini-4-neon";

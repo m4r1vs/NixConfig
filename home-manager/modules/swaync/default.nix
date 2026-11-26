@@ -107,6 +107,12 @@ in {
         hc-hold-max-seconds = cfg.holdMaxSeconds;
         hc-hold-apps = cfg.holdApps;
         hc-hold-exclude-apps = cfg.holdExcludeApps;
+        notification-visibility = {
+          hey-computer = {
+            state = "transient";
+            app-name = "^hey-computer$";
+          };
+        };
         script-continue-on-match = true;
         script-fail-notify = false;
         widgets = [

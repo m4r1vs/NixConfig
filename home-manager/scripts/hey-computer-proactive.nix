@@ -535,7 +535,7 @@ in {
           fi
           if [ $((now - last)) -ge "$ALERT_COOLDOWN_SECS" ]; then
             printf '%s\n' "$now" > "$stamp"
-            notify-send --app-name=hey-computer --urgency=normal \
+            notify-send -e --app-name=hey-computer --urgency=normal \
               "Proactive check failed ($check)" "$msg" >/dev/null 2>&1 || true
           fi
         }
