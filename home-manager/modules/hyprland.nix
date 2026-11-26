@@ -95,6 +95,34 @@ with lib; let
         end
       end
     end'';
+  toggleHeyComputerViewer = ''
+    function()
+      local ws = hl.get_active_workspace()
+      local on_current = {}
+      local on_other = {}
+      for _, w in ipairs(hl.get_windows()) do
+        if w.initial_class == "hey-computer.answer" or w.class == "hey-computer.answer" then
+          if ws ~= nil and w.workspace ~= nil and w.workspace.id == ws.id then
+            table.insert(on_current, w)
+          else
+            table.insert(on_other, w)
+          end
+        end
+      end
+      if #on_current > 0 then
+        for _, w in ipairs(on_current) do
+          hl.dispatch(hl.dsp.window.close({ window = w }))
+        end
+      elseif #on_other > 0 then
+        local w = on_other[1]
+        if ws ~= nil then
+          hl.dispatch(hl.dsp.window.move({ window = w, workspace = ws }))
+        end
+        hl.dispatch(hl.dsp.focus({ window = w }))
+      else
+        hl.exec_cmd(${toLua "${pkgs.procps}/bin/pgrep -f '[h]ey-computer-viewer' >/dev/null || ${heyComputer} view --resume"})
+      end
+    end'';
 in {
   options.programs.configured.hyprland = {
     enable = mkEnableOption "Tiling Wayland Window Manager";
@@ -770,7 +798,7 @@ in {
           ++ lib.optionals config.programs.configured.hey-computer.enable [
             (bindd "SUPER + a" "Ask Computer" (exec "${scripts.rofi-launch} ask"))
             (bindd "SUPER + SHIFT + a" "Ask Computer History" (exec "${scripts.rofi-launch} history"))
-            (bindd "SUPER + CTRL + a" "Ask Computer (Reopen Last)" (exec "${heyComputer} view --resume"))
+            (bindd "SUPER + CTRL + a" "Ask Computer (Toggle Last)" toggleHeyComputerViewer)
           ]
           ++ [
             # Allow on lockscreen (locked) and allow repeat (repeating)
