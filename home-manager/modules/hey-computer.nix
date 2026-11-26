@@ -959,6 +959,16 @@ in {
         description = "Strictly read-only `server/tool` MCP subset allowed on Stage 2 notification enrichment turns.";
       };
 
+      extraInstructions = mkOption {
+        type = types.str;
+        default = ''
+          - Reply in German when the incoming message is in German; otherwise English.
+          - Use 24-hour times and metric units; default location is ${weatherLocation}, Germany (CET/CEST).
+          ${optionalString googleWorkspace.enable "- For `google-workspace` read-only calendar/tasks/contacts lookups, always pass `user_google_email`: personal is `${personalGoogleEmail}`${optionalString workEnabled ", work is `${workGoogleEmail}` (personal WhatsApp/Signal messages usually need personal first; also check work calendar for Mon–Fri work-hours availability)"}."}
+        '';
+        description = "Concise read-only context for Stage 2 `notify-enrich` turns (injected into `restricted-enrich-workspace/AGENTS.md`).";
+      };
+
       quietStart = mkOption {
         type = types.str;
         default = "";
@@ -1158,6 +1168,7 @@ in {
           maxHoldSecs
           maxToolCalls
           allowedMcpTools
+          extraInstructions
           quietStart
           quietEnd
           sendersFile
@@ -1170,6 +1181,7 @@ in {
         agent = {
           model = "gemini-4-hydrogen";
           thought_level = "low";
+          inactivity_timeout_secs = 60;
         };
         profiles = {
           fast = {
@@ -1194,6 +1206,7 @@ in {
           deep = {
             model = "gemini-4-neon";
             thought_level = "high";
+            inactivity_timeout_secs = 180;
             max_turn_secs = 900;
             max_tool_calls = 200;
             thinking_label = "Pondering Hard…";
