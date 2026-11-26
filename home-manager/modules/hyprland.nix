@@ -23,6 +23,7 @@ with lib; let
   pinSecondaryBrowser = browsersCfg.secondaryProfile && secondaryWorkspace != null && defaultBrowserApp != null;
   geminiClass = "${browser.appClassPrefix}-gemini.google.com__-${browsers.personalProfile}";
   npuDictate = lib.getExe config.programs.npu-dictate.package;
+  heyComputer = lib.getExe config.programs.hey-computer.package;
   # pamixer stops at 100% unless it is told to boost
   boost = cfg.maxVolume > 100;
   volumeUp = "${pkgs.pamixer}/bin/pamixer ${optionalString boost "--allow-boost --set-limit ${toString cfg.maxVolume} "}-i 5";
@@ -769,7 +770,7 @@ in {
           ++ lib.optionals config.programs.configured.hey-computer.enable [
             (bindd "SUPER + a" "Ask Computer" (exec "${scripts.rofi-launch} ask"))
             (bindd "SUPER + SHIFT + a" "Ask Computer History" (exec "${scripts.rofi-launch} history"))
-            (bindd "SUPER + CTRL + a" "Cancel Ask Computer" (exec "${scripts.waybar-hey-computer} cancel"))
+            (bindd "SUPER + CTRL + a" "Ask Computer (Reopen Last)" (exec "${heyComputer} view --resume"))
           ]
           ++ [
             # Allow on lockscreen (locked) and allow repeat (repeating)
