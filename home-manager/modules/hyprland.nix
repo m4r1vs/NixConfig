@@ -101,7 +101,7 @@ with lib; let
       local on_current = {}
       local on_other = {}
       for _, w in ipairs(hl.get_windows()) do
-        if w.initial_class == "hey-computer.answer" or w.class == "hey-computer.answer" then
+        if w.initial_class == "hey_computer.answer" or w.class == "hey_computer.answer" then
           if ws ~= nil and w.workspace ~= nil and w.workspace.id == ws.id then
             table.insert(on_current, w)
           else
@@ -593,10 +593,10 @@ in {
             }
           ]
           # hey-computer's answer viewer (hey-computer-viewer, app_id =
-          # hey-computer.answer): a column for reading, over whatever is open
+          # hey_computer.answer): a column for reading, over whatever is open
           ++ optionals config.programs.configured.hey-computer.enable [
             {
-              match.initial_class = "^(hey-computer\\.answer)$";
+              match.initial_class = "^(hey_computer\\.answer)$";
               float = true;
               size = "1000 1100";
               center = true;
