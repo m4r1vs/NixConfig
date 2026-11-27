@@ -64,8 +64,10 @@
     };
     spotify-player = {
       # Fork: custom title, playlist page, podcasts in library
+      # Follows unstable: upstream uses Option::map_or_default, which the
+      # Rust in nixos-26.05 still treats as unstable.
       url = "github:m4r1vs/spotify-player?ref=master";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs_unstable";
     };
     helium = {
       # Helium web browser

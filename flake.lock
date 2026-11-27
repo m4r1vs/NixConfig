@@ -977,15 +977,15 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs_unstable"
         ]
       },
       "locked": {
-        "lastModified": 1790673318,
-        "narHash": "sha256-t4PxAboPCy9QR+zDgu0qJKulO+b3rHdHYSrncTKM/54=",
+        "lastModified": 1795768073,
+        "narHash": "sha256-LG3ST/yPVB+39wRk74VUmQFUQogb68H1UH0dI8yT49E=",
         "owner": "m4r1vs",
         "repo": "spotify-player",
-        "rev": "af4052394387be60705b47fd75ad0b7788b41d9a",
+        "rev": "4fb3d8fda066eba53a5f0ce35a88fc5b3a1e32d6",
         "type": "github"
       },
       "original": {
