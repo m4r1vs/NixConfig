@@ -316,11 +316,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1776200327,
-        "narHash": "sha256-Q8/3e8gNtcNVCt8zGKXxQlxPXmZ7RSZtM8/vTdPUV5o=",
+        "lastModified": 1795768073,
+        "narHash": "sha256-RN2d0bfXx+jJUpoUbFXhoT380u6yW106WAqaTkZ/Bsc=",
         "owner": "m4r1vs",
         "repo": "golazo",
-        "rev": "7d5a810bbc4a6c4e75bb8584c12480b73faba72f",
+        "rev": "082ab244af49dcf2f8821c903391ca129dbb40d7",
         "type": "github"
       },
       "original": {
